@@ -1,0 +1,58 @@
+{
+  "name": "rf-intellisense",
+  "version": "2.8.0",
+  "description": "Robot Framework Intellisense",
+  "license": "MIT",
+  "author": {
+    "name": "Tomi Turtiainen",
+    "email": "tomi.turtiainen@gmail.com"
+  },
+  "engines": {
+    "node": "8"
+  },
+  "dependencies": {
+    "lodash": "4.17.11",
+    "minimatch": "~3.0.3",
+    "node-ternary-search-trie": "https://github.com/tomi/node-ternary-search-trie.git",
+    "vscode-languageserver": "~5.1.0",
+    "vscode-uri": "1.0.6"
+  },
+  "devDependencies": {
+    "@types/minimatch": "3.0.3",
+    "@types/chai": "4.1.7",
+    "@types/lodash": "4.14.121",
+    "@types/mocha": "5.2.6",
+    "@types/node": "8.9.5",
+    "chai": "^4.2.0",
+    "mocha": "^5.2.0",
+    "prettier": "1.14.3",
+    "ts-node": "~8.0.2",
+    "tslint": "~5.11.0",
+    "typescript": "3.3.3333"
+  },
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc --outDir out",
+    "clean": "rm -rf ../client/server",
+    "compile": "npm run copy-libs && installServerIntoExtension ../client ./package.json ./tsconfig.json && tsc -p .",
+    "copy-libs": "mkdir -p ../client/server && cp -r ../library-docs/library-docs ../client/server",
+    "lint": "npm run tslint && npm run prettier",
+    "prettier": "prettier -l src/**",
+    "test": "mocha --require ts-node/register src/**/*.test.ts",
+    "tslint": "tslint --project . --config ../tslint.json",
+    "watch": "npm run clean && npm run copy-libs && installServerIntoExtension ../client ./package.json ./tsconfig.json && tsc --watch -p ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tomi/vscode-rf-language-server.git"
+  },
+  "keywords": [
+    "RF",
+    "RobotFramework",
+    "Intellisense"
+  ],
+  "bugs": {
+    "url": "https://github.com/tomi/vscode-rf-language-server/issues"
+  },
+  "homepage": "https://github.com/tomi/vscode-rf-language-server#readme"
+}

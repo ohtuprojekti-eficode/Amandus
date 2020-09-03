@@ -1,0 +1,5 @@
+node_modules
+prototype/monaco-languageclient/client/lib/
+dist
+out
+prototype/monaco-languageclient/example/lib/   

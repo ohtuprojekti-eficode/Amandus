@@ -1,0 +1,4 @@
+langservers:
+  robotti:
+    - node
+    - ./rf-server/out/server.js
