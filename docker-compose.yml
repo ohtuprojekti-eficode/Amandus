@@ -5,6 +5,7 @@ services:
     build: ./frontend
     stdin_open: true
     volumes:
-      - ./frontend/:/./frontend/
+      - ./frontend/src:/src
+      - ./frontend/node_modules:/node_modules
     ports:
       - "3000:3000"
