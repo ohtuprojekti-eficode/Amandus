@@ -6,7 +6,7 @@
 ### Definition of done
 * Feature is implemented
 * Tests are passed
-* Code is reviewed
+* Code is reviewed: at least 2 person have accepted changes in the pull request
 
 ### Frontend skeleton
 
