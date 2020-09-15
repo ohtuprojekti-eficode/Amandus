@@ -11,10 +11,10 @@
 ### Frontend skeleton
 
 * How to run
-  * Requirements: `yarn`
-  * `cd frontend`
-  * `yarn`
-  * `yarn start`
+  * Requirements: `yarn docker docker-compose`
+  * `cd frontend && yarn && cd ..`
+  * `sudo docker-compose build`
+  * `sudo docker-compose up`
 
 * Features
   * Configured typescript
