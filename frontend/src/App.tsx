@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import axios, { AxiosResponse } from 'axios'
+import {
+    BrowserRouter as Router,
+    Route,
+    Link,
+} from 'react-router-dom'
 
 import ListView from './components/ListView'
 
@@ -43,8 +48,18 @@ const App = () => {
         fetchData()
     }, [])
 
+    const padding = {
+        paddingRight: 5
+    }
+
     return (
-        <ListView files={files} />
+        <Router>
+            <div>
+                <Link style={padding} to="/">Main menu</Link>
+                <Link style={padding} to="/filelist">File listing</Link>
+                <Route exact path="/filelist" render={() => <ListView files={files} />} />
+            </div>
+        </Router>
     )
 }
 
