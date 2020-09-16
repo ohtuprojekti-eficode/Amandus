@@ -11,10 +11,12 @@ import { getFiles } from './store/actions/files'
 import ListView from './components/ListView'
 
 const App = (props:any) => {
-    
+
     useEffect(() => {
-        props.getFiles()
-    }, [])
+        if (props.fetching) {
+            props.getFiles()
+        }
+    }, [props])
 
     const padding = {
         paddingRight: 5
