@@ -20,12 +20,12 @@ const App = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            const commits: AxiosResponse<any> = await axios(
-                'https://api.github.com/repos/ohtuprojekti-eficode/robot-test-files/commits'
+            const latestCommitMaster: AxiosResponse<any> = await axios(
+                'https://api.github.com/repos/ohtuprojekti-eficode/robot-test-files/commits/master'
             )
-            const latestCommitTreeURL: string = commits.data[0].commit.tree.url
-            const rootTreePromise: AxiosResponse<any> = await axios(latestCommitTreeURL)
-            const rootTreeURL: string = rootTreePromise.data.url
+            const latestCommitTreeURL: string = latestCommitMaster.data.commit.tree.url
+            const rootTreeResponse: AxiosResponse<any> = await axios(latestCommitTreeURL)
+            const rootTreeURL: string = rootTreeResponse.data.url
 
             const getFiles = async (newUrl: string) => {
                 const result: AxiosResponse<any> = await axios(newUrl)
