@@ -1,9 +1,8 @@
 import React, { useEffect } from 'react'
 import { connect } from 'react-redux'
 import {
-    BrowserRouter as Router,
     Route,
-    Link,
+    Link
 } from 'react-router-dom'
 
 import { getFiles } from './store/actions/files'
@@ -40,15 +39,12 @@ const App = (props:any) => {
     }
 
     return (
-        <Router>
-            <div>
-                <Link style={padding} to="/">Main menu</Link>
-                <Link style={padding} to="/filelist">File listing</Link>
-                <Link style={padding} to="/edit">Editing</Link>
-                <Route exact path="/filelist" render={() => <ListView files={props.fileList} />} />
-                <Route exact path="/edit" render={() => <EditView />} />
-            </div>
-        </Router>
+        <div>
+            <Link style={padding} to="/">Main menu</Link>
+            <Link style={padding} to="/filelist">File listing</Link>
+            <Route exact path="/filelist" render={() => <ListView files={props.fileList} />} />    
+            <Route path="/edit/:filename" children={<EditView />} />
+        </div>
     )
 }
 
