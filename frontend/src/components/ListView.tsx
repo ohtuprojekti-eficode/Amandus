@@ -14,8 +14,8 @@ const ListView = ({ files }: any) => {
                 <ul>
                     {files.map((e: string) => (
                         <li key={e}>
-                            <Link to="/edit">{e}</Link>
-                            <Route exact path="/edit" render={() => <EditView />} />
+                            <Link to={"/edit"+e}>{e}</Link>
+                            <Route exact path={"/edit"+e} render={() => <EditView content={e}/>} />
                          </li>
                     ))}
                 </ul>

@@ -9,6 +9,7 @@ import {
 import { getFiles } from './store/actions/files'
 
 import ListView from './components/ListView'
+import EditView from './components/EditView'
 
 const App = (props:any) => {
 
@@ -43,7 +44,9 @@ const App = (props:any) => {
             <div>
                 <Link style={padding} to="/">Main menu</Link>
                 <Link style={padding} to="/filelist">File listing</Link>
+                <Link style={padding} to="/edit">Editing</Link>
                 <Route exact path="/filelist" render={() => <ListView files={props.fileList} />} />
+                <Route exact path="/edit" render={() => <EditView />} />
             </div>
         </Router>
     )

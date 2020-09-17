@@ -1,11 +1,11 @@
 import React from 'react'
-import Editor from '@monaco-editor/react'
+import MonacoEditor from './MonacoEditor'
 
-const EditView = ({ files }: any) => {
+const EditView = ({content}: any) => {
     return (
         <div>
             <h1>Edit View</h1>
-            <Editor />
+            <MonacoEditor content={content}/>
         </div>
     )
 }
