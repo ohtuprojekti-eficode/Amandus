@@ -2,12 +2,17 @@ import React from 'react'
 import MonacoEditor from './MonacoEditor'
 import { useParams } from 'react-router-dom'
 
+interface RouteParams {
+    filename: string
+}
 
-const EditView = ({content}: any) => {
-    let { filename }: any = useParams()
+const EditView = ({ files }: any) => {
+    const params = useParams<RouteParams>();
+    const content = files.find((e: any) => e.filename === params.filename).content
+    
     return (
         <div>
-            <h1>{filename}</h1>
+            <h1>{params.filename}</h1>
             <MonacoEditor content={content}/>
         </div>
     )

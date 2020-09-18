@@ -43,7 +43,7 @@ const App = (props:any) => {
             <Link style={padding} to="/">Main menu</Link>
             <Link style={padding} to="/filelist">File listing</Link>
             <Route exact path="/filelist" render={() => <ListView files={props.fileList} />} />    
-            <Route path="/edit/:filename" children={<EditView />} />
+            <Route path="/edit/:filename" children={<EditView files={props.fileList}/>} />
         </div>
     )
 }
