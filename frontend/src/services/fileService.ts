@@ -13,11 +13,11 @@ interface File {
 }
 
 const getRootTreeUrl = async () => {
-    const latestCommitMaster: AxiosResponse<any> = await axios(
+    const latestCommitMaster = await axios(
         'https://api.github.com/repos/ohtuprojekti-eficode/robot-test-files/commits/master'
     )
     const latestCommitTreeURL: string = latestCommitMaster.data.commit.tree.url
-    const rootTreeResponse: AxiosResponse<any> = await axios(latestCommitTreeURL)
+    const rootTreeResponse = await axios(latestCommitTreeURL)
     const rootTreeURL: string = rootTreeResponse.data.url
     return rootTreeURL
 }
@@ -33,6 +33,7 @@ export const getFiles = async () => {
             if (tree[i].type === "blob") {
                 const content: string = await getFileContent(tree[i].url)
                 await results.push({ filename: tree[i].path, url: tree[i].url, content: content })
+                
             } else if (tree[i].type === "tree") {
                 results = results.concat(await getFileList(tree[i].url))
             }
