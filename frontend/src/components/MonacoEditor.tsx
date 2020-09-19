@@ -4,8 +4,8 @@ import Editor from '@monaco-editor/react'
 const MonacoEditor = ({ content }: any) => {
     
     return (
-        <div>
-            <Editor height="90vh" language="javascript" value={content}/>
+        <div style={{ border: "2px solid black", padding: "5px" }}>
+            <Editor height="50vh" language="javascript" value={content}/>
         </div>
     )
 }
