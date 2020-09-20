@@ -1,16 +1,15 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import { RootState } from '../store/store'
 
-interface File {
+interface RepoFile {
     filename: string,
-    content: string
+    content: string,
 }
 
-interface Props {
-    files: File[];
-}
-
-const ListView = ({ files }: Props) => {
+const ListView = () => {
+    const files = useSelector<RootState, RepoFile[]>(state => state.files.fileList)
     return (
         <div>
             <h1>List of files in the repository</h1>

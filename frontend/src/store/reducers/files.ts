@@ -5,8 +5,8 @@ import {
     FileActionTypes,
     File
 } from '../types/files'
-  
-interface FilesState {
+
+export interface FilesState {
     fetching: boolean,
     error: boolean,
     fileList: File[]
@@ -17,9 +17,9 @@ const initialState: FilesState = {
     fetching: true,
     error: false
 }
-  
+
 export default function fileReducer(state = initialState, action: FileActionTypes): FilesState {
-    
+
     switch (action.type) {
         case INIT_GET_FILES:
             return {
@@ -39,7 +39,7 @@ export default function fileReducer(state = initialState, action: FileActionType
                 fetching: false,
                 error: false
             }
-      default:
-        return state
+        default:
+            return state
     }
-  }
+}
