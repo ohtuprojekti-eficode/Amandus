@@ -1,19 +1,21 @@
 import React from 'react'
 import MonacoEditor from './MonacoEditor'
-import { useParams } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import { RootState } from '../store/store'
 
-interface RouteParams {
-    filename: string
+interface File {
+    filename: string,
+    content: string,
 }
 
-const EditView = ({ files }: any) => {
-    const params = useParams<RouteParams>();
-    const content = files.find((e: any) => e.filename === params.filename).content
-    
+const EditView = ({ location }: any) => {
+    const filename = location.search.slice(3)
+    const files = useSelector<RootState, File[]>(state => state.files.fileList)
+    const content = files.find(e => e.filename === filename)?.content
     return (
         <div>
-            <h1>{params.filename}</h1>
-            <MonacoEditor content={content}/>
+            <h1>{filename}</h1>
+            <MonacoEditor content={content} />
         </div>
     )
 }

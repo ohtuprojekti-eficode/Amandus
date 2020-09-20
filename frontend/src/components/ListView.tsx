@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 
 interface File {
     filename: string,
-    url: string
     content: string
 }
 
@@ -16,9 +15,11 @@ const ListView = ({ files }: Props) => {
         <div>
             <h1>List of files in the repository</h1>
             <ul>
-                {files.map((e: File) => (
-                    <li key={e.url}>
-                        <Link to={"/edit/" + e.filename}>{e.filename}</Link>
+                {files.map((e) => (
+                    <li key={e.filename}>
+                        <Link to={
+                            `edit?q=${e.filename}`
+                        }>{e.filename}</Link>
                     </li>
                 ))}
             </ul>
