@@ -11,7 +11,7 @@
 ### Frontend skeleton
 
 * How to run
-  * Requirements: `yarn docker docker-compose`
+  * Requirements: `yarn`, `docker` and  `docker-compose`
   * `cd frontend && yarn && cd ..`
   * `sudo docker-compose build`
   * `sudo docker-compose up`
