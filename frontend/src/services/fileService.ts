@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from 'axios'
+import axios from 'axios'
 
 interface TreeNode {
     path: string,
@@ -8,8 +8,7 @@ interface TreeNode {
 
 interface File {
     filename: string,
-    url: string
-    content: string
+    content: string,
 }
 
 const getRootTreeUrl = async () => {
@@ -23,33 +22,23 @@ const getRootTreeUrl = async () => {
 }
 
 export const getFiles = async () => {
-    
-    const getFileList = async (newUrl: string) => {
-        const result: AxiosResponse<any> = await axios(newUrl)
-        const tree: TreeNode[] = result.data.tree
-        let results: File[] = []
-        let i: number;
-        for (i = 0; i < tree.length; i++) {
-            if (tree[i].type === "blob") {
-                const content: string = await getFileContent(tree[i].url)
-                await results.push({ filename: tree[i].path, url: tree[i].url, content: content })
-                
-            } else if (tree[i].type === "tree") {
-                results = results.concat(await getFileList(tree[i].url))
-            }
-        }
-        return results
-    }
-
     const rootTreeURL: string = await getRootTreeUrl()
-
-    const fileList: File[] = await getFileList(rootTreeURL)
-    
+    const result = await axios(rootTreeURL, { params: { recursive: 1 } })
+    const fileList: File[] = await Promise.all(result.data.tree
+        .filter((e: TreeNode) => e.type === "blob")
+        .map(async (e: TreeNode) => {
+            return {
+                filename: e.path,
+                content: await getFileContent(e.url)
+            }
+        })
+    )
     return fileList
+
 }
 
 export const getFileContent = async (contentUrl: string) => {
-    const response: AxiosResponse<any> = await axios(contentUrl)
+    const response = await axios(contentUrl)
     const content: string = atob(response.data.content)
     return content
 }
