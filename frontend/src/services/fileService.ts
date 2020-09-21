@@ -1,14 +1,10 @@
 import axios from 'axios'
+import { RepoFile } from '../types/RepoFile'
 
 interface TreeNode {
     path: string,
     type: string,
     url: string
-}
-
-interface File {
-    filename: string,
-    content: string,
 }
 
 const getRootTreeUrl = async () => {
@@ -24,7 +20,7 @@ const getRootTreeUrl = async () => {
 export const getFiles = async () => {
     const rootTreeURL: string = await getRootTreeUrl()
     const result = await axios(rootTreeURL, { params: { recursive: 1 } })
-    const fileList: File[] = await Promise.all(result.data.tree
+    const fileList: RepoFile[] = await Promise.all(result.data.tree
         .filter((e: TreeNode) => e.type === "blob")
         .map(async (e: TreeNode) => {
             return {

@@ -1,7 +1,4 @@
-export interface File {
-  filename: string,
-  content: string,
-}
+import { RepoFile } from '../../types/RepoFile'
 
 export interface Error {
   message: string
@@ -17,7 +14,7 @@ interface InitGetFiles {
 
 interface GetFilesSuccessAction {
   type: typeof GET_FILES_SUCCESS,
-  payload: File[]
+  payload: RepoFile[]
 }
 
 interface GetFilesFailAction {

@@ -2,11 +2,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { RootState } from '../store/store'
-
-interface RepoFile {
-    filename: string,
-    content: string,
-}
+import { RepoFile } from '../types/RepoFile'
 
 const ListView = () => {
     const files = useSelector<RootState, RepoFile[]>(state => state.files.fileList)
