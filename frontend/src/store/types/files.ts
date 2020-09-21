@@ -1,9 +1,10 @@
 export interface File {
-    name: string
+  filename: string,
+  content: string,
 }
 
 export interface Error {
-    message: string
+  message: string
 }
 
 export const INIT_GET_FILES = 'INIT_GET_FILES'

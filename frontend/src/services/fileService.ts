@@ -6,6 +6,11 @@ interface TreeNode {
     url: string
 }
 
+interface File {
+    filename: string,
+    content: string,
+}
+
 const getRootTreeUrl = async () => {
     const latestCommitMaster = await axios(
         'https://api.github.com/repos/ohtuprojekti-eficode/robot-test-files/commits/master'
@@ -19,14 +24,21 @@ const getRootTreeUrl = async () => {
 export const getFiles = async () => {
     const rootTreeURL: string = await getRootTreeUrl()
     const result = await axios(rootTreeURL, { params: { recursive: 1 } })
-    const gitTree: TreeNode[] = result.data.tree
+    const fileList: File[] = await Promise.all(result.data.tree
         .filter((e: TreeNode) => e.type === "blob")
-        .map((e: TreeNode) => {
+        .map(async (e: TreeNode) => {
             return {
-                path: e.path,
-                type: e.type,
-                url: e.url
+                filename: e.path,
+                content: await getFileContent(e.url)
             }
         })
-    return gitTree
+    )
+    return fileList
+
+}
+
+export const getFileContent = async (contentUrl: string) => {
+    const response = await axios(contentUrl)
+    const content: string = atob(response.data.content)
+    return content
 }

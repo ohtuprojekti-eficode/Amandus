@@ -1,14 +1,13 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 
-// copypaste
-interface TreeNode {
-    path: string,
-    type: string,
-    url: string
+interface File {
+    filename: string,
+    content: string
 }
 
 interface Props {
-    files: TreeNode[]
+    files: File[];
 }
 
 const ListView = ({ files }: Props) => {
@@ -16,8 +15,12 @@ const ListView = ({ files }: Props) => {
         <div>
             <h1>List of files in the repository</h1>
             <ul>
-                {files.map((e: TreeNode) => (
-                    <li key={e.url}><a href={e.url}>{e.path}</a></li>
+                {files.map((e) => (
+                    <li key={e.filename}>
+                        <Link to={
+                            `edit?q=${e.filename}`
+                        }>{e.filename}</Link>
+                    </li>
                 ))}
             </ul>
         </div>

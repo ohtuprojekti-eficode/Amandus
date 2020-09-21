@@ -1,16 +1,16 @@
 import React, { useEffect } from 'react'
 import { connect } from 'react-redux'
 import {
-    BrowserRouter as Router,
     Route,
-    Link,
+    Link
 } from 'react-router-dom'
 
 import { getFiles } from './store/actions/files'
 
 import ListView from './components/ListView'
+import EditView from './components/EditView'
 
-const App = (props:any) => {
+const App = (props: any) => {
 
     useEffect(() => {
         if (props.fetching) {
@@ -39,26 +39,25 @@ const App = (props:any) => {
     }
 
     return (
-        <Router>
-            <div>
-                <Link style={padding} to="/">Main menu</Link>
-                <Link style={padding} to="/filelist">File listing</Link>
-                <Route exact path="/filelist" render={() => <ListView files={props.fileList} />} />
-            </div>
-        </Router>
+        <div>
+            <Link style={padding} to="/">Main menu</Link>
+            <Link style={padding} to="/filelist">File listing</Link>
+            <Route exact path="/filelist" render={() => <ListView files={props.fileList} />} />
+            <Route path="/edit" component={EditView} />
+        </div>
     )
 }
 
-const mapStateToProps = (state:any) => {
-	return {
+const mapStateToProps = (state: any) => {
+    return {
         fileList: state.files.fileList,
         fetching: state.files.fetching,
         error: state.files.error
-	}
+    }
 }
 
 const ConnectedApp = connect(mapStateToProps, {
-	getFiles,
+    getFiles,
 })(App)
 
 export default ConnectedApp
