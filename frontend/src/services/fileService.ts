@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { RepoFile } from '../types/RepoFile'
+import { RepoFile } from '../types'
 
 interface TreeNode {
     path: string,

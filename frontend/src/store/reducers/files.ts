@@ -3,14 +3,8 @@ import {
     GET_FILES_SUCCESS,
     GET_FILES_FAIL,
     FileActionTypes,
-} from '../types/files'
-import { RepoFile } from '../../types/RepoFile'
-
-export interface FilesState {
-    fetching: boolean,
-    error: boolean,
-    fileList: RepoFile[]
-}
+    FilesState,
+} from '../../types'
 
 const initialState: FilesState = {
     fileList: [],

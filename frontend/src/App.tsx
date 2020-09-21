@@ -1,14 +1,10 @@
 import React, { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import {
-    Route,
-    Link
-} from 'react-router-dom'
+import { Route,Link } from 'react-router-dom'
 import { getFiles } from './store/actions/files'
 import ListView from './components/ListView'
 import EditView from './components/EditView'
-import { RootState } from './store/store'
-import { FilesState } from "./store/reducers/files";
+import { RootState, FilesState } from "./types";
 
 const App = () => {
 
@@ -37,6 +33,5 @@ const App = () => {
         </div>
     )
 }
-
 
 export default App

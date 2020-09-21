@@ -1,8 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { useSelector } from 'react-redux'
-import { RootState } from '../store/store'
-import { RepoFile } from '../types/RepoFile'
+import { RootState, RepoFile } from '../types'
 
 const ListView = () => {
     const files = useSelector<RootState, RepoFile[]>(state => state.files.fileList)

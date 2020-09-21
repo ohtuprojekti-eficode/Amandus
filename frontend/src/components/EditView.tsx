@@ -1,8 +1,7 @@
 import React from 'react'
 import MonacoEditor from './MonacoEditor'
 import { useSelector } from 'react-redux'
-import { RootState } from '../store/store'
-import { RepoFile } from '../types/RepoFile'
+import { RootState, RepoFile } from '../types'
 
 interface Props {
     location: Location
