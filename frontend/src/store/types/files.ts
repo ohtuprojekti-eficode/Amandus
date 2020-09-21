@@ -21,8 +21,7 @@ interface GetFilesSuccessAction {
 }
 
 interface GetFilesFailAction {
-  type: typeof GET_FILES_FAIL,
-  payload: Error
+  type: typeof GET_FILES_FAIL
 }
 
 export type FileActionTypes = InitGetFiles | GetFilesSuccessAction | GetFilesFailAction
