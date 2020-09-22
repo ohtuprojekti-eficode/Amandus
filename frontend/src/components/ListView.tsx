@@ -12,7 +12,7 @@ const ListView = () => {
     const files = useSelector<RootState, RepoFile[]>(state => state.files.fileList)
     return (
         <div>
-            <h1>List of files in the repository</h1>
+            <h2>Files in the repository</h2>
             <ul>
                 {files.map((e) => (
                     <li key={e.filename}>
