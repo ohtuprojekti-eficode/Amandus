@@ -3,7 +3,7 @@ import {
     GET_FILES_SUCCESS,
     GET_FILES_FAIL,
     FileActionTypes
-} from '../../types'
+} from '../types/files'
 import * as fileService from '../../services/fileService'
 import '../reducers/files'
 

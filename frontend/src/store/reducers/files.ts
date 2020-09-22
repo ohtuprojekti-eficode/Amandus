@@ -1,10 +1,10 @@
 import {
     INIT_GET_FILES,
-    GET_FILES_SUCCESS,
     GET_FILES_FAIL,
-    FileActionTypes,
-    FilesState,
-} from '../../types'
+    GET_FILES_SUCCESS,
+    FileActionTypes
+} from '../types/files'
+import { FilesState } from '../../types'
 
 const initialState: FilesState = {
     fileList: [],

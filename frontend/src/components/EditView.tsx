@@ -2,13 +2,10 @@ import React from 'react'
 import MonacoEditor from './MonacoEditor'
 import { useSelector } from 'react-redux'
 import { RootState, RepoFile } from '../types'
+import { Location } from 'history'
 
 interface Props {
     location: Location
-}
-
-interface Location {
-    search: string
 }
 
 const EditView = ({ location }: Props) => {
