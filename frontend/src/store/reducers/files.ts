@@ -1,16 +1,10 @@
 import {
     INIT_GET_FILES,
-    GET_FILES_SUCCESS,
     GET_FILES_FAIL,
-    FileActionTypes,
-    File
+    GET_FILES_SUCCESS,
+    FileActionTypes
 } from '../types/files'
-
-export interface FilesState {
-    fetching: boolean,
-    error: boolean,
-    fileList: File[]
-}
+import { FilesState } from '../../types'
 
 const initialState: FilesState = {
     fileList: [],

@@ -1,7 +1,11 @@
 import React from 'react'
 import Editor from '@monaco-editor/react'
 
-const MonacoEditor = ({ content }: any) => {
+interface Props {
+    content: string | undefined
+}
+
+const MonacoEditor = ({ content }: Props) => {
     
     return (
         <div style={{ border: "2px solid black", padding: "5px" }}>
