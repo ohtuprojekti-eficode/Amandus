@@ -1,8 +1,6 @@
-name: WEVC CI/CD
+name: WEVC CI
 
 on:
-  push:
-    branches: [ master, ci-configuration ]
   pull_request:
     branches: [ master ]
 
@@ -29,19 +27,3 @@ jobs:
         working-directory: ./frontend
         start: yarn start
         wait-on: http://localhost:3000
-
-  CD:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Docker login
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_TOKEN }}
-      - name: Docker build
-        run: cd frontend && docker build -t front .
-      - name: Docker tag
-        run: docker tag front ${{ secrets.DOCKER_REPO }}:frontend-latest
-      - name: Docker push
-        run: docker push ${{ secrets.DOCKER_REPO }}:frontend-latest
