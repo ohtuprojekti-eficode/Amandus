@@ -29,6 +29,7 @@ jobs:
         wait-on: http://localhost:3000
 
   CD:
+    needs: CI
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
