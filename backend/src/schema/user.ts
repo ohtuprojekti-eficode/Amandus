@@ -8,33 +8,31 @@ const typeDef = `
 `
 
 const resolvers = {
-    Query: {
-        getUserById: async (_root:any, args:any, _context:any) => {
-            
-            if (!args.id) {
-                throw new UserInputError('No user id provided')
-            }
+  Query: {
+    getUserById: async (_root: any, args: any, _context: any) => {
+      if (!args.id) {
+        throw new UserInputError('No user id provided')
+      }
 
-            // do something here
+      // do something here
 
-            return args.id
-        }
+      return args.id
     },
-    Mutation: {
-        addUser: async (_root:any, args:any, _context:any) => {
+  },
+  Mutation: {
+    addUser: async (_root: any, args: any, _context: any) => {
+      if (!args.username) {
+        throw new UserInputError('No username provided')
+      }
 
-            if (!args.username) {
-                throw new UserInputError('No username provided')
-            }
+      // do something here
 
-            // do something here
-
-            return args.username
-        }
-    }
+      return args.username
+    },
+  },
 }
 
 export default {
-    typeDef,
-    resolvers
+  typeDef,
+  resolvers,
 }

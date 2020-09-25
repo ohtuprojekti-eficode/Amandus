@@ -15,8 +15,8 @@ const Mutation = `
 `
 
 const rootSchema = makeExecutableSchema({
-    typeDefs: [ Query, Mutation, user.typeDef ],
-    resolvers: user.resolvers
+  typeDefs: [Query, Mutation, user.typeDef],
+  resolvers: user.resolvers,
 })
 
 export default rootSchema

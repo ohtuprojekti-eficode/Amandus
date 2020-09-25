@@ -5,16 +5,19 @@ export const GET_FILES_SUCCESS = 'GET_FILES_SUCCESS'
 export const GET_FILES_FAIL = 'GET_FILES_FAIL'
 
 interface InitGetFiles {
-    type: typeof INIT_GET_FILES
+  type: typeof INIT_GET_FILES
 }
 
 interface GetFilesSuccessAction {
-    type: typeof GET_FILES_SUCCESS,
-    payload: RepoFile[]
+  type: typeof GET_FILES_SUCCESS
+  payload: RepoFile[]
 }
 
 interface GetFilesFailAction {
-    type: typeof GET_FILES_FAIL
+  type: typeof GET_FILES_FAIL
 }
 
-export type FileActionTypes = InitGetFiles | GetFilesSuccessAction | GetFilesFailAction
+export type FileActionTypes =
+  | InitGetFiles
+  | GetFilesSuccessAction
+  | GetFilesFailAction

@@ -1,33 +1,31 @@
 import {
-    INIT_GET_FILES,
-    GET_FILES_SUCCESS,
-    GET_FILES_FAIL,
-    FileActionTypes
+  INIT_GET_FILES,
+  GET_FILES_SUCCESS,
+  GET_FILES_FAIL,
+  FileActionTypes,
 } from '../types/files'
 import * as fileService from '../../services/fileService'
 import '../reducers/files'
 
-import { Dispatch } from "redux"
+import { Dispatch } from 'redux'
 
 export const getFiles = () => {
+  return async (dispatch: Dispatch<FileActionTypes>) => {
+    dispatch({
+      type: INIT_GET_FILES,
+    })
 
-    return async (dispatch: Dispatch<FileActionTypes>) => {
+    const files = await fileService.getFiles()
 
-        dispatch({
-            type: INIT_GET_FILES
-        })
-
-        const files = await fileService.getFiles()
-
-        if (files.length > 0) {
-            return dispatch({
-                type: GET_FILES_SUCCESS,
-                payload: files
-            })
-        }
-
-        return dispatch({
-            type: GET_FILES_FAIL
-        })
+    if (files.length > 0) {
+      return dispatch({
+        type: GET_FILES_SUCCESS,
+        payload: files,
+      })
     }
+
+    return dispatch({
+      type: GET_FILES_FAIL,
+    })
+  }
 }
