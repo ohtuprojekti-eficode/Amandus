@@ -8,7 +8,7 @@ WORKDIR /usr/src/app
 USER node
 
 COPY --chown=node:node . .
-RUN yarn && yarn tsc
+RUN yarn && yarn build
 
 EXPOSE 3001
 
