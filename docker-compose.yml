@@ -2,17 +2,21 @@ version: "3"
 
 services:
   frontend:
+    command: yarn start
     build: ./frontend
     stdin_open: true
     volumes:
-      - ./frontend/:/usr/src/app
-      - ./frontend/node_modules:/usr/src/app/node_modules
+      - ./frontend/:/usr/src/frontend
+      - ./frontend/node_modules:/usr/src/frontend/node_modules
     ports:
       - "3000:3000"
 
   backend:
+    command: yarn dev
     build: ./backend
     stdin_open: true
+    volumes:
+      - ./backend/:/usr/src/app
+      - ./backend/node_modules:/usr/src/app/node_modules
     ports:
       - "3001:3001"
-
