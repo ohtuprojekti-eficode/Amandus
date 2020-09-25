@@ -5,7 +5,7 @@
 
 ##### Without docker-compose
 
-* Follow the instructions in [Frontend documentation](https://github.com/ohtuprojekti-eficode/WEVC/blob/master/documentation/frontend.md) and [Backend documentation](https://github.com/ohtuprojekti-eficode/WEVC/blob/master/documentation/backend.md) to start the services individually
+* Follow the instructions in [Frontend documentation](../documentation/frontend.md) and [Backend documentation](../documentation/backend.md) to start the services individually
 
 ##### With docker-compose
 
