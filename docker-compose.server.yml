@@ -1,0 +1,23 @@
+version: "3"
+
+services:
+  
+  frontend:
+    command: yarn serve -s build -p 3000
+    image: ohtuprojekti/wevc:frontend-latest
+    stdin_open: true
+    ports:
+      - "3000:3000"
+
+  backend:
+    command: yarn start
+    image: ohtuprojekti/wevc:backend-latest
+    stdin_open: true
+    ports:
+      - "3001:3001"
+
+  watchtower:
+    image: v2tec/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 30
