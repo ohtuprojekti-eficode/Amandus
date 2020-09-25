@@ -19,4 +19,4 @@ Web application to edit Robot Framework files remotely
 ### Definition of done
 * Feature is implemented
 * Tests are passed
-* Code is reviewed: at least 2 person have accepted changes in the pull request
+* Code is reviewed: at least 2 persons have accepted changes in the pull request
