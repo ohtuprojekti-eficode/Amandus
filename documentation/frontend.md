@@ -10,6 +10,8 @@
 
 * Docker
 
+* ESLint
+
 ### Starting frontend without backend
 
 ##### Without docker
