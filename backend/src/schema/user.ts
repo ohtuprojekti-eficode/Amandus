@@ -1,4 +1,4 @@
-const { UserInputError } = require('apollo-server')
+import { UserInputError } from 'apollo-server'
 
 const typeDef = `
     type User {
@@ -34,7 +34,7 @@ const resolvers = {
     }
 }
 
-module.exports = {
+export default {
     typeDef,
     resolvers
 }

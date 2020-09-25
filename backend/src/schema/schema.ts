@@ -1,6 +1,6 @@
-const { makeExecutableSchema } = require('graphql-tools')
+import { makeExecutableSchema } from 'graphql-tools'
 
-const user = require('./user')
+import user from './user'
 
 const Query = `
     type Query {
@@ -19,4 +19,4 @@ const rootSchema = makeExecutableSchema({
     resolvers: user.resolvers
 })
 
-module.exports = rootSchema
+export default rootSchema

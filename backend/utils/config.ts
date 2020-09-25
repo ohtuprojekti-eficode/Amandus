@@ -1,10 +1,11 @@
-require('dotenv').config()
+import dotenv from 'dotenv'
 
-console.log(process.env)
+dotenv.config()
+
 const PORT = process.env.PORT
 const DB_URI = process.env.DB_URI
 
-module.exports = {
+export default {
     PORT,
     DB_URI
 }

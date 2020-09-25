@@ -1,7 +1,7 @@
-const config = require('../utils/config')
+import config from '../utils/config'
 
-const { ApolloServer } = require('apollo-server')
-const schema = require('./schema/schema')
+import { ApolloServer } from 'apollo-server'
+import schema from './schema/schema'
 
 const server = new ApolloServer({
   schema: schema
@@ -15,7 +15,7 @@ server.listen({ port: config.PORT }).then(( {url}:Args ) => {
   console.log(`Server running at ${url}`)
 })
 
-module.exports = {
+export default {
   server,
   schema,
   config
