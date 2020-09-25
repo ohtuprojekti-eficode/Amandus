@@ -4,7 +4,7 @@
 
 * Typescript
 
-* Nodejs, express
+* Node.js, GraphQL 
 
 * Docker
 
@@ -20,5 +20,5 @@
 
 ##### With docker
 1. Go to `backend` folder
-2. Run `docker build --tag backend .` to build the frontend image
+2. Run `docker build --tag backend .` to build the backend image
 3. Start the image with `docker run -p 3001:3001 backend` and the server should launch to `localhost:3001`
