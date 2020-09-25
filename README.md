@@ -20,16 +20,3 @@ Web application to edit Robot Framework files remotely
 * Feature is implemented
 * Tests are passed
 * Code is reviewed: at least 2 person have accepted changes in the pull request
-
-### Frontend skeleton
-
-* How to run
-  * Requirements: `yarn`, `docker` and  `docker-compose`
-  * `cd frontend && yarn && cd ..`
-  * `sudo docker-compose build`
-  * `sudo docker-compose up`
-
-* Features
-  * Configured typescript
-  * ESLint rules
-  * Prettier code formatter rules
