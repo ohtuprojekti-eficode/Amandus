@@ -1,4 +1,4 @@
-version: "3"
+version: '3'
 
 services:
   frontend:
@@ -9,7 +9,7 @@ services:
       - ./frontend/:/usr/src/frontend
       - ./frontend/node_modules:/usr/src/frontend/node_modules
     ports:
-      - "3000:3000"
+      - '3000:3000'
 
   backend:
     command: yarn dev
@@ -19,4 +19,25 @@ services:
       - ./backend/:/usr/src/app
       - ./backend/node_modules:/usr/src/app/node_modules
     ports:
-      - "3001:3001"
+      - '3001:3001'
+
+  userdata:
+    image: 'postgres' # latest official postgres version
+    env_file:
+      - ./userdata/userdata.env # configure postgres
+    volumes:
+      - userdata-data:/var/lib/postgresql/data/ # persist data when container is closed
+    ports:
+      - '5432:5432' #some ports
+
+volumes:
+  userdata-data: # docker-compose manages named volumes
+
+
+  # to gain access for existing database:
+  # sudo docker-compose run userdata bash
+  #to connect with database created: psql --host=user_data --username=ohtu_user --dbname=account_database
+  #password is ohtupassword
+  # while in database \d shows tables etc.
+
+  # to destroy volume: docker-compose down --volumes
