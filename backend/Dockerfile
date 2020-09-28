@@ -4,8 +4,10 @@ RUN mkdir -p /usr/src/app/node_modules && \
   chown -R node:node /usr/src/app
 
 WORKDIR /usr/src/app
+RUN apk add git
 
 USER node
+
 
 COPY --chown=node:node . .
 RUN yarn && yarn build
