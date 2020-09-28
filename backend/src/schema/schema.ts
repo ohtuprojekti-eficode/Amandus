@@ -1,11 +1,12 @@
 import { makeExecutableSchema } from 'graphql-tools'
-
+import repository from './repository'
 import user from './user'
 
 const Query = `
     type Query {
         getUserById(id: String): String!
-    }
+        cloneRepository: String
+    },
 `
 
 const Mutation = `
@@ -16,7 +17,7 @@ const Mutation = `
 
 const rootSchema = makeExecutableSchema({
   typeDefs: [Query, Mutation, user.typeDef],
-  resolvers: user.resolvers,
+  resolvers: [user.resolvers, repository.resolvers],
 })
 
 export default rootSchema
