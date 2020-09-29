@@ -1,24 +1,47 @@
-import { GitError } from 'simple-git'
 import { cloneRepository } from '../git'
+import { existsSync, readFileSync } from 'fs'
+import readRecursive from 'recursive-readdir'
+import { relative } from 'path'
+
+const typeDef = `
+    type File {
+        name: String!
+        content: String!
+    }
+`
+
+interface File {
+  name: string
+  content: string
+}
 
 const resolvers = {
   Query: {
-    cloneRepository: async (): Promise<string> => {
-      // do something here
+    cloneRepository: async (
+      root: any,
+      args: { url: string },
+      context: any
+    ): Promise<File[]> => {
+      const url = new URL(args.url)
+      const repositoryName = url.pathname
+      const fileLocation = `./repositories/${repositoryName}`
 
-      try {
-        await cloneRepository(
-          'https://github.com/ohtuprojekti-eficode/robot-test-files.git'
-        )
-        return 'Succesfully cloned repository'
-      } catch (error) {
-        if (error instanceof GitError) return 'Repository already cloned'
-        return 'Error'
+      if (!existsSync(fileLocation)) {
+        await cloneRepository(url.href)
       }
+
+      const paths = await readRecursive(fileLocation, ['.git'])
+      const contents = paths.map((file) => ({
+        name: relative('repositories/', file),
+        content: readFileSync(file, 'utf-8'),
+      }))
+
+      return contents
     },
   },
 }
 
 export default {
   resolvers,
+  typeDef,
 }
