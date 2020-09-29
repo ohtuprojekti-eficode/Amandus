@@ -18,9 +18,9 @@ interface File {
 const resolvers = {
   Query: {
     cloneRepository: async (
-      root: any,
+      _root: any,
       args: { url: string },
-      context: any
+      _context: any
     ): Promise<File[]> => {
       const url = new URL(args.url)
       const repositoryName = url.pathname
