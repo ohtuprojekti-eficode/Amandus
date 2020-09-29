@@ -5,7 +5,7 @@ import user from './user'
 const Query = `
     type Query {
         getUserById(id: String): String!
-        cloneRepository: String
+        cloneRepository(url: String): [File]
     },
 `
 
@@ -16,7 +16,7 @@ const Mutation = `
 `
 
 const rootSchema = makeExecutableSchema({
-  typeDefs: [Query, Mutation, user.typeDef],
+  typeDefs: [Query, Mutation, user.typeDef, repository.typeDef],
   resolvers: [user.resolvers, repository.resolvers],
 })
 
