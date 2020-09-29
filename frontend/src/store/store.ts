@@ -4,9 +4,9 @@ import thunk from 'redux-thunk'
 import fileReducer from './reducers/files'
 
 const rootReducer = combineReducers({
-	files: fileReducer
+  files: fileReducer,
 })
 
 export default function configureStore() {
-	return createStore(rootReducer, applyMiddleware(thunk))
+  return createStore(rootReducer, applyMiddleware(thunk))
 }
