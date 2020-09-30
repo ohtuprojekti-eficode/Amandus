@@ -2,28 +2,40 @@ name: WEVC CI
 
 on:
   pull_request:
-    branches: [ master ]
-
+    branches: [master]
+    paths-ignore:
+      - 'documentation/**'
+      - 'README.md'
+      - LICENSE
 jobs:
-
-  CI: 
+  CI:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node-version: [14.x]
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-    - name: Install frontend
-      run: cd frontend && yarn
-    - name: Test frontend
-      run: cd frontend && yarn test --watchAll=false --passWithNoTests 
-    - name: Cypress run
-      uses: cypress-io/github-action@v2
-      with:
-        working-directory: ./frontend
-        start: yarn start
-        wait-on: http://localhost:3000
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install frontend
+        run: cd frontend && yarn
+      - name: Test frontend
+        run: cd frontend && yarn test --watchAll=false --passWithNoTests
+      - name: Build frontend
+        run: cd frontend && yarn build
+      - name: Install backend
+        run: cd backend && yarn
+      - name: Test backend
+        run: echo 'no tests yet'
+      - name: Build backend
+        run: cd backend && yarn build
+      - name: Start backend for Cypress tests
+        run: cd backend && nohup node build/src/index.js &
+      - name: Cypress run
+        uses: cypress-io/github-action@v2
+        with:
+          working-directory: ./frontend
+          start: yarn start
+          wait-on: http://localhost:3000
