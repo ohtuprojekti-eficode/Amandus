@@ -4,6 +4,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import { UserInputError } from 'apollo-server'
+import config from '../../utils/config'
 import { Context } from 'vm'
 import { UserType, LoginArgs } from '../../types/user'
 
@@ -29,6 +30,9 @@ const resolvers = {
 
       return args.id
     },
+    githubLoginUrl: ():string => {
+      return `https://github.com/login/oauth/authorize?response_type=code&redirect_uri=${config.GITHUB_CB_URL}&client_id=${config.GITHUB_CLIENT_ID}`
+    } 
   },
   Mutation: {
     logout: (_root: unknown, _args:undefined, context: Context):void => {

@@ -4,6 +4,7 @@ import user from './user'
 
 const Query = `
     type Query {
+        githubLoginUrl: String!
         getUserById(id: String): String!
     }
 `
