@@ -18,7 +18,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "dev": "ts-node-dev ./src/index.ts",
+    "dev": "ts-node-dev --respawn --transpile-only --exit-child src/",
     "start": "node ./build/src/index.js"
   },
   "devDependencies": {
