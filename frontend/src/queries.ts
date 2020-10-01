@@ -13,11 +13,6 @@ export const ALL_FILES = gql`
 
 export const GITHUB_LOGIN_URL = gql`
   query {
-    githubLoginurl: cloneRepository(
-      url: "https://github.com/ohtuprojekti-eficode/robot-test-files"
-    ) {
-      name
-      content
-    }
+    githubLoginurl
   }
 `

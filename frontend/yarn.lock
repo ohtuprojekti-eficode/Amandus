@@ -1501,6 +1501,41 @@
     "@svgr/plugin-svgo" "^4.3.1"
     loader-utils "^1.2.3"
 
+"@syncfusion/ej2-base@~18.2.55", "@syncfusion/ej2-base@~18.2.57":
+  version "18.2.59"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-base/-/ej2-base-18.2.59.tgz#1317d801b67423efdc4386c603b3c34d3575833a"
+  integrity sha512-2kLCFSW44BQp44pJH8oVczf6bQpU7jgMa8W/FaO/gbtVeo3+olJuCf/Qq3YqHFlKMoWYdKS3B8sxpaNc2PC3rg==
+  dependencies:
+    "@syncfusion/ej2-icons" "~18.2.54"
+
+"@syncfusion/ej2-buttons@18.2.58":
+  version "18.2.58"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-buttons/-/ej2-buttons-18.2.58.tgz#f679f8db00fad35ea876365e86e57134ce828cee"
+  integrity sha512-N1cXj0ZZfOIk7MeGeMXqgEwMszY6XD4AQzhgXkF8HowzuesjO72olrdbeUfwrTQ9vKZ3pXAtx9sjEZnP200A2w==
+  dependencies:
+    "@syncfusion/ej2-base" "~18.2.57"
+
+"@syncfusion/ej2-icons@~18.2.54":
+  version "18.2.54"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-icons/-/ej2-icons-18.2.54.tgz#3e28896dac781aad2d3340ca8e33aadd8d521af7"
+  integrity sha512-KheTKLmj9BgiQdp/yJ2JTTvCB1KQK134uGDBx6A5/J+8+mVTqOWwzZhqxzUIYpUhWtt1/gKohkjF86CZ/Ucs3A==
+
+"@syncfusion/ej2-react-base@~18.2.55":
+  version "18.2.55"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-react-base/-/ej2-react-base-18.2.55.tgz#3e4ec98c77d4ab7586cc4c51f55bb9d9c460c9b7"
+  integrity sha512-TnX1PsxoYNa2/vmC+SxYxqbiX/nrHIx7+WZnjBcx1FkGkvWz+tksGyT2g4mL1RQ8D+6ScrR1zASDMeepwTZxZw==
+  dependencies:
+    "@syncfusion/ej2-base" "~18.2.55"
+
+"@syncfusion/ej2-react-buttons@^18.2.58":
+  version "18.2.58"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-react-buttons/-/ej2-react-buttons-18.2.58.tgz#8c9c45647a0f68a0d9960f95a0b2409c605c32a6"
+  integrity sha512-R1aU6F599zdvdmgXx9949jlhKBSe+ENMGOshKH047yQctjj2gdKoHt7qG1rdPu9RkqrqFht5U6MCzq9goU4BpQ==
+  dependencies:
+    "@syncfusion/ej2-base" "~18.2.57"
+    "@syncfusion/ej2-buttons" "18.2.58"
+    "@syncfusion/ej2-react-base" "~18.2.55"
+
 "@testing-library/dom@*":
   version "7.24.1"
   resolved "https://registry.yarnpkg.com/@testing-library/dom/-/dom-7.24.1.tgz#0e8acd042070f2c1b183fbfe5c0d38b3194ad3c0"
