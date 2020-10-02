@@ -2,7 +2,6 @@ import express from 'express'
 import { ApolloServer } from 'apollo-server-express'
 import { buildContext } from 'graphql-passport'
 import { createServer } from 'http'
-import cors from 'cors'
 
 import passport from '../utils/passport'
 import config from '../utils/config'
@@ -12,8 +11,8 @@ import schema from './schema/schema'
 
 const app = express()
 
-const corsOptions:cors.CorsOptions = {
-  origin: '*',
+const corsOptions = {
+  origin: true,
   credentials: true
 }
 
@@ -25,7 +24,7 @@ const server = new ApolloServer({
   context: ({ req, res }) => buildContext({ req, res, User })
 })
 
-server.applyMiddleware({ app, path: '/graphql', cors: { credentials: true, origin: true } })
+server.applyMiddleware({ app, path: '/graphql' })
 server.applyMiddleware({ app, cors: corsOptions })
 
 const httpServer = createServer(app)

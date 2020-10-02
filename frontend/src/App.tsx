@@ -12,6 +12,8 @@ const App = () => {
   if (result.loading) return <div>Loading...</div>
   if (result.error) return <div>Error fetching files...</div>
 
+  console.log(result)
+
   const padding = {
     paddingRight: 5,
   }

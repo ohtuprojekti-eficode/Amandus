@@ -5,15 +5,22 @@ import { GITHUB_LOGIN_URL } from '../queries'
 
 const LoginForm = () => {
 
-  const handler = () => {
-    const result = useQuery(GITHUB_LOGIN_URL)
-    console.log(result)
-    return result
+  const loginUrl = useQuery(GITHUB_LOGIN_URL)
+
+  console.log(loginUrl)
+  const btnClickHandler = ():void => {
+    
+    window.location.href = `${loginUrl}`
   }
 
   return (
     <div>
-        <ButtonComponent onClick={() => {console.log(useQuery(GITHUB_LOGIN_URL))}} cssClass='e-info' style={{ margin: '20px' }}>Login Via Github</ButtonComponent>
+        <ButtonComponent 
+          onClick={() => btnClickHandler()} 
+          cssClass='e-info' 
+          style={{ margin: '20px' }}>
+            Login Via Github
+        </ButtonComponent>
     </div>
   )
 }
