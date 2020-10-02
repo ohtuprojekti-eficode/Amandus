@@ -21,6 +21,7 @@ passport.deserializeUser((obj, done) => {
     // });
 })
 
+
 passport.use(new GithubStrategy({
     clientID: config.GITHUB_CLIENT_ID ? config.GITHUB_CLIENT_ID : '',
     clientSecret: config.GITHUB_CLIENT_SECRET ? config.GITHUB_CLIENT_SECRET : '',
@@ -32,7 +33,7 @@ passport.use(new GithubStrategy({
     if (!match) {
       
       const user:UserType = {
-        githubid: profile.id,
+        gitHubid: profile.id,
         username: profile.username ? profile.username : '',
         emails: profile.emails ? profile.emails.map(email => email.value) : [],
       }

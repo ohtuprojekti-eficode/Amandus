@@ -13,7 +13,7 @@ const Query = `
 const Mutation = `
     type Mutation {
         logout: String
-        loginGitHub(email: String, password: String) : User
+        authorizeWithGithub(code: String!) : User
         addUser(username: String) : String!
     }
 `

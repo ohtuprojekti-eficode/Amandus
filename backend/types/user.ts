@@ -3,14 +3,46 @@ export interface LoginArgs {
     password: string
 }
 
+export interface GitHubCredentials {
+    client_id: string,
+    client_secret: string,
+    code: string
+}
+
+export interface GitHubAuthCode {
+    code: string
+}
+
+export interface GitHubAccessToken {
+    access_token: string
+}
+
+export interface GitHubAccessTokenResponse {
+    access_token: GitHubAccessToken,
+
+}
+
+export interface GitHubUserType {
+    id?: string,
+    login?: string,
+    email?: string,
+    repos_url?: string, 
+    access_token?: string
+}
+
 export interface UserType {
     id?: string
     emails: string[]
     username: string
     password?: string,
     token?: string,
-    githubid?: string
+    gitHubid?: string,
+    gitHubLogin?: string,
+    gitHubEmail?: string,
+    gitHubReposUrl?: string, 
+    gitHubToken?: string
 }
+
 
 const users:UserType[] = [
     {
@@ -19,7 +51,7 @@ const users:UserType[] = [
       emails: ['maurice@moss.com'],
       password: 'abcdefg',
       token: '',
-      githubid: ''
+      gitHubid: ''
     },
     {
       id: '2',
@@ -27,7 +59,7 @@ const users:UserType[] = [
       emails: ['roy@trenneman.com'],
       password: 'imroy',
       token: '',
-      githubid: ''
+      gitHubid: ''
     }
 ];
 
@@ -41,7 +73,7 @@ const getUsers = ():UserType[] => {
 }
 
 const getUserByGithubId = (id:string):UserType|undefined => {
-    return users.find(user => user.githubid === id)
+    return users.find(user => user.gitHubid === id)
 }
   
 export default {

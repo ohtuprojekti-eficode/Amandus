@@ -6,14 +6,19 @@
 import { UserInputError } from 'apollo-server'
 import config from '../../utils/config'
 import { Context } from 'vm'
-import { UserType, LoginArgs } from '../../types/user'
+import { UserType, GitHubAuthCode } from '../../types/user'
+import { requestGithubUser } from '../../services/gitHub'
 
 const typeDef = `
     type User {
         id: ID
-        githubid: String
         username: String
-        email: String
+        emails: [String]
+        gitHubid: String
+        gitHubLogin: String
+        gitHubEmail: String
+        gitHubReposUrl: String
+        gitHubToken: String
     }
 `
 
@@ -35,19 +40,29 @@ const resolvers = {
     } 
   },
   Mutation: {
+    authorizeWithGithub: async (_root: unknown, args: GitHubAuthCode):Promise<UserType> => {
+      
+        const gitHubUser = await requestGithubUser({
+          client_id: config.GITHUB_CLIENT_ID ? config.GITHUB_CLIENT_ID : '',
+          client_secret: config.GITHUB_CLIENT_SECRET ? config.GITHUB_CLIENT_SECRET : '',
+          code: args.code
+        })
+      
+        const currentUser:UserType = {
+          username: gitHubUser.login ? gitHubUser.login : '',
+          emails: [gitHubUser.email ? gitHubUser.email : ''],
+          gitHubid: gitHubUser.id,
+          gitHubLogin: gitHubUser.login,
+          gitHubEmail: gitHubUser.email,
+          gitHubReposUrl: gitHubUser.repos_url,
+          gitHubToken: gitHubUser.access_token,
+        }
+        
+        console.log('currentuser', currentUser)
+        return currentUser
+    },
     logout: (_root: unknown, _args:undefined, context: Context):void => {
       context.logout()
-    },
-    loginGitHub: async (_root: unknown, args:LoginArgs, context: Context):Promise<UserType|undefined> => {
-      // const email = args.email
-      // const password = args.password
-      console.log(args)
-      const { user } = await context.authenticate('github')
-      console.log('context user', context)
-      void context.login(user)
-      
-      return context.getUser()
-
     },
     addUser: (_root: unknown, args: UserType, _context: Context):string => {
       if (!args.username) {

@@ -5,6 +5,7 @@ import { ALL_FILES } from './queries'
 import ListView from './components/ListView'
 import EditView from './components/EditView'
 import LoginForm from './components/LoginForm'
+import CallBack from './components/auth/CallBack'
 
 const App = () => {
   const result = useQuery(ALL_FILES)
@@ -29,6 +30,9 @@ const App = () => {
       <Link style={padding} to="/login">
         Login
       </Link>
+      <Route path="/auth/github/callback">
+        <CallBack />
+      </Route>
       <Route exact path="/filelist">
         <ListView files={result.data.files}/>
       </Route>
