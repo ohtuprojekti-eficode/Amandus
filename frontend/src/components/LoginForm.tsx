@@ -7,10 +7,12 @@ const LoginForm = () => {
 
   const loginUrl = useQuery(GITHUB_LOGIN_URL)
 
-  console.log(loginUrl)
-  const btnClickHandler = ():void => {
-    
-    window.location.href = `${loginUrl}`
+  const btnClickHandler = ():void => {    
+    window.location.href = `${loginUrl.data.githubLoginUrl}`
+  }
+
+  if (loginUrl.error || !loginUrl) {
+    return <></>
   }
 
   return (
