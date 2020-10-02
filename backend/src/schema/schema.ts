@@ -13,6 +13,8 @@ const Mutation = `
     type Mutation {
         logout: String
         authorizeWithGithub(code: String!) : User
+        addUser(username: String) : String!
+        saveChanges(file: FileInput, username: String, email: String, token: String): String
     }
 `
 
