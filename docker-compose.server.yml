@@ -1,4 +1,4 @@
-version: "3"
+version: '3'
 
 services:
   frontend:
@@ -6,12 +6,32 @@ services:
     image: ohtuprojekti/wevc:frontend-latest
     stdin_open: true
     ports:
-      - "3000:3000"
-
+      - '3000:3000'
 
   backend:
     command: yarn start
-    build: ohtuprojekti/wevc:backend-latest
+    image: ohtuprojekti/wevc:backend-latest
     stdin_open: true
     ports:
-      - "3001:3001"
+      - '3001:3001'
+    depends_on:
+      - userdata
+
+  userdata:
+    image: 'postgres'
+    env_file:
+      - ./userdata/userdata.env
+    volumes:
+      - ./userdata/init_scripts/:/docker-entrypoint-initdb.d/
+      - userdata-data:/var/lib/postgresql/data/
+    ports:
+      - '5432:5432'
+
+  watchtower:
+    image: v2tec/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 30
+
+volumes:
+  userdata-data:
