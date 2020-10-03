@@ -20,7 +20,7 @@ const GitHubAuthBtn = () => {
         <ButtonComponent 
           onClick={() => btnClickHandler()} 
           cssClass='e-info' 
-          style={{ margin: '20px' }}>
+          style={{ margin: '20px', padding: '10px' }}>
             Login Via Github
         </ButtonComponent>
     </div>
