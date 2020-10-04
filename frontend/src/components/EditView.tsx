@@ -1,24 +1,18 @@
 import React from 'react'
 import MonacoEditor from './MonacoEditor'
 import ListView from './ListView'
-import { useSelector } from 'react-redux'
-import { RootState, RepoFile } from '../types'
-import { Location } from 'history'
+import { useLocation } from 'react-router-dom'
+import { FileList } from '../types'
 
-interface Props {
-  location: Location
-}
-
-const EditView = ({ location }: Props) => {
+const EditView = ({ files }: FileList) => {
+  let location = useLocation()
   const filename = location.search.slice(3)
-  const files = useSelector<RootState, RepoFile[]>(
-    (state) => state.files.fileList
-  )
-  const content = files.find((e) => e.filename === filename)?.content
+  const content = files.find((e) => e.name === filename)?.content
+
   return (
     <div style={gridContainerStyle}>
       <div style={asideContainerStyle}>
-        <ListView />
+        <ListView files={files}/>
       </div>
       <div style={mainContainerStyle}>
         <h2>{filename}</h2>
