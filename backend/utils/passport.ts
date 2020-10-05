@@ -27,7 +27,7 @@ passport.use(new GithubStrategy({
     clientSecret: config.GITHUB_CLIENT_SECRET || '',
     callbackURL: 'http://localhost:3000/auth/github/callback' // url in frontend, best to use a constant here
   },
-  function(_accessToken, _refreshToken, profile, cb) {
+  (_accessToken, _refreshToken, profile, cb) => {
     
     let match:UserType|undefined = User.getUserByGithubId(profile.id)
     if (!match) {
