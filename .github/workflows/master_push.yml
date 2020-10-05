@@ -20,20 +20,31 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
+
       - name: Install frontend
         run: cd frontend && yarn
+
       - name: Test frontend
         run: cd frontend && yarn test --watchAll=false --passWithNoTests
+
       - name: Build frontend
         run: cd frontend && yarn build
+
       - name: Install backend
         run: cd backend && yarn
+
       - name: Test backend
         run: echo 'no tests yet'
+
       - name: Build backend
         run: cd backend && yarn build
+
       - name: Start backend for Cypress tests
-        run: cd backend && nohup node build/src/index.js &
+        run: cd backend && yarn run start &
+        env:
+          GH_CLIENT_ID: ${{ secrets.GH_CLIENT_ID }}
+          GH_CLIENT_SECRET: ${{ secrets.GH_CLIENT_SECRET }}
+
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
@@ -53,13 +64,18 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Docker build frontend
         run: cd frontend && docker build -t front .
+
       - name: Docker tag frontend
         run: docker tag front ${{ secrets.DOCKER_REPO }}:frontend-latest
+
       - name: Docker push frontend
         run: docker push ${{ secrets.DOCKER_REPO }}:frontend-latest
+
       - name: Docker build backend
         run: cd backend && docker build -t back .
+
       - name: Docker tag backend
         run: docker tag back ${{ secrets.DOCKER_REPO }}:backend-latest
+
       - name: Docker push backend
         run: docker push ${{ secrets.DOCKER_REPO }}:backend-latest
