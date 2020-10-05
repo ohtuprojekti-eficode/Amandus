@@ -4,8 +4,8 @@ dotenv.config()
 
 const PORT = process.env.PORT || 3001
 const DB_URI = process.env.DB_URI
-const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID
-const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET
+const GITHUB_CLIENT_ID = process.env.GH_CLIENT_ID
+const GITHUB_CLIENT_SECRET = process.env.GH_CLIENT_SECRET
 const GITHUB_CB_URL = 'http://localhost:3000/auth/github/callback'
 
 export default {
