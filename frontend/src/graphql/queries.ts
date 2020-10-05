@@ -10,3 +10,9 @@ export const ALL_FILES = gql`
     }
   }
 `
+
+export const GITHUB_LOGIN_URL = gql`
+  query {
+    githubLoginUrl
+  }
+`

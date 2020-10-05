@@ -1,7 +1,7 @@
 import React from 'react'
 import { Route, Link } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
-import { ALL_FILES } from './queries'
+import { ALL_FILES } from './graphql/queries'
 import ListView from './components/ListView'
 import EditView from './components/EditView'
 import LoginForm from './components/LoginForm'

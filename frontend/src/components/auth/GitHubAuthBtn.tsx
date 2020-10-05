@@ -1,7 +1,6 @@
 import React from 'react'
 import { useQuery } from '@apollo/client'
-import { ButtonComponent } from '@syncfusion/ej2-react-buttons';
-import { GITHUB_LOGIN_URL } from '../../queries'
+import { GITHUB_LOGIN_URL } from '../../graphql/queries'
 
 const GitHubAuthBtn = () => {
   const loginUrl = useQuery(GITHUB_LOGIN_URL)
@@ -16,12 +15,12 @@ const GitHubAuthBtn = () => {
 
   return (
     <div>
-        <ButtonComponent 
+        <button 
           onClick={() => btnClickHandler()} 
-          cssClass='e-info' 
+          className='e-info' 
           style={{ margin: '20px', padding: '10px' }}>
             Login Via Github
-        </ButtonComponent>
+        </button>
     </div>
   )
 }
