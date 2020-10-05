@@ -4,14 +4,15 @@ import user from './user'
 
 const Query = `
     type Query {
-        getUserById(id: String): String!
+        githubLoginUrl: String!
         cloneRepository(url: String): [File]
     },
 `
 
 const Mutation = `
     type Mutation {
-        addUser(username: String) : String!
+        logout: String
+        authorizeWithGithub(code: String!) : User
     }
 `
 

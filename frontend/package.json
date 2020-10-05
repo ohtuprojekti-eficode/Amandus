@@ -5,6 +5,7 @@
   "dependencies": {
     "@apollo/client": "^3.2.1",
     "@monaco-editor/react": "^3.6.2",
+    "@syncfusion/ej2-react-buttons": "^18.2.58",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
@@ -13,6 +14,7 @@
     "@types/react": "^16.9.49",
     "@types/react-dom": "^16.9.8",
     "@types/react-router-dom": "^5.1.5",
+    "axios": "^0.20.0",
     "graphql": "^15.3.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
@@ -27,6 +29,7 @@
     "cypress:open": "cypress open",
     "eject": "react-scripts eject"
   },
+  "proxy": "http://localhost:3001",
   "eslintConfig": {
     "extends": "react-app"
   },
