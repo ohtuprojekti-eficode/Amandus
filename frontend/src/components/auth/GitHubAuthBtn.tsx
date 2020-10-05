@@ -6,9 +6,14 @@ import { GITHUB_LOGIN_URL } from '../../queries'
 const GitHubAuthBtn = () => {
 
   const loginUrl = useQuery(GITHUB_LOGIN_URL)
+  console.log(loginUrl.data);
+  
 
   const btnClickHandler = ():void => {    
     window.location.href = `${loginUrl.data.githubLoginUrl}`
+    console.log(loginUrl.data.githubLoginUrl);
+    
+    //const user = use
   }
 
   if (loginUrl.error || !loginUrl) {
