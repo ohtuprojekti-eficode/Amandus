@@ -20,8 +20,8 @@ const typeDef = `
 const resolvers = {
   Query: {
     githubLoginUrl: ():string => {
-      const cbUrl = config.GITHUB_CB_URL ? config.GITHUB_CB_URL : ''
-      const cliendID = config.GITHUB_CLIENT_ID ? config.GITHUB_CLIENT_ID : ''
+      const cbUrl = config.GITHUB_CB_URL || ''
+      const cliendID = config.GITHUB_CLIENT_ID || ''
 
       if (!cbUrl || !cliendID) {
         throw new Error('GitHub cliend id or callback url not set')
@@ -38,8 +38,8 @@ const resolvers = {
         }
 
         const gitHubUser = await requestGithubUser({
-          client_id: config.GITHUB_CLIENT_ID ? config.GITHUB_CLIENT_ID : '',
-          client_secret: config.GITHUB_CLIENT_SECRET ? config.GITHUB_CLIENT_SECRET : '',
+          client_id: config.GITHUB_CLIENT_ID || '',
+          client_secret: config.GITHUB_CLIENT_SECRET || '',
           code: args.code
         })
 

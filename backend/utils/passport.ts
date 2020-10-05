@@ -23,8 +23,8 @@ passport.deserializeUser((obj, done) => {
 
 
 passport.use(new GithubStrategy({
-    clientID: config.GITHUB_CLIENT_ID ? config.GITHUB_CLIENT_ID : '',
-    clientSecret: config.GITHUB_CLIENT_SECRET ? config.GITHUB_CLIENT_SECRET : '',
+    clientID: config.GITHUB_CLIENT_ID || '',
+    clientSecret: config.GITHUB_CLIENT_SECRET || '',
     callbackURL: 'http://localhost:3000/auth/github/callback' // url in frontend, best to use a constant here
   },
   function(_accessToken, _refreshToken, profile, cb) {
