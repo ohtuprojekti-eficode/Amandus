@@ -21,18 +21,28 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: Install frontend
         run: cd frontend && yarn
+
       - name: Test frontend
         run: cd frontend && yarn test --watchAll=false --passWithNoTests
+
       - name: Build frontend
         run: cd frontend && yarn build
+
       - name: Install backend
         run: cd backend && yarn
+
       - name: Test backend
         run: echo 'no tests yet'
+
       - name: Build backend
         run: cd backend && yarn build
+
+      - name: echo env
+        run: echo ${{ secrets.GH_CLIENT_ID }}
+
       - name: Start backend for Cypress tests
-        run: cd backend && nohup node build/src/index.js &
+        run: cd backend && yarn run start &
+
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
