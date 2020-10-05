@@ -17,7 +17,6 @@ const corsOptions = {
 }
 
 app.use(passport.initialize())
-app.use(passport.session()) // if session is used
 
 const server = new ApolloServer({
   schema: schema,
