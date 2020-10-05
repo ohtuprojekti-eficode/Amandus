@@ -29,7 +29,7 @@ passport.use(new GithubStrategy({
   },
   (_accessToken, _refreshToken, profile, cb) => {
     
-    let match:UserType|undefined = User.getUserByGithubId(profile.id)
+    let match = User.getUserByGithubId(profile.id)
     if (!match) {
       
       const user:UserType = {
