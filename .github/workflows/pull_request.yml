@@ -37,11 +37,11 @@ jobs:
       - name: Build backend
         run: cd backend && yarn build
 
-      - name: echo env
-        run: echo ${{ secrets.GH_CLIENT_ID }}
-
       - name: Start backend for Cypress tests
         run: cd backend && yarn run start &
+        env:
+          GH_CLIENT_ID: ${{ secrets.GH_CLIENT_ID }}
+          GH_CLIENT_SECRET: ${{ secrets.GH_CLIENT_SECRET }}
 
       - name: Cypress run
         uses: cypress-io/github-action@v2
