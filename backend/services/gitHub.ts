@@ -28,6 +28,8 @@ export const requestGithubUserAccount = (token: string):Promise<GitHubUserType> 
 export const requestGithubUser = async (credentials:GitHubCredentials):Promise<GitHubUserType> => {
     const response = await requestGithubToken(credentials)
 
+    //DEBUG
+    console.log(response);
     const token = response.access_token.toString()
     const githubUser = await requestGithubUserAccount(token)
     
