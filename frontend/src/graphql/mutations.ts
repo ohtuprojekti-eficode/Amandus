@@ -1,5 +1,4 @@
-import { gql } from '@apollo/client';
-
+import { gql } from '@apollo/client'
 
 export const AUTHORIZE_WITH_GH = gql`
   mutation authorizeWithGithub($code: String!) {
@@ -7,6 +6,11 @@ export const AUTHORIZE_WITH_GH = gql`
       id
       username
       emails
+      gitHubid
+      gitHubLogin
+      gitHubEmail
+      gitHubReposUrl
+      gitHubToken
     }
   }
-`;
+`

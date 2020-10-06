@@ -12,8 +12,9 @@ const CallBack = () => {
   const queryString = window.location.search
   const params = new URLSearchParams(queryString);
 
-  const [authenticate, { loading, data, error }] = useMutation<UserType, any>(AUTHORIZE_WITH_GH,
-    { variables: { code: params.get('code') }
+  const [authenticate] = useMutation(AUTHORIZE_WITH_GH,
+    { 
+      variables: { code: params.get('code') },
    });
 
   useEffect(() => {

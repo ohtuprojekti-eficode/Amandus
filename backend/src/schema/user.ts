@@ -1,8 +1,8 @@
 import { UserInputError } from 'apollo-server'
 import config from '../../utils/config'
-import { Context } from 'vm'
 import { UserType, GitHubAuthCode } from '../../types/user'
 import { requestGithubUser } from '../../services/gitHub'
+import User from '../model/user'
 
 const typeDef = `
     type User {
@@ -17,8 +17,16 @@ const typeDef = `
     }
 `
 
+interface AppContext {
+  gitHubId?: string,
+  currentUser: UserType
+}
+
 const resolvers = {
   Query: {
+    me: (_root:unknown, _args:unknown, context: AppContext):UserType|undefined => {
+      return context.currentUser
+    },
     githubLoginUrl: ():string => {
       const cbUrl = config.GITHUB_CB_URL || ''
       const cliendID = config.GITHUB_CLIENT_ID || ''
@@ -37,29 +45,20 @@ const resolvers = {
           throw new UserInputError('GitHub code not provided')
         }
 
-        const gitHubUser = await requestGithubUser({
-          client_id: config.GITHUB_CLIENT_ID || '',
-          client_secret: config.GITHUB_CLIENT_SECRET || '',
-          code: args.code
-        })
+        try {
+          const gitHubUser = await requestGithubUser({
+            client_id: config.GITHUB_CLIENT_ID || '',
+            client_secret: config.GITHUB_CLIENT_SECRET || '',
+            code: args.code
+          })
 
-        if (!gitHubUser) {
-          throw new Error('GitHub user not found or invalid/expired code provided')
+          return User.findOrCreateUserByGitHubUser(gitHubUser)
+
+        } catch (error) {
+          throw new UserInputError(error)
         } 
-
-        const currentUser:UserType = {
-          username: gitHubUser.login ? gitHubUser.login : '',
-          emails: [gitHubUser.email ? gitHubUser.email : ''],
-          gitHubid: gitHubUser.id,
-          gitHubLogin: gitHubUser.login,
-          gitHubEmail: gitHubUser.email,
-          gitHubReposUrl: gitHubUser.repos_url,
-          gitHubToken: gitHubUser.access_token,
-        }
-       
-        return currentUser
     },
-    logout: (_root: unknown, _args:undefined, _context: Context):string => {
+    logout: (_root: unknown, _args:undefined, _context: AppContext):string => {
       return 'logout'
     },
   },

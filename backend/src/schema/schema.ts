@@ -5,6 +5,7 @@ import user from './user'
 const Query = `
     type Query {
         githubLoginUrl: String!
+        me: User
         cloneRepository(url: String): [File]
     },
 `
