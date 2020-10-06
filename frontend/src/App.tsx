@@ -4,6 +4,8 @@ import { useQuery } from '@apollo/client'
 import { ALL_FILES } from './graphql/queries'
 import ListView from './components/ListView'
 import EditView from './components/EditView'
+import LoginForm from './components/LoginForm'
+import CallBack from './components/auth/CallBack'
 
 const App = () => {
   const result = useQuery(ALL_FILES)
@@ -23,12 +25,19 @@ const App = () => {
       <Link style={padding} to="/filelist">
         File listing
       </Link>
+      <Link style={padding} to="/login">
+        Login
+      </Link>
+      <Route path="/auth/github/callback">
+        <CallBack />
+      </Route>
       <Route exact path="/filelist">
         <ListView files={result.data.files}/>
       </Route>
       <Route path="/edit">
         <EditView files={result.data.files}/>
       </Route>
+      <Route exact path="/login" component={LoginForm} />
     </div>
   )
 }
