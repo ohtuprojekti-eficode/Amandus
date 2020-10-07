@@ -1,7 +1,8 @@
 import { UserInputError } from 'apollo-server'
+import { sign } from 'jsonwebtoken'
 import config from '../../utils/config'
-import { UserType, GitHubAuthCode } from '../../types/user'
-import { requestGithubUser } from '../../services/gitHub'
+import { UserType, GitHubAuthCode, AuthResponse } from '../../types/user'
+import { requestGithubToken, requestGithubUserAccount } from '../../services/gitHub'
 import User from '../model/user'
 
 const typeDef = `
@@ -9,7 +10,7 @@ const typeDef = `
         id: ID
         username: String
         emails: [String]
-        gitHubid: String
+        gitHubId: String
         gitHubLogin: String
         gitHubEmail: String
         gitHubReposUrl: String
@@ -39,23 +40,41 @@ const resolvers = {
     } 
   },
   Mutation: {
-    authorizeWithGithub: async (_root: unknown, args: GitHubAuthCode):Promise<UserType> => {
+    authorizeWithGithub: async (_root: unknown, args: GitHubAuthCode):Promise<AuthResponse> => {
       
         if (!args.code) {
           throw new UserInputError('GitHub code not provided')
         }
 
-        try {
-          const gitHubUser = await requestGithubUser({
-            client_id: config.GITHUB_CLIENT_ID || '',
-            client_secret: config.GITHUB_CLIENT_SECRET || '',
-            code: args.code
-          })
+        const { access_token } = await requestGithubToken(args.code)
+        
+        if (!access_token) {
+          throw new UserInputError('Invalid or expired GitHub code')
+        }
 
-          return User.findOrCreateUserByGitHubUser(gitHubUser)
+        let gitHubUser = await requestGithubUserAccount(access_token.toString())
+        // store gh token in user for now
+        gitHubUser = {
+          ...gitHubUser,
+          access_token: access_token.toString()
+        }
+        if (!gitHubUser) {
+          throw new Error('No GitHub user found')
+        }
+        
+        const user = User.findOrCreateUserByGitHubUser(gitHubUser)
+        
+        const token = sign(
+          {
+            gitHubId: user.gitHubId,
+            gitHubToken: access_token.toString()
+          },
+          config.JWT_SECRET
+        )
 
-        } catch (error) {
-          throw new UserInputError(error)
+        return {
+          user,
+          token
         } 
     },
     logout: (_root: unknown, _args:undefined, _context: AppContext):string => {

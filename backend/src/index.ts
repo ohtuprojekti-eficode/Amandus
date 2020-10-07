@@ -1,6 +1,8 @@
 import express from 'express'
 import { ApolloServer } from 'apollo-server-express'
 import { createServer } from 'http'
+import { verify } from 'jsonwebtoken'
+
 import config from '../utils/config'
 import schema from './schema/schema'
 
@@ -14,16 +16,19 @@ const corsOptions = {
   credentials: true
 }
 
+interface TokenType {
+  gitHubId: string
+}
+
 const server = new ApolloServer({
   schema: schema,
   context: ({ req }: Req) => {
     const auth = req.headers.authorization
     if ( auth && auth.toLowerCase().startsWith('bearer') ) {
-      const gitHubId = auth.substring(7) // using github id for now
-      const currentUser = User.getUserByGithubId(gitHubId)
+      const decodedToken = verify(auth.substring(7), config.JWT_SECRET)
+			const currentUser = User.getUserByGithubId((<TokenType>decodedToken).gitHubId)
 			return { currentUser }
     }
-    
     return null
   }
 })

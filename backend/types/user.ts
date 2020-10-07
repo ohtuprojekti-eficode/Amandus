@@ -3,12 +3,6 @@ export interface LoginArgs {
     password: string
 }
 
-export interface GitHubCredentials {
-    client_id: string,
-    client_secret: string,
-    code: string
-}
-
 export interface GitHubAuthCode {
     code: string
 }
@@ -18,8 +12,7 @@ export interface GitHubAccessToken {
 }
 
 export interface GitHubAccessTokenResponse {
-    access_token: GitHubAccessToken,
-
+    access_token: GitHubAccessToken
 }
 
 export interface GitHubUserType {
@@ -36,9 +29,14 @@ export interface UserType {
     username: string
     password?: string,
     token?: string,
-    gitHubid?: string,
+    gitHubId?: string,
     gitHubLogin?: string,
     gitHubEmail?: string,
     gitHubReposUrl?: string, 
     gitHubToken?: string
+}
+
+export interface AuthResponse {
+    user?: UserType,
+    token?: string
 }

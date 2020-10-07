@@ -11,11 +11,14 @@ const Query = `
 `
 
 const Mutation = `
+    type AuthResponse {
+        user: User
+        token: String
+    }
     type Mutation {
         logout: String
-        authorizeWithGithub(code: String!) : User
-        addUser(username: String) : String!
         saveChanges(file: FileInput, username: String, email: String, token: String): String
+        authorizeWithGithub(code: String!) : AuthResponse
     }
 `
 

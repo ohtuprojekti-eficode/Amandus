@@ -8,7 +8,7 @@ const users:UserType[] = [
       emails: ['maurice@moss.com'],
       password: 'abcdefg',
       token: '',
-      gitHubid: '123124124'
+      gitHubId: '123124124'
     },
     {
       id: '2',
@@ -16,7 +16,7 @@ const users:UserType[] = [
       emails: ['roy@trenneman.com'],
       password: 'imroy',
       token: '',
-      gitHubid: '124214124'
+      gitHubId: '124214124'
     }
 ];
 
@@ -30,18 +30,18 @@ const getUsers = ():UserType[] => {
 }
 
 const getUserByGithubId = (id:string):UserType|undefined => {
-    return users.find(user => user.gitHubid === id)
+    return users.find(user => user.gitHubId === id)
 }
 
 const findOrCreateUserByGitHubUser = (gitHubUser: GitHubUserType):UserType => {
     const gitHubId = gitHubUser.id?.toString()
 
-    let match = users.find(user => user.gitHubid === gitHubId)
+    let match = users.find(user => user.gitHubId === gitHubId)
     if (!match) {
         match = {
             username: gitHubUser.login || '',
             emails: [gitHubUser.email || ''],
-            gitHubid: gitHubId,
+            gitHubId: gitHubId,
             gitHubLogin: gitHubUser.login,
             gitHubEmail: gitHubUser.email,
             gitHubReposUrl: gitHubUser.repos_url,
