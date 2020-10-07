@@ -26,7 +26,7 @@ passport.use(
     {
       clientID: config.GITHUB_CLIENT_ID || '',
       clientSecret: config.GITHUB_CLIENT_SECRET || '',
-      callbackURL: '/auth/github/callback', // url in frontend, best to use a constant here
+      // url in frontend, best to use a constant here
     },
     (_accessToken, _refreshToken, profile, cb) => {
       let match = User.getUserByGithubId(profile.id)
