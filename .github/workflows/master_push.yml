@@ -62,20 +62,11 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_TOKEN }}
-      - name: Docker build frontend
-        run: cd frontend && docker build -t front .
+      - name: Docker build application
+        run: docker build -t application .
 
-      - name: Docker tag frontend
-        run: docker tag front ${{ secrets.DOCKER_REPO }}:frontend-latest
+      - name: Docker tag application
+        run: docker tag application ${{ secrets.DOCKER_REPO }}:application-latest
 
-      - name: Docker push frontend
-        run: docker push ${{ secrets.DOCKER_REPO }}:frontend-latest
-
-      - name: Docker build backend
-        run: cd backend && docker build -t back .
-
-      - name: Docker tag backend
-        run: docker tag back ${{ secrets.DOCKER_REPO }}:backend-latest
-
-      - name: Docker push backend
-        run: docker push ${{ secrets.DOCKER_REPO }}:backend-latest
+      - name: Docker push application
+        run: docker push ${{ secrets.DOCKER_REPO }}:application-latest
