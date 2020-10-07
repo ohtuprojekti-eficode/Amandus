@@ -32,10 +32,10 @@ const App = () => {
         <CallBack />
       </Route>
       <Route exact path="/filelist">
-        <ListView files={result.data.files}/>
+        <ListView files={result.data.files} />
       </Route>
       <Route path="/edit">
-        <EditView files={result.data.files}/>
+        <EditView files={result.data.files} />
       </Route>
       <Route exact path="/login" component={LoginForm} />
     </div>

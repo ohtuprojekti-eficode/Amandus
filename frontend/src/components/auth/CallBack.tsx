@@ -3,28 +3,28 @@ import { useMutation } from '@apollo/client'
 import { AUTHORIZE_WITH_GH } from '../../graphql/mutations'
 
 const CallBack = () => {
-
   const [userdata, setUserData] = useState(null)
 
   const queryString = window.location.search
   const params = new URLSearchParams(queryString)
 
-  
-  const [authenticate, { loading: mutationLoading, error: mutationError }] = useMutation(AUTHORIZE_WITH_GH,
-    { 
-      variables: { code: params.get('code') },
-    })
-  
+  const [
+    authenticate,
+    { loading: mutationLoading, error: mutationError },
+  ] = useMutation(AUTHORIZE_WITH_GH, {
+    variables: { code: params.get('code') },
+  })
+
   useEffect(() => {
-    if(!userdata) {
-      (async () => {
+    if (!userdata) {
+      ;(async () => {
         const response: any = await authenticate()
-        if(response && !response.errors) {
+        if (response && !response.errors) {
           setUserData(response.data)
           localStorage.setItem('token', response.data.authorizeWithGithub.token)
         }
       })()
-    } 
+    }
   }, [userdata, authenticate])
 
   return (

@@ -12,7 +12,7 @@ const EditView = ({ files }: FileList) => {
   return (
     <div style={gridContainerStyle}>
       <div style={asideContainerStyle}>
-        <ListView files={files}/>
+        <ListView files={files} />
       </div>
       <div style={mainContainerStyle}>
         <h2>{filename}</h2>

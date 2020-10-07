@@ -1,24 +1,26 @@
 {
-    "env": {
-      "browser": true,
-      "es6": true,
-      "jest": true
-    },
-    "extends": [
-      "eslint:recommended",
-      "plugin:react/recommended",
-      "plugin:@typescript-eslint/recommended"
-    ],
-    "plugins": ["react", "@typescript-eslint"],
-    "settings": {
-      "react": {
-        "pragma": "React",
-        "version": "detect"
-      }
-    },
-    "rules": {
-      "@typescript-eslint/member-delimiter-style": ["warn", {
-        "multiline" : {
+  "env": {
+    "browser": true,
+    "es6": true,
+    "jest": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "plugins": ["react", "@typescript-eslint"],
+  "settings": {
+    "react": {
+      "pragma": "React",
+      "version": "detect"
+    }
+  },
+  "rules": {
+    "@typescript-eslint/member-delimiter-style": [
+      "warn",
+      {
+        "multiline": {
           "delimiter": "comma",
           "requireLast": false
         },
@@ -26,9 +28,10 @@
           "delimiter": "comma",
           "requireLast": false
         }
-      }],
-      "@typescript-eslint/explicit-function-return-type": 0,
-      "@typescript-eslint/no-explicit-any": 1,
-      "@typescript-eslint/no-use-before-define": 0
-    }
+      }
+    ],
+    "@typescript-eslint/explicit-function-return-type": 0,
+    "@typescript-eslint/no-explicit-any": 1,
+    "@typescript-eslint/no-use-before-define": 0
+  }
 }

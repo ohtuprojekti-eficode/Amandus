@@ -9,7 +9,7 @@ const GitHubAuthBtn = () => {
   const me = useQuery(ME)
   console.log('me', me.data)
 
-  const btnClickHandler = ():void => {    
+  const btnClickHandler = (): void => {
     window.location.href = `${loginUrl.data.githubLoginUrl}`
   }
 
@@ -19,12 +19,13 @@ const GitHubAuthBtn = () => {
 
   return (
     <div>
-        <button 
-          onClick={() => btnClickHandler()} 
-          className='e-info' 
-          style={{ margin: '20px', padding: '10px' }}>
-            Login Via Github
-        </button>
+      <button
+        onClick={() => btnClickHandler()}
+        className="e-info"
+        style={{ margin: '20px', padding: '10px' }}
+      >
+        Login Via Github
+      </button>
     </div>
   )
 }
