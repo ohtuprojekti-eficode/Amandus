@@ -11,16 +11,18 @@ import schema from './schema/schema'
 
 const app = express()
 
+app.use(express.static('build'))
+
 const corsOptions = {
   origin: true,
-  credentials: true
+  credentials: true,
 }
 
 app.use(passport.initialize())
 
 const server = new ApolloServer({
   schema: schema,
-  context: ({ req, res }) => buildContext({ req, res, User })
+  context: ({ req, res }) => buildContext({ req, res, User }),
 })
 
 server.applyMiddleware({ app, path: '/graphql' })
@@ -28,7 +30,8 @@ server.applyMiddleware({ app, cors: corsOptions })
 
 const httpServer = createServer(app)
 
-httpServer.listen(
-  { port: config.PORT },
-  (): void => console.log(`GraphQL is now running on http://localhost:${config.PORT}/graphql`)
+httpServer.listen({ port: config.PORT }, (): void =>
+  console.log(
+    `GraphQL is now running on http://localhost:${config.PORT}/graphql`
+  )
 )

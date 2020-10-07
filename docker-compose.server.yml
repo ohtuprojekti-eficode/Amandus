@@ -1,21 +1,16 @@
 version: '3'
 
 services:
-  frontend:
-    command: yarn serve -s build -p 3000
-    image: ohtuprojekti/wevc:frontend-latest
-    stdin_open: true
-    ports:
-      - '3000:3000'
-
-  backend:
-    command: yarn start
-    image: ohtuprojekti/wevc:backend-latest
+  application:
+    image: ohtuprojekti/wevc:application-latest
     stdin_open: true
     ports:
       - '3001:3001'
     depends_on:
       - userdata
+    environment:
+      - GH_CLIENT_ID=
+      - GH_CLIENT_SECRET=
 
   userdata:
     image: 'postgres'
