@@ -1,4 +1,4 @@
-import { cloneRepository } from '../git'
+import { cloneRepository, saveChanges } from '../git'
 import { existsSync, readFileSync } from 'fs'
 import readRecursive from 'recursive-readdir'
 import { relative } from 'path'
@@ -8,11 +8,23 @@ const typeDef = `
         name: String!
         content: String!
     }
+    input FileInput {
+      name: String!
+      content: String!
+    }
 `
 
 interface File {
   name: string
   content: string
+}
+
+interface SaveArgs {
+  file: File
+  repositoryName: string
+  username: string
+  email: string
+  token: string
 }
 
 const resolvers = {
@@ -37,6 +49,16 @@ const resolvers = {
       }))
 
       return contents
+    },
+  },
+  Mutation: {
+    saveChanges: async (
+      _root: any,
+      { file, username, email, token }: SaveArgs,
+      _context: any
+    ): Promise<string> => {
+      await saveChanges(file, username, email, token)
+      return 'Saved'
     },
   },
 }
