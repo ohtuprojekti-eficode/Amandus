@@ -25,7 +25,7 @@ const CallBack = () => {
         }
       })()
     } 
-  }, [userdata])
+  }, [userdata, authenticate])
 
   return (
     <div>
