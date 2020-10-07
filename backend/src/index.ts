@@ -1,13 +1,13 @@
 import express from 'express'
 import { ApolloServer } from 'apollo-server-express'
-import { buildContext } from 'graphql-passport'
 import { createServer } from 'http'
+import { verify } from 'jsonwebtoken'
 
-import passport from '../utils/passport'
 import config from '../utils/config'
-import User from '../types/user'
-
 import schema from './schema/schema'
+
+import { Req } from '../types/request'
+import User from './model/user'
 
 const app = express()
 
@@ -16,11 +16,21 @@ const corsOptions = {
   credentials: true
 }
 
-app.use(passport.initialize())
+interface TokenType {
+  gitHubId: string
+}
 
 const server = new ApolloServer({
   schema: schema,
-  context: ({ req, res }) => buildContext({ req, res, User })
+  context: ({ req }: Req) => {
+    const auth = req.headers.authorization
+    if ( auth && auth.toLowerCase().startsWith('bearer') ) {
+      const decodedToken = verify(auth.substring(7), config.JWT_SECRET)
+			const currentUser = User.getUserByGithubId((<TokenType>decodedToken).gitHubId)
+			return { currentUser }
+    }
+    return null
+  }
 })
 
 server.applyMiddleware({ app, path: '/graphql' })

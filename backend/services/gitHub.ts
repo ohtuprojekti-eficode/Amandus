@@ -1,19 +1,29 @@
-import { GitHubCredentials, GitHubAccessTokenResponse, GitHubUserType } from '../types/user'
+import { GitHubAccessTokenResponse, GitHubUserType } from '../types/user'
 import fetch from 'node-fetch'
+import config from '../utils/config'
 
-export const requestGithubToken = (credentials:GitHubCredentials):Promise<GitHubAccessTokenResponse> =>
-    fetch("https://github.com/login/oauth/access_token", {
-        method: "POST",
-        headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json"
+export const requestGithubToken = (code: string):Promise<GitHubAccessTokenResponse> => {
+    
+    const credentials = {
+        client_id: config.GITHUB_CLIENT_ID || '',
+        client_secret: config.GITHUB_CLIENT_SECRET || '',
+        code
+    }
+
+    return fetch("https://github.com/login/oauth/access_token", {
+            method: "POST",
+            headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json"
         },
         body: JSON.stringify(credentials)
-        })
-            .then<GitHubAccessTokenResponse>((res) => res.json())
-            .catch((error:Error) => {
-                throw new Error(error.message);
-            })
+    })
+    .then<GitHubAccessTokenResponse>((res) => res.json())
+    .catch((error:Error) => {
+        throw new Error(error.message);
+    })
+}
+    
 
 export const requestGithubUserAccount = (token: string):Promise<GitHubUserType> => {
 
@@ -24,16 +34,3 @@ export const requestGithubUserAccount = (token: string):Promise<GitHubUserType> 
     })
 }
     
-
-export const requestGithubUser = async (credentials:GitHubCredentials):Promise<GitHubUserType> => {
-    const response = await requestGithubToken(credentials)
-
-    const token = response.access_token.toString()
-    const githubUser = await requestGithubUserAccount(token)
-    
-    return {
-        ...githubUser,
-        access_token: token
-    }
-   
-}

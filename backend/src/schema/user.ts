@@ -1,15 +1,16 @@
 import { UserInputError } from 'apollo-server'
+import { sign } from 'jsonwebtoken'
 import config from '../../utils/config'
-import { Context } from 'vm'
-import { UserType, GitHubAuthCode } from '../../types/user'
-import { requestGithubUser } from '../../services/gitHub'
+import { UserType, GitHubAuthCode, AuthResponse } from '../../types/user'
+import { requestGithubToken, requestGithubUserAccount } from '../../services/gitHub'
+import User from '../model/user'
 
 const typeDef = `
     type User {
         id: ID
         username: String
         emails: [String]
-        gitHubid: String
+        gitHubId: String
         gitHubLogin: String
         gitHubEmail: String
         gitHubReposUrl: String
@@ -17,8 +18,16 @@ const typeDef = `
     }
 `
 
+interface AppContext {
+  gitHubId?: string,
+  currentUser: UserType
+}
+
 const resolvers = {
   Query: {
+    me: (_root:unknown, _args:unknown, context: AppContext):UserType|undefined => {
+      return context.currentUser
+    },
     githubLoginUrl: ():string => {
       const cbUrl = config.GITHUB_CB_URL || ''
       const cliendID = config.GITHUB_CLIENT_ID || ''
@@ -31,35 +40,44 @@ const resolvers = {
     } 
   },
   Mutation: {
-    authorizeWithGithub: async (_root: unknown, args: GitHubAuthCode):Promise<UserType> => {
+    authorizeWithGithub: async (_root: unknown, args: GitHubAuthCode):Promise<AuthResponse> => {
       
         if (!args.code) {
           throw new UserInputError('GitHub code not provided')
         }
 
-        const gitHubUser = await requestGithubUser({
-          client_id: config.GITHUB_CLIENT_ID || '',
-          client_secret: config.GITHUB_CLIENT_SECRET || '',
-          code: args.code
-        })
-
-        if (!gitHubUser) {
-          throw new Error('GitHub user not found or invalid/expired code provided')
-        } 
-
-        const currentUser:UserType = {
-          username: gitHubUser.login ? gitHubUser.login : '',
-          emails: [gitHubUser.email ? gitHubUser.email : ''],
-          gitHubid: gitHubUser.id,
-          gitHubLogin: gitHubUser.login,
-          gitHubEmail: gitHubUser.email,
-          gitHubReposUrl: gitHubUser.repos_url,
-          gitHubToken: gitHubUser.access_token,
+        const { access_token } = await requestGithubToken(args.code)
+        
+        if (!access_token) {
+          throw new UserInputError('Invalid or expired GitHub code')
         }
-       
-        return currentUser
+
+        let gitHubUser = await requestGithubUserAccount(access_token.toString())
+        // store gh token in user for now
+        gitHubUser = {
+          ...gitHubUser,
+          access_token: access_token.toString()
+        }
+        if (!gitHubUser) {
+          throw new Error('No GitHub user found')
+        }
+        
+        const user = User.findOrCreateUserByGitHubUser(gitHubUser)
+        
+        const token = sign(
+          {
+            gitHubId: user.gitHubId,
+            gitHubToken: access_token.toString()
+          },
+          config.JWT_SECRET
+        )
+
+        return {
+          user,
+          token
+        } 
     },
-    logout: (_root: unknown, _args:undefined, _context: Context):string => {
+    logout: (_root: unknown, _args:undefined, _context: AppContext):string => {
       return 'logout'
     },
   },

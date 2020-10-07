@@ -16,3 +16,18 @@ export const GITHUB_LOGIN_URL = gql`
     githubLoginUrl
   }
 `
+
+export const ME = gql`
+  query {
+    me {
+      id
+      username
+      emails
+      gitHubId
+      gitHubLogin
+      gitHubEmail
+      gitHubReposUrl
+      gitHubToken
+    }
+  }
+`
