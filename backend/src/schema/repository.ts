@@ -4,6 +4,7 @@ import readRecursive from 'recursive-readdir'
 import { ForbiddenError } from 'apollo-server'
 import { relative } from 'path'
 import { AppContext } from '../../types/user'
+import { File } from '../../types/file'
 
 const typeDef = `
     type File {
@@ -15,11 +16,6 @@ const typeDef = `
       content: String!
     }
 `
-
-interface File {
-  name: string
-  content: string
-}
 
 interface SaveArgs {
   file: File

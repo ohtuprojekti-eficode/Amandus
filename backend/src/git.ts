@@ -1,11 +1,7 @@
 import simpleGit, { SimpleGit } from 'simple-git'
 import { writeFileSync } from 'fs'
 import { v4 as uuidv4 } from 'uuid'
-
-interface File {
-  name: string
-  content: string
-}
+import { File } from '../types/file'
 
 export const cloneRepository = async (httpsURL: string): Promise<void> => {
   const git: SimpleGit = simpleGit()
