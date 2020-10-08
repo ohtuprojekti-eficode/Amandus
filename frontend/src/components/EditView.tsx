@@ -16,7 +16,7 @@ const EditView = ({ files }: FileList) => {
       </div>
       <div style={mainContainerStyle}>
         <h2>{filename}</h2>
-        <MonacoEditor content={content} />
+        <MonacoEditor content={content} filename={filename} />
       </div>
     </div>
   )

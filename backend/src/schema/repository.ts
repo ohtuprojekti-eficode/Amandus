@@ -57,6 +57,7 @@ const resolvers = {
       { file, username, email, token }: SaveArgs,
       _context: any
     ): Promise<string> => {
+      console.log(`${JSON.stringify(file)} ${username} ${email} ${token}`)
       await saveChanges(file, username, email, token)
       return 'Saved'
     },
