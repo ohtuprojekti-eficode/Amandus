@@ -24,8 +24,6 @@ const MonacoEditor = ({ content, filename }: Props) => {
         { loading: mutationSaveLoading, error: mutationSaveError }
     ] = useMutation(SAVE_CHANGES)
     
-    console.log('data', user, userQueryLoading, userQueryError)
-
     const valueGetter = useRef<Getter | null>(null)
 
     const handleEditorDidMount = (_valueGetter: Getter) => {
@@ -44,13 +42,9 @@ const MonacoEditor = ({ content, filename }: Props) => {
                     token: user.me.gitHubToken
                 } 
             });        
-            
-            console.log(valueGetter.current(), user.me.username, user.me.gitHubEmail, user.me.gitHubToken)
         }
     }
 
-    
-    
     return (
         <div style={{ border: '2px solid black', padding: '5px' }}>
             <Editor
@@ -59,16 +53,24 @@ const MonacoEditor = ({ content, filename }: Props) => {
                 value={content}
                 editorDidMount={handleEditorDidMount}
             />
-            <button
-                disabled={
-                    userQueryLoading || 
-                    !!userQueryError ||
-                    mutationSaveLoading ||
-                    !user.me
-                } 
-                onClick={handleSaveButton}
-                >Save
-            </button>
+            <div>
+                <button
+                    disabled={
+                        userQueryLoading || 
+                        !!userQueryError ||
+                        mutationSaveLoading ||
+                        !user.me
+                    } 
+                    onClick={handleSaveButton}
+                    >Save
+                </button>
+            </div>
+            <div style={{ fontSize: 14, marginTop: 5, marginBottom: 5 }}>
+                {!user || !user.me 
+                    ? "Please login to enable saving"
+                    : `Logged in as ${user.me.username}`}
+            </div>
+            
         </div>
     )
 }
