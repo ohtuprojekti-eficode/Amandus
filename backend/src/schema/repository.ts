@@ -1,7 +1,9 @@
 import { cloneRepository, saveChanges } from '../git'
 import { existsSync, readFileSync } from 'fs'
 import readRecursive from 'recursive-readdir'
+import { ForbiddenError } from 'apollo-server'
 import { relative } from 'path'
+import { AppContext } from '../../types/user'
 
 const typeDef = `
     type File {
@@ -21,18 +23,14 @@ interface File {
 
 interface SaveArgs {
   file: File
-  repositoryName: string
-  username: string
-  email: string
-  token: string
 }
 
 const resolvers = {
   Query: {
     cloneRepository: async (
-      _root: any,
+      _root: unknown,
       args: { url: string },
-      _context: any
+      _context: unknown
     ): Promise<File[]> => {
       const url = new URL(args.url)
       const repositoryName = url.pathname
@@ -53,12 +51,18 @@ const resolvers = {
   },
   Mutation: {
     saveChanges: async (
-      _root: any,
-      { file, username, email, token }: SaveArgs,
-      _context: any
+      _root: unknown,
+      { file }: SaveArgs,
+      context: AppContext
     ): Promise<string> => {
-      console.log(`${JSON.stringify(file)} ${username} ${email} ${token}`)
-      await saveChanges(file, username, email, token)
+      if (!context.currentUser || !context.currentUser.gitHubToken) {
+        throw new ForbiddenError('You have to login')
+      }
+      const { username, gitHubEmail, gitHubToken } = context.currentUser
+      console.log(
+        `${JSON.stringify(file)} ${username} ${gitHubEmail} ${gitHubToken}`
+      )
+      await saveChanges(file, username, gitHubEmail ?? '', gitHubToken)
       return 'Saved'
     },
   },

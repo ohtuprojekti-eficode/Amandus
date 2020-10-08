@@ -17,7 +17,7 @@ const Mutation = `
     }
     type Mutation {
         logout: String
-        saveChanges(file: FileInput, username: String, email: String, token: String): String
+        saveChanges(file: FileInput): String
         authorizeWithGithub(code: String!) : AuthResponse
     }
 `

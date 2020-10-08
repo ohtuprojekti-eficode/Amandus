@@ -1,7 +1,7 @@
 import { UserInputError } from 'apollo-server'
 import { sign } from 'jsonwebtoken'
 import config from '../../utils/config'
-import { UserType, GitHubAuthCode, AuthResponse } from '../../types/user'
+import { UserType, GitHubAuthCode, AuthResponse, AppContext } from '../../types/user'
 import { requestGithubToken, requestGithubUserAccount } from '../../services/gitHub'
 import User from '../model/user'
 
@@ -17,11 +17,6 @@ const typeDef = `
         gitHubToken: String
     }
 `
-
-interface AppContext {
-  gitHubId?: string,
-  currentUser: UserType
-}
 
 const resolvers = {
   Query: {
