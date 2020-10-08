@@ -21,9 +21,9 @@ const MonacoEditor = ({ content, filename }: Props) => {
     
     const [
         saveChanges, 
-        { loading: mutationSaveLoading, error: mutationSaveError }
+        { loading: mutationSaveLoading }
     ] = useMutation(SAVE_CHANGES)
-    
+
     const valueGetter = useRef<Getter | null>(null)
 
     const handleEditorDidMount = (_valueGetter: Getter) => {
