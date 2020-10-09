@@ -55,9 +55,6 @@ const resolvers = {
         throw new ForbiddenError('You have to login')
       }
       const { username, gitHubEmail, gitHubToken } = context.currentUser
-      console.log(
-        `${JSON.stringify(file)} ${username} ${gitHubEmail} ${gitHubToken}`
-      )
       await saveChanges(file, username, gitHubEmail ?? '', gitHubToken)
       return 'Saved'
     },
