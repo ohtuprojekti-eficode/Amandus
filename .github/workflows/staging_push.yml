@@ -1,8 +1,8 @@
-name: MASTER PUSH
+name: STAGING PUSH
 
 on:
   push:
-    branches: [master]
+    branches: [staging]
     paths-ignore:
       - 'documentation/**'
       - 'README.md'
@@ -60,7 +60,7 @@ jobs:
     run: docker build -t application .
 
   - name: Docker tag application
-    run: docker tag application ${{ secrets.DOCKER_REPO }}:application-production
+    run: docker tag application ${{ secrets.DOCKER_REPO }}:application-latest
 
   - name: Docker push application
-    run: docker push ${{ secrets.DOCKER_REPO }}:application-production
+    run: docker push ${{ secrets.DOCKER_REPO }}:application-latest
