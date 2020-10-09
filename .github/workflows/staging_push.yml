@@ -16,51 +16,52 @@ jobs:
   steps:
     - uses: actions/checkout@v2
     - name: Use Node.js ${{ matrix.node-version }}
-  uses: actions/setup-node@v1
-    with:
-      node-version: ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
 
-  - name: Install frontend
-    run: cd frontend && yarn
+    - name: Install frontend
+      run: cd frontend && yarn
 
-  - name: Test frontend
-    run: cd frontend && yarn test --watchAll=false --passWithNoTests
+    - name: Test frontend
+      run: cd frontend && yarn test --watchAll=false --passWithNoTests
 
-  - name: Build frontend
-    run: cd frontend && yarn build
+    - name: Build frontend
+      run: cd frontend && yarn build
 
-  - name: Install backend
-    run: cd backend && yarn
+    - name: Install backend
+      run: cd backend && yarn
 
-  - name: Test backend
-    run: echo 'no tests yet'
+    - name: Test backend
+      run: echo 'no tests yet'
 
-  - name: Build backend
-    run: cd backend && yarn build
+    - name: Build backend
+      run: cd backend && yarn build
 
-  - name: Start backend for Cypress tests
-    run: cd backend && yarn run start &
-    env:
-      GH_CLIENT_ID: ${{ secrets.GH_CLIENT_ID }}
-      GH_CLIENT_SECRET: ${{ secrets.GH_CLIENT_SECRET }}
+    - name: Start backend for Cypress tests
+      run: cd backend && yarn run start &
+      env:
+        GH_CLIENT_ID: ${{ secrets.GH_CLIENT_ID }}
+        GH_CLIENT_SECRET: ${{ secrets.GH_CLIENT_SECRET }}
 
-  - name: Cypress run
-    uses: cypress-io/github-action@v2
-    with:
-      working-directory: ./frontend
-      start: yarn start
-      wait-on: http://localhost:3000
+    - name: Cypress run
+      uses: cypress-io/github-action@v2
+      with:
+        working-directory: ./frontend
+        start: yarn start
+        wait-on: http://localhost:3000
 
-  - name: Docker login
-    uses: docker/login-action@v1
-    with:
-      username: ${{ secrets.DOCKER_USER }}
-      password: ${{ secrets.DOCKER_TOKEN }}
-  - name: Docker build application
-    run: docker build -t application .
+    - name: Docker login
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_USER }}
+        password: ${{ secrets.DOCKER_TOKEN }}
 
-  - name: Docker tag application
-    run: docker tag application ${{ secrets.DOCKER_REPO }}:application-latest
+    - name: Docker build application
+      run: docker build -t application .
 
-  - name: Docker push application
-    run: docker push ${{ secrets.DOCKER_REPO }}:application-latest
+    - name: Docker tag application
+      run: docker tag application ${{ secrets.DOCKER_REPO }}:application-latest
+
+    - name: Docker push application
+      run: docker push ${{ secrets.DOCKER_REPO }}:application-latest
