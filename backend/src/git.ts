@@ -1,11 +1,7 @@
 import simpleGit, { SimpleGit } from 'simple-git'
 import { writeFileSync } from 'fs'
 import { v4 as uuidv4 } from 'uuid'
-
-interface File {
-  name: string
-  content: string
-}
+import { File } from '../types/file'
 
 export const cloneRepository = async (httpsURL: string): Promise<void> => {
   const git: SimpleGit = simpleGit()
@@ -24,9 +20,7 @@ export const saveChanges = async (
 ): Promise<void> => {
   const repositoryName = file.name.split('/').slice(0, 2).join('/')
   const realFilename = file.name.replace(`${repositoryName}/`, '') || file.name
-  const branchName = `${username}-${new Date()
-    .toLocaleString()
-    .replace(/[\s|:]/g, '-')}`
+  const branchName = 'master'
   const commitMessage = `User ${username} modified file ${realFilename}`
   const remoteUuid = uuidv4()
 
@@ -34,8 +28,7 @@ export const saveChanges = async (
     .addConfig('user.name', username)
     .addConfig('user.email', email)
 
-  await git.checkout(['master'])
-  await git.checkout(['-b', branchName])
+  await git.checkout([branchName])
 
   writeFileSync(`./repositories/${file.name}`, file.content)
 
@@ -47,6 +40,4 @@ export const saveChanges = async (
   )
   await git.push(remoteUuid, branchName)
   await git.removeRemote(remoteUuid)
-  await git.checkout(['master'])
-  await git.branch(['-D', branchName])
 }
