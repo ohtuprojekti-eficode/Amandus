@@ -1,4 +1,4 @@
-import { cloneRepository, saveChanges } from '../git'
+import { cloneRepository, pullMasterChanges, saveChanges } from '../git'
 import { existsSync, readFileSync } from 'fs'
 import readRecursive from 'recursive-readdir'
 import { relative } from 'path'
@@ -40,6 +40,8 @@ const resolvers = {
 
       if (!existsSync(fileLocation)) {
         await cloneRepository(url.href)
+      } else {
+        await pullMasterChanges(url.href)
       }
 
       const paths = await readRecursive(fileLocation, ['.git'])

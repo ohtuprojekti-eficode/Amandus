@@ -7,13 +7,20 @@ interface File {
   content: string
 }
 
-export const cloneRepository = async (httpsURL: string): Promise<void> => {
-  const git: SimpleGit = simpleGit()
-
+export const pullMasterChanges = async (httpsURL: string): Promise<void> => {
   const url = new URL(httpsURL)
   const repositoryName = url.pathname
 
-  await git.clone(httpsURL, `./repositories/${repositoryName}`)
+  await simpleGit(`./repositories/${repositoryName}`)
+    .fetch('origin')
+    .pull('origin', 'master')
+}
+
+export const cloneRepository = async (httpsURL: string): Promise<void> => {
+  const url = new URL(httpsURL)
+  const repositoryName = url.pathname
+
+  await simpleGit().clone(httpsURL, `./repositories/${repositoryName}`)
 }
 
 export const saveChanges = async (
