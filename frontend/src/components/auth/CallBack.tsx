@@ -22,6 +22,7 @@ const CallBack = () => {
         if(response && !response.errors) {
           setUserData(response.data)
           localStorage.setItem('token', response.data.authorizeWithGithub.token)
+          window.location.href = '/'
         }
       })()
     } 

@@ -2,6 +2,7 @@ import React from 'react'
 import { Route, Link } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
 import { ALL_FILES } from './graphql/queries'
+import { ME } from './graphql/queries'
 import ListView from './components/ListView'
 import EditView from './components/EditView'
 import LoginForm from './components/LoginForm'
@@ -9,6 +10,7 @@ import CallBack from './components/auth/CallBack'
 
 const App = () => {
   const result = useQuery(ALL_FILES)
+  const { loading: userQueryLoading, error: userQueryError, data: user } = useQuery(ME)
 
   if (result.loading) return <div>Loading...</div>
   if (result.error) return <div>Error fetching files...</div>
@@ -25,9 +27,14 @@ const App = () => {
       <Link style={padding} to="/filelist">
         File listing
       </Link>
+      {!user || !user.me &&
       <Link style={padding} to="/login">
         Login
-      </Link>
+      </Link>}
+      {user && user.me &&
+      <Link style={padding} to="/">
+        Logged in as {user.me.username}
+      </Link>}
       <Route path="/auth/github/callback">
         <CallBack />
       </Route>

@@ -66,9 +66,8 @@ const MonacoEditor = ({ content, filename }: Props) => {
                 </button>
             </div>
             <div style={{ fontSize: 14, marginTop: 5, marginBottom: 5 }}>
-                {!user || !user.me 
-                    ? "Please login to enable saving"
-                    : `Logged in as ${user.me.username}`}
+                {(!user || !user.me) && 
+                        "Please login to enable saving"}
             </div>
             
         </div>
