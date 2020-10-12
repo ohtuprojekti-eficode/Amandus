@@ -19,6 +19,11 @@ const App = () => {
     paddingRight: 5,
   }
 
+  const logout = () => {
+    localStorage.clear()
+    window.location.href = '/'
+  }
+
   return (
     <div>
       <Link style={padding} to="/">
@@ -32,8 +37,8 @@ const App = () => {
         Login
       </Link>}
       {user && user.me &&
-      <Link style={padding} to="/">
-        Logged in as {user.me.username}
+      <Link style={padding} to="/" onClick={logout}>
+        {user.me.username} - logout
       </Link>}
       <Route path="/auth/github/callback">
         <CallBack />
