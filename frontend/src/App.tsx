@@ -10,7 +10,7 @@ import CallBack from './components/auth/CallBack'
 
 const App = () => {
   const result = useQuery(ALL_FILES)
-  const { loading: userQueryLoading, error: userQueryError, data: user } = useQuery(ME)
+  const { data: user } = useQuery(ME)
 
   if (result.loading) return <div>Loading...</div>
   if (result.error) return <div>Error fetching files...</div>
@@ -32,7 +32,7 @@ const App = () => {
       <Link style={padding} to="/filelist">
         File listing
       </Link>
-      {!user || !user.me &&
+      {(!user || !user.me) &&
       <Link style={padding} to="/login">
         Login
       </Link>}
