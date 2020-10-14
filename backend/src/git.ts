@@ -1,4 +1,4 @@
-import simpleGit, { SimpleGit } from 'simple-git'
+import simpleGit from 'simple-git'
 import { writeFileSync } from 'fs'
 import { v4 as uuidv4 } from 'uuid'
 
