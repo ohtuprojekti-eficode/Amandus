@@ -2,10 +2,10 @@ version: '3'
 
 services:
   application:
-    image: ohtuprojekti/wevc:application-latest
+    image: ''
     stdin_open: true
     ports:
-      - '3001:3001'
+      - ':'
     depends_on:
       - userdata
     environment:
@@ -13,6 +13,7 @@ services:
       - GH_CLIENT_SECRET=
       - GH_CB_URL=
       - JWT_SECRET=
+      - PORT=
 
   userdata:
     image: 'postgres'
@@ -22,7 +23,7 @@ services:
       - ./userdata/init_scripts/:/docker-entrypoint-initdb.d/
       - userdata-data:/var/lib/postgresql/data/
     ports:
-      - '5432:5432'
+      - ':'
 
   watchtower:
     image: v2tec/watchtower
