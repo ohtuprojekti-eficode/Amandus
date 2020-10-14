@@ -7,62 +7,58 @@ on:
       - 'documentation/**'
       - 'README.md'
       - LICENSE
-
 jobs:
-  TEST-AND-DEPLOY:
+  TEST-AND-DEPLOY-STAGING:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node-version: [14.x]
     steps:
-      - uses: actions/checkout@v2
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+      - name: Setup actions
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2-beta
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Install frontend
-        run: cd frontend && yarn
+      - name: Install, build and test frontend
+        run: |
+          cd frontend
+          yarn
+          yarn build
+          yarn test --watchAll=false --passWithNoTests
 
-      - name: Test frontend
-        run: cd frontend && yarn test --watchAll=false --passWithNoTests
+      - name: Install, build and test backend
+        run: |
+          cd backend
+          yarn
+          yarn build 
+          yarn test
 
-      - name: Build frontend
-        run: cd frontend && yarn build
-
-      - name: Install backend
-        run: cd backend && yarn
-
-      - name: Test backend
-        run: echo 'no tests yet'
-
-      - name: Build backend
-        run: cd backend && yarn build
-
-      - name: Start backend for Cypress tests
-        run: cd backend && yarn run start &
+      - name: Start server for E2E tests
+        run: |
+          cd backend 
+          yarn run start &
         env:
           GH_CLIENT_ID: ${{ secrets.GH_CLIENT_ID }}
           GH_CLIENT_SECRET: ${{ secrets.GH_CLIENT_SECRET }}
 
-      - name: Cypress run
+      - name: E2E testing
         uses: cypress-io/github-action@v2
         with:
-          working-directory: ./frontend
+          working-directory: frontend
           start: yarn start
           wait-on: http://localhost:3000
 
-      - name: Docker login
+      - name: Dockerhub login
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
-      - name: Docker build application
-        run: docker build -t application .
-
-      - name: Docker tag application
-        run: docker tag application ${{ secrets.DOCKER_REPO }}:application-latest
-
-      - name: Docker push application
-        run: docker push ${{ secrets.DOCKER_REPO }}:application-latest
+      - name: Dockerhub deploy latest
+        run: |
+          docker build -t application .
+          docker tag application ${{ secrets.DOCKER_REPO }}:application-latest
+          docker push ${{ secrets.DOCKER_REPO }}:application-latest
