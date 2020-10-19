@@ -2,11 +2,25 @@
 
 Web application to edit Robot Framework files remotely
 
+[Application in production](http://135.181.89.96:4000/)
+
+## How to run locally for development
+
+* Requirements: `docker`, `docker-compose` & `yarn`
+
+1. Create the `.env` file in `/backend` with the proper values (see `backend/.env.dist`)
+     1. Check [Backend documentation](/documentation/backend.md) for more details on environment values if needed
+2. Install backend and frontend node modules
+    1. `cd backend/ && yarn`
+    2. `cd frontend/ && yarn`
+3. Run `sudo docker-compose build`
+4. Run `sudo docker-compose up`
+5. The application should be viewable in `localhost:3000`
+
+
 ## Documentation
 
 [General](documentation/general.md)
-
-[Application in production](http://135.181.89.96:4000/)
 
 [Frontend documentation](/documentation/frontend.md)
 
@@ -18,4 +32,6 @@ Web application to edit Robot Framework files remotely
 
 - Feature is implemented
 - Tests are passed
+- Documentation is updated to match the state of the application
 - Code is reviewed: at least 2 persons have accepted changes in the pull request
+- The feature works in production environment
