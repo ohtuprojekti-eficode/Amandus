@@ -25,13 +25,13 @@ export const saveChanges = async (
   username: string,
   email: string,
   token: string,
-  branch: 'master'
+  branch: string
 ): Promise<void> => {
   await validateBranchName(branch)
   const repositoryName = file.name.split('/').slice(0, 2).join('/')
   const realFilename = file.name.replace(`${repositoryName}/`, '') || file.name
 
-  const branchName = branch
+  const branchName = branch ?? 'master'
   const commitMessage = `User ${username} modified file ${realFilename}`
   const remoteUuid = uuidv4()
 

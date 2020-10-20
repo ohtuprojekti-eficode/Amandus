@@ -51,13 +51,14 @@ const resolvers = {
     saveChanges: async (
       _root: unknown,
       { file }: SaveArgs,
-      context: AppContext
+      context: AppContext,
+      branch: string
     ): Promise<string> => {
       if (!context.currentUser || !context.currentUser.gitHubToken) {
         throw new ForbiddenError('You have to login')
       }
       const { username, gitHubEmail, gitHubToken } = context.currentUser
-      await saveChanges(file, username, gitHubEmail ?? '', gitHubToken)
+      await saveChanges(file, username, gitHubEmail ?? '', gitHubToken, branch)
       return 'Saved'
     },
   },
