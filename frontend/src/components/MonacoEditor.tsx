@@ -39,7 +39,24 @@ const MonacoEditor = ({ content, filename }: Props) => {
                     },  
                     username: user.me.username,
                     email: user.me.gitHubEmail,
-                    token: user.me.gitHubToken
+                    token: user.me.gitHubToken,
+                    branch: 'master'
+                }
+            });
+        }
+    }
+
+    const handleSaveToBranchButton = () => {
+        if (valueGetter.current) {
+            saveChanges({ variables: {
+                    file: {
+                        name: filename,
+                        content: valueGetter.current(),
+                    },
+                    username: user.me.username,
+                    email: user.me.gitHubEmail,
+                    token: user.me.gitHubToken,
+                    branch: 'new_branch' // ask the branchname from user?
                 } 
             });        
         }
@@ -56,13 +73,23 @@ const MonacoEditor = ({ content, filename }: Props) => {
             <div>
                 <button
                     disabled={
-                        userQueryLoading || 
+                        userQueryLoading ||
                         !!userQueryError ||
                         mutationSaveLoading ||
                         !user.me
-                    } 
+                    }
                     onClick={handleSaveButton}
                     >Save
+                </button>
+                <button
+                    disabled={
+                        userQueryLoading ||
+                        !!userQueryError ||
+                        mutationSaveLoading ||
+                        !user.me
+                    }
+                    onClick={handleSaveToBranchButton}
+                    >Save to branch
                 </button>
             </div>
             <div style={{ fontSize: 14, marginTop: 5, marginBottom: 5 }}>
