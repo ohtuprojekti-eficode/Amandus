@@ -1,4 +1,4 @@
-import { UserType, GitHubUserType } from './../types/user'
+import { UserType, GitHubUserType } from '../types/user'
 
 // temp user data
 const users:UserType[] = [
