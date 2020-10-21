@@ -75,8 +75,19 @@ const setupGitConfig = (username: string, email: string, repositoryName: string)
 const gitCheckout = async (git:SimpleGit, branchName: string) => {
   const sanitizedBranchName = sanitizeBranchName(branchName)
   await validateBranchName(sanitizedBranchName)
-  await git.checkout([sanitizedBranchName])
+  
+  if (await branchExists(git, sanitizedBranchName)) {
+    await git.checkout([sanitizedBranchName])
+    return
+  }
+  
+  await git.checkout(['-b', sanitizedBranchName])
 }
+
+const branchExists = async (git:SimpleGit, branchName: string):Promise<boolean> => {
+  const branchSummaryResult = await git.branch(['--list', branchName])
+  return Object.keys(branchSummaryResult.branches).find(branch => branch === branchName) ? true : false
+} 
 
 const writeToFile = (file: File) => {
   writeFileSync(`./repositories/${file.name}`, file.content)
