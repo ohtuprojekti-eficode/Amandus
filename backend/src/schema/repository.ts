@@ -57,9 +57,8 @@ const resolvers = {
       if (!context.currentUser || !context.currentUser.gitHubToken) {
         throw new ForbiddenError('You have to login')
       }
-      
-      const { username, gitHubEmail, gitHubToken } = context.currentUser
-      await saveChanges(file, username, gitHubEmail ?? '', gitHubToken, branch)
+     
+      await saveChanges(file, branch, context.currentUser)
       return 'Saved'
     },
   },

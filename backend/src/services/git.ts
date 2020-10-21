@@ -1,8 +1,9 @@
 import simpleGit, { SimpleGit } from 'simple-git'
 import { writeFileSync } from 'fs'
 import { v4 as uuidv4 } from 'uuid'
-import { File } from './types/file'
-import { validateBranchName } from './utils/utils'
+import { File } from '../types/file'
+import { UserType } from '../types/user'
+import { validateBranchName } from '../utils/utils'
 
 let git:SimpleGit
 
@@ -24,14 +25,18 @@ export const cloneRepository = async (httpsURL: string): Promise<void> => {
 
 export const saveChanges = async (
   file: File,
-  username: string,
-  email: string,
-  token: string,
-  branch: string
+  branch: string,
+  user: UserType
 ): Promise<void> => {
   
+  const { username, gitHubEmail, gitHubToken } = user
   const repositoryName = getRepositoryFromFilePath(file)
-  setupGitConfig(username, email, repositoryName)
+  
+  setupGitConfig(
+    username, 
+    gitHubEmail ?? '', 
+    repositoryName
+  )
 
   await gitCheckout(branch)
  
@@ -43,7 +48,11 @@ export const saveChanges = async (
   const commitMessage = makeCommitMessage(username, realFilename)
   await gitCommit(commitMessage) 
 
-  await gitPush(username, token, branch)
+  await gitPush(
+    username, 
+    gitHubToken ?? '', 
+    branch
+  )
 
 }
 
