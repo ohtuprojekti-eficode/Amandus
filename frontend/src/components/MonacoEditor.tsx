@@ -53,9 +53,6 @@ const MonacoEditor = ({ content, filename }: Props) => {
             name: filename,
             content: valueGetter.current(),
           },
-          username: user.me.username,
-          email: user.me.gitHubEmail,
-          token: user.me.gitHubToken,
           branch: 'master', // change this to branchName after backend is updated
         },
       })

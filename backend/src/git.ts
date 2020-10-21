@@ -1,8 +1,10 @@
-import simpleGit from 'simple-git'
+import simpleGit, { SimpleGit } from 'simple-git'
 import { writeFileSync } from 'fs'
 import { v4 as uuidv4 } from 'uuid'
 import { File } from './types/file'
 import { validateBranchName } from './utils/utils'
+
+let git:SimpleGit
 
 export const pullMasterChanges = async (httpsURL: string): Promise<void> => {
   const url = new URL(httpsURL)
@@ -27,28 +29,73 @@ export const saveChanges = async (
   token: string,
   branch: string
 ): Promise<void> => {
-  await validateBranchName(branch)
-  const repositoryName = file.name.split('/').slice(0, 2).join('/')
-  const realFilename = file.name.replace(`${repositoryName}/`, '') || file.name
+  
+  const repositoryName = getRepositoryFromFilePath(file)
+  setupGitConfig(username, email, repositoryName)
 
-  const branchName = branch ?? 'master'
-  const commitMessage = `User ${username} modified file ${realFilename}`
-  const remoteUuid = uuidv4()
+  await gitCheckout(branch)
+ 
+  writeToFile(file)
 
-  const git = simpleGit(`./repositories/${repositoryName}`)
-    .addConfig('user.name', username)
-    .addConfig('user.email', email)
+  const realFilename = getFileNameFromFilePath(file, repositoryName)
+  await gitAdd([realFilename])
 
+  const commitMessage = makeCommitMessage(username, realFilename)
+  await gitCommit(commitMessage) 
+
+  await gitPush(username, token, branch)
+
+}
+
+const getRepositoryFromFilePath = (file: File) => {
+  return file.name.split('/').slice(0, 2).join('/')
+}
+
+const getFileNameFromFilePath = (file: File, repositoryName: string) => {
+  return file.name.replace(`${repositoryName}/`, '') || file.name
+}
+
+const setupGitConfig = (username: string, email: string, repositoryName: string) => {
+  git = simpleGit(`./repositories/${repositoryName}`)
+  .addConfig('user.name', username)
+  .addConfig('user.email', email)
+}
+
+const gitCheckout = async (branchName: string) => {
+  await validateBranchName(branchName)
   await git.checkout([branchName])
+}
 
+const writeToFile = (file: File) => {
   writeFileSync(`./repositories/${file.name}`, file.content)
+}
 
-  await git.add([realFilename])
+const gitAdd = async (files: Array<string>) => {
+  await git.add(files)
+}
+
+const makeCommitMessage = (username: string, realFilename: string) => {
+  return `User ${username} modified file ${realFilename}`
+}
+
+const gitCommit = async (commitMessage: string) => {
   await git.commit(commitMessage)
+}
+
+const gitPush = async (username: string, token: string, branchName: string) => {
+  const remoteUuid = uuidv4()
+  await gitAddRemote(remoteUuid, username, token)
+  await git.push(remoteUuid, branchName)
+  await gitRemoveRemote(remoteUuid)
+}
+
+const gitAddRemote = async (remoteId: string, username: string, token: string) => {  
   await git.addRemote(
-    remoteUuid,
+    remoteId,
     `https://${username}:${token}@github.com/ohtuprojekti-eficode/robot-test-files`
   )
-  await git.push(remoteUuid, branchName)
-  await git.removeRemote(remoteUuid)
+}
+
+const gitRemoveRemote = async (remoteId: string) => {
+  await git.removeRemote(remoteId)
 }

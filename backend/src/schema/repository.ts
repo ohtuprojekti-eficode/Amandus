@@ -18,7 +18,7 @@ const typeDef = `
 `
 
 interface SaveArgs {
-  file: File
+  file: File,
   branch: string
 }
 
@@ -52,11 +52,12 @@ const resolvers = {
     saveChanges: async (
       _root: unknown,
       { file, branch }: SaveArgs,
-      context: AppContext,
+      context: AppContext
     ): Promise<string> => {
       if (!context.currentUser || !context.currentUser.gitHubToken) {
         throw new ForbiddenError('You have to login')
       }
+      
       const { username, gitHubEmail, gitHubToken } = context.currentUser
       await saveChanges(file, username, gitHubEmail ?? '', gitHubToken, branch)
       return 'Saved'
