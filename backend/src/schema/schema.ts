@@ -20,6 +20,7 @@ const Mutation = `
         saveChanges(
             file: FileInput! 
             branch: String!
+            commitMessage: String
         ): String
         authorizeWithGithub(
             code: String!
