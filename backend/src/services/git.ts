@@ -3,7 +3,7 @@ import { writeFileSync } from 'fs'
 import { v4 as uuidv4 } from 'uuid'
 import { File } from '../types/file'
 import { UserType } from '../types/user'
-import { validateBranchName } from '../utils/utils'
+import { validateBranchName, sanitizeString } from '../utils/utils'
 import { SaveArgs } from '../types/params'
 
 export const pullMasterChanges = async (httpsURL: string): Promise<void> => {
@@ -55,7 +55,6 @@ export const saveChanges = async (
     gitHubToken ?? '', 
     branch
   )
-
 }
 
 const getRepositoryFromFilePath = (file: File) => {
@@ -86,7 +85,7 @@ const gitAdd = async (git:SimpleGit, files: Array<string>) => {
 }
 
 const makeCommitMessage = (rawCommitMessage: string, username: string, realFilename: string) => {
-  return rawCommitMessage ?? `User ${username} modified file ${realFilename}`
+  return rawCommitMessage ? sanitizeString(rawCommitMessage) : `User ${username} modified file ${realFilename}`
 }
 
 const gitCommit = async (git:SimpleGit, commitMessage: string) => {
