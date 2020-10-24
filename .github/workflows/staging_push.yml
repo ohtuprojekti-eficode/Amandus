@@ -35,6 +35,9 @@ jobs:
           yarn
           yarn build 
           yarn test
+    
+      - name: Copy built frontend to backend build directory
+        run: cp -r frontend/build backend/build/frontBuild
 
       - name: Start server for E2E tests
         run: |
@@ -48,8 +51,7 @@ jobs:
         uses: cypress-io/github-action@v2
         with:
           working-directory: frontend
-          start: yarn start
-          wait-on: http://localhost:3000
+          wait-on: http://localhost:3001
 
       - name: Dockerhub login
         uses: docker/login-action@v1
