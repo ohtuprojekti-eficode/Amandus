@@ -6,6 +6,10 @@
 
 * React
 
+* Material-UI
+
+* Apollo Client
+
 * Monaco editor
 
 * Docker
