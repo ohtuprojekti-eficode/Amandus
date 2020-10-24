@@ -1,4 +1,6 @@
 import React from 'react'
+import GitHubIcon from '@material-ui/icons/GitHub'
+import Button from '@material-ui/core/Button'
 import { useQuery } from '@apollo/client'
 import { GITHUB_LOGIN_URL, ME } from '../../graphql/queries'
 
@@ -9,7 +11,7 @@ const GitHubAuthBtn = () => {
   const me = useQuery(ME)
   console.log('me', me.data)
 
-  const btnClickHandler = ():void => {    
+  const btnClickHandler = (): void => {
     window.location.href = `${loginUrl.data.githubLoginUrl}`
   }
 
@@ -19,12 +21,13 @@ const GitHubAuthBtn = () => {
 
   return (
     <div>
-        <button 
-          onClick={() => btnClickHandler()} 
-          className='e-info' 
-          style={{ margin: '20px', padding: '10px' }}>
-            Login Via Github
-        </button>
+      <Button
+        variant="contained"
+        startIcon={<GitHubIcon />}
+        onClick={btnClickHandler}
+      >
+        Login with GitHub
+      </Button>
     </div>
   )
 }
