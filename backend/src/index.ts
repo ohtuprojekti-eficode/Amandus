@@ -3,10 +3,10 @@ import { ApolloServer } from 'apollo-server-express'
 import { createServer } from 'http'
 import { verify } from 'jsonwebtoken'
 
-import config from '../utils/config'
+import config from './utils/config'
 import schema from './schema/schema'
 
-import { Req } from '../types/request'
+import { Req } from './types/request'
 import User from './model/user'
 import path from 'path'
 

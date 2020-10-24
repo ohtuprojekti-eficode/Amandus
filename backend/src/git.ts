@@ -1,8 +1,8 @@
 import simpleGit from 'simple-git'
 import { writeFileSync } from 'fs'
 import { v4 as uuidv4 } from 'uuid'
-import { File } from '../types/file'
-import { validateBranchName } from '../utils/utils'
+import { File } from './types/file'
+import { validateBranchName } from './utils/utils'
 
 export const pullMasterChanges = async (httpsURL: string): Promise<void> => {
   const url = new URL(httpsURL)
