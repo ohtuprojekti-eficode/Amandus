@@ -35,12 +35,10 @@ jobs:
           yarn
           yarn build 
           yarn test
-    
-      - name: Copy built frontend to backend build directory
-        run: cp -r frontend/build backend/build/frontBuild
 
       - name: Start server for E2E tests
         run: |
+          cp -r frontend/build backend/build/frontBuild
           cd backend 
           yarn run start &
         env:
