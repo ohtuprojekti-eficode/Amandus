@@ -19,6 +19,7 @@ const typeDef = `
 
 interface SaveArgs {
   file: File
+  branch: string
 }
 
 const resolvers = {
@@ -50,9 +51,8 @@ const resolvers = {
   Mutation: {
     saveChanges: async (
       _root: unknown,
-      { file }: SaveArgs,
+      { file, branch }: SaveArgs,
       context: AppContext,
-      branch: string
     ): Promise<string> => {
       if (!context.currentUser || !context.currentUser.gitHubToken) {
         throw new ForbiddenError('You have to login')
