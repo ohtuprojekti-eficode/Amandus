@@ -29,7 +29,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "cypress:open": "cypress open",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "cypress:test": "cypress run --headless"
   },
   "proxy": "http://localhost:3001",
   "eslintConfig": {

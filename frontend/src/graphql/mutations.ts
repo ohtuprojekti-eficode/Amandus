@@ -19,7 +19,7 @@ export const AUTHORIZE_WITH_GH = gql`
 `
 
 export const SAVE_CHANGES = gql`
-  mutation saveChanges($file: FileInput) {
-    saveChanges(file: $file)
+  mutation saveChanges($file: FileInput, $branch: String) {
+    saveChanges(file: $file, branch: $branch)
   }
 `

@@ -39,9 +39,10 @@ const MonacoEditor = ({ content, filename }: Props) => {
                     },  
                     username: user.me.username,
                     email: user.me.gitHubEmail,
-                    token: user.me.gitHubToken
-                } 
-            });        
+                    token: user.me.gitHubToken,
+                    branch: 'master'
+                }
+            });
         }
     }
 
@@ -56,11 +57,11 @@ const MonacoEditor = ({ content, filename }: Props) => {
             <div>
                 <button
                     disabled={
-                        userQueryLoading || 
+                        userQueryLoading ||
                         !!userQueryError ||
                         mutationSaveLoading ||
                         !user.me
-                    } 
+                    }
                     onClick={handleSaveButton}
                     >Save
                 </button>

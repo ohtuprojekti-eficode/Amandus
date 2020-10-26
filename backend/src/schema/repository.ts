@@ -3,8 +3,8 @@ import { existsSync, readFileSync } from 'fs'
 import readRecursive from 'recursive-readdir'
 import { ForbiddenError } from 'apollo-server'
 import { relative } from 'path'
-import { AppContext } from '../../types/user'
-import { File } from '../../types/file'
+import { AppContext } from './../types/user'
+import { File } from './../types/file'
 
 const typeDef = `
     type File {
@@ -19,6 +19,7 @@ const typeDef = `
 
 interface SaveArgs {
   file: File
+  branch: string
 }
 
 const resolvers = {
@@ -50,14 +51,14 @@ const resolvers = {
   Mutation: {
     saveChanges: async (
       _root: unknown,
-      { file }: SaveArgs,
-      context: AppContext
+      { file, branch }: SaveArgs,
+      context: AppContext,
     ): Promise<string> => {
       if (!context.currentUser || !context.currentUser.gitHubToken) {
         throw new ForbiddenError('You have to login')
       }
       const { username, gitHubEmail, gitHubToken } = context.currentUser
-      await saveChanges(file, username, gitHubEmail ?? '', gitHubToken)
+      await saveChanges(file, username, gitHubEmail ?? '', gitHubToken, branch)
       return 'Saved'
     },
   },

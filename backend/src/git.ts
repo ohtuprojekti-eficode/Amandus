@@ -1,7 +1,8 @@
 import simpleGit from 'simple-git'
 import { writeFileSync } from 'fs'
 import { v4 as uuidv4 } from 'uuid'
-import { File } from '../types/file'
+import { File } from './types/file'
+import { validateBranchName } from './utils/utils'
 
 export const pullMasterChanges = async (httpsURL: string): Promise<void> => {
   const url = new URL(httpsURL)
@@ -23,11 +24,14 @@ export const saveChanges = async (
   file: File,
   username: string,
   email: string,
-  token: string
+  token: string,
+  branch: string
 ): Promise<void> => {
+  await validateBranchName(branch)
   const repositoryName = file.name.split('/').slice(0, 2).join('/')
   const realFilename = file.name.replace(`${repositoryName}/`, '') || file.name
-  const branchName = 'master'
+
+  const branchName = branch ?? 'master'
   const commitMessage = `User ${username} modified file ${realFilename}`
   const remoteUuid = uuidv4()
 
