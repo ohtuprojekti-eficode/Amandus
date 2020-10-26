@@ -33,10 +33,17 @@ const SaveDialog = ({
   const [branchName, setBranchName] = useState('')
   const [commitMessage, setCommitMessage] = useState('')
 
+  const handleExit = () => {
+    setCreateNewBranch(false)
+    setBranchName('')
+    setCommitMessage('')
+  }
+
   return (
     <Dialog
       open={open}
       onClose={handleClose}
+      onExit={handleExit}
       aria-labelledby="form-dialog-title"
     >
       <DialogTitle id="form-dialog-title">Save changes</DialogTitle>
