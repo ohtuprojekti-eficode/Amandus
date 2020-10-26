@@ -3,6 +3,7 @@ import Editor from '@monaco-editor/react'
 import { useMutation, useQuery } from '@apollo/client'
 import { ME } from '../graphql/queries'
 import { SAVE_CHANGES } from '../graphql/mutations'
+import { Button } from '@material-ui/core'
 import SaveDialog from './SaveDialog'
 
 interface Props {
@@ -81,7 +82,9 @@ const MonacoEditor = ({ content, filename }: Props) => {
           handleSubmit={handleDialogSubmit}
           currentBranch={currentBranch}
         />
-        <button
+        <Button
+          color="primary"
+          variant="contained"
           disabled={
             userQueryLoading ||
             !!userQueryError ||
@@ -91,7 +94,7 @@ const MonacoEditor = ({ content, filename }: Props) => {
           onClick={handleSaveButton}
         >
           Save
-        </button>
+        </Button>
       </div>
       <div style={{ fontSize: 14, marginTop: 5, marginBottom: 5 }}>
         {(!user || !user.me) && 'Please login to enable saving'}
