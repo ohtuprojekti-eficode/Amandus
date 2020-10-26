@@ -1,10 +1,9 @@
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import Editor from '@monaco-editor/react'
-
 import { useMutation, useQuery } from '@apollo/client'
-
 import { ME } from '../graphql/queries'
 import { SAVE_CHANGES } from '../graphql/mutations'
+import SaveDialog from './SaveDialog'
 
 interface Props {
   content: string | undefined
@@ -16,6 +15,9 @@ interface Getter {
 }
 
 const MonacoEditor = ({ content, filename }: Props) => {
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const currentBranch = 'master' // get this from somewhere
+
   const {
     loading: userQueryLoading,
     error: userQueryError,
@@ -32,8 +34,18 @@ const MonacoEditor = ({ content, filename }: Props) => {
     valueGetter.current = _valueGetter
   }
 
-  const handleSaveButton = () => {
+  const handleDialogClose = () => {
+    setDialogOpen(false)
+  }
+
+  const handleDialogSubmit = (
+    createNewBranch: boolean,
+    newBranch: string,
+    commitMessage: string
+  ) => {
     if (valueGetter.current) {
+      const branchName = createNewBranch ? newBranch : currentBranch
+      console.log(branchName, commitMessage)
       saveChanges({
         variables: {
           file: {
@@ -43,10 +55,15 @@ const MonacoEditor = ({ content, filename }: Props) => {
           username: user.me.username,
           email: user.me.gitHubEmail,
           token: user.me.gitHubToken,
-          branch: 'master',
+          branch: 'master', // change this to branchName after backend is updated
         },
       })
     }
+    setDialogOpen(false)
+  }
+
+  const handleSaveButton = () => {
+    setDialogOpen(true)
   }
 
   return (
@@ -58,6 +75,12 @@ const MonacoEditor = ({ content, filename }: Props) => {
         editorDidMount={handleEditorDidMount}
       />
       <div>
+        <SaveDialog
+          open={dialogOpen}
+          handleClose={handleDialogClose}
+          handleSubmit={handleDialogSubmit}
+          currentBranch={currentBranch}
+        />
         <button
           disabled={
             userQueryLoading ||
