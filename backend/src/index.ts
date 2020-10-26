@@ -3,10 +3,10 @@ import { ApolloServer } from 'apollo-server-express'
 import { createServer } from 'http'
 import { verify } from 'jsonwebtoken'
 
-import config from '../utils/config'
+import config from './utils/config'
 import schema from './schema/schema'
 
-import { Req } from '../types/request'
+import { Req } from './types/request'
 import User from './model/user'
 import path from 'path'
 
@@ -40,9 +40,9 @@ server.applyMiddleware({ app, path: '/graphql' })
 server.applyMiddleware({ app, cors: corsOptions })
 
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static('build'))
+  app.use(express.static('build/frontBuild'))
   app.get('*', (_req, res) => {
-    res.sendFile(path.join(__dirname, '../', 'index.html'))
+    res.sendFile(path.join(__dirname, '../build/frontBuild/index.html'))
   })
 }
 

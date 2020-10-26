@@ -10,7 +10,7 @@ RUN mkdir -p /usr/src/app/
 COPY ./backend /usr/src/app/backend
 WORKDIR /usr/src/app/backend
 RUN apk add git && yarn && yarn build 
-COPY --from=front-build-stage /frontend/build/ /usr/src/app/backend/build/
+COPY --from=front-build-stage /frontend/build/ /usr/src/app/backend/build/frontBuild
 
 EXPOSE 3001
 
