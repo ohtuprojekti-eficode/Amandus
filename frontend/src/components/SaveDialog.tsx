@@ -56,9 +56,7 @@ const SaveDialog = ({
                 aria-label="branch selection"
                 value={createNewBranch}
                 onChange={(event) =>
-                  setCreateNewBranch(
-                    (event.target as HTMLInputElement).value === 'true'
-                  )
+                  setCreateNewBranch(event.target.value === 'true')
                 }
               >
                 <FormControlLabel
@@ -82,9 +80,7 @@ const SaveDialog = ({
                 margin="normal"
                 fullWidth
                 value={branchName}
-                onChange={(event) =>
-                  setBranchName((event.target as HTMLInputElement).value)
-                }
+                onChange={(event) => setBranchName(event.target.value)}
               ></TextField>
             </Collapse>
           </Grid>
@@ -98,9 +94,7 @@ const SaveDialog = ({
           variant="outlined"
           fullWidth
           value={commitMessage}
-          onChange={(event) =>
-            setCommitMessage((event.target as HTMLInputElement).value)
-          }
+          onChange={(event) => setCommitMessage(event.target.value)}
         />
       </DialogContent>
       <DialogActions>
