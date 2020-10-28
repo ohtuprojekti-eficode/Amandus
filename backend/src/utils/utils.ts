@@ -13,3 +13,6 @@ const runShellCommand = async (command: string): Promise<string> => {
     throw new Error(error.message)
   }
 }
+
+export const pipe = <T>(...fns: Array<(a: T) => T>) => (x: T): T =>
+  fns.reduce((value, func) => func(value), x)
