@@ -1,6 +1,6 @@
 describe('When on editor view, as a user', function () {
   beforeEach(function () {
-    cy.visit('http://localhost:3001/filelist')
+    cy.visit('http://localhost:3001/edit')
   })
 
   it('I can view the file listing', function () {

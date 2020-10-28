@@ -3,7 +3,7 @@ export interface File {
   content: string
 }
 
-export interface FileList {
+export interface FileListQueryResult {
   files: File[]
 }
 
@@ -14,12 +14,12 @@ export interface Error {
 export interface UserType {
   id?: string
   emails: string[]
-  username: string,
-  password?: string,
-  token?: string,
-  gitHubid?: string,
-  gitHubLogin?: string,
-  gitHubEmail?: string,
-  gitHubReposUrl?: string, 
+  username: string
+  password?: string
+  token?: string
+  gitHubid?: string
+  gitHubLogin?: string
+  gitHubEmail?: string
+  gitHubReposUrl?: string
   gitHubToken?: string
 }
