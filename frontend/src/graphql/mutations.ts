@@ -20,12 +20,10 @@ export const AUTHORIZE_WITH_GH = gql`
 
 export const SAVE_CHANGES = gql`
   mutation saveChanges(
-    $file: FileInput! 
+    $file: FileInput!
     $branch: String!
+    $commitMessage: String
   ) {
-    saveChanges(
-      file: $file
-      branch: $branch
-    )
+    saveChanges(file: $file, branch: $branch, commitMessage: $commitMessage)
   }
 `
