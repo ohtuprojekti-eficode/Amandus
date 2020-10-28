@@ -1,10 +1,11 @@
 import React, { useRef, useState } from 'react'
 import Editor from '@monaco-editor/react'
 import { useMutation, useQuery } from '@apollo/client'
-import { ME } from '../graphql/queries'
+import { BRANCH_STATE, ME } from '../graphql/queries'
 import { SAVE_CHANGES } from '../graphql/mutations'
 import { Button } from '@material-ui/core'
 import SaveDialog from './SaveDialog'
+import { RepoStateQueryResult } from '../types'
 
 interface Props {
   content: string | undefined
@@ -17,7 +18,9 @@ interface Getter {
 
 const MonacoEditor = ({ content, filename }: Props) => {
   const [dialogOpen, setDialogOpen] = useState(false)
-  const currentBranch = 'master' // get this from somewhere
+
+  const branchState = useQuery<RepoStateQueryResult>(BRANCH_STATE)
+  const currentBranch = branchState.data?.repoState.branchName || ''
 
   const {
     loading: userQueryLoading,

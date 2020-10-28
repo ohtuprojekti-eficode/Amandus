@@ -7,6 +7,14 @@ import { sanitizeCommitMessage, sanitizeBranchName } from '../utils/sanitize'
 import { validateBranchName } from '../utils/utils'
 import { SaveArgs } from '../types/params'
 
+export const getCurrentBranchName = async (
+  repoLocation: string
+): Promise<string> => {
+  const git = simpleGit(repoLocation)
+  const branches = await git.branchLocal()
+  return branches.current
+}
+
 export const pullMasterChanges = async (httpsURL: string): Promise<void> => {
   const url = new URL(httpsURL)
   const repositoryName = url.pathname

@@ -7,6 +7,12 @@ export interface FileListQueryResult {
   files: File[]
 }
 
+export interface RepoStateQueryResult {
+  repoState: {
+    branchName: string
+  }
+}
+
 export interface Error {
   message: string
 }
