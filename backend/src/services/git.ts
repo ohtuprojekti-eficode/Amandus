@@ -3,7 +3,9 @@ import { writeFileSync } from 'fs'
 import { v4 as uuidv4 } from 'uuid'
 import { File } from '../types/file'
 import { UserType } from '../types/user'
+import { sanitizeCommitMessage, sanitizeBranchName } from '../utils/sanitize'
 import { validateBranchName } from '../utils/utils'
+import { SaveArgs } from '../types/params'
 
 export const pullMasterChanges = async (httpsURL: string): Promise<void> => {
   const url = new URL(httpsURL)
@@ -22,12 +24,13 @@ export const cloneRepository = async (httpsURL: string): Promise<void> => {
 }
 
 export const saveChanges = async (
-  file: File,
-  branch: string,
+  saveArgs: SaveArgs,
   user: UserType
 ): Promise<void> => {
   
   const { username, gitHubEmail, gitHubToken } = user
+  const { file, branch, commitMessage } = saveArgs
+
   const repositoryName = getRepositoryFromFilePath(file)
   
   const gitObject = setupGitConfig(
@@ -35,7 +38,7 @@ export const saveChanges = async (
     gitHubEmail ?? '', 
     repositoryName
   )
-  
+
   await gitCheckout(gitObject, branch)
  
   writeToFile(file)
@@ -43,8 +46,9 @@ export const saveChanges = async (
   const realFilename = getFileNameFromFilePath(file, repositoryName)
   await gitAdd(gitObject, [realFilename])
 
-  const commitMessage = makeCommitMessage(username, realFilename)
-  await gitCommit(gitObject, commitMessage) 
+  const validCommitMessage = makeCommitMessage(commitMessage, username, realFilename)
+  
+  await gitCommit(gitObject, validCommitMessage) 
 
   await gitPush(
     gitObject,
@@ -52,7 +56,6 @@ export const saveChanges = async (
     gitHubToken ?? '', 
     branch
   )
-
 }
 
 const getRepositoryFromFilePath = (file: File) => {
@@ -70,8 +73,9 @@ const setupGitConfig = (username: string, email: string, repositoryName: string)
 }
 
 const gitCheckout = async (git:SimpleGit, branchName: string) => {
-  await validateBranchName(branchName)
-  await git.checkout([branchName])
+  const sanitizedBranchName = sanitizeBranchName(branchName)
+  await validateBranchName(sanitizedBranchName)
+  await git.checkout([sanitizedBranchName])
 }
 
 const writeToFile = (file: File) => {
@@ -82,8 +86,8 @@ const gitAdd = async (git:SimpleGit, files: Array<string>) => {
   await git.add(files)
 }
 
-const makeCommitMessage = (username: string, realFilename: string) => {
-  return `User ${username} modified file ${realFilename}`
+const makeCommitMessage = (rawCommitMessage: string, username: string, realFilename: string) => {
+  return rawCommitMessage ? sanitizeCommitMessage(rawCommitMessage) : `User ${username} modified file ${realFilename}`
 }
 
 const gitCommit = async (git:SimpleGit, commitMessage: string) => {

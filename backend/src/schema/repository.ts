@@ -5,6 +5,7 @@ import { ForbiddenError } from 'apollo-server'
 import { relative } from 'path'
 import { AppContext } from '../types/user'
 import { File } from '../types/file'
+import { SaveArgs } from '../types/params'
 
 const typeDef = `
     type File {
@@ -16,11 +17,6 @@ const typeDef = `
       content: String!
     }
 `
-
-interface SaveArgs {
-  file: File,
-  branch: string
-}
 
 const resolvers = {
   Query: {
@@ -51,14 +47,14 @@ const resolvers = {
   Mutation: {
     saveChanges: async (
       _root: unknown,
-      { file, branch }: SaveArgs,
+      saveArgs: SaveArgs,
       context: AppContext
     ): Promise<string> => {
       if (!context.currentUser || !context.currentUser.gitHubToken) {
         throw new ForbiddenError('You have to login')
       }
      
-      await saveChanges(file, branch, context.currentUser)
+      await saveChanges(saveArgs, context.currentUser)
       return 'Saved'
     },
   },
