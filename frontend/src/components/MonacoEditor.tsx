@@ -46,14 +46,14 @@ const MonacoEditor = ({ content, filename }: Props) => {
   ) => {
     if (valueGetter.current) {
       const branchName = createNewBranch ? newBranch : currentBranch
-      console.log(branchName, commitMessage)
       saveChanges({
         variables: {
           file: {
             name: filename,
             content: valueGetter.current(),
           },
-          branch: 'master', // change this to branchName after backend is updated
+          branch: branchName,
+          commitMessage: commitMessage,
         },
       })
     }
