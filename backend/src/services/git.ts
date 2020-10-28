@@ -27,35 +27,29 @@ export const saveChanges = async (
   saveArgs: SaveArgs,
   user: UserType
 ): Promise<void> => {
-  
   const { username, gitHubEmail, gitHubToken } = user
   const { file, branch, commitMessage } = saveArgs
 
   const repositoryName = getRepositoryFromFilePath(file)
-  
-  const gitObject = setupGitConfig(
-    username, 
-    gitHubEmail ?? '', 
-    repositoryName
-  )
+
+  const gitObject = setupGitConfig(username, gitHubEmail ?? '', repositoryName)
 
   await gitCheckout(gitObject, branch)
- 
+
   writeToFile(file)
 
   const realFilename = getFileNameFromFilePath(file, repositoryName)
   await gitAdd(gitObject, [realFilename])
 
-  const validCommitMessage = makeCommitMessage(commitMessage, username, realFilename)
-  
-  await gitCommit(gitObject, validCommitMessage) 
-
-  await gitPush(
-    gitObject,
-    username, 
-    gitHubToken ?? '', 
-    branch
+  const validCommitMessage = makeCommitMessage(
+    commitMessage,
+    username,
+    realFilename
   )
+
+  await gitCommit(gitObject, validCommitMessage)
+
+  await gitPush(gitObject, username, gitHubToken ?? '', branch)
 }
 
 const getRepositoryFromFilePath = (file: File) => {
@@ -66,48 +60,82 @@ const getFileNameFromFilePath = (file: File, repositoryName: string) => {
   return file.name.replace(`${repositoryName}/`, '') || file.name
 }
 
-const setupGitConfig = (username: string, email: string, repositoryName: string):SimpleGit => {
+const setupGitConfig = (
+  username: string,
+  email: string,
+  repositoryName: string
+): SimpleGit => {
   return simpleGit(`./repositories/${repositoryName}`)
-  .addConfig('user.name', username)
-  .addConfig('user.email', email)
+    .addConfig('user.name', username)
+    .addConfig('user.email', email)
 }
 
-const gitCheckout = async (git:SimpleGit, branchName: string) => {
+const gitCheckout = async (git: SimpleGit, branchName: string) => {
   const sanitizedBranchName = sanitizeBranchName(branchName)
   await validateBranchName(sanitizedBranchName)
-  await git.checkout([sanitizedBranchName])
+
+  if (await branchExists(git, sanitizedBranchName)) {
+    await git.checkout([sanitizedBranchName])
+    return
+  }
+
+  await git.checkout(['-b', sanitizedBranchName])
+}
+
+const branchExists = async (
+  git: SimpleGit,
+  branchName: string
+): Promise<boolean> => {
+  const branches = await git.branchLocal()
+  return branches.all.some((branch) => branch === branchName)
 }
 
 const writeToFile = (file: File) => {
   writeFileSync(`./repositories/${file.name}`, file.content)
 }
 
-const gitAdd = async (git:SimpleGit, files: Array<string>) => {
+const gitAdd = async (git: SimpleGit, files: Array<string>) => {
   await git.add(files)
 }
 
-const makeCommitMessage = (rawCommitMessage: string, username: string, realFilename: string) => {
-  return rawCommitMessage ? sanitizeCommitMessage(rawCommitMessage) : `User ${username} modified file ${realFilename}`
+const makeCommitMessage = (
+  rawCommitMessage: string,
+  username: string,
+  realFilename: string
+) => {
+  return rawCommitMessage
+    ? sanitizeCommitMessage(rawCommitMessage)
+    : `User ${username} modified file ${realFilename}`
 }
 
-const gitCommit = async (git:SimpleGit, commitMessage: string) => {
+const gitCommit = async (git: SimpleGit, commitMessage: string) => {
   await git.commit(commitMessage)
 }
 
-const gitPush = async (git:SimpleGit, username: string, token: string, branchName: string) => {
+const gitPush = async (
+  git: SimpleGit,
+  username: string,
+  token: string,
+  branchName: string
+) => {
   const remoteUuid = uuidv4()
   await gitAddRemote(git, remoteUuid, username, token)
   await git.push(remoteUuid, branchName)
   await gitRemoveRemote(git, remoteUuid)
 }
 
-const gitAddRemote = async (git:SimpleGit, remoteId: string, username: string, token: string) => {  
+const gitAddRemote = async (
+  git: SimpleGit,
+  remoteId: string,
+  username: string,
+  token: string
+) => {
   await git.addRemote(
     remoteId,
     `https://${username}:${token}@github.com/ohtuprojekti-eficode/robot-test-files`
   )
 }
 
-const gitRemoveRemote = async (git:SimpleGit, remoteId: string) => {
+const gitRemoveRemote = async (git: SimpleGit, remoteId: string) => {
   await git.removeRemote(remoteId)
 }
