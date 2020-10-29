@@ -89,7 +89,8 @@ const MonacoEditor = ({ content, filename }: Props) => {
             userQueryLoading ||
             !!userQueryError ||
             mutationSaveLoading ||
-            !user.me
+            !user.me ||
+            branchState.loading
           }
           onClick={handleSaveButton}
         >
