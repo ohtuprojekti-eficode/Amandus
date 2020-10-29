@@ -50,6 +50,7 @@ jobs:
         with:
           working-directory: frontend
           wait-on: http://localhost:3001
+          env: configFile=production
 
       - name: Dockerhub login
         uses: docker/login-action@v1
