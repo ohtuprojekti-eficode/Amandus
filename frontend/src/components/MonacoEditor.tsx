@@ -19,9 +19,7 @@ interface Getter {
 const MonacoEditor = ({ content, filename }: Props) => {
   const [dialogOpen, setDialogOpen] = useState(false)
 
-  const branchState = useQuery<RepoStateQueryResult>(BRANCH_STATE, {
-    pollInterval: 1000
-  })
+  const branchState = useQuery<RepoStateQueryResult>(BRANCH_STATE)
   const currentBranch = branchState.data?.repoState.branchName || ''
 
   const {
@@ -31,8 +29,9 @@ const MonacoEditor = ({ content, filename }: Props) => {
   } = useQuery(ME)
 
   const [saveChanges, { loading: mutationSaveLoading }] = useMutation(
-    SAVE_CHANGES
-  )
+    SAVE_CHANGES, {
+      refetchQueries: [ { query: BRANCH_STATE } ]
+    })
 
   const valueGetter = useRef<Getter | null>(null)
 
