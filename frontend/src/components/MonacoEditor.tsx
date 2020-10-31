@@ -19,7 +19,9 @@ interface Getter {
 const MonacoEditor = ({ content, filename }: Props) => {
   const [dialogOpen, setDialogOpen] = useState(false)
 
-  const branchState = useQuery<RepoStateQueryResult>(BRANCH_STATE)
+  const branchState = useQuery<RepoStateQueryResult>(BRANCH_STATE, {
+    pollInterval: 1000
+  })
   const currentBranch = branchState.data?.repoState.branchName || ''
 
   const {
