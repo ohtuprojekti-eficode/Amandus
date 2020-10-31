@@ -8,7 +8,7 @@ WORKDIR /usr/src/frontend
 USER node
 
 COPY --chown=node:node . .
-RUN yarn && yarn build && yarn add serve
+RUN yarn
 
 EXPOSE 3000
 
