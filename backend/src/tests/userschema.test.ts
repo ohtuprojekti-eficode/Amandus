@@ -45,7 +45,6 @@ describe('User schema mutations', () => {
     })
     
     expect(res.errors?.some(error => error.message === 'Variable "$code" of required type "String!" was not provided.')).toBeTruthy()
-
   })
 
   it('user can not authorize with an invalid GitHub code', async () => {
@@ -57,10 +56,7 @@ describe('User schema mutations', () => {
     })
     
     expect(res.errors?.some(error => error.message === 'Invalid or expired GitHub code')).toBeTruthy()
-
   })
-
-
 })
 
 
@@ -74,6 +70,5 @@ describe('User schema queries', () => {
     })
     
     expect(res.data?.me).toBeNull()
-
   })
 })
