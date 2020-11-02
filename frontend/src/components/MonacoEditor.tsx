@@ -100,7 +100,7 @@ const MonacoEditor = ({ content, filename }: Props) => {
       </div>
       <div style={{ fontSize: 14, marginTop: 5, marginBottom: 5 }}>
         {(!user || !user.me) && 'Please login to enable saving'}
-        {(user && user.me && currentBranch && currentBranch !== '') && `On branch ${currentBranch}`}
+        {user?.me && currentBranch && `On branch ${currentBranch}`}
       </div>
     </div>
   )
