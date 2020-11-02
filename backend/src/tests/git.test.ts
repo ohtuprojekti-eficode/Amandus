@@ -5,6 +5,7 @@ import { getBranches } from '../services/git'
 
 describe('Get branches', () => {
   const repoPath = join(__dirname, 'testRepo')
+
   beforeEach(() => {
     mkdirSync(repoPath)
   })
