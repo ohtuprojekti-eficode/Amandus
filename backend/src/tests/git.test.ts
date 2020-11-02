@@ -31,6 +31,8 @@ describe('Get branches', () => {
     const testRepo = simpleGit(repoPath)
     await testRepo
       .init()
+      .addConfig('user.name', 'Some One')
+      .addConfig('user.email', 'some@one.com')
       .add('.')
       .commit('init commit')
       .branch(['secondBranch'])

@@ -54,7 +54,12 @@ describe('Getbranches query', () => {
     )
 
     const testRepo = simpleGit(repoPath)
-    await testRepo.add('.').commit('init commit').branch(['secondBranch'])
+    await testRepo
+      .addConfig('user.name', 'Some One')
+      .addConfig('user.email', 'some@one.com')
+      .add('.')
+      .commit('init commit')
+      .branch(['secondBranch'])
 
     const { query } = createTestClient(server)
 
