@@ -3,6 +3,7 @@ import {
   getCurrentBranchName,
   pullMasterChanges,
   saveChanges,
+  getBranches,
 } from '../services/git'
 import { existsSync, readFileSync } from 'fs'
 import readRecursive from 'recursive-readdir'
@@ -12,6 +13,7 @@ import { AppContext } from '../types/user'
 import { File } from '../types/file'
 import { SaveArgs } from '../types/params'
 import { RepoState } from '../types/repoState'
+import simpleGit from 'simple-git'
 
 const typeDef = `
     type File {
@@ -62,6 +64,18 @@ const resolvers = {
       const repoLocation = `./repositories/${repositoryName}`
       const branchName = await getCurrentBranchName(repoLocation)
       return { branchName: branchName }
+    },
+    getRepoBranches: async (
+      _root: unknown,
+      args: { url: string },
+      _context: unknown
+    ): Promise<string[]> => {
+      const repoUrl = new URL(args.url)
+      const repositoryName = repoUrl.pathname
+      const repoLocation = `./repositories/${repositoryName}`
+      const branches = await getBranches(simpleGit(repoLocation))
+
+      return branches
     },
   },
   Mutation: {

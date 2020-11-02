@@ -20,9 +20,8 @@ const corsOptions = {
 interface TokenType {
   gitHubId: string
 }
-
 const server = new ApolloServer({
-  schema: schema,
+  schema,
   context: ({ req }: Req) => {
     const auth = req.headers.authorization
     if (auth && auth.toLowerCase().startsWith('bearer')) {

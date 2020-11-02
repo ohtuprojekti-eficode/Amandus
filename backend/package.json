@@ -16,7 +16,7 @@
     "@typescript-eslint/eslint-plugin": "^4.2.0",
     "@typescript-eslint/parser": "^4.2.0",
     "apollo-server": "^2.18.1",
-    "apollo-server-express": "^2.18.1",
+    "apollo-server-express": "^2.19.0",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "eslint": "^7.9.0",
@@ -45,6 +45,7 @@
   },
   "devDependencies": {
     "@types/jest": "^26.0.15",
+    "apollo-server-testing": "^2.19.0",
     "jest": "^26.6.1",
     "ts-jest": "^26.4.3",
     "ts-node-dev": "^1.0.0-pre.63"
