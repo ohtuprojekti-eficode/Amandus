@@ -7,6 +7,7 @@ const Query = `
         githubLoginUrl: String!
         me: User
         getRepoState(url: String): RepoState!
+        cloneRepository(url: String!): String
     },
 `
 

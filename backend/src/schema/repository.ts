@@ -31,6 +31,22 @@ const typeDef = `
 
 const resolvers = {
   Query: {
+    cloneRepository: async (
+      _root: unknown,
+      args: { url: string },
+      _context: unknown
+    ): Promise<string> => {
+      const url = new URL(args.url)
+      const repositoryName = url.pathname
+      const fileLocation = `./repositories/${repositoryName}`
+
+      if (!existsSync(fileLocation)) {
+        await cloneRepository(url.href)
+      } else {
+        await pullMasterChanges(url.href)
+      }
+      return 'Cloned'
+    },
     getRepoState: async (
       _root: unknown,
       args: { url: string },
@@ -39,12 +55,6 @@ const resolvers = {
       const url = new URL(args.url)
       const repositoryName = url.pathname
       const repoLocation = `./repositories/${repositoryName}`
-
-      if (!existsSync(repoLocation)) {
-        await cloneRepository(url.href)
-      } else {
-        await pullMasterChanges(url.href)
-      }
 
       const currentBranch = await getCurrentBranchName(repoLocation)
 
