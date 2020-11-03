@@ -8,10 +8,9 @@ import { REPO_STATE, CLONE_REPO } from '../graphql/queries'
 
 const EditView = () => {
   const location = useLocation()
-  const [
-    repoStateQuery,
-    { loading: repoStateLoading, error: repoStateError, data: repoStateData },
-  ] = useLazyQuery<RepoStateQueryResult>(REPO_STATE)
+  const [repoStateQuery, { data: repoStateData }] = useLazyQuery<
+    RepoStateQueryResult
+  >(REPO_STATE)
   const cloneRepoQuery = useQuery(CLONE_REPO, {
     onCompleted: () => repoStateQuery(),
   })
