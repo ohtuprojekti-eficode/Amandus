@@ -44,7 +44,8 @@ describe('User schema mutations', () => {
       mutation: AUTHORIZE_WITH_GH
     })
     
-    expect(res.errors?.some(error => error.message === 'Variable "$code" of required type "String!" was not provided.')).toBeTruthy()
+    const errorFound = res.errors?.some(error => error.message === 'Variable "$code" of required type "String!" was not provided.')
+    expect(errorFound).toBeTruthy()
   })
 
   it('user can not authorize with an invalid GitHub code', async () => {
@@ -55,7 +56,8 @@ describe('User schema mutations', () => {
       variables: { code: 'invalid' }
     })
     
-    expect(res.errors?.some(error => error.message === 'Invalid or expired GitHub code')).toBeTruthy()
+    const errorFound = res.errors?.some(error => error.message === 'Invalid or expired GitHub code')
+    expect(errorFound).toBeTruthy()
   })
 })
 
