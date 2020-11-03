@@ -148,7 +148,8 @@ const gitRemoveRemote = async (git: SimpleGit, remoteId: string) => {
   await git.removeRemote(remoteId)
 }
 
-export const getBranches = async (git: SimpleGit): Promise<string[]> => {
+export const getBranches = async (repoLocation: string): Promise<string[]> => {
+  const git = simpleGit(repoLocation)
   const branches = await git.branch()
   return branches.all
 }

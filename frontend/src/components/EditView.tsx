@@ -2,22 +2,18 @@ import React from 'react'
 import MonacoEditor from './MonacoEditor'
 import ListView from './ListView'
 import { useLocation } from 'react-router-dom'
-import { FileListQueryResult } from '../types'
-import { ApolloError } from '@apollo/client'
+import { useQuery } from '@apollo/client'
+import { RepoStateQueryResult } from '../types'
+import { REPO_STATE } from '../graphql/queries'
 
-interface PropsType {
-  loading: boolean
-  data: FileListQueryResult | undefined
-  error: ApolloError | undefined
-}
-
-const EditView = ({ loading, data, error }: PropsType) => {
+const EditView = () => {
+  const repoStateQuery = useQuery<RepoStateQueryResult>(REPO_STATE)
   const location = useLocation()
 
-  if (loading) return <div>Loading files...</div>
-  if (error) return <div>Error fetching files...</div>
+  if (repoStateQuery.loading) return <div>Loading repo files...</div>
+  if (repoStateQuery.error) return <div>Error loading repo files...</div>
 
-  const files = data ? data.files : []
+  const files = repoStateQuery.data ? repoStateQuery.data.repoState.files : []
   const filename = location.search.slice(3)
   const content = files.find((e) => e.name === filename)?.content
 

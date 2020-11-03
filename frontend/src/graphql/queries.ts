@@ -1,22 +1,16 @@
 import { gql } from '@apollo/client'
 
-export const ALL_FILES = gql`
-  query {
-    files: cloneRepository(
-      url: "https://github.com/ohtuprojekti-eficode/robot-test-files"
-    ) {
-      name
-      content
-    }
-  }
-`
-
-export const BRANCH_STATE = gql`
+export const REPO_STATE = gql`
   query {
     repoState: getRepoState(
       url: "https://github.com/ohtuprojekti-eficode/robot-test-files"
     ) {
-      branchName
+      currentBranch
+      files {
+        name
+        content
+      }
+      branches
     }
   }
 `

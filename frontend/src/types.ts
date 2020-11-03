@@ -9,7 +9,9 @@ export interface FileListQueryResult {
 
 export interface RepoStateQueryResult {
   repoState: {
-    branchName: string
+    currentBranch: string
+    files: File[]
+    branches: string[]
   }
 }
 
