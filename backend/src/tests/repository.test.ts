@@ -40,7 +40,7 @@ describe('Getbranches query', () => {
       },
     })
 
-    expect(res.data.getRepoBranches).toEqual([])
+    expect(res.data?.getRepoBranches).toEqual([])
   })
 
   it('returns [master, secondbranch]', async () => {
@@ -70,6 +70,6 @@ describe('Getbranches query', () => {
       },
     })
 
-    expect(res.data.getRepoBranches).toEqual(['master', 'secondBranch'])
+    expect(res.data?.getRepoBranches).toEqual(['master', 'secondBranch'])
   })
 })
