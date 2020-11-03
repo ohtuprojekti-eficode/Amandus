@@ -4,7 +4,7 @@ import GitHubAuthBtn from './auth/GitHubAuthBtn'
 const LoginForm = () => {
 
   return (
-    <div>
+    <div style={{ marginTop: 15, marginLeft: 5 }}>
         <GitHubAuthBtn />
     </div>
   )
