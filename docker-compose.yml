@@ -12,7 +12,7 @@ services:
       - '3000:3000'
 
   backend:
-    command: yarn dev
+    command: sh -c "yarn run migrate-up-prod && yarn dev"
     build: ./backend
     stdin_open: true
     volumes:
@@ -30,7 +30,6 @@ services:
     env_file:
       - ./userdata/userdata.env
     volumes:
-      - ./userdata/init_scripts/:/docker-entrypoint-initdb.d/
       - userdata-data:/var/lib/postgresql/data/
     ports:
       - '5432:5432'
