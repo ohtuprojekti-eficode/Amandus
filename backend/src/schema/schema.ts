@@ -19,6 +19,11 @@ const Mutation = `
     }
     type Mutation {
         logout: String
+        register(
+            username: String!
+            email: String!
+            password: String!
+        ): String
         saveChanges(
             file: FileInput! 
             branch: String!

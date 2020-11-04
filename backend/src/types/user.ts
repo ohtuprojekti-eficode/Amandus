@@ -45,3 +45,9 @@ export interface AppContext {
   gitHubId?: string
   currentUser: UserType
 }
+
+export interface LocalUser {
+  username: string
+  password: string
+  email: string
+}

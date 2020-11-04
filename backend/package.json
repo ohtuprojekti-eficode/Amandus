@@ -4,6 +4,7 @@
   "main": "index.ts",
   "license": "MIT",
   "dependencies": {
+    "@types/bcrypt": "^3.0.0",
     "@types/express": "^4.17.8",
     "@types/express-session": "^1.17.0",
     "@types/jsonwebtoken": "^8.5.0",
@@ -17,6 +18,7 @@
     "@typescript-eslint/parser": "^4.2.0",
     "apollo-server": "^2.18.1",
     "apollo-server-express": "^2.19.0",
+    "bcrypt": "^5.0.0",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "eslint": "^7.9.0",
