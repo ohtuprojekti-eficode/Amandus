@@ -18,6 +18,11 @@
 - `GH_CLIENT_ID` = Client ID of GitHub App, **required**
 - `GH_CLIENT_SECRET` = Client secret of GitHub App, **required**
 - `GH_CB_URL` = GitHub App login callback url, defaults to `http://localhost:3000/auth/github/callback`, **not required for local dev**
+- `POSTGRES_PORT` = Postgres port for connecting
+- `POSTGRES_USER` = Postgres username for connecting
+- `POSTGRES_HOST` = Postgres hostname for connecting
+- `POSTGRES_DB` = Postgres database name for connecting
+- `POSTGRES_PASSWORD` = Postgres database password for connecting
 
 ### Starting backend without frontend
 
