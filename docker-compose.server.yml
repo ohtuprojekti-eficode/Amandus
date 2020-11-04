@@ -3,6 +3,7 @@ version: '3'
 services:
   application:
     image: ''
+    command: sh -c "yarn run migrate-up-prod && yarn start"
     stdin_open: true
     ports:
       - ':'
@@ -14,13 +15,15 @@ services:
       - GH_CB_URL=
       - JWT_SECRET=
       - PORT=
+      - DATABASE_URL=
 
   userdata:
     image: 'postgres'
-    env_file:
-      - ./userdata/userdata.env
+    environment:
+      - POSTGRES_USER=
+      - POSTGRES_DB=
+      - POSTGRES_PASSWORD=
     volumes:
-      - ./userdata/init_scripts/:/docker-entrypoint-initdb.d/
       - userdata-data:/var/lib/postgresql/data/
     ports:
       - ':'

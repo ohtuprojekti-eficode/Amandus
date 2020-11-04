@@ -13,7 +13,7 @@ import {
   requestGithubUserAccount,
 } from '../services/gitHub'
 import User from '../model/user'
-import { connect } from '../db/connect'
+import { pool } from '../db/connect'
 
 const typeDef = `
     type User {
@@ -100,17 +100,15 @@ const resolvers = {
       const email = args.email
       const password = args.password
 
-      const client = connect()
-
       try {
-        await client.query('BEGIN')
+        await pool.query('BEGIN')
         const queryText =
           'INSERT INTO users(username, email, password) VALUES($1, $2, $3)'
-        await client.query(queryText, [username, email, password])
-        await client.query('COMMIT')
+        await pool.query(queryText, [username, email, password])
+        await pool.query('COMMIT')
         return 'Registered'
       } catch (error) {
-        await client.query('ROLLBACK')
+        await pool.query('ROLLBACK')
       }
 
       return 'Register failed'
