@@ -14,7 +14,6 @@ import {
 } from '../services/gitHub'
 import User from '../model/user'
 import { connect } from '../db/connect'
-import bcrypt from 'bcrypt'
 
 const typeDef = `
     type User {
