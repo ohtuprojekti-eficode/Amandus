@@ -9,7 +9,6 @@ RUN apk add git
 USER node
 
 COPY --chown=node:node . .
-RUN yarn
 
 EXPOSE 3001
 

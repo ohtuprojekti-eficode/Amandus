@@ -8,7 +8,6 @@ WORKDIR /usr/src/frontend
 USER node
 
 COPY --chown=node:node . .
-RUN yarn
 
 EXPOSE 3000
 
