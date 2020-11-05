@@ -10,10 +10,8 @@ import readRecursive from 'recursive-readdir'
 import { ForbiddenError } from 'apollo-server'
 import { relative } from 'path'
 import { AppContext } from '../types/user'
-import { File } from '../types/file'
 import { SaveArgs } from '../types/params'
 import { RepoState } from '../types/repoState'
-import simpleGit from 'simple-git'
 
 const typeDef = `
     type File {
@@ -25,7 +23,9 @@ const typeDef = `
       content: String!
     }
     type RepoState {
-      branchName: String!
+      currentBranch: String!
+      files: [File]!
+      branches: [String]!
     }
 `
 
@@ -35,7 +35,7 @@ const resolvers = {
       _root: unknown,
       args: { url: string },
       _context: unknown
-    ): Promise<File[]> => {
+    ): Promise<string> => {
       const url = new URL(args.url)
       const repositoryName = url.pathname
       const fileLocation = `./repositories/${repositoryName}`
@@ -45,14 +45,7 @@ const resolvers = {
       } else {
         await pullMasterChanges(url.href)
       }
-
-      const paths = await readRecursive(fileLocation, ['.git'])
-      const contents = paths.map((file) => ({
-        name: relative('repositories/', file),
-        content: readFileSync(file, 'utf-8'),
-      }))
-
-      return contents
+      return 'Cloned'
     },
     getRepoState: async (
       _root: unknown,
@@ -62,20 +55,18 @@ const resolvers = {
       const url = new URL(args.url)
       const repositoryName = url.pathname
       const repoLocation = `./repositories/${repositoryName}`
-      const branchName = await getCurrentBranchName(repoLocation)
-      return { branchName: branchName }
-    },
-    getRepoBranches: async (
-      _root: unknown,
-      args: { url: string },
-      _context: unknown
-    ): Promise<string[]> => {
-      const repoUrl = new URL(args.url)
-      const repositoryName = repoUrl.pathname
-      const repoLocation = `./repositories/${repositoryName}`
-      const branches = await getBranches(simpleGit(repoLocation))
 
-      return branches
+      const currentBranch = await getCurrentBranchName(repoLocation)
+
+      const filePaths = await readRecursive(repoLocation, ['.git'])
+      const files = filePaths.map((file) => ({
+        name: relative('repositories/', file),
+        content: readFileSync(file, 'utf-8'),
+      }))
+
+      const branches = await getBranches(repoLocation)
+
+      return { currentBranch, files, branches }
     },
   },
   Mutation: {

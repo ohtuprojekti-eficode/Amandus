@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react'
 import Editor from '@monaco-editor/react'
 import { useMutation, useQuery } from '@apollo/client'
-import { BRANCH_STATE, ME } from '../graphql/queries'
+import { ME, REPO_STATE } from '../graphql/queries'
 import { SAVE_CHANGES } from '../graphql/mutations'
 import { Button } from '@material-ui/core'
 import SaveDialog from './SaveDialog'
@@ -18,8 +18,8 @@ interface Getter {
 
 const MonacoEditor = ({ content, filename }: Props) => {
   const [dialogOpen, setDialogOpen] = useState(false)
-  const branchState = useQuery<RepoStateQueryResult>(BRANCH_STATE)
-  const currentBranch = branchState.data?.repoState.branchName || ''
+  const branchState = useQuery<RepoStateQueryResult>(REPO_STATE)
+  const currentBranch = branchState.data?.repoState.currentBranch || ''
 
   const {
     loading: userQueryLoading,
@@ -28,8 +28,9 @@ const MonacoEditor = ({ content, filename }: Props) => {
   } = useQuery(ME)
 
   const [saveChanges, { loading: mutationSaveLoading }] = useMutation(
-    SAVE_CHANGES, {
-      refetchQueries: [ { query: BRANCH_STATE } ]
+    SAVE_CHANGES,
+    {
+      refetchQueries: [{ query: REPO_STATE }],
     }
   )
 
@@ -58,7 +59,7 @@ const MonacoEditor = ({ content, filename }: Props) => {
           },
           branch: branchName,
           commitMessage: commitMessage,
-        }
+        },
       })
     }
     setDialogOpen(false)

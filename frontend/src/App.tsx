@@ -1,15 +1,12 @@
 import React from 'react'
 import { Route, Link } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
-import { ALL_FILES } from './graphql/queries'
 import { ME } from './graphql/queries'
 import EditView from './components/EditView'
 import LoginForm from './components/LoginForm'
 import CallBack from './components/auth/CallBack'
-import { FileListQueryResult } from './types'
 
 const App = () => {
-  const { loading, data, error } = useQuery<FileListQueryResult>(ALL_FILES)
   const { data: user } = useQuery(ME)
 
   const padding = {
@@ -46,7 +43,7 @@ const App = () => {
           <CallBack />
         </Route>
         <Route path="/edit">
-          <EditView loading={loading} data={data} error={error} />
+          <EditView />
         </Route>
         <Route exact path="/login" component={LoginForm} />
       </div>

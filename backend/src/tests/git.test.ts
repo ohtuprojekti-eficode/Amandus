@@ -18,7 +18,7 @@ describe('Get branches', () => {
     const testRepo = simpleGit(repoPath)
     await testRepo.init()
 
-    const branches = await getBranches(testRepo)
+    const branches = await getBranches(repoPath)
     expect(branches).toEqual([])
   })
 
@@ -37,7 +37,7 @@ describe('Get branches', () => {
       .commit('init commit')
       .branch(['secondBranch'])
 
-    const branches = await getBranches(testRepo)
+    const branches = await getBranches(repoPath)
     expect(branches).toEqual(['master', 'secondBranch'])
   })
 })

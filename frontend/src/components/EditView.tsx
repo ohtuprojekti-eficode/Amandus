@@ -2,22 +2,27 @@ import React from 'react'
 import MonacoEditor from './MonacoEditor'
 import ListView from './ListView'
 import { useLocation } from 'react-router-dom'
-import { FileListQueryResult } from '../types'
-import { ApolloError } from '@apollo/client'
+import { useLazyQuery, useQuery } from '@apollo/client'
+import { RepoStateQueryResult } from '../types'
+import { REPO_STATE, CLONE_REPO } from '../graphql/queries'
 
-interface PropsType {
-  loading: boolean
-  data: FileListQueryResult | undefined
-  error: ApolloError | undefined
-}
-
-const EditView = ({ loading, data, error }: PropsType) => {
+const EditView = () => {
   const location = useLocation()
+  const [repoStateQuery, { data: repoStateData }] = useLazyQuery<
+    RepoStateQueryResult
+  >(REPO_STATE)
+  const cloneRepoQuery = useQuery(CLONE_REPO, {
+    onCompleted: () => repoStateQuery(),
+  })
 
-  if (loading) return <div>Loading files...</div>
-  if (error) return <div>Error fetching files...</div>
+  if (cloneRepoQuery.loading) return <div>Cloning repo...</div>
+  if (cloneRepoQuery.error) return <div>Error cloning repo...</div>
 
-  const files = data ? data.files : []
+  // TODO: "can't perform react state update on unmounted component "
+  // if (repoStateLoading) return <div>Fetching repo state...</div>
+  // if (repoStateError) return <div>Error fetching repo state...</div>
+
+  const files = repoStateData ? repoStateData.repoState.files : []
   const filename = location.search.slice(3)
   const content = files.find((e) => e.name === filename)?.content
 

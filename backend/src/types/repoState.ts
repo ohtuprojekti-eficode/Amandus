@@ -1,3 +1,7 @@
+import { File } from './file'
+
 export interface RepoState {
-  branchName: string
+  currentBranch: string
+  files: File[]
+  branches: string[]
 }

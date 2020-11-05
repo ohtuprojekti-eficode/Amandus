@@ -6,9 +6,8 @@ const Query = `
     type Query {
         githubLoginUrl: String!
         me: User
-        cloneRepository(url: String): [File]
         getRepoState(url: String): RepoState!
-        getRepoBranches(url: String!): [String]!
+        cloneRepository(url: String!): String
     },
 `
 
