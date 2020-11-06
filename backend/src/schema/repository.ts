@@ -12,7 +12,6 @@ import { relative } from 'path'
 import { AppContext } from '../types/user'
 import { SaveArgs } from '../types/params'
 import { RepoState } from '../types/repoState'
-import { GitError } from 'simple-git'
 
 const typeDef = `
     type File {
