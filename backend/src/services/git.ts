@@ -129,6 +129,11 @@ const gitPush = async (
   const remoteUuid = uuidv4()
   await gitAddRemote(git, remoteUuid, username, token)
   await git.push(remoteUuid, branchName)
+  .catch((error: Error) => {
+    if (error.message.includes('failed to push some refs')) {
+      throw new Error('merge conflict')
+    }
+  })
   await gitRemoveRemote(git, remoteUuid)
 }
 

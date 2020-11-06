@@ -81,9 +81,12 @@ const resolvers = {
       }
 
       await saveChanges(saveArgs, context.currentUser)
-      .catch((error: GitError) => {
-        console.log(error)
-        throw new Error('Merge conflict detected')
+      .catch((error: Error) => {
+        if (error.message === 'merge conflict') {
+          throw new Error('Merge conflict detected')
+        } else {
+          console.log(error.message)
+        }
       })
       return 'Saved'
     },
