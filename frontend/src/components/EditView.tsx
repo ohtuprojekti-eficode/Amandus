@@ -48,7 +48,7 @@ const useStyles = makeStyles(() =>
     },
     sidebar: {
       flexShrink: 0,
-      width: 400,
+      width: '20%',
     },
     editor: {
       flexGrow: 1,

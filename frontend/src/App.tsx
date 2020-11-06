@@ -42,6 +42,7 @@ const App = () => {
         </Toolbar>
       </AppBar>
       <div>
+        <Toolbar />
         <Route path="/auth/github/callback">
           <CallBack />
         </Route>

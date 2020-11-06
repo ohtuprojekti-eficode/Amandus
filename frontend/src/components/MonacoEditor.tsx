@@ -3,7 +3,7 @@ import Editor from '@monaco-editor/react'
 import { useMutation, useQuery } from '@apollo/client'
 import { ME, REPO_STATE } from '../graphql/queries'
 import { SAVE_CHANGES } from '../graphql/mutations'
-import { Button, Toolbar } from '@material-ui/core'
+import { Button } from '@material-ui/core'
 import SaveDialog from './SaveDialog'
 import { RepoStateQueryResult } from '../types'
 
@@ -71,7 +71,6 @@ const MonacoEditor = ({ content, filename }: Props) => {
 
   return (
     <div>
-      <Toolbar />
       <h2>{filename}</h2>
       <Editor
         height="75vh"

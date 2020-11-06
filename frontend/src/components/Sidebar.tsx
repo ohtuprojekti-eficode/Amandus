@@ -9,7 +9,7 @@ interface Props {
 
 const Sidebar = ({ files }: Props) => {
   return (
-    <Drawer variant="permanent" PaperProps={{ style: { width: 400 } }}>
+    <Drawer variant="permanent" PaperProps={{ style: { width: '20%' } }}>
       <Toolbar />
       <ListView files={files} />
     </Drawer>
