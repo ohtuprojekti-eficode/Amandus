@@ -12,6 +12,7 @@ import { relative } from 'path'
 import { AppContext } from '../types/user'
 import { SaveArgs } from '../types/params'
 import { RepoState } from '../types/repoState'
+import { GitError } from 'simple-git'
 
 const typeDef = `
     type File {
@@ -80,6 +81,10 @@ const resolvers = {
       }
 
       await saveChanges(saveArgs, context.currentUser)
+      .catch((error: GitError) => {
+        console.log(error)
+        throw new Error('Merge conflict detected')
+      })
       return 'Saved'
     },
   },
