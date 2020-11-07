@@ -13,11 +13,7 @@ import {
   requestGithubUserAccount,
 } from '../services/gitHub'
 import User from '../model/user'
-<<<<<<< HEAD
 import { RegisterUserInput } from '../types/user'
-=======
-import { pool } from '../db/connect'
->>>>>>> Change sql init scripts to migrations
 
 const typeDef = `
     type User {
