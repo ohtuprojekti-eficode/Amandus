@@ -16,10 +16,18 @@ interface Getter {
   (): string
 }
 
+interface DialogError {
+  title: string
+  message: string
+}
+
 const MonacoEditor = ({ content, filename }: Props) => {
   const [dialogOpen, setDialogOpen] = useState(false)
   const branchState = useQuery<RepoStateQueryResult>(REPO_STATE)
   const currentBranch = branchState.data?.repoState.currentBranch || ''
+  const [dialogError, setDialogError] = useState<DialogError | undefined>(
+    undefined
+  )
 
   const {
     loading: userQueryLoading,
@@ -51,20 +59,26 @@ const MonacoEditor = ({ content, filename }: Props) => {
   ) => {
     if (valueGetter.current) {
       const branchName = createNewBranch ? newBranch : currentBranch
-      saveChanges({
-        variables: {
-          file: {
-            name: filename,
-            content: valueGetter.current(),
+      try {
+        saveChanges({
+          variables: {
+            file: {
+              name: filename,
+              content: valueGetter.current(),
+            },
+            branch: branchName,
+            commitMessage: commitMessage,
           },
-          branch: branchName,
-          commitMessage: commitMessage,
-        },
-      }).catch((error: Error) => {
-        console.log(error.message)
-      })
+        })
+        setDialogOpen(false)
+        setDialogError(undefined)
+      } catch (error) {
+        setDialogError({
+          title: 'Merge conflict',
+          message: 'Cannot push to selected branch. Create a new one.',
+        })
+      }
     }
-    setDialogOpen(false)
   }
 
   const handleSaveButton = () => {
@@ -85,6 +99,7 @@ const MonacoEditor = ({ content, filename }: Props) => {
           handleClose={handleDialogClose}
           handleSubmit={handleDialogSubmit}
           currentBranch={currentBranch}
+          error={dialogError}
         />
         <Button
           color="primary"
