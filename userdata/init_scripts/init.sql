@@ -3,7 +3,7 @@ CREATE TABLE USERS(
     username TEXT UNIQUE NOT NULL,
     email TEXT,
     password TEXT NOT NULL,
-    created_on TIMESTAMP NOT NULL,
+    created_on TIMESTAMP NOT NULL DEFAULT NOW(),
     last_login TIMESTAMP
 );
 

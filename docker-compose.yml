@@ -20,6 +20,8 @@ services:
       - ./backend/node_modules:/usr/src/app/node_modules
     ports:
       - '3001:3001'
+    environment:
+      - DATABASE_URL=postgres://ohtu_user:ohtupassword@userdata:5432/account_database
     depends_on:
       - userdata
 

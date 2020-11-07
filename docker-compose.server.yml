@@ -14,6 +14,7 @@ services:
       - GH_CB_URL=
       - JWT_SECRET=
       - PORT=
+      - DATABASE_URL=
 
   userdata:
     image: 'postgres'
