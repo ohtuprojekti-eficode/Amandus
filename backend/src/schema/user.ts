@@ -13,7 +13,7 @@ import {
   requestGithubUserAccount,
 } from '../services/gitHub'
 import User from '../model/user'
-import { pool } from '../db/connect'
+import { RegisterUserInput } from '../types/user'
 
 const typeDef = `
     type User {
@@ -95,23 +95,11 @@ const resolvers = {
     ): string => {
       return 'logout'
     },
-    register: async (_root: unknown, args: LocalUser): Promise<string> => {
-      const username = args.username
-      const email = args.email
-      const password = args.password
-
-      try {
-        await pool.query('BEGIN')
-        const queryText =
-          'INSERT INTO users(username, email, password) VALUES($1, $2, $3)'
-        await pool.query(queryText, [username, email, password])
-        await pool.query('COMMIT')
-        return 'Registered'
-      } catch (error) {
-        await pool.query('ROLLBACK')
-      }
-
-      return 'Register failed'
+    register: async (
+      _root: unknown,
+      args: RegisterUserInput
+    ): Promise<LocalUser> => {
+      return await User.registerUser(args)
     },
   },
 }

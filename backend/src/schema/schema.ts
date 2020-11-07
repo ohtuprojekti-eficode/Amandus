@@ -17,13 +17,18 @@ const Mutation = `
         user: User
         token: String
     }
+    type LocalUser {
+        user_id: Int
+        username: String
+        email: String
+    }
     type Mutation {
         logout: String
         register(
             username: String!
             email: String!
             password: String!
-        ): String
+        ): LocalUser
         saveChanges(
             file: FileInput! 
             branch: String!

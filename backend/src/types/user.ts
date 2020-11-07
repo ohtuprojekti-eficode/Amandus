@@ -47,7 +47,13 @@ export interface AppContext {
 }
 
 export interface LocalUser {
+  user_id: number
   username: string
-  password: string
   email: string
+}
+
+export interface RegisterUserInput {
+  username: string
+  email: string
+  password: string
 }
