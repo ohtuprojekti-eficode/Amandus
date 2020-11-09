@@ -1,6 +1,6 @@
 import React from 'react'
 import { Drawer, Toolbar } from '@material-ui/core'
-import ListView from './ListView'
+import FileTreeView from './FileTreeView'
 import { File } from '../types'
 
 interface Props {
@@ -11,7 +11,7 @@ const Sidebar = ({ files }: Props) => {
   return (
     <Drawer variant="permanent" PaperProps={{ style: { width: '20%' } }}>
       <Toolbar />
-      <ListView files={files} />
+      <FileTreeView files={files} />
     </Drawer>
   )
 }

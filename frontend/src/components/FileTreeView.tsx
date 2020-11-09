@@ -18,7 +18,7 @@ const useStyles = makeStyles({
   },
 })
 
-const ListView = ({ files }: PropsType) => {
+const FileTreeView = ({ files }: PropsType) => {
   const [fileTree, setFileTree] = useState<FileTree>()
 
   const classes = useStyles()
@@ -71,4 +71,4 @@ const ListView = ({ files }: PropsType) => {
   )
 }
 
-export default ListView
+export default FileTreeView
