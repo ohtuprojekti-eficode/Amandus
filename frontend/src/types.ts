@@ -15,6 +15,13 @@ export interface RepoStateQueryResult {
   }
 }
 
+export interface FileTree {
+  name: string
+  path: string
+  type: 'folder' | 'file' | 'root'
+  children: FileTree[]
+}
+
 export interface Error {
   message: string
 }
