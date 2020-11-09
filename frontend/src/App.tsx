@@ -1,18 +1,15 @@
 import React from 'react'
-import { Route, Link } from 'react-router-dom'
+import { Route } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
 import { ME } from './graphql/queries'
 import EditView from './components/EditView'
+import Header from './components/Header'
 import LoginForm from './components/LoginForm'
 import CallBack from './components/auth/CallBack'
-import { AppBar, Toolbar } from '@material-ui/core'
+import { Toolbar } from '@material-ui/core'
 
 const App = () => {
   const { data: user } = useQuery(ME)
-
-  const padding = {
-    paddingRight: 5,
-  }
 
   const logout = () => {
     localStorage.clear()
@@ -21,26 +18,7 @@ const App = () => {
 
   return (
     <div>
-      <AppBar position="fixed" color="default" style={{ zIndex: 1250 }}>
-        <Toolbar>
-          <Link style={padding} to="/">
-            Main menu
-          </Link>
-          <Link style={padding} to="/edit">
-            Edit view
-          </Link>
-          {(!user || !user.me) && (
-            <Link style={padding} to="/login">
-              Login
-            </Link>
-          )}
-          {user && user.me && (
-            <Link style={padding} to="/" onClick={logout}>
-              {user.me.username} - logout
-            </Link>
-          )}
-        </Toolbar>
-      </AppBar>
+      <Header user={user?.me} logout={logout} />
       <div>
         <Toolbar />
         <Route path="/auth/github/callback">
