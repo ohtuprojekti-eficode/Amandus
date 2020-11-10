@@ -133,14 +133,18 @@ const gitPush = async (
       if (error.message.includes('CONFLICT')) {
         throw new Error('Merge conflict')
       }
-      throw new Error('Unexpected error')
+      if (!error.message.includes(`merge: origin/${branchName}`)) {
+        throw new Error('Unexpected error')
+      }
     })
   } catch (e) {
     if (e.message === 'Merge conflict') {
       await git.merge(['--abort'])
       await git.reset(['--hard', 'HEAD~1'])
     }
-    throw e
+    if (!e.message.includes(`merge: origin/${branchName}`)) {
+      throw e
+    }
   }
 
   const remoteUuid = uuidv4()
