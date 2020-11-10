@@ -81,7 +81,7 @@ const resolvers = {
 
       await saveChanges(saveArgs, context.currentUser)
       .catch((error: Error) => {
-        if (error.message === 'merge conflict') {
+        if (error.message === 'Merge conflict') {
           throw new Error('Merge conflict detected')
         } else {
           console.log(error.message)
