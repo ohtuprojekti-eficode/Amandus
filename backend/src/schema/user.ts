@@ -1,19 +1,20 @@
 import { UserInputError } from 'apollo-server'
 import { sign } from 'jsonwebtoken'
+import bcrypt from 'bcryptjs'
 import config from '../utils/config'
 import {
   UserType,
   GitHubAuthCode,
   AuthResponse,
   AppContext,
-  LocalUser,
+  RegisterUserInput, 
+  LoginUserInput, 
 } from '../types/user'
 import {
   requestGithubToken,
   requestGithubUserAccount,
 } from '../services/gitHub'
 import User from '../model/user'
-import { RegisterUserInput } from '../types/user'
 
 const typeDef = `
     type User {
@@ -98,9 +99,57 @@ const resolvers = {
     register: async (
       _root: unknown,
       args: RegisterUserInput
-    ): Promise<LocalUser> => {
-      return await User.registerUser(args)
+    ): Promise<AuthResponse> => {
+
+      const user = await User.registerUser(args)
+
+      if (!user) {
+        throw new UserInputError('Could not create a user with given username and password')
+      }
+
+      const token = sign(
+        {
+          id: user.id,
+          username: user.username,
+        },
+        config.JWT_SECRET
+      )
+      
+			return {
+        user,
+        token
+      }
     },
+    login: async (
+      _root: unknown,
+      args: LoginUserInput
+    ): Promise<AuthResponse> => {
+      
+      const user = await User.findUserByUsername(args.username)
+      
+      if (!user) {
+        throw new UserInputError('Invalid username or password')
+      }
+
+      const passwordMatch = await bcrypt.compare(args.password, user.password ?? '')
+      
+      if (!passwordMatch) {
+				throw new UserInputError('Invalid username or password')
+      }
+      
+      const token = sign(
+        {
+          id: user.id,
+          username: user.username,
+        },
+        config.JWT_SECRET
+      )
+      
+			return {
+        user,
+        token
+      }
+    }
   },
 }
 

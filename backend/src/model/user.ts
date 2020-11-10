@@ -1,4 +1,9 @@
-import { UserType, GitHubUserType, LocalUser } from '../types/user'
+import { 
+  UserType, 
+  GitHubUserType, 
+  RegisterUserInput,
+  UserRecord,
+} from '../types/user'
 import { pool } from '../db/connect'
 import bcrypt from 'bcryptjs'
 
@@ -7,6 +12,7 @@ const users: UserType[] = [
   {
     id: '1',
     username: 'Maurice',
+    email: 'mau@mau.fi',
     emails: ['maurice@moss.com'],
     password: 'abcdefg',
     token: '',
@@ -15,6 +21,7 @@ const users: UserType[] = [
   {
     id: '2',
     username: 'Roy',
+    email: 'roy@roy.fi',
     emails: ['roy@trenneman.com'],
     password: 'imroy',
     token: '',
@@ -56,26 +63,61 @@ const findOrCreateUserByGitHubUser = (gitHubUser: GitHubUserType): UserType => {
   return match
 }
 
-interface RegisterProps {
-  username: string
-  email: string
-  password: string
-}
-
 const registerUser = async ({
   username,
   email,
   password,
-}: RegisterProps): Promise<LocalUser> => {
+}: RegisterUserInput): Promise<UserType|null> => {
   const queryText =
     'INSERT INTO USERS(username, email, password) VALUES($1, $2, $3) RETURNING user_id, username, email'
   const cryptedPassword = bcrypt.hashSync(password, 10)
-  const queryResult = await pool.query<LocalUser>(queryText, [
+  const queryResult = await pool.query<UserRecord>(queryText, [
     username,
     email,
     cryptedPassword,
   ])
-  return queryResult.rows[0]
+
+  if (queryResult.rows.length === 0) {
+    return null
+  }
+
+  const user = {
+    id: queryResult.rows[0].user_id,
+    username: queryResult.rows[0].username,
+    email: queryResult.rows[0].email,
+  }
+
+  return user
+}
+
+const findUserByUsername = async (username: string): Promise<UserType|null> => {
+  const queryText =
+    'SELECT * FROM USERS WHERE username = $1'
+  const queryResult = await pool.query<UserRecord>(queryText, [
+    username,
+  ])
+  
+  if (queryResult.rows.length === 0) {
+    return null
+  }
+
+  const user = {
+    id: queryResult.rows[0].user_id,
+    username: queryResult.rows[0].username,
+    email: queryResult.rows[0].email,
+    password: queryResult.rows[0].password,
+  }
+
+  return user
+}
+
+const deleteAll = async (): Promise<number> => {
+  const queryText = 'DELETE FROM USERS WHERE user_id > $1'
+  await pool.query(queryText, [
+    0,
+  ])
+  
+  return 0
 }
 
 export default {
@@ -84,4 +126,6 @@ export default {
   addUser,
   findOrCreateUserByGitHubUser,
   registerUser,
+  findUserByUsername,
+  deleteAll,
 }

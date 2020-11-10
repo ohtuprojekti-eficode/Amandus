@@ -27,7 +27,11 @@ const Mutation = `
             username: String!
             email: String!
             password: String!
-        ): LocalUser
+        ): AuthResponse
+        login(
+            username: String!
+            password: String!
+        ): AuthResponse
         saveChanges(
             file: FileInput! 
             branch: String!
