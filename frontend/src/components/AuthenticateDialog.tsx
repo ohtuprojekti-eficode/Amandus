@@ -25,10 +25,8 @@ const AuthenticateDialog = ({ open }: Props) => {
         </Grid>
       </DialogContent>
       <DialogActions>
-        <Button onClick={() => console.log('Hello Auth Modal')}>
-          <div>
-            <Link to="/login">Take me to login</Link>
-          </div>
+        <Button>
+          <Link to="/login">Take me to login</Link>
         </Button>
       </DialogActions>
     </Dialog>
