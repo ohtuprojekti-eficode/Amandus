@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
   cloneRepository,
   getCurrentBranchName,
@@ -79,7 +80,16 @@ const resolvers = {
         throw new ForbiddenError('You have to login')
       }
 
-      await saveChanges(saveArgs, context.currentUser)
+      try {
+        await saveChanges(saveArgs, context.currentUser)
+      } catch (error) {
+        if (error.message === 'Merge conflict') {
+          throw new Error('Merge conflict detected')
+        } else {
+          console.log(error.message)
+        }
+      }
+
       return 'Saved'
     },
   },

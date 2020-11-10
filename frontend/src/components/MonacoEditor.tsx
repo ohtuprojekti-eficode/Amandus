@@ -60,6 +60,8 @@ const MonacoEditor = ({ content, filename }: Props) => {
           branch: branchName,
           commitMessage: commitMessage,
         },
+      }).catch((error: Error) => {
+        console.log(error.message)
       })
     }
     setDialogOpen(false)
