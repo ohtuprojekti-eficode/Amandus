@@ -41,7 +41,7 @@ jobs:
           cd frontend
           yarn
           yarn build
-          yarn test --watchAll=false --passWithNoTests
+          yarn test --watchAll=false
 
       - name: Install, build and test backend
         run: |
