@@ -98,6 +98,14 @@ const branchExists = async (
   return branches.all.some((branch) => branch === branchName)
 }
 
+const remoteBranchExists = async (
+  git: SimpleGit,
+  branchName: string
+): Promise<boolean> => {
+  const branches = await git.branch()
+  return branches.all.some((branch) => branch === branchName)
+}
+
 const writeToFile = (file: File) => {
   writeFileSync(`./repositories/${file.name}`, file.content)
 }
@@ -128,21 +136,22 @@ const gitPush = async (
 ) => {
   await git.fetch()
 
-  try {
-    await git.merge([`origin/${branchName}`]).catch((error: GitError) => {
-      if (error.message.includes('CONFLICT')) {
-        throw new Error('Merge conflict')
-      }
-      if (!error.message.includes(`merge: origin/${branchName}`)) {
+  const remoteExists = await remoteBranchExists(
+    git,
+    `remotes/origin/${branchName}`
+  )
+
+  if (remoteExists) {
+    try {
+      await git.merge([`origin/${branchName}`]).catch((error: GitError) => {
+        if (error.message.includes('CONFLICT')) {
+          throw new Error('Merge conflict')
+        }
         throw new Error('Unexpected error')
-      }
-    })
-  } catch (e) {
-    if (e.message === 'Merge conflict') {
+      })
+    } catch (e) {
       await git.merge(['--abort'])
       await git.reset(['--hard', 'HEAD~1'])
-    }
-    if (!e.message.includes(`merge: origin/${branchName}`)) {
       throw e
     }
   }
