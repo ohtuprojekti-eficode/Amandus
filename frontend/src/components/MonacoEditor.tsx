@@ -52,7 +52,7 @@ const MonacoEditor = ({ content, filename }: Props) => {
     setDialogOpen(false)
   }
 
-  const handleDialogSubmit = (
+  const handleDialogSubmit = async (
     createNewBranch: boolean,
     newBranch: string,
     commitMessage: string
@@ -60,7 +60,7 @@ const MonacoEditor = ({ content, filename }: Props) => {
     if (valueGetter.current) {
       const branchName = createNewBranch ? newBranch : currentBranch
       try {
-        saveChanges({
+        await saveChanges({
           variables: {
             file: {
               name: filename,
@@ -73,10 +73,12 @@ const MonacoEditor = ({ content, filename }: Props) => {
         setDialogOpen(false)
         setDialogError(undefined)
       } catch (error) {
-        setDialogError({
-          title: 'Merge conflict',
-          message: 'Cannot push to selected branch. Create a new one.',
-        })
+        if (error.message === 'Merge conflict detected') {
+          setDialogError({
+            title: 'Merge conflict',
+            message: 'Cannot push to selected branch. Create a new one.',
+          })
+        }
       }
     }
   }
