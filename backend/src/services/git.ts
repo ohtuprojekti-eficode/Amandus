@@ -1,4 +1,4 @@
-import simpleGit, { SimpleGit } from 'simple-git'
+import simpleGit, { GitError, SimpleGit } from 'simple-git'
 import { writeFileSync } from 'fs'
 import { v4 as uuidv4 } from 'uuid'
 import { File } from '../types/file'
@@ -98,6 +98,14 @@ const branchExists = async (
   return branches.all.some((branch) => branch === branchName)
 }
 
+const remoteBranchExists = async (
+  git: SimpleGit,
+  branchName: string
+): Promise<boolean> => {
+  const branches = await git.branch()
+  return branches.all.some((branch) => branch === branchName)
+}
+
 const writeToFile = (file: File) => {
   writeFileSync(`./repositories/${file.name}`, file.content)
 }
@@ -126,6 +134,28 @@ const gitPush = async (
   token: string,
   branchName: string
 ) => {
+  await git.fetch()
+
+  const remoteExists = await remoteBranchExists(
+    git,
+    `remotes/origin/${branchName}`
+  )
+
+  if (remoteExists) {
+    try {
+      await git.merge([`origin/${branchName}`]).catch((error: GitError) => {
+        if (error.message.includes('CONFLICT')) {
+          throw new Error('Merge conflict')
+        }
+        throw new Error('Unexpected error')
+      })
+    } catch (e) {
+      await git.merge(['--abort'])
+      await git.reset(['--hard', 'HEAD~1'])
+      throw e
+    }
+  }
+
   const remoteUuid = uuidv4()
   await gitAddRemote(git, remoteUuid, username, token)
   await git.push(remoteUuid, branchName)
@@ -146,4 +176,10 @@ const gitAddRemote = async (
 
 const gitRemoveRemote = async (git: SimpleGit, remoteId: string) => {
   await git.removeRemote(remoteId)
+}
+
+export const getBranches = async (repoLocation: string): Promise<string[]> => {
+  const git = simpleGit(repoLocation)
+  const branches = await git.branch()
+  return branches.all
 }

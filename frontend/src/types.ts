@@ -9,8 +9,17 @@ export interface FileListQueryResult {
 
 export interface RepoStateQueryResult {
   repoState: {
-    branchName: string
+    currentBranch: string
+    files: File[]
+    branches: string[]
   }
+}
+
+export interface FileTree {
+  name: string
+  path: string
+  type: 'folder' | 'file' | 'root'
+  children: FileTree[]
 }
 
 export interface Error {

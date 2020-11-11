@@ -8,10 +8,8 @@ RUN apk add git
 
 USER node
 
-
 COPY --chown=node:node . .
-RUN yarn && yarn build
 
 EXPOSE 3001
 
-CMD ["yarn","start"]
+CMD ["yarn","dev"]

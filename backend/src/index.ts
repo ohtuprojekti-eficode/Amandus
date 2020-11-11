@@ -20,11 +20,10 @@ const corsOptions = {
 interface TokenType {
   gitHubId: string
 }
-
 const server = new ApolloServer({
-  schema: schema,
+  schema,
   context: ({ req }: Req) => {
-    const auth = req.headers.authorization
+    const auth = req && req.headers.authorization
     if (auth && auth.toLowerCase().startsWith('bearer')) {
       const decodedToken = verify(auth.substring(7), config.JWT_SECRET)
       const currentUser = User.getUserByGithubId(
@@ -32,7 +31,7 @@ const server = new ApolloServer({
       )
       return { currentUser }
     }
-    return null
+    return
   },
 })
 
@@ -46,10 +45,17 @@ if (process.env.NODE_ENV === 'production') {
   })
 }
 
-const httpServer = createServer(app)
+if (process.env.NODE_ENV !== 'test') {
+  const httpServer = createServer(app)
 
-httpServer.listen({ port: config.PORT }, (): void =>
-  console.log(
-    `GraphQL is now running on http://localhost:${config.PORT}/graphql`
+  httpServer.listen({ port: config.PORT }, (): void =>
+    console.log(
+      `GraphQL is now running on http://localhost:${config.PORT}/graphql`
+    )
   )
-)
+}
+
+
+export {
+  server
+}

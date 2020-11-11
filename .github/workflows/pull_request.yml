@@ -7,9 +7,23 @@ on:
       - 'documentation/**'
       - 'README.md'
       - LICENSE
+
 jobs:
   TEST:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
+        ports:
+          - 5432/tcp
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
     strategy:
       matrix:
         node-version: [14.x]
@@ -27,21 +41,26 @@ jobs:
           cd frontend
           yarn
           yarn build
-          yarn test --watchAll=false --passWithNoTests
+          yarn test --watchAll=false
 
       - name: Install, build and test backend
         run: |
           cd backend
           yarn
-          yarn build 
+          yarn build
+          yarn migrate-up-prod
           yarn test
+        env:
+          DATABASE_URL: postgres://test:test@localhost:${{ job.services.postgres.ports[5432] }}/test
 
       - name: Start server for E2E tests
         run: |
           cp -r frontend/build backend/build/frontBuild
-          cd backend 
+          cd backend
+          yarn migrate-up-prod 
           yarn run start &
         env:
+          DATABASE_URL: postgres://test:test@localhost:${{ job.services.postgres.ports[5432] }}/test
           GH_CLIENT_ID: ${{ secrets.GH_CLIENT_ID }}
           GH_CLIENT_SECRET: ${{ secrets.GH_CLIENT_SECRET }}
 

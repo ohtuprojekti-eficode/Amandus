@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react'
 import Editor from '@monaco-editor/react'
 import { useMutation, useQuery } from '@apollo/client'
-import { BRANCH_STATE, ME } from '../graphql/queries'
+import { ME, REPO_STATE } from '../graphql/queries'
 import { SAVE_CHANGES } from '../graphql/mutations'
 import { Button } from '@material-ui/core'
 import SaveDialog from './SaveDialog'
@@ -16,11 +16,18 @@ interface Getter {
   (): string
 }
 
+interface DialogError {
+  title: string
+  message: string
+}
+
 const MonacoEditor = ({ content, filename }: Props) => {
   const [dialogOpen, setDialogOpen] = useState(false)
-
-  const branchState = useQuery<RepoStateQueryResult>(BRANCH_STATE)
-  const currentBranch = branchState.data?.repoState.branchName || ''
+  const branchState = useQuery<RepoStateQueryResult>(REPO_STATE)
+  const currentBranch = branchState.data?.repoState.currentBranch || ''
+  const [dialogError, setDialogError] = useState<DialogError | undefined>(
+    undefined
+  )
 
   const {
     loading: userQueryLoading,
@@ -29,7 +36,10 @@ const MonacoEditor = ({ content, filename }: Props) => {
   } = useQuery(ME)
 
   const [saveChanges, { loading: mutationSaveLoading }] = useMutation(
-    SAVE_CHANGES
+    SAVE_CHANGES,
+    {
+      refetchQueries: [{ query: REPO_STATE }],
+    }
   )
 
   const valueGetter = useRef<Getter | null>(null)
@@ -42,25 +52,35 @@ const MonacoEditor = ({ content, filename }: Props) => {
     setDialogOpen(false)
   }
 
-  const handleDialogSubmit = (
+  const handleDialogSubmit = async (
     createNewBranch: boolean,
     newBranch: string,
     commitMessage: string
   ) => {
     if (valueGetter.current) {
       const branchName = createNewBranch ? newBranch : currentBranch
-      saveChanges({
-        variables: {
-          file: {
-            name: filename,
-            content: valueGetter.current(),
+      try {
+        await saveChanges({
+          variables: {
+            file: {
+              name: filename,
+              content: valueGetter.current(),
+            },
+            branch: branchName,
+            commitMessage: commitMessage,
           },
-          branch: branchName,
-          commitMessage: commitMessage,
-        },
-      })
+        })
+        setDialogOpen(false)
+        setDialogError(undefined)
+      } catch (error) {
+        if (error.message === 'Merge conflict detected') {
+          setDialogError({
+            title: 'Merge conflict',
+            message: 'Cannot push to selected branch. Create a new one.',
+          })
+        }
+      }
     }
-    setDialogOpen(false)
   }
 
   const handleSaveButton = () => {
@@ -68,9 +88,10 @@ const MonacoEditor = ({ content, filename }: Props) => {
   }
 
   return (
-    <div style={{ border: '2px solid black', padding: '5px' }}>
+    <div>
+      <h2>{filename?.substring(filename.lastIndexOf('/') + 1)}</h2>
       <Editor
-        height="50vh"
+        height="75vh"
         language="javascript"
         value={content}
         editorDidMount={handleEditorDidMount}
@@ -81,6 +102,7 @@ const MonacoEditor = ({ content, filename }: Props) => {
           handleClose={handleDialogClose}
           handleSubmit={handleDialogSubmit}
           currentBranch={currentBranch}
+          error={dialogError}
         />
         <Button
           color="primary"
@@ -99,6 +121,7 @@ const MonacoEditor = ({ content, filename }: Props) => {
       </div>
       <div style={{ fontSize: 14, marginTop: 5, marginBottom: 5 }}>
         {(!user || !user.me) && 'Please login to enable saving'}
+        {user?.me && currentBranch && `On branch ${currentBranch}`}
       </div>
     </div>
   )
