@@ -33,9 +33,24 @@
 
 ### Testing 
 
-Run:
-1. `sudo docker-compose -f docker-compose.test.yml build`
-2. `sudo docker-compose -f docker-compose.test.yml up`
+Using configured setup:
+1. Start database in the background with:
+    1. `sudo docker-compose -f docker-compose.test.yml build`
+    2. `sudo docker-compose -f docker-compose.test.yml up`
+2. Go to `backend/` folder
+3. Run `yarn test:setup` to run migrations to test database
+4. Run `yarn test` to run tests
+     1. This can be repeated as many times you wish
+    
 
+Using own database
+1. configure your own postgresql database to run in localhost with the following connection URL = `'postgres://test:test@localhost:5432/test'`
+2. Go to `backend/` folder
+3. Run `yarn test:setup` to run migrations to test database
+4. Run `yarn test` to run tests
+     1. This can be repeated as many times you wish
+
+Common errors:
 Delete test postgres volumes if something doesn't seem to work:
 1. `sudo docker-compose -f docker-compose.test.yml down --volumes`
+
