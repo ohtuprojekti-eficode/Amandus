@@ -45,7 +45,7 @@
     "start": "NODE_ENV=production node ./build/index.js",
     "test": "cross-env NODE_ENV=test jest --verbose --runInBand",
     "test:watch": "jest --watchAll",
-    "test:setup":"DATABASE_URL=postgres://test:test@localhost:5432/test node-pg-migrate -m ./src/db/migrations up",
+    "pretest":"DATABASE_URL=postgres://test:test@localhost:5432/test node-pg-migrate -m ./src/db/migrations up",
     "migrate": "node-pg-migrate",
     "migrate-up-dev": "DATABASE_URL=postgres://ohtu_user:ohtupassword@localhost:5432/account_database node-pg-migrate -m ./src/db/migrations up",
     "migrate-down-dev": "DATABASE_URL=postgres://ohtu_user:ohtupassword@localhost:5432/account_database node-pg-migrate -m ./src/db/migrations down",

@@ -101,6 +101,14 @@ const resolvers = {
       args: RegisterUserInput
     ): Promise<AuthResponse> => {
 
+      if (
+        args.username.length === 0 || 
+        args.email.length === 0 || 
+        args.password.length === 0
+      ) {
+        throw new UserInputError('Username, email or password can not be empty')
+      }
+
       const user = await User.registerUser(args)
 
       if (!user) {
@@ -124,7 +132,7 @@ const resolvers = {
       _root: unknown,
       args: LoginUserInput
     ): Promise<AuthResponse> => {
-      
+
       const user = await User.findUserByUsername(args.username)
       
       if (!user) {
