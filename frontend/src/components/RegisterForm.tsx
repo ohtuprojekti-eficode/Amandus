@@ -23,7 +23,7 @@ const stylesInUse = makeStyles((theme: Theme) =>
                 width: '100%',
             },
         },
-        submitButton: {
+        registerButton: {
             marginTop: '30px',
         },
         title: { textAlign: 'left' },
@@ -155,7 +155,7 @@ const RegisterForm = () =>  {
 
                     return (
                       <Form>
-                          <h1>Register here</h1>
+                          <h1 className={classes.title}>Registeration</h1>
                           <Grid container direction="row">
                             <Grid item className={classes.textField} xs={8}>
                                 <TextField id="username" name="username" type="text" label="Username" value={values.username} 
@@ -218,12 +218,12 @@ const RegisterForm = () =>  {
                                     }
                                             />
                                 </Grid>
+                                <Grid item  className = {classes.registerButton} xs={6}>                         
+                                     <Button color="primary" type = "submit" variant = "contained" disabled = {isSubmitting} > Register</Button> 
+                                     
+                                     </Grid>
                           </Grid>
-                          <Button color="primary" type = "submit" variant = "contained" disabled = {isSubmitting} > Register</Button> 
-
-
-
-
+                          
                       </Form>
                     )
 
@@ -234,7 +234,7 @@ const RegisterForm = () =>  {
 
 
         </div>
-    //Formikin yläpuolelle sitten itse lomake muotoiluineen.
+    
      )
 
 
