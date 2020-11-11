@@ -1,13 +1,16 @@
 import React from 'react'
 import MonacoEditor from './MonacoEditor'
-import ListView from './ListView'
+import Sidebar from './Sidebar'
 import { useLocation } from 'react-router-dom'
 import { useLazyQuery, useQuery } from '@apollo/client'
 import { RepoStateQueryResult } from '../types'
 import { REPO_STATE, CLONE_REPO } from '../graphql/queries'
+import { createStyles, makeStyles } from '@material-ui/core/styles'
 
 const EditView = () => {
   const location = useLocation()
+  const classes = useStyles()
+
   const [repoStateQuery, { data: repoStateData }] = useLazyQuery<
     RepoStateQueryResult
   >(REPO_STATE)
@@ -27,29 +30,30 @@ const EditView = () => {
   const content = files.find((e) => e.name === filename)?.content
 
   return (
-    <div style={gridContainerStyle}>
-      <div style={asideContainerStyle}>
-        <ListView files={files} />
+    <div className={classes.root}>
+      <div className={classes.sidebar}>
+        <Sidebar files={files} />
       </div>
-      <div style={mainContainerStyle}>
-        <h2>{filename}</h2>
+      <div className={classes.editor}>
         <MonacoEditor content={content} filename={filename} />
       </div>
     </div>
   )
 }
 
-const gridContainerStyle = {
-  display: 'flex',
-  justifyContent: 'space-between',
-}
-
-const asideContainerStyle = {
-  width: '20%',
-}
-
-const mainContainerStyle = {
-  width: '80%',
-}
+const useStyles = makeStyles(() =>
+  createStyles({
+    root: {
+      display: 'flex',
+    },
+    sidebar: {
+      flexShrink: 0,
+      width: '20%',
+    },
+    editor: {
+      flexGrow: 1,
+    },
+  })
+)
 
 export default EditView

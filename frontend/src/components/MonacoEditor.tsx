@@ -88,9 +88,10 @@ const MonacoEditor = ({ content, filename }: Props) => {
   }
 
   return (
-    <div style={{ border: '2px solid black', padding: '5px' }}>
+    <div>
+      <h2>{filename?.substring(filename.lastIndexOf('/') + 1)}</h2>
       <Editor
-        height="50vh"
+        height="75vh"
         language="javascript"
         value={content}
         editorDidMount={handleEditorDidMount}
