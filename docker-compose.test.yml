@@ -23,8 +23,6 @@ services:
       - POSTGRES_USER=test
       - POSTGRES_DB=test
       - POSTGRES_PASSWORD=test
-    volumes:
-      - testdata-data:/var/lib/postgresql/data/
     ports:
       - '5431:5431'
     healthcheck:
@@ -32,6 +30,3 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-
-volumes:
-  testdata-data:
