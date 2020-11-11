@@ -15,11 +15,18 @@ import {
   RadioGroup,
   TextField,
 } from '@material-ui/core'
+import { Alert, AlertTitle } from '@material-ui/lab'
+
+interface Error {
+  title: string
+  message: string
+}
 
 interface Props {
   open: boolean
   handleClose: () => void
   handleSubmit: (newBranch: boolean, name: string, message: string) => void
+  error: Error | undefined
   currentBranch: string
 }
 
@@ -28,6 +35,7 @@ const SaveDialog = ({
   handleClose,
   handleSubmit,
   currentBranch,
+  error,
 }: Props) => {
   const [createNewBranch, setCreateNewBranch] = useState(false)
   const [branchName, setBranchName] = useState('')
@@ -47,6 +55,13 @@ const SaveDialog = ({
       aria-labelledby="form-dialog-title"
     >
       <DialogTitle id="form-dialog-title">Save changes</DialogTitle>
+      {error && (
+        <Alert severity="error">
+          <AlertTitle>{error.title}</AlertTitle>
+          {error.message}
+        </Alert>
+      )}
+
       <DialogContent>
         <Grid container direction="column">
           <Grid item>
@@ -59,11 +74,17 @@ const SaveDialog = ({
                   setCreateNewBranch(event.target.value === 'true')
                 }
               >
-                <FormControlLabel
-                  value={false}
-                  control={<Radio color="primary" />}
-                  label={`Current: ${currentBranch}`}
-                />
+                {
+                  <FormControlLabel
+                    style={{
+                      display:
+                        error?.title === 'Merge conflict' ? 'none' : 'visible',
+                    }}
+                    value={false}
+                    control={<Radio color="primary" />}
+                    label={`Current: ${currentBranch}`}
+                  />
+                }
                 <FormControlLabel
                   value={true}
                   control={<Radio color="primary" />}
