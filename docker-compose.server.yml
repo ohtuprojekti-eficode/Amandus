@@ -3,6 +3,7 @@ version: '3'
 services:
   application:
     image: ''
+    restart: always
     command: sh -c "yarn run migrate-up-prod && yarn start"
     stdin_open: true
     ports:
