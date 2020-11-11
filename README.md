@@ -15,6 +15,7 @@ Web application to edit Robot Framework files remotely
     2. `cd frontend/ && yarn`
 3. Run `sudo docker-compose build`
 4. Run `sudo docker-compose up`
+     1. If database migrations seem to fail at start, run `sudo docker-compose up` again or `sudo docker-compose down --volumes` & `sudo docker-compose up`
 5. The application should be viewable in `localhost:3000`
 
 

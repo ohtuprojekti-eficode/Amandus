@@ -30,3 +30,12 @@
 ### GraphQL queries and mutations
 
 - Start the development version locally and open GraphQL docs in `localhost:PORT/graphql`
+
+### Testing 
+
+Run:
+1. `sudo docker-compose -f docker-compose.test.yml build`
+2. `sudo docker-compose -f docker-compose.test.yml up`
+
+Delete test postgres volumes if something doesn't seem to work:
+1. `sudo docker-compose -f docker-compose.test.yml down --volumes`
