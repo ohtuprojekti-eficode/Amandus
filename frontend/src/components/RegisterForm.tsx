@@ -204,19 +204,19 @@ const RegisterForm = () => {
 
                 <Grid item className={classes.textField} xs={8}>
                   <TextField
-                    id="confirm"
-                    name="confirm"
+                    id="confirmPassword"
+                    name="confirmPassword"
                     type="password"
-                    label="confirm"
+                    label="Confirm"
                     value={values.confirmPassword}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     helperText={
-                      touched.password && errors.password
+                      touched.confirmPassword && errors.confirmPassword
                         ? 'Valid password is atleast 6 characters long and consists 1 uppercase, 1 lowercase and 1 number.'
                         : 'No spaces, at least 6 characters, 1 uppercase, 1 lowercase and 1 number.'
                     }
-                    error={touched.password && errors.password ? true : false}
+                    error={touched.confirmPassword && errors.confirmPassword ? true : false}
                   />
                 </Grid>
 
