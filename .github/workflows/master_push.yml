@@ -48,6 +48,7 @@ jobs:
           cd backend
           yarn
           yarn build
+          yarn migrate-up-prod
           yarn test
         env:
           DATABASE_URL: postgres://test:test@localhost:${{ job.services.postgres.ports[5432] }}/test
