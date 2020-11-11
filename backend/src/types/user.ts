@@ -24,8 +24,8 @@ export interface GitHubUserType {
 }
 
 export interface UserType {
-  id: string
-  email: string,
+  id?: string
+  email?: string,
   password?: string
   emails?: string[]
   username: string
