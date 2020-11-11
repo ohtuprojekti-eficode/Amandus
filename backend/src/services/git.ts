@@ -15,6 +15,14 @@ export const getCurrentBranchName = async (
   return branches.current
 }
 
+export const switchCurrentBranch = async (
+  repoLocation: string,
+  branchName: string
+): Promise<string> => {
+  const git = simpleGit(repoLocation)
+  return await gitCheckout(git, branchName)
+}
+
 export const pullMasterChanges = async (httpsURL: string): Promise<void> => {
   const url = new URL(httpsURL)
   const repositoryName = url.pathname
@@ -84,10 +92,10 @@ const gitCheckout = async (git: SimpleGit, branchName: string) => {
 
   if (await branchExists(git, sanitizedBranchName)) {
     await git.checkout([sanitizedBranchName])
-    return
+  } else {
+    await git.checkout(['-b', sanitizedBranchName])
   }
-
-  await git.checkout(['-b', sanitizedBranchName])
+  return sanitizedBranchName
 }
 
 const branchExists = async (

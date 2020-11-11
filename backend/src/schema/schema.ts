@@ -36,6 +36,10 @@ const Mutation = `
         authorizeWithGithub(
             code: String!
         ): AuthResponse
+        switchBranch(
+            url: String!
+            branch: String!
+        ): String
     }
 `
 
