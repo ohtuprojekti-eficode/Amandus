@@ -220,7 +220,16 @@ const RegisterForm = () =>  {
                                 </Grid>
                                 <Grid item  className = {classes.registerButton} xs={6}>                         
                                      <Button color="primary" type = "submit" variant = "contained" disabled = {isSubmitting} > Register</Button> 
-                                     
+                                     {showFormStatus && (
+                                     <div className='formStatus'>
+                                         {formStatus.type === 'successfull' ?(
+                                            <p className= {classes.successMessage}>{formStatus.message}</p>
+                                         ) : formStatus.type === 'error' ? (
+                                            <p className= {classes.errorMessage}>{formStatus.message}</p>
+                                         )
+                                        :null}
+                                     </div>
+                                            )}
                                      </Grid>
                           </Grid>
                           
