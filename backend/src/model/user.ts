@@ -111,13 +111,9 @@ const findUserByUsername = async (username: string): Promise<UserType|null> => {
   return user
 }
 
-const deleteAll = async (): Promise<number> => {
-  const queryText = 'DELETE FROM USERS WHERE user_id > $1'
-  await pool.query(queryText, [
-    0,
-  ])
-  
-  return 0
+const deleteAll = async (): Promise<void> => {
+  const queryText = 'DELETE FROM USERS'
+  await pool.query(queryText)
 }
 
 export default {
