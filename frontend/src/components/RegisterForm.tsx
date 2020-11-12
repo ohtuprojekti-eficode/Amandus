@@ -27,7 +27,7 @@ const stylesInUse = makeStyles(() =>
     registerButton: {
       marginTop: '30px',
     },
-    title: { textAlign: 'left' },
+    title: { textAlign: 'center' },
     successMessage: { color: 'green' },
     errorMessage: { color: 'red' },
   })
@@ -57,10 +57,6 @@ const formStatusProps: MyFormStatusProps = {
   success: {
     message: 'Registered successfully.',
     type: 'success',
-  },
-  already_used: {
-    message: 'Email already in use. Please use different email.',
-    type: 'error',
   },
 }
 
@@ -100,7 +96,7 @@ const RegisterForm = () => {
   }
 
   const UserSchema = Yup.object().shape({
-    email: Yup.string().email().required('Enter unique email'),
+    email: Yup.string().email().required('Enter your email'),
     username: Yup.string()
       .required('Please choose your username')
       .min(3, 'username must be at least 3 characters long')
@@ -119,6 +115,7 @@ const RegisterForm = () => {
 
   return (
     <div className={classes.root}>
+
       <Formik
         initialValues={{
           username: '',
@@ -148,6 +145,7 @@ const RegisterForm = () => {
             <Form>
               <h1 className={classes.title}>Registeration</h1>
               <Grid container direction="row">
+
                 <Grid item className={classes.textField} xs={8}>
                   <TextField
                     id="username"
@@ -195,8 +193,8 @@ const RegisterForm = () => {
                     onBlur={handleBlur}
                     helperText={
                       touched.password && errors.password
-                        ? 'Valid password is atleast 6 characters long and consists 1 uppercase, 1 lowercase and 1 number.'
-                        : 'No spaces, at least 6 characters, 1 uppercase, 1 lowercase and 1 number.'
+                        ? 'Valid password is atleast 6 characters long and consists atleast 1 uppercase,lowercase,number and special character.'
+                        : 'Make sure your password includes no spaces, is minimum 6 characters long and consists at least 1 uppercase,lowercase,number and special character.'
                     }
                     error={touched.password && errors.password ? true : false}
                   />
@@ -213,8 +211,8 @@ const RegisterForm = () => {
                     onBlur={handleBlur}
                     helperText={
                       touched.confirmPassword && errors.confirmPassword
-                        ? 'Valid password is atleast 6 characters long and consists 1 uppercase, 1 lowercase and 1 number.'
-                        : 'No spaces, at least 6 characters, 1 uppercase, 1 lowercase and 1 number.'
+                        ? 'Valid password is atleast 6 characters long and consists atleast 1 uppercase,lowercase,number and special character.'
+                        : 'Make sure your password includes no spaces, is minimum 6 characters long and consists at least 1 uppercase,lowercase,number and special character.'
                     }
                     error={touched.confirmPassword && errors.confirmPassword ? true : false}
                   />
