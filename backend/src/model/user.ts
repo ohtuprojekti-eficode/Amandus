@@ -8,26 +8,7 @@ import { pool } from '../db/connect'
 import bcrypt from 'bcryptjs'
 
 // temp user data
-const users: UserType[] = [
-  {
-    id: '1',
-    username: 'Maurice',
-    email: 'mau@mau.fi',
-    emails: ['maurice@moss.com'],
-    password: 'abcdefg',
-    token: '',
-    gitHubId: '123124124',
-  },
-  {
-    id: '2',
-    username: 'Roy',
-    email: 'roy@roy.fi',
-    emails: ['roy@trenneman.com'],
-    password: 'imroy',
-    token: '',
-    gitHubId: '124214124',
-  },
-]
+const users: UserType[] = []
 
 const addUser = (user: UserType): UserType => {
   users.push(user)
