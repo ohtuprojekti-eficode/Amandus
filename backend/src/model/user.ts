@@ -1,6 +1,6 @@
-import { 
-  UserType, 
-  GitHubUserType, 
+import {
+  UserType,
+  GitHubUserType,
   RegisterUserInput,
   UserRecord,
 } from '../types/user'
@@ -48,9 +48,9 @@ const registerUser = async ({
   username,
   email,
   password,
-}: RegisterUserInput): Promise<UserType|null> => {
+}: RegisterUserInput): Promise<UserType | null> => {
   const queryText =
-    'INSERT INTO USERS(username, email, password) VALUES($1, $2, $3) RETURNING user_id, username, email'
+    'INSERT INTO USERS(username, email, password) VALUES($1, $2, $3) RETURNING id, username, email'
   const cryptedPassword = bcrypt.hashSync(password, 10)
   const queryResult = await pool.query<UserRecord>(queryText, [
     username,
@@ -62,34 +62,20 @@ const registerUser = async ({
     return null
   }
 
-  const user = {
-    id: queryResult.rows[0].user_id,
-    username: queryResult.rows[0].username,
-    email: queryResult.rows[0].email,
-  }
-
-  return user
+  return queryResult.rows[0]
 }
 
-const findUserByUsername = async (username: string): Promise<UserType|null> => {
-  const queryText =
-    'SELECT * FROM USERS WHERE username = $1'
-  const queryResult = await pool.query<UserRecord>(queryText, [
-    username,
-  ])
-  
+const findUserByUsername = async (
+  username: string
+): Promise<UserType | null> => {
+  const queryText = 'SELECT * FROM USERS WHERE username = $1'
+  const queryResult = await pool.query<UserRecord>(queryText, [username])
+
   if (queryResult.rows.length === 0) {
     return null
   }
 
-  const user = {
-    id: queryResult.rows[0].user_id,
-    username: queryResult.rows[0].username,
-    email: queryResult.rows[0].email,
-    password: queryResult.rows[0].password,
-  }
-
-  return user
+  return queryResult.rows[0]
 }
 
 const deleteAll = async (): Promise<void> => {
