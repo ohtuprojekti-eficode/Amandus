@@ -1,26 +1,14 @@
-import { UserType, GitHubUserType, LocalUser } from '../types/user'
+import {
+  UserType,
+  GitHubUserType,
+  RegisterUserInput,
+  UserRecord,
+} from '../types/user'
 import { pool } from '../db/connect'
 import bcrypt from 'bcryptjs'
 
 // temp user data
-const users: UserType[] = [
-  {
-    id: '1',
-    username: 'Maurice',
-    emails: ['maurice@moss.com'],
-    password: 'abcdefg',
-    token: '',
-    gitHubId: '123124124',
-  },
-  {
-    id: '2',
-    username: 'Roy',
-    emails: ['roy@trenneman.com'],
-    password: 'imroy',
-    token: '',
-    gitHubId: '124214124',
-  },
-]
+const users: UserType[] = []
 
 const addUser = (user: UserType): UserType => {
   users.push(user)
@@ -56,26 +44,43 @@ const findOrCreateUserByGitHubUser = (gitHubUser: GitHubUserType): UserType => {
   return match
 }
 
-interface RegisterProps {
-  username: string
-  email: string
-  password: string
-}
-
 const registerUser = async ({
   username,
   email,
   password,
-}: RegisterProps): Promise<LocalUser> => {
+}: RegisterUserInput): Promise<UserType | null> => {
   const queryText =
-    'INSERT INTO USERS(username, email, password) VALUES($1, $2, $3) RETURNING user_id, username, email'
+    'INSERT INTO USERS(username, email, password) VALUES($1, $2, $3) RETURNING id, username, email'
   const cryptedPassword = bcrypt.hashSync(password, 10)
-  const queryResult = await pool.query<LocalUser>(queryText, [
+  const queryResult = await pool.query<UserRecord>(queryText, [
     username,
     email,
     cryptedPassword,
   ])
+
+  if (queryResult.rows.length === 0) {
+    return null
+  }
+
   return queryResult.rows[0]
+}
+
+const findUserByUsername = async (
+  username: string
+): Promise<UserType | null> => {
+  const queryText = 'SELECT * FROM USERS WHERE username = $1'
+  const queryResult = await pool.query<UserRecord>(queryText, [username])
+
+  if (queryResult.rows.length === 0) {
+    return null
+  }
+
+  return queryResult.rows[0]
+}
+
+const deleteAll = async (): Promise<void> => {
+  const queryText = 'DELETE FROM USERS'
+  await pool.query(queryText)
 }
 
 export default {
@@ -84,4 +89,6 @@ export default {
   addUser,
   findOrCreateUserByGitHubUser,
   registerUser,
+  findUserByUsername,
+  deleteAll,
 }

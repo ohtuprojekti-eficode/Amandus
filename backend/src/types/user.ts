@@ -25,9 +25,10 @@ export interface GitHubUserType {
 
 export interface UserType {
   id?: string
-  emails: string[]
-  username: string
+  email?: string,
   password?: string
+  emails?: string[]
+  username: string
   token?: string
   gitHubId?: string
   gitHubLogin?: string
@@ -56,4 +57,18 @@ export interface RegisterUserInput {
   username: string
   email: string
   password: string
+}
+
+export interface LoginUserInput {
+  username: string
+  password: string
+}
+
+export interface UserRecord {
+  user_id: string,
+  username: string,
+  email: string,
+  password: string,
+  created_on: string,
+  last_login: string
 }

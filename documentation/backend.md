@@ -19,6 +19,7 @@
 - `GH_CLIENT_SECRET` = Client secret of GitHub App, **required**
 - `GH_CB_URL` = GitHub App login callback url, defaults to `http://localhost:3000/auth/github/callback`, **not required for local dev**
 - `DATABASE_URL` = Postgresql connection URL, **not required for local dev with docker**
+- `DATABASE_URL_TEST` = Postgresql connection URL when `NODE_ENV=test`, **required for tests**
 
 ### Starting backend without frontend
 

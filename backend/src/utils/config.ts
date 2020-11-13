@@ -13,7 +13,7 @@ const GITHUB_CB_URL =
 
 const DATABASE_URL =
   process.env.NODE_ENV == 'test'
-    ? 'postgres://test:test@localhost:5432/test'
+    ? process.env.DATABASE_URL_TEST
     : process.env.DATABASE_URL
 
 export default {
