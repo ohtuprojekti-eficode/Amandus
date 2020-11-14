@@ -9,6 +9,7 @@ import schema from './schema/schema'
 import { Req } from './types/request'
 import User from './model/user'
 import path from 'path'
+import { UserJWT } from './types/user'
 
 const app = express()
 
@@ -17,18 +18,13 @@ const corsOptions = {
   credentials: true,
 }
 
-interface TokenType {
-  gitHubId: string
-}
 const server = new ApolloServer({
   schema,
   context: ({ req }: Req) => {
     const auth = req && req.headers.authorization
     if (auth && auth.toLowerCase().startsWith('bearer')) {
-      const decodedToken = verify(auth.substring(7), config.JWT_SECRET)
-      const currentUser = User.getUserByGithubId(
-        (<TokenType>decodedToken).gitHubId
-      )
+      const decodedToken = <UserJWT>verify(auth.substring(7), config.JWT_SECRET)
+      const currentUser = User.getUserById(decodedToken.id)
       return { currentUser }
     }
     return
@@ -55,7 +51,4 @@ if (process.env.NODE_ENV !== 'test') {
   )
 }
 
-
-export {
-  server
-}
+export { server }

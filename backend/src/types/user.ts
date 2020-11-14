@@ -1,8 +1,3 @@
-export interface LoginArgs {
-  email: string
-  password: string
-}
-
 export interface GitHubAuthCode {
   code: string
 }
@@ -24,17 +19,10 @@ export interface GitHubUserType {
 }
 
 export interface UserType {
-  id?: string
-  email?: string,
-  password?: string
-  emails?: string[]
+  id: number
   username: string
-  token?: string
-  gitHubId?: string
-  gitHubLogin?: string
-  gitHubEmail?: string
-  gitHubReposUrl?: string
-  gitHubToken?: string
+  email: string
+  services?: ServiceUserType[]
 }
 
 export interface AuthResponse {
@@ -45,12 +33,6 @@ export interface AuthResponse {
 export interface AppContext {
   gitHubId?: string
   currentUser: UserType
-}
-
-export interface LocalUser {
-  user_id: number
-  username: string
-  email: string
 }
 
 export interface RegisterUserInput {
@@ -65,10 +47,32 @@ export interface LoginUserInput {
 }
 
 export interface UserRecord {
-  user_id: string,
-  username: string,
-  email: string,
-  password: string,
-  created_on: string,
+  id: number
+  username: string
+  email: string
+  password: string
+  created_on: string
   last_login: string
+}
+
+export interface UserJWT {
+  id: number
+  username: string
+}
+
+export interface ServiceUserType {
+  serviceName: string
+  username: string
+  email: string
+  token: string
+  reposurl: string
+}
+
+export interface ServiceUserInput {
+  user_id: number
+  services_id: number
+  username: string
+  email: string
+  token: string
+  reposurl: string
 }

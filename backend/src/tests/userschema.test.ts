@@ -1,8 +1,41 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/unbound-method */
 import { createTestClient } from 'apollo-server-testing'
 import gql from 'graphql-tag'
 import { closePool } from '../db/connect'
 import { server } from '../index'
 import User from '../model/user'
+
+import config from '../utils/config'
+import { createApolloTestServer } from './createTestServer'
+import { sign } from 'jsonwebtoken'
+
+// const typeDef = `
+//     input GithubAccountInput {
+//       user_id: Int!,
+//       username: String!,
+//       email: String!,
+//       token: String!,
+//       reposurl: String!,
+//       services_id: Int!
+//     }
+//     type GithubAccount {
+//       user_id: Int!,
+//       username: String!,
+//       email: String!,
+//       token: String!,
+//       reposurl: String!,
+//       services_id: Int!
+//     }
+// `
+
+const ADD_SERVICE = gql`
+  mutation connectGitService($service: AddServiceArgs!) {
+    connectGitService(service: $service) {
+      success
+    }
+  }
+`
 
 const AUTHORIZE_WITH_GH = gql`
   mutation authorizeWithGithub($code: String!) {
@@ -78,8 +111,7 @@ describe('User schema register mutations', () => {
       },
     })
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    expect(res.data?.register?.user?.username).toEqual('testuser2')
+    expect(res.data.register.user.username).toEqual('testuser2')
   })
 
   it('backend returns a token after user has successfully registered', async () => {
@@ -94,7 +126,6 @@ describe('User schema register mutations', () => {
       },
     })
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     expect(res.data?.register?.token).toBeTruthy()
   })
 
@@ -115,7 +146,6 @@ describe('User schema register mutations', () => {
         error.message === 'Username, email or password can not be empty'
     )
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     expect(errorFound).toBeTruthy()
   })
 
@@ -204,7 +234,6 @@ describe('User schema login mutations', () => {
     const errorFound = res.errors?.some(
       (error) => error.message === 'Invalid username or password'
     )
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     expect(errorFound).toBeTruthy()
   })
 
@@ -222,7 +251,6 @@ describe('User schema login mutations', () => {
     const errorFound = res.errors?.some(
       (error) => error.message === 'Invalid username or password'
     )
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     expect(errorFound).toBeTruthy()
   })
 
@@ -240,7 +268,6 @@ describe('User schema login mutations', () => {
     const errorFound = res.errors?.some(
       (error) => error.message === 'Invalid username or password'
     )
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     expect(errorFound).toBeTruthy()
   })
 
@@ -260,6 +287,9 @@ describe('User schema login mutations', () => {
 })
 
 describe('User schema GitHub auth mutations', () => {
+  beforeEach(async () => {
+    await User.deleteAll()
+  })
   it('user can not authorize with an invalid GitHub code', async () => {
     const { mutate } = createTestClient(server)
 
@@ -272,6 +302,48 @@ describe('User schema GitHub auth mutations', () => {
       (error) => error.message === 'Invalid or expired GitHub code'
     )
     expect(errorFound).toBeTruthy()
+  })
+
+  it('users github account can be added to user data', async () => {
+    const userToSave = {
+      username: 'testuser',
+      password: 'testpassword',
+      email: 'test@test.fi',
+    }
+
+    const user = await User.registerUser(userToSave)
+
+    //TODO oma funktio createUserJWT(user: UserType, secret: string)
+    const token = sign(
+      {
+        id: user.id,
+        username: user.username,
+      },
+      config.JWT_SECRET
+    )
+
+    const testServer = createApolloTestServer(token)
+
+    const { mutate } = createTestClient(testServer)
+
+    const serviceArgs = {
+      serviceName: 'github',
+      username: 'github_username',
+      email: 'user@githubmail.com',
+      token: 'token123',
+      reposurl: 'mygithubrepos.github.com',
+    }
+
+    const res = await mutate({
+      mutation: ADD_SERVICE,
+      variables: { serviceArgs },
+    })
+
+    console.log({ res })
+
+    expect(1).toBe(2)
+
+    // expect(res.data.success).toEqual('success')
   })
 })
 

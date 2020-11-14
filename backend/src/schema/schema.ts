@@ -21,6 +21,17 @@ const Mutation = `
         username: String
         email: String
     }
+    input AddServiceArgs {
+        serviceName: String!
+        username: String!
+        email: String!
+        token: String!
+        reposurl: String!
+    }
+    type GithubAccount {
+        username: String
+        email: String
+    }
     type Mutation {
         logout: String
         register(
@@ -40,6 +51,9 @@ const Mutation = `
         authorizeWithGithub(
             code: String!
         ): AuthResponse
+        connectGitService(
+            service: AddServiceArgs
+        ): String
         switchBranch(
             url: String!
             branch: String!

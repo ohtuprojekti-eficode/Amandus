@@ -1,20 +1,23 @@
-import { UserInputError } from 'apollo-server'
+import { UserInputError, ForbiddenError } from 'apollo-server'
 import { sign } from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 import config from '../utils/config'
 import {
   UserType,
-  GitHubAuthCode,
+  // GitHubAuthCode,
   AuthResponse,
   AppContext,
-  RegisterUserInput, 
-  LoginUserInput, 
+  RegisterUserInput,
+  LoginUserInput,
 } from '../types/user'
-import {
-  requestGithubToken,
-  requestGithubUserAccount,
-} from '../services/gitHub'
+
+// import {
+//   requestGithubToken,
+//   requestGithubUserAccount,
+// } from '../services/gitHub'
 import User from '../model/user'
+import Service from '../model/service'
+import { AddServiceArgs } from '../types/request'
 
 const typeDef = `
     type User {
@@ -50,44 +53,28 @@ const resolvers = {
     },
   },
   Mutation: {
-    authorizeWithGithub: async (
+    connectGitService: async (
       _root: unknown,
-      args: GitHubAuthCode
-    ): Promise<AuthResponse> => {
-      if (!args.code) {
-        throw new UserInputError('GitHub code not provided')
+      args: AddServiceArgs,
+      context: AppContext
+    ): Promise<string> => {
+      if (!context.currentUser) {
+        throw new ForbiddenError('You have to login')
       }
 
-      const { access_token } = await requestGithubToken(args.code)
-
-      if (!access_token) {
-        throw new UserInputError('Invalid or expired GitHub code')
+      if (!args) {
+        throw new UserInputError('No service account provided')
       }
 
-      let gitHubUser = await requestGithubUserAccount(access_token.toString())
-      // store gh token in user for now
-      gitHubUser = {
-        ...gitHubUser,
-        access_token: access_token.toString(),
-      }
-      if (!gitHubUser) {
-        throw new Error('No GitHub user found')
-      }
+      const service = await Service.getServiceByName(args.serviceName)
 
-      const user = User.findOrCreateUserByGitHubUser(gitHubUser)
+      await User.addServiceUser({
+        ...args,
+        user_id: context.currentUser.id,
+        services_id: service.id,
+      })
 
-      const token = sign(
-        {
-          gitHubId: user.gitHubId,
-          gitHubToken: access_token.toString(),
-        },
-        config.JWT_SECRET
-      )
-
-      return {
-        user,
-        token,
-      }
+      return 'success'
     },
     logout: (
       _root: unknown,
@@ -100,10 +87,9 @@ const resolvers = {
       _root: unknown,
       args: RegisterUserInput
     ): Promise<AuthResponse> => {
-
       if (
-        args.username.length === 0 || 
-        args.email.length === 0 || 
+        args.username.length === 0 ||
+        args.email.length === 0 ||
         args.password.length === 0
       ) {
         throw new UserInputError('Username, email or password can not be empty')
@@ -112,7 +98,9 @@ const resolvers = {
       const user = await User.registerUser(args)
 
       if (!user) {
-        throw new UserInputError('Could not create a user with given username and password')
+        throw new UserInputError(
+          'Could not create a user with given username and password'
+        )
       }
 
       const token = sign(
@@ -122,29 +110,31 @@ const resolvers = {
         },
         config.JWT_SECRET
       )
-      
-			return {
+
+      return {
         user,
-        token
+        token,
       }
     },
     login: async (
       _root: unknown,
       args: LoginUserInput
     ): Promise<AuthResponse> => {
-
       const user = await User.findUserByUsername(args.username)
-      
+
       if (!user) {
         throw new UserInputError('Invalid username or password')
       }
 
-      const passwordMatch = await bcrypt.compare(args.password, user.password ?? '')
-      
+      const passwordMatch = await bcrypt.compare(
+        args.password,
+        user.password ?? ''
+      )
+
       if (!passwordMatch) {
-				throw new UserInputError('Invalid username or password')
+        throw new UserInputError('Invalid username or password')
       }
-      
+
       const token = sign(
         {
           id: user.id,
@@ -152,12 +142,12 @@ const resolvers = {
         },
         config.JWT_SECRET
       )
-      
-			return {
+
+      return {
         user,
-        token
+        token,
       }
-    }
+    },
   },
 }
 
