@@ -2,7 +2,7 @@
 import {
   cloneRepository,
   getCurrentBranchName,
-  pullMasterChanges,
+  pullNewestChanges,
   saveChanges,
   getBranches,
   switchCurrentBranch,
@@ -45,7 +45,7 @@ const resolvers = {
       if (!existsSync(fileLocation)) {
         await cloneRepository(url.href)
       } else {
-        await pullMasterChanges(url.href)
+        await pullNewestChanges(url.href)
       }
       return 'Cloned'
     },
