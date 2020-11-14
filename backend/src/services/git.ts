@@ -23,13 +23,19 @@ export const switchCurrentBranch = async (
   return await gitCheckout(git, branchName)
 }
 
-export const pullMasterChanges = async (httpsURL: string): Promise<void> => {
+export const pullCurrentBranchChanges = async (
+  httpsURL: string
+): Promise<void> => {
   const url = new URL(httpsURL)
   const repositoryName = url.pathname
 
-  await simpleGit(`./repositories/${repositoryName}`)
+  const git = simpleGit(`./repositories/${repositoryName}`)
+  const currentlyActiveBranch = (await git.branch()).current
+
+  await git
     .fetch('origin')
-    .pull('origin', 'master')
+    .reset(['--hard'])
+    .pull('origin', currentlyActiveBranch)
 }
 
 export const cloneRepository = async (httpsURL: string): Promise<void> => {
