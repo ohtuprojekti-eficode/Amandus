@@ -27,11 +27,7 @@ const stylesInUse = makeStyles(() =>
     registerButton: {
       marginTop: '30px',
     },
-<<<<<<< HEAD
     title: { textAlign: 'left', color: 'black' },
-=======
-    title: { textAlign: 'center' },
->>>>>>> 637e41c5db60b4501e0bb632d9bfaa6eec7ebdbf
     successMessage: { color: 'green' },
     errorMessage: { color: 'red' },
   })
@@ -149,17 +145,12 @@ const RegisterForm = () => {
 
           return (
             <Form>
-<<<<<<< HEAD
 
               <Grid container direction="row">
                 
               <Grid item className={classes.title} xs={12}>
                   <h1>Register</h1>
                 </Grid>
-=======
-              <h1 className={classes.title}>Registeration</h1>
-              <Grid container direction="row">
->>>>>>> 637e41c5db60b4501e0bb632d9bfaa6eec7ebdbf
 
                 <Grid item className={classes.textField} xs={8}>
                   <TextField
