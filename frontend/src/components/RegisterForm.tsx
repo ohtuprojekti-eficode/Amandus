@@ -27,7 +27,7 @@ const stylesInUse = makeStyles(() =>
     registerButton: {
       marginTop: '30px',
     },
-    title: { textAlign: 'center' },
+    title: { textAlign: 'left', color: 'black' },
     successMessage: { color: 'green' },
     errorMessage: { color: 'red' },
   })
@@ -78,13 +78,15 @@ const RegisterForm = () => {
     resetForm: Function
   ) => {
     try {
-      await registerUser({
+    const response=  await registerUser({
         variables: {
           username: data.username,
           email: data.email,
           password: data.password,
         },
       })
+      //localStorage.setItem('token', response.data.register.token)
+      //window.location.href = '/'
     } catch (error) {
       setFormStatus(formStatusProps.error)
     }
@@ -143,8 +145,12 @@ const RegisterForm = () => {
 
           return (
             <Form>
-              <h1 className={classes.title}>Registeration</h1>
+
               <Grid container direction="row">
+                
+              <Grid item className={classes.title} xs={12}>
+                  <h1>Register</h1>
+                </Grid>
 
                 <Grid item className={classes.textField} xs={8}>
                   <TextField
