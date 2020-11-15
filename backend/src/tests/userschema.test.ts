@@ -1,13 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/unbound-method */
-import { createTestClient } from 'apollo-server-testing'
+
+// import { createTestClient } from 'apollo-server-testing'
+import { createTestClient } from 'apollo-server-integration-testing'
 import gql from 'graphql-tag'
 import { closePool } from '../db/connect'
 import { server } from '../index'
 import User from '../model/user'
 
 import config from '../utils/config'
-import { createApolloTestServer } from './createTestServer'
+// import { createApolloTestServer } from './createTestServer'
 import { sign } from 'jsonwebtoken'
 
 // const typeDef = `
@@ -31,44 +33,42 @@ import { sign } from 'jsonwebtoken'
 
 const ADD_SERVICE = gql`
   mutation connectGitService($service: AddServiceArgs!) {
-    connectGitService(service: $service) {
-      success
-    }
+    connectGitService(service: $service)
   }
 `
 
-const AUTHORIZE_WITH_GH = gql`
-  mutation authorizeWithGithub($code: String!) {
-    authorizeWithGithub(code: $code) {
-      user {
-        id
-        username
-        emails
-        gitHubId
-        gitHubLogin
-        gitHubEmail
-        gitHubReposUrl
-        gitHubToken
-      }
-      token
-    }
-  }
-`
+// const AUTHORIZE_WITH_GH = gql`
+//   mutation authorizeWithGithub($code: String!) {
+//     authorizeWithGithub(code: $code) {
+//       user {
+//         id
+//         username
+//         emails
+//         gitHubId
+//         gitHubLogin
+//         gitHubEmail
+//         gitHubReposUrl
+//         gitHubToken
+//       }
+//       token
+//     }
+//   }
+// `
 
-const ME = gql`
-  query {
-    me {
-      id
-      username
-      emails
-      gitHubId
-      gitHubLogin
-      gitHubEmail
-      gitHubReposUrl
-      gitHubToken
-    }
-  }
-`
+// const ME = gql`
+//   query {
+//     me {
+//       id
+//       username
+//       emails
+//       gitHubId
+//       gitHubLogin
+//       gitHubEmail
+//       gitHubReposUrl
+//       gitHubToken
+//     }
+//   }
+// `
 
 const REGISTER = gql`
   mutation register($username: String!, $email: String!, $password: String!) {
@@ -82,17 +82,17 @@ const REGISTER = gql`
   }
 `
 
-const LOGIN = gql`
-  mutation login($username: String!, $password: String!) {
-    login(username: $username, password: $password) {
-      token
-      user {
-        id
-        username
-      }
-    }
-  }
-`
+// const LOGIN = gql`
+//   mutation login($username: String!, $password: String!) {
+//     login(username: $username, password: $password) {
+//       token
+//       user {
+//         id
+//         username
+//       }
+//     }
+//   }
+// `
 
 describe('User schema register mutations', () => {
   beforeEach(async () => {
@@ -100,10 +100,9 @@ describe('User schema register mutations', () => {
   })
 
   it('user can register with valid username, email and password', async () => {
-    const { mutate } = createTestClient(server)
+    const { mutate } = createTestClient({ apolloServer: server })
 
-    const res = await mutate({
-      mutation: REGISTER,
+    const mutationResult = await mutate(REGISTER, {
       variables: {
         username: 'testuser2',
         email: 'testuser2@test.com',
@@ -111,198 +110,240 @@ describe('User schema register mutations', () => {
       },
     })
 
-    expect(res.data.register.user.username).toEqual('testuser2')
-  })
-
-  it('backend returns a token after user has successfully registered', async () => {
-    const { mutate } = createTestClient(server)
-
-    const res = await mutate({
-      mutation: REGISTER,
-      variables: {
-        username: 'testuser2',
-        email: 'testuser2@test.com',
-        password: 'mypassword',
+    const expectedUser = await User.findUserByUsername('testuser2')
+    const expectedToken = sign(
+      {
+        id: expectedUser?.id,
+        username: expectedUser?.username,
       },
-    })
-
-    expect(res.data?.register?.token).toBeTruthy()
-  })
-
-  it('user can not register without a username', async () => {
-    const { mutate } = createTestClient(server)
-
-    const res = await mutate({
-      mutation: REGISTER,
-      variables: {
-        username: '',
-        email: 'testuser2@test.com',
-        password: 'mypassword',
-      },
-    })
-
-    const errorFound = res.errors?.some(
-      (error) =>
-        error.message === 'Username, email or password can not be empty'
+      config.JWT_SECRET
     )
 
-    expect(errorFound).toBeTruthy()
-  })
-
-  it('user can not register without a password', async () => {
-    const { mutate } = createTestClient(server)
-
-    const res = await mutate({
-      mutation: REGISTER,
-      variables: {
-        username: 'testuser2',
-        email: 'testuser2@test.com',
-        password: '',
+    expect(mutationResult).toEqual({
+      data: {
+        register: {
+          token: expectedToken,
+          user: {
+            id: expectedUser?.id,
+            username: expectedUser?.username,
+          },
+        },
       },
     })
-
-    const errorFound = res.errors?.some(
-      (error) =>
-        error.message === 'Username, email or password can not be empty'
-    )
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    expect(errorFound).toBeTruthy()
-  })
-
-  it('user can not register without an email address', async () => {
-    const { mutate } = createTestClient(server)
-
-    const res = await mutate({
-      mutation: REGISTER,
-      variables: {
-        username: 'testuser2',
-        email: '',
-        password: 'mypassword',
-      },
-    })
-
-    const errorFound = res.errors?.some(
-      (error) =>
-        error.message === 'Username, email or password can not be empty'
-    )
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    expect(errorFound).toBeTruthy()
   })
 })
+// it('backend returns a token after user has successfully registered', async () => {
+//   const { mutate } = createTestClient({ apolloServer: server })
 
-describe('User schema login mutations', () => {
-  beforeEach(async () => {
-    await User.deleteAll()
+//   const mutationResult = await mutate(REGISTER, {
+//     variables: {
+//       username: 'testuser2',
+//       email: 'testuser2@test.com',
+//       password: 'mypassword',
+//     },
+//   })
 
-    const userData = {
-      username: 'testuser',
-      email: 'testuser@test.com',
-      password: 'testpassword',
-    }
+//   const expectedUser = await User.findUserByUsername('testuser2')
 
-    await User.registerUser(userData)
-  })
+//   const expectedToken = sign(
+//     {
+//       id: expectedUser?.id,
+//       username: expectedUser?.username,
+//     },
+//     config.JWT_SECRET
+//   )
 
-  it('user can login with valid username and password', async () => {
-    const { mutate } = createTestClient(server)
+//   expect(mutationResult).toEqual({
+//     data: {
+//       register: {
+//         token: expectedToken,
+//         user: expectedUser,
+//       },
+//     },
+//   })
 
-    const res = await mutate({
-      mutation: LOGIN,
-      variables: {
-        username: 'testuser',
-        password: 'testpassword',
-      },
-    })
+//   // expect(res.data?.register?.token).toBeTruthy()
+// })
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    expect(res.data?.login?.user?.username).toEqual('testuser')
-  })
+// it('user can not register without a username', async () => {
+//   const { mutate } = createTestClient({ apolloServer: server })
 
-  it('user can not login without username and password', async () => {
-    const { mutate } = createTestClient(server)
+//   const mutationResult = await mutate(REGISTER, {
+//     variables: {
+//       username: '',
+//       email: 'testuser2@test.com',
+//       password: 'mypassword',
+//     },
+//   })
 
-    const res = await mutate({
-      mutation: LOGIN,
-      variables: {
-        username: '',
-        password: '',
-      },
-    })
+//   expect(mutationResult).toEqual({
 
-    const errorFound = res.errors?.some(
-      (error) => error.message === 'Invalid username or password'
-    )
-    expect(errorFound).toBeTruthy()
-  })
+//     error: {
+//       message: 'Username, email or password can not be empty'
+//     },
+//   })
 
-  it('user can not login without a valid password', async () => {
-    const { mutate } = createTestClient(server)
+//   const errorFound = res.errors?.some(
+//     (error) =>
+//       error.message === 'Username, email or password can not be empty'
+//   )
 
-    const res = await mutate({
-      mutation: LOGIN,
-      variables: {
-        username: 'testuser',
-        password: 'wrongpass',
-      },
-    })
+//   expect(errorFound).toBeTruthy()
+// })
 
-    const errorFound = res.errors?.some(
-      (error) => error.message === 'Invalid username or password'
-    )
-    expect(errorFound).toBeTruthy()
-  })
+// it('user can not register without a password', async () => {
+//   const { mutate } = createTestClient(server)
 
-  it('user can not login without a valid username', async () => {
-    const { mutate } = createTestClient(server)
+//   const res = await mutate({
+//     mutation: REGISTER,
+//     variables: {
+//       username: 'testuser2',
+//       email: 'testuser2@test.com',
+//       password: '',
+//     },
+//   })
 
-    const res = await mutate({
-      mutation: LOGIN,
-      variables: {
-        username: 'wronguser',
-        password: 'testpassword',
-      },
-    })
+//   const errorFound = res.errors?.some(
+//     (error) =>
+//       error.message === 'Username, email or password can not be empty'
+//   )
 
-    const errorFound = res.errors?.some(
-      (error) => error.message === 'Invalid username or password'
-    )
-    expect(errorFound).toBeTruthy()
-  })
+//   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+//   expect(errorFound).toBeTruthy()
+// })
 
-  it('user can not authorize with an invalid GitHub code', async () => {
-    const { mutate } = createTestClient(server)
+// it('user can not register without an email address', async () => {
+//   const { mutate } = createTestClient(server)
 
-    const res = await mutate({
-      mutation: AUTHORIZE_WITH_GH,
-      variables: { code: 'invalid' },
-    })
+//   const res = await mutate({
+//     mutation: REGISTER,
+//     variables: {
+//       username: 'testuser2',
+//       email: '',
+//       password: 'mypassword',
+//     },
+//   })
 
-    const errorFound = res.errors?.some(
-      (error) => error.message === 'Invalid or expired GitHub code'
-    )
-    expect(errorFound).toBeTruthy()
-  })
-})
+//   const errorFound = res.errors?.some(
+//     (error) =>
+//       error.message === 'Username, email or password can not be empty'
+//   )
+
+//   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+//   expect(errorFound).toBeTruthy()
+// })
+// })
+
+// describe('User schema login mutations', () => {
+//   beforeEach(async () => {
+//     await User.deleteAll()
+
+//     const userData = {
+//       username: 'testuser',
+//       email: 'testuser@test.com',
+//       password: 'testpassword',
+//     }
+
+//     await User.registerUser(userData)
+//   })
+
+//   it('user can login with valid username and password', async () => {
+//     const { mutate } = createTestClient(server)
+
+//     const res = await mutate({
+//       mutation: LOGIN,
+//       variables: {
+//         username: 'testuser',
+//         password: 'testpassword',
+//       },
+//     })
+
+//     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+//     expect(res.data?.login?.user?.username).toEqual('testuser')
+//   })
+
+//   it('user can not login without username and password', async () => {
+//     const { mutate } = createTestClient(server)
+
+//     const res = await mutate({
+//       mutation: LOGIN,
+//       variables: {
+//         username: '',
+//         password: '',
+//       },
+//     })
+
+//     const errorFound = res.errors?.some(
+//       (error) => error.message === 'Invalid username or password'
+//     )
+//     expect(errorFound).toBeTruthy()
+//   })
+
+//   it('user can not login without a valid password', async () => {
+//     const { mutate } = createTestClient(server)
+
+//     const res = await mutate({
+//       mutation: LOGIN,
+//       variables: {
+//         username: 'testuser',
+//         password: 'wrongpass',
+//       },
+//     })
+
+//     const errorFound = res.errors?.some(
+//       (error) => error.message === 'Invalid username or password'
+//     )
+//     expect(errorFound).toBeTruthy()
+//   })
+
+//   it('user can not login without a valid username', async () => {
+//     const { mutate } = createTestClient(server)
+
+//     const res = await mutate({
+//       mutation: LOGIN,
+//       variables: {
+//         username: 'wronguser',
+//         password: 'testpassword',
+//       },
+//     })
+
+//     const errorFound = res.errors?.some(
+//       (error) => error.message === 'Invalid username or password'
+//     )
+//     expect(errorFound).toBeTruthy()
+//   })
+
+//   it('user can not authorize with an invalid GitHub code', async () => {
+//     const { mutate } = createTestClient(server)
+
+//     const res = await mutate({
+//       mutation: AUTHORIZE_WITH_GH,
+//       variables: { code: 'invalid' },
+//     })
+
+//     const errorFound = res.errors?.some(
+//       (error) => error.message === 'Invalid or expired GitHub code'
+//     )
+//     expect(errorFound).toBeTruthy()
+//   })
+// })
 
 describe('User schema GitHub auth mutations', () => {
   beforeEach(async () => {
     await User.deleteAll()
   })
-  it('user can not authorize with an invalid GitHub code', async () => {
-    const { mutate } = createTestClient(server)
+  // it('user can not authorize with an invalid GitHub code', async () => {
+  //   const { mutate } = createTestClient({apolloServer:server})
 
-    const res = await mutate({
-      mutation: AUTHORIZE_WITH_GH,
-      variables: { code: 'invalid' },
-    })
+  //   const res = await mutate(AUTHORIZE_WITH_GH, {
+  //     variables: { code: 'invalid' },
+  //   })
 
-    const errorFound = res.errors?.some(
-      (error) => error.message === 'Invalid or expired GitHub code'
-    )
-    expect(errorFound).toBeTruthy()
-  })
+  //   const errorFound = res.errors?.some(
+  //     (error) => error.message === 'Invalid or expired GitHub code'
+  //   )
+  //   expect(errorFound).toBeTruthy()
+  // })
 
   it('users github account can be added to user data', async () => {
     const userToSave = {
@@ -322,9 +363,14 @@ describe('User schema GitHub auth mutations', () => {
       config.JWT_SECRET
     )
 
-    const testServer = createApolloTestServer(token)
-
-    const { mutate } = createTestClient(testServer)
+    const { mutate } = createTestClient({
+      apolloServer: server,
+      extendMockRequest: {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      },
+    })
 
     const serviceArgs = {
       serviceName: 'github',
@@ -334,30 +380,31 @@ describe('User schema GitHub auth mutations', () => {
       reposurl: 'mygithubrepos.github.com',
     }
 
-    const res = await mutate({
-      mutation: ADD_SERVICE,
-      variables: { serviceArgs },
+    const mutationResult = await mutate(ADD_SERVICE, {
+      variables: { service: serviceArgs },
     })
 
-    console.log({ res })
-
-    expect(1).toBe(2)
-
-    // expect(res.data.success).toEqual('success')
+    expect(mutationResult).toEqual({
+      data: {
+        connectGitService: 'success',
+      },
+    })
   })
 })
 
-describe('User schema logged out queries', () => {
-  it('no user data is returned when user is not logged in', async () => {
-    const { query } = createTestClient(server)
+// describe('User schema logged out queries', () => {
+//   it('no user data is returned when user is not logged in', async () => {
+//     const { query } = createTestClient({ apolloServer: server })
 
-    const res = await query({
-      query: ME,
-    })
+//     const queryResult = await query(ME)
 
-    expect(res.data?.me).toBeNull()
-  })
-})
+//     expect(queryResult).toEqual({
+//       data: {
+//         me: null,
+//       },
+//     })
+//   })
+// })
 
 afterAll(async () => {
   await closePool()

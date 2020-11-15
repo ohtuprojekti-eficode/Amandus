@@ -52,7 +52,7 @@ const Mutation = `
             code: String!
         ): AuthResponse
         connectGitService(
-            service: AddServiceArgs
+            service: AddServiceArgs!
         ): String
         switchBranch(
             url: String!

@@ -20,11 +20,11 @@ const corsOptions = {
 
 const server = new ApolloServer({
   schema,
-  context: ({ req }: Req) => {
+  context: async ({ req }: Req) => {
     const auth = req && req.headers.authorization
     if (auth && auth.toLowerCase().startsWith('bearer')) {
       const decodedToken = <UserJWT>verify(auth.substring(7), config.JWT_SECRET)
-      const currentUser = User.getUserById(decodedToken.id)
+      const currentUser = await User.getUserById(decodedToken.id)
       return { currentUser }
     }
     return

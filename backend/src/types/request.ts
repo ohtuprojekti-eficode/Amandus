@@ -4,9 +4,11 @@ import { IncomingMessage } from 'http'
 export type Req = { req: IncomingMessage }
 
 export interface AddServiceArgs {
-  serviceName: string
-  username: string
-  email: string
-  token: string
-  reposurl: string
+  service: {
+    serviceName: string
+    username: string
+    email: string
+    token: string
+    reposurl: string
+  }
 }

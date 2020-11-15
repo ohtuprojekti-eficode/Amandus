@@ -21,14 +21,8 @@ import { AddServiceArgs } from '../types/request'
 
 const typeDef = `
     type User {
-        id: ID
-        username: String
-        emails: [String]
-        gitHubId: String
-        gitHubLogin: String
-        gitHubEmail: String
-        gitHubReposUrl: String
-        gitHubToken: String
+        id: Int!
+        username: String!
     }
 `
 
@@ -66,10 +60,10 @@ const resolvers = {
         throw new UserInputError('No service account provided')
       }
 
-      const service = await Service.getServiceByName(args.serviceName)
+      const service = await Service.getServiceByName(args.service.serviceName)
 
       await User.addServiceUser({
-        ...args,
+        ...args.service,
         user_id: context.currentUser.id,
         services_id: service.id,
       })
