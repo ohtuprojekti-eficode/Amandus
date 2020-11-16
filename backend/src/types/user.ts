@@ -1,7 +1,3 @@
-export interface GitHubAuthCode {
-  code: string
-}
-
 export interface GitHubAccessToken {
   access_token: string
 }
@@ -35,17 +31,6 @@ export interface AppContext {
   currentUser: UserType
 }
 
-export interface RegisterUserInput {
-  username: string
-  email: string
-  password: string
-}
-
-export interface LoginUserInput {
-  username: string
-  password: string
-}
-
 export interface UserRecord {
   id: number
   username: string
@@ -62,15 +47,6 @@ export interface UserJWT {
 
 export interface ServiceUserType {
   serviceName: string
-  username: string
-  email: string
-  token: string
-  reposurl: string
-}
-
-export interface ServiceUserInput {
-  user_id: number
-  services_id: number
   username: string
   email: string
   token: string

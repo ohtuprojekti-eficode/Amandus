@@ -1,17 +1,12 @@
 import { UserInputError, ForbiddenError } from 'apollo-server'
 import bcrypt from 'bcryptjs'
 import config from '../utils/config'
-import {
-  UserType,
-  AuthResponse,
-  AppContext,
-  RegisterUserInput,
-  LoginUserInput,
-} from '../types/user'
+import { UserType, AuthResponse, AppContext } from '../types/user'
 import User from '../model/user'
 import Service from '../model/service'
 import { AddServiceArgs } from '../types/request'
 import { createToken } from '../utils/token'
+import { RegisterUserInput, LoginUserInput } from '../types/params'
 
 const typeDef = `
     type Service {
@@ -61,6 +56,12 @@ const resolvers = {
 
       if (!args) {
         throw new UserInputError('No service account provided')
+      }
+
+      if (args.service.serviceName !== 'github') {
+        throw new UserInputError(
+          `'github' is the only currently supported service`
+        )
       }
 
       const service = await Service.getServiceByName(args.service.serviceName)

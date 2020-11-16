@@ -1,11 +1,7 @@
-import {
-  UserType,
-  RegisterUserInput,
-  UserRecord,
-  ServiceUserInput,
-} from '../types/user'
+import { UserType, UserRecord } from '../types/user'
 import { pool } from '../db/connect'
 import bcrypt from 'bcryptjs'
+import { ServiceUserInput, RegisterUserInput } from '../types/params'
 
 const registerUser = async ({
   username,

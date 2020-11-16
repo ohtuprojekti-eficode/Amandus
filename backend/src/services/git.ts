@@ -50,12 +50,13 @@ export const saveChanges = async (
   saveArgs: SaveArgs,
   user: UserType
 ): Promise<void> => {
-  const { username, gitHubEmail, gitHubToken } = user
+  const { username, email } = user
+  const gitHubToken = 'to be addressed'
   const { file, branch, commitMessage } = saveArgs
 
   const repositoryName = getRepositoryFromFilePath(file)
 
-  const gitObject = setupGitConfig(username, gitHubEmail ?? '', repositoryName)
+  const gitObject = setupGitConfig(username, email ?? '', repositoryName)
 
   await gitCheckout(gitObject, branch)
 

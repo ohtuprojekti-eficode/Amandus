@@ -77,7 +77,7 @@ const resolvers = {
       saveArgs: SaveArgs,
       context: AppContext
     ): Promise<string> => {
-      if (!context.currentUser || !context.currentUser.gitHubToken) {
+      if (!context.currentUser) {
         throw new ForbiddenError('You have to login')
       }
 
