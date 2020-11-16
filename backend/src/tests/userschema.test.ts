@@ -1,14 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/unbound-method */
-
 import { createTestClient as createNormalTestClient } from 'apollo-server-testing'
 import { createTestClient as createIntegrationTestClient } from 'apollo-server-integration-testing'
 import gql from 'graphql-tag'
 import { closePool } from '../db/connect'
 import { server } from '../index'
 import User from '../model/user'
-import config from '../utils/config'
-import { sign } from 'jsonwebtoken'
+import { createToken } from '../utils/token'
 
 const ADD_SERVICE = gql`
   mutation connectGitService($service: AddServiceArgs!) {
@@ -67,13 +65,7 @@ describe('User schema register mutations', () => {
     })
 
     const expectedUser = await User.findUserByUsername('testuser2')
-    const expectedToken = sign(
-      {
-        id: expectedUser?.id,
-        username: expectedUser?.username,
-      },
-      config.JWT_SECRET
-    )
+    const expectedToken = createToken(expectedUser)
 
     expect(mutationResult).toEqual({
       data: {
@@ -257,13 +249,7 @@ describe('User schema add git service mutations', () => {
     const user = await User.registerUser(userToSave)
 
     //TODO oma funktio createUserJWT(user: UserType, secret: string)
-    const token = sign(
-      {
-        id: user.id,
-        username: user.username,
-      },
-      config.JWT_SECRET
-    )
+    const token = createToken(user)
 
     const { mutate } = createIntegrationTestClient({
       apolloServer: server,

@@ -1,23 +1,17 @@
 import { UserInputError, ForbiddenError } from 'apollo-server'
-import { sign } from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 import config from '../utils/config'
 import {
   UserType,
-  // GitHubAuthCode,
   AuthResponse,
   AppContext,
   RegisterUserInput,
   LoginUserInput,
 } from '../types/user'
-
-// import {
-//   requestGithubToken,
-//   requestGithubUserAccount,
-// } from '../services/gitHub'
 import User from '../model/user'
 import Service from '../model/service'
 import { AddServiceArgs } from '../types/request'
+import { createToken } from '../utils/token'
 
 const typeDef = `
     type Service {
@@ -106,13 +100,7 @@ const resolvers = {
         )
       }
 
-      const token = sign(
-        {
-          id: user.id,
-          username: user.username,
-        },
-        config.JWT_SECRET
-      )
+      const token = createToken(user)
 
       return {
         user,
@@ -138,13 +126,7 @@ const resolvers = {
         throw new UserInputError('Invalid username or password')
       }
 
-      const token = sign(
-        {
-          id: user.id,
-          username: user.username,
-        },
-        config.JWT_SECRET
-      )
+      const token = createToken(user)
 
       return {
         user,
