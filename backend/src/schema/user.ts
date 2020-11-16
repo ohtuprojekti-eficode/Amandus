@@ -20,9 +20,18 @@ import Service from '../model/service'
 import { AddServiceArgs } from '../types/request'
 
 const typeDef = `
+    type Service {
+      serviceName: String!
+      username: String!
+      email: String!
+      token: String!
+      reposurl: String!
+    }
     type User {
         id: Int!
         username: String!
+        email: String!
+        services: [Service!]
     }
 `
 
