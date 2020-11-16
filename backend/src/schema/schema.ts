@@ -48,9 +48,6 @@ const Mutation = `
             branch: String!
             commitMessage: String
         ): String
-        authorizeWithGithub(
-            code: String!
-        ): AuthResponse
         connectGitService(
             service: AddServiceArgs!
         ): String
