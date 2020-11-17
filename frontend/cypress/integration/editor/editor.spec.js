@@ -17,14 +17,4 @@ describe('When visiting the edit view page, as a user', () => {
   it('I can view the file listing', () => {
     cy.contains('Files in the repository')
   })
-
-  it('I can open a file in editor', () => {
-    cy.contains('example.txt').click()
-    cy.contains('ohtuprojekti-eficode/robot-test-files/example.txt')
-  })
-
-  it('I can edit a file in editor and see a save button', () => {
-    cy.contains('example.txt').click()
-    cy.contains('Save')
-  })
 })
