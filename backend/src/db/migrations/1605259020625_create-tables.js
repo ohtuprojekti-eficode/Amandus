@@ -22,7 +22,6 @@ exports.up = (pgm) => {
         services_id INTEGER REFERENCES SERVICES(id) ON DELETE CASCADE,
         username TEXT, 
         email TEXT,
-        token TEXT,
         reposurl TEXT,
         UNIQUE(services_id, username));`)
 

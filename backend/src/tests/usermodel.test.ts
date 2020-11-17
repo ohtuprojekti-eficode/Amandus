@@ -18,7 +18,6 @@ describe('getUser query return right user data', () => {
       services_id: 1,
       username: 'githubUser',
       email: 'githubemail@first.com',
-      token: 'tokeni22',
       reposurl: 'repourli.com',
     })
 
@@ -31,7 +30,6 @@ describe('getUser query return right user data', () => {
           serviceName: 'github',
           email: 'githubemail@first.com',
           reposurl: 'repourli.com',
-          token: 'tokeni22',
           username: 'githubUser',
         },
       ],
@@ -53,7 +51,6 @@ describe('getUser query return right user data', () => {
       services_id: 1,
       username: 'githubUser',
       email: 'githubemail@first.com',
-      token: 'tokeni22',
       reposurl: 'repourli.com',
     })
 
@@ -62,7 +59,6 @@ describe('getUser query return right user data', () => {
       services_id: 1,
       username: 'githubUser2',
       email: 'githubUser2@email.com',
-      token: 'tokenfake',
       reposurl: 'repo2.com',
     })
 
@@ -75,14 +71,12 @@ describe('getUser query return right user data', () => {
           serviceName: 'github',
           email: 'githubemail@first.com',
           reposurl: 'repourli.com',
-          token: 'tokeni22',
           username: 'githubUser',
         },
         {
           serviceName: 'github',
           email: 'githubUser2@email.com',
           username: 'githubUser2',
-          token: 'tokenfake',
           reposurl: 'repo2.com',
         },
       ],

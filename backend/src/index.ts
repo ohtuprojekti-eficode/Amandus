@@ -25,7 +25,8 @@ const server = new ApolloServer({
     if (auth && auth.toLowerCase().startsWith('bearer')) {
       const decodedToken = <UserJWT>verify(auth.substring(7), config.JWT_SECRET)
       const currentUser = await User.getUserById(decodedToken.id)
-      return { currentUser }
+      const githubToken = decodedToken.githubToken
+      return { currentUser, githubToken }
     }
     return
   },

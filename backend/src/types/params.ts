@@ -16,7 +16,6 @@ export interface ServiceUserInput {
   services_id: number
   username: string
   email: string
-  token: string
   reposurl: string
 }
 
@@ -29,4 +28,13 @@ export interface RegisterUserInput {
 export interface LoginUserInput {
   username: string
   password: string
+}
+
+export interface AddServiceArgs {
+  service: {
+    serviceName: string
+    username: string
+    email: string
+    reposurl: string
+  }
 }

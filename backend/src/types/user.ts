@@ -1,3 +1,7 @@
+export interface GitHubAuthCode {
+  code: string
+}
+
 export interface GitHubAccessToken {
   access_token: string
 }
@@ -7,11 +11,11 @@ export interface GitHubAccessTokenResponse {
 }
 
 export interface GitHubUserType {
-  id?: string
-  login?: string
-  email?: string
-  repos_url?: string
-  access_token?: string
+  id: string
+  login: string
+  email: string
+  repos_url: string
+  access_token: string
 }
 
 export interface UserType {
@@ -22,13 +26,18 @@ export interface UserType {
 }
 
 export interface AuthResponse {
-  user?: UserType
-  token?: string
+  user: UserType
+  token: string
+}
+
+export interface ServiceAuthResponse {
+  serviceUser: ServiceUserType
+  token: string
 }
 
 export interface AppContext {
-  gitHubId?: string
   currentUser: UserType
+  githubToken?: string
 }
 
 export interface UserRecord {
@@ -43,12 +52,12 @@ export interface UserRecord {
 export interface UserJWT {
   id: number
   username: string
+  githubToken?: string
 }
 
 export interface ServiceUserType {
   serviceName: string
   username: string
   email: string
-  token: string
   reposurl: string
 }

@@ -1,26 +1,38 @@
 import { UserInputError, ForbiddenError } from 'apollo-server'
 import bcrypt from 'bcryptjs'
 import config from '../utils/config'
-import { UserType, AuthResponse, AppContext } from '../types/user'
+import {
+  UserType,
+  AuthResponse,
+  AppContext,
+  GitHubAuthCode,
+  ServiceAuthResponse,
+} from '../types/user'
 import User from '../model/user'
 import Service from '../model/service'
-import { AddServiceArgs } from '../types/request'
 import { createToken } from '../utils/token'
-import { RegisterUserInput, LoginUserInput } from '../types/params'
+import {
+  RegisterUserInput,
+  LoginUserInput,
+  AddServiceArgs,
+} from '../types/params'
+import {
+  requestGithubToken,
+  requestGithubUserAccount,
+} from '../services/gitHub'
 
 const typeDef = `
-    type Service {
+    type ServiceUser {
       serviceName: String!
       username: String!
       email: String!
-      token: String!
       reposurl: String!
     }
     type User {
         id: Int!
         username: String!
         email: String!
-        services: [Service!]
+        services: [ServiceUser!]
     }
 `
 
@@ -42,6 +54,13 @@ const resolvers = {
       }
 
       return `https://github.com/login/oauth/authorize?response_type=code&redirect_uri=${cbUrl}&client_id=${cliendID}`
+    },
+    currentToken: (
+      _root: unknown,
+      _args: unknown,
+      context: AppContext
+    ): string | undefined => {
+      return context.githubToken
     },
   },
   Mutation: {
@@ -73,6 +92,41 @@ const resolvers = {
       })
 
       return 'success'
+    },
+    authorizeWithGithub: async (
+      _root: unknown,
+      args: GitHubAuthCode,
+      context: AppContext
+    ): Promise<ServiceAuthResponse> => {
+      if (!context.currentUser) {
+        throw new ForbiddenError('You have to login')
+      }
+
+      if (!args.code) {
+        throw new UserInputError('GitHub code not provided')
+      }
+
+      const { access_token } = await requestGithubToken(args.code)
+
+      if (!access_token) {
+        throw new UserInputError('Invalid or expired GitHub code')
+      }
+
+      const gitHubUser = await requestGithubUserAccount(access_token.toString())
+
+      const serviceUser = {
+        serviceName: 'github',
+        username: gitHubUser.login,
+        email: gitHubUser.email,
+        reposurl: gitHubUser.repos_url,
+      }
+
+      const token = createToken(context.currentUser, access_token.access_token)
+
+      return {
+        serviceUser,
+        token,
+      }
     },
     logout: (
       _root: unknown,

@@ -43,12 +43,11 @@ const addServiceUser = async ({
   services_id,
   username,
   email,
-  token,
   reposurl,
 }: ServiceUserInput): Promise<void> => {
   const insertQuery = `
-  INSERT INTO SERVICE_USERS(user_id, services_id, username, email, token, reposurl)
-    VALUES ($1, $2, $3, $4, $5, $6) 
+  INSERT INTO SERVICE_USERS(user_id, services_id, username, email, reposurl)
+    VALUES ($1, $2, $3, $4, $5) 
     ON CONFLICT DO NOTHING;
     `
   await pool.query(insertQuery, [
@@ -56,7 +55,6 @@ const addServiceUser = async ({
     services_id,
     username,
     email,
-    token,
     reposurl,
   ])
 }
@@ -70,7 +68,6 @@ const getUserById = async (id: number): Promise<UserType> => {
           SELECT json_agg(json_build_object(
             'username', service_users.username,
             'email', SERVICE_USERS.email,
-            'token', SERVICE_USERS.token,
             'reposurl', SERVICE_USERS.reposurl,
             'serviceName', SERVICES.name
             )

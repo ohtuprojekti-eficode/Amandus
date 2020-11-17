@@ -48,10 +48,11 @@ export const cloneRepository = async (httpsURL: string): Promise<void> => {
 
 export const saveChanges = async (
   saveArgs: SaveArgs,
-  user: UserType
+  user: UserType,
+  remoteToken: string
 ): Promise<void> => {
   const { username, email } = user
-  const gitHubToken = 'to be addressed'
+
   const { file, branch, commitMessage } = saveArgs
 
   const repositoryName = getRepositoryFromFilePath(file)
@@ -73,7 +74,7 @@ export const saveChanges = async (
 
   await gitCommit(gitObject, validCommitMessage)
 
-  await gitPush(gitObject, username, gitHubToken ?? '', branch)
+  await gitPush(gitObject, username, remoteToken, branch)
 }
 
 const getRepositoryFromFilePath = (file: File) => {

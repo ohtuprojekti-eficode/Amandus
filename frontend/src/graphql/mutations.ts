@@ -3,15 +3,11 @@ import { gql } from '@apollo/client'
 export const AUTHORIZE_WITH_GH = gql`
   mutation authorizeWithGithub($code: String!) {
     authorizeWithGithub(code: $code) {
-      user {
-        id
+      serviceUser {
+        serviceName
         username
-        emails
-        gitHubId
-        gitHubLogin
-        gitHubEmail
-        gitHubReposUrl
-        gitHubToken
+        email
+        reposurl
       }
       token
     }
@@ -25,5 +21,11 @@ export const SAVE_CHANGES = gql`
     $commitMessage: String
   ) {
     saveChanges(file: $file, branch: $branch, commitMessage: $commitMessage)
+  }
+`
+
+export const ADD_SERVICE = gql`
+  mutation connectGitService($service: AddServiceArgs!) {
+    connectGitService(service: $service)
   }
 `

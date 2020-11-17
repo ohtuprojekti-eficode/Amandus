@@ -20,7 +20,19 @@ const ME = gql`
       id
       username
       email
+      services {
+        serviceName
+        username
+        email
+        reposurl
+      }
     }
+  }
+`
+
+const GH_TOKEN = gql`
+  query {
+    currentToken
   }
 `
 
@@ -248,7 +260,6 @@ describe('User schema add git service mutations', () => {
 
     const user = await User.registerUser(userToSave)
 
-    //TODO oma funktio createUserJWT(user: UserType, secret: string)
     const token = createToken(user)
 
     const { mutate } = createIntegrationTestClient({
@@ -264,7 +275,6 @@ describe('User schema add git service mutations', () => {
       serviceName: 'github',
       username: 'github_username',
       email: 'user@githubmail.com',
-      token: 'token123',
       reposurl: 'mygithubrepos.github.com',
     }
 
@@ -281,6 +291,10 @@ describe('User schema add git service mutations', () => {
 })
 
 describe('Context currentuser query', () => {
+  beforeEach(async () => {
+    await User.deleteAll()
+  })
+
   it('no user data is returned when user is not logged in', async () => {
     const { query } = createIntegrationTestClient({ apolloServer: server })
 
@@ -289,6 +303,146 @@ describe('Context currentuser query', () => {
     expect(queryResult).toEqual({
       data: {
         me: null,
+      },
+    })
+  })
+
+  it('user data and github token is returned when set, no services', async () => {
+    const userToSave = {
+      username: 'testuser',
+      password: 'testpassword',
+      email: 'test@test.fi',
+    }
+
+    const user = await User.registerUser(userToSave)
+    const token = createToken(user)
+
+    const { query } = createIntegrationTestClient({
+      apolloServer: server,
+      extendMockRequest: {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      },
+    })
+
+    const queryResult = await query(ME)
+
+    expect(queryResult).toEqual({
+      data: {
+        me: {
+          id: user.id,
+          username: userToSave.username,
+          email: userToSave.email,
+          services: null,
+        },
+      },
+    })
+  })
+
+  it('user data and github token is returned when set, one service', async () => {
+    const userToSave = {
+      username: 'testuser',
+      password: 'testpassword',
+      email: 'test@test.fi',
+    }
+
+    const user = await User.registerUser(userToSave)
+    const serviceArgs = {
+      serviceName: 'github',
+      username: 'github_username',
+      email: 'user@githubmail.com',
+      reposurl: 'mygithubrepos.github.com',
+    }
+
+    const token = createToken(user, 'githubtoken123')
+
+    const { query, mutate } = createIntegrationTestClient({
+      apolloServer: server,
+      extendMockRequest: {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      },
+    })
+
+    await mutate(ADD_SERVICE, {
+      variables: { service: serviceArgs },
+    })
+
+    const queryResult = await query(ME)
+
+    expect(queryResult).toEqual({
+      data: {
+        me: {
+          id: user.id,
+          username: userToSave.username,
+          email: userToSave.email,
+          services: [serviceArgs],
+        },
+      },
+    })
+  })
+})
+
+describe('Context githubToken query', () => {
+  beforeEach(async () => {
+    await User.deleteAll()
+  })
+  it('no token is returned when set', async () => {
+    const userToSave = {
+      username: 'testuser',
+      password: 'testpassword',
+      email: 'test@test.fi',
+    }
+
+    const user = await User.registerUser(userToSave)
+
+    const token = createToken(user)
+
+    const { query } = createIntegrationTestClient({
+      apolloServer: server,
+      extendMockRequest: {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      },
+    })
+
+    const queryResult = await query(GH_TOKEN)
+
+    expect(queryResult).toEqual({
+      data: {
+        currentToken: null,
+      },
+    })
+  })
+
+  it('correct token is returned when set', async () => {
+    const userToSave = {
+      username: 'testuser',
+      password: 'testpassword',
+      email: 'test@test.fi',
+    }
+
+    const user = await User.registerUser(userToSave)
+
+    const token = createToken(user, 'githubtoken123')
+
+    const { query } = createIntegrationTestClient({
+      apolloServer: server,
+      extendMockRequest: {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      },
+    })
+
+    const queryResult = await query(GH_TOKEN)
+
+    expect(queryResult).toEqual({
+      data: {
+        currentToken: 'githubtoken123',
       },
     })
   })

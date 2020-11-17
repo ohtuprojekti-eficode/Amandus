@@ -8,12 +8,17 @@ const Query = `
         me: User
         getRepoState(url: String): RepoState!
         cloneRepository(url: String!): String
+        currentToken: String
     },
 `
 
 const Mutation = `
     type AuthResponse {
         user: User
+        token: String
+    }
+    type ServiceAuthResponse {
+        serviceUser: ServiceUser
         token: String
     }
     type LocalUser {
@@ -25,7 +30,6 @@ const Mutation = `
         serviceName: String!
         username: String!
         email: String!
-        token: String!
         reposurl: String!
     }
     type GithubAccount {
@@ -55,6 +59,9 @@ const Mutation = `
             url: String!
             branch: String!
         ): String
+        authorizeWithGithub(
+            code: String!
+        ): ServiceAuthResponse
     }
 `
 
