@@ -11,7 +11,10 @@ const GITHUB_CLIENT_SECRET = process.env.GH_CLIENT_SECRET
 const GITHUB_CB_URL =
   process.env.GH_CB_URL || 'http://localhost:3000/auth/github/callback'
 
-const DATABASE_URL = process.env.DATABASE_URL
+const DATABASE_URL =
+  process.env.NODE_ENV == 'test'
+    ? process.env.DATABASE_URL_TEST
+    : process.env.DATABASE_URL
 
 export default {
   PORT,

@@ -19,6 +19,11 @@ const GET_REPO_STATE = gql`
     }
   }
 `
+const SWITCH_BRANCH = gql`
+  mutation switchBranch($url: String!, $branch: String!) {
+    switchBranch(url: $url, branch: $branch)
+  }
+`
 
 describe('getRepoState query', () => {
   const repoPath = join('.', 'repositories', 'testRepo')
@@ -158,5 +163,91 @@ describe('getRepoState query', () => {
 
     const currentBranch = res.data?.getRepoState.currentBranch
     expect(currentBranch).toEqual('master')
+  })
+})
+
+describe('switchBranch mutation', () => {
+  const repoPath = join('.', 'repositories', 'testRepo')
+
+  beforeEach(async () => {
+    mkdirSync(repoPath, { recursive: true })
+    await simpleGit(repoPath).init()
+
+    appendFileSync(
+      `${repoPath}/file.txt`,
+      'Commit and add file to create master branch'
+    )
+  })
+
+  afterEach(() => {
+    rmdirSync(repoPath, { recursive: true })
+  })
+
+  it('switches current branch to given existing branch', async () => {
+    const testRepo = simpleGit(repoPath)
+    await testRepo
+      .addConfig('user.name', 'Some One')
+      .addConfig('user.email', 'some@one.com')
+      .add('.')
+      .commit('init commit')
+      .branch(['secondBranch'])
+
+    const { mutate } = createTestClient(server)
+
+    await mutate({
+      mutation: SWITCH_BRANCH,
+      variables: {
+        url: 'http://www.remote.org/testRepo',
+        branch: 'secondBranch',
+      },
+    })
+
+    const branches = await testRepo.branchLocal()
+    expect(branches.current).toEqual('secondBranch')
+  })
+
+  it('returns the name of the branch it switched to', async () => {
+    const testRepo = simpleGit(repoPath)
+    await testRepo
+      .addConfig('user.name', 'Some One')
+      .addConfig('user.email', 'some@one.com')
+      .add('.')
+      .commit('init commit')
+      .branch(['secondBranch'])
+
+    const { mutate } = createTestClient(server)
+
+    const res = await mutate({
+      mutation: SWITCH_BRANCH,
+      variables: {
+        url: 'http://www.remote.org/testRepo',
+        branch: 'secondBranch',
+      },
+    })
+
+    const currentBranch = res.data?.switchBranch
+    expect(currentBranch).toEqual('secondBranch')
+  })
+
+  it('creates a new branch when switching to branch that does not exist', async () => {
+    const testRepo = simpleGit(repoPath)
+    await testRepo
+      .addConfig('user.name', 'Some One')
+      .addConfig('user.email', 'some@one.com')
+      .add('.')
+      .commit('init commit')
+      .branch(['secondBranch'])
+
+    const { mutate } = createTestClient(server)
+
+    await mutate({
+      mutation: SWITCH_BRANCH,
+      variables: {
+        url: 'http://www.remote.org/testRepo',
+        branch: 'thirdBranch',
+      },
+    })
+    const branches = await testRepo.branchLocal()
+    expect(branches.current).toEqual('thirdBranch')
   })
 })

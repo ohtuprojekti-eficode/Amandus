@@ -1,4 +1,4 @@
-import simpleGit, { SimpleGit } from 'simple-git'
+import simpleGit, { GitError, SimpleGit } from 'simple-git'
 import { writeFileSync } from 'fs'
 import { v4 as uuidv4 } from 'uuid'
 import { File } from '../types/file'
@@ -13,6 +13,14 @@ export const getCurrentBranchName = async (
   const git = simpleGit(repoLocation)
   const branches = await git.branchLocal()
   return branches.current
+}
+
+export const switchCurrentBranch = async (
+  repoLocation: string,
+  branchName: string
+): Promise<string> => {
+  const git = simpleGit(repoLocation)
+  return await gitCheckout(git, branchName)
 }
 
 export const pullMasterChanges = async (httpsURL: string): Promise<void> => {
@@ -84,10 +92,10 @@ const gitCheckout = async (git: SimpleGit, branchName: string) => {
 
   if (await branchExists(git, sanitizedBranchName)) {
     await git.checkout([sanitizedBranchName])
-    return
+  } else {
+    await git.checkout(['-b', sanitizedBranchName])
   }
-
-  await git.checkout(['-b', sanitizedBranchName])
+  return sanitizedBranchName
 }
 
 const branchExists = async (
@@ -95,6 +103,14 @@ const branchExists = async (
   branchName: string
 ): Promise<boolean> => {
   const branches = await git.branchLocal()
+  return branches.all.some((branch) => branch === branchName)
+}
+
+const remoteBranchExists = async (
+  git: SimpleGit,
+  branchName: string
+): Promise<boolean> => {
+  const branches = await git.branch()
   return branches.all.some((branch) => branch === branchName)
 }
 
@@ -126,6 +142,28 @@ const gitPush = async (
   token: string,
   branchName: string
 ) => {
+  await git.fetch()
+
+  const remoteExists = await remoteBranchExists(
+    git,
+    `remotes/origin/${branchName}`
+  )
+
+  if (remoteExists) {
+    try {
+      await git.merge([`origin/${branchName}`]).catch((error: GitError) => {
+        if (error.message.includes('CONFLICT')) {
+          throw new Error('Merge conflict')
+        }
+        throw new Error('Unexpected error')
+      })
+    } catch (e) {
+      await git.merge(['--abort'])
+      await git.reset(['--hard', 'HEAD~1'])
+      throw e
+    }
+  }
+
   const remoteUuid = uuidv4()
   await gitAddRemote(git, remoteUuid, username, token)
   await git.push(remoteUuid, branchName)
