@@ -23,13 +23,20 @@ export const switchCurrentBranch = async (
   return await gitCheckout(git, branchName)
 }
 
-export const pullMasterChanges = async (httpsURL: string): Promise<void> => {
+export const pullNewestChanges = async (httpsURL: string): Promise<void> => {
   const url = new URL(httpsURL)
   const repositoryName = url.pathname
+  const repoLocation = `./repositories/${repositoryName}`
+
+  const currentBranch = await getCurrentBranch(repoLocation)
 
   await simpleGit(`./repositories/${repositoryName}`)
     .fetch('origin')
-    .pull('origin', 'master')
+    .branch([`--set-upstream-to=origin/${currentBranch}`, currentBranch])
+    .pull()
+    .catch((error: GitError) => {
+      console.log(error)
+    })
 }
 
 export const cloneRepository = async (httpsURL: string): Promise<void> => {
@@ -190,4 +197,12 @@ export const getBranches = async (repoLocation: string): Promise<string[]> => {
   const git = simpleGit(repoLocation)
   const branches = await git.branch()
   return branches.all
+}
+
+export const getCurrentBranch = async (
+  repoLocation: string
+): Promise<string> => {
+  const git = simpleGit(repoLocation)
+  const branches = await git.branchLocal()
+  return branches.current
 }
