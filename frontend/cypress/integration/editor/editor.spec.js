@@ -13,8 +13,4 @@ describe('When visiting the edit view page, as a user', () => {
   beforeEach(() => {
     cy.visit(Cypress.env('HOST') + '/edit')
   })
-
-  it('I can view the file listing', () => {
-    cy.contains('Files in the repository')
-  })
 })
