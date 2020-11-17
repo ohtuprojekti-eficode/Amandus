@@ -9,7 +9,7 @@ import {
   createStyles,
 } from '@material-ui/core'
 import { useMutation } from '@apollo/client'
-//import { REGISTER } from '../graphql/mutations'
+import { LOGIN } from '../graphql/mutations'
 
 const stylesInUse = makeStyles(() =>
   createStyles({
@@ -66,34 +66,22 @@ const MyLoginForm = () => {
   const classes = stylesInUse()
   const [showFormStatus, setShowFormStatus] = useState(false)
 
-  /*
-  const [
-    registerUser,
-    { loading: registerLoading, data: registerData },
-  ] = useMutation(REGISTER)
-*/
+  const [loginUser, { loading: loginLoading, data: loginData }] = useMutation(
+    LOGIN
+  )
 
-  const createNewAccount = async (
-    data: LoginFormFields,
-    resetForm: Function
-  ) => {
-    /*
+  const logInUser = async (data: LoginFormFields, resetForm: Function) => {
     try {
-      await registerUser({
+      await loginUser({
         variables: {
           username: data.username,
-          email: data.email,
           password: data.password,
         },
       })
     } catch (error) {
       setFormStatus(formStatusProps.error)
     }
-    
-    // DEBUG
-    console.log('register loading', registerLoading)
-    console.log('register data', registerData)
-*/
+
     setFormStatus(formStatusProps.success)
     resetForm({})
     setShowFormStatus(true)
@@ -112,7 +100,7 @@ const MyLoginForm = () => {
           password: '',
         }}
         onSubmit={(values: LoginFormFields, actions) => {
-          createNewAccount(values, actions.resetForm)
+          logInUser(values, actions.resetForm)
           setTimeout(() => {
             actions.setSubmitting(false)
           }, 400)
