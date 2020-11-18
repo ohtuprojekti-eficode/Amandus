@@ -4,6 +4,7 @@ import {
   getCurrentBranchName,
   pullNewestChanges,
   saveChanges,
+  saveChangesAndPush,
   getBranches,
   switchCurrentBranch,
 } from '../services/git'
@@ -81,12 +82,36 @@ const resolvers = {
         throw new ForbiddenError('You have to login')
       }
 
+      try {
+        await saveChanges(
+          saveArgs,
+          context.currentUser
+        )
+      } catch (error) {
+        if (error.message === 'Merge conflict') {
+          throw new Error('Merge conflict detected')
+        } else {
+          console.log(error.message)
+        }
+      }
+
+      return 'Saved'
+    },
+    saveChangesAndPushToRemote: async (
+      _root: unknown,
+      saveArgs: SaveArgs,
+      context: AppContext
+    ): Promise<string> => {
+      if (!context.currentUser) {
+        throw new ForbiddenError('You have to login')
+      }
+
       if (!context.githubToken) {
         throw new ForbiddenError('You need a remote token')
       }
 
       try {
-        await saveChanges(
+        await saveChangesAndPush(
           saveArgs,
           context.currentUser,
           context.githubToken ?? ''
@@ -99,7 +124,7 @@ const resolvers = {
         }
       }
 
-      return 'Saved'
+      return 'Saved to remote repository'
     },
     switchBranch: async (
       _root: unknown,

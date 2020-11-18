@@ -48,6 +48,35 @@ export const cloneRepository = async (httpsURL: string): Promise<void> => {
 
 export const saveChanges = async (
   saveArgs: SaveArgs,
+  user: UserType
+): Promise<void> => {
+  const { username, email } = user
+
+  const { file, branch, commitMessage } = saveArgs
+
+  const repositoryName = getRepositoryFromFilePath(file)
+
+  const gitObject = setupGitConfig(username, email ?? '', repositoryName)
+
+  await gitCheckout(gitObject, branch)
+
+  writeToFile(file)
+
+  const realFilename = getFileNameFromFilePath(file, repositoryName)
+  await gitAdd(gitObject, [realFilename])
+
+  const validCommitMessage = makeCommitMessage(
+    commitMessage,
+    username,
+    realFilename
+  )
+
+  await gitCommit(gitObject, validCommitMessage)
+  
+}
+
+export const saveChangesAndPush = async (
+  saveArgs: SaveArgs,
   user: UserType,
   remoteToken: string
 ): Promise<void> => {

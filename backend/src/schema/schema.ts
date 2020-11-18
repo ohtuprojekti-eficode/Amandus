@@ -52,6 +52,11 @@ const Mutation = `
             branch: String!
             commitMessage: String
         ): String
+        saveChangesAndPushToRemote(
+            file: FileInput! 
+            branch: String!
+            commitMessage: String
+        ): String
         connectGitService(
             service: AddServiceArgs!
         ): String
