@@ -1,10 +1,8 @@
 //import React from 'react'
 import * as Yup from 'yup'
 
-  const RegisterSchema = () => {
-      
-      return(
-      Yup.object().shape({
+const RegisterSchema = () => {
+  return Yup.object().shape({
     email: Yup.string().email().required('Enter your email'),
     username: Yup.string()
       .required('Please choose your username')
@@ -21,6 +19,6 @@ import * as Yup from 'yup'
       .oneOf([Yup.ref('password'), ''], 'Passwords must match')
       .required('Password confirm is required'),
   })
-      )}
+}
 
-  export default RegisterSchema
+export default RegisterSchema

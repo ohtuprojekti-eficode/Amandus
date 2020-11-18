@@ -59,6 +59,10 @@ const formStatusProps: MyFormStatusProps = {
     message: 'Registered successfully.',
     type: 'success',
   },
+  duplicate: {
+    message: 'Username already exists',
+    type: 'error',
+  },
 }
 
 const RegisterForm = () => {
@@ -69,31 +73,30 @@ const RegisterForm = () => {
   const classes = stylesInUse()
   const [showFormStatus, setShowFormStatus] = useState(false)
 
-  const [
-    registerUser,
-    { loading: registerLoading, data: registerData },
-  ] = useMutation(REGISTER)
+  const [registerUser] = useMutation(REGISTER)
 
   const createNewAccount = async (
     data: MyRegisterForm,
     resetForm: Function
   ) => {
     try {
-     await registerUser({
+      await registerUser({
         variables: {
           username: data.username,
           email: data.email,
           password: data.password,
         },
       })
-      //localStorage.setItem('token', response.data.register.token)
-      //window.location.href = '/'
+      setFormStatus(formStatusProps.success)
     } catch (error) {
-      setFormStatus(formStatusProps.error)
+      if (
+        error.message.includes('duplicate key value violates unique constraint')
+      ) {
+        setFormStatus(formStatusProps.duplicate)
+      } else {
+        setFormStatus(formStatusProps.error)
+      }
     }
-    console.log('register loading', registerLoading)
-    console.log('register data', registerData)
-    setFormStatus(formStatusProps.success)
     resetForm({})
     setShowFormStatus(true)
   }
