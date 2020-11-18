@@ -10,7 +10,7 @@ import {
 } from '../services/git'
 import { existsSync, readFileSync } from 'fs'
 import readRecursive from 'recursive-readdir'
-import { ForbiddenError } from 'apollo-server'
+import { ForbiddenError, ApolloError } from 'apollo-server'
 import { relative } from 'path'
 import { AppContext } from '../types/user'
 import { BranchSwitchArgs, SaveArgs } from '../types/params'
@@ -89,9 +89,9 @@ const resolvers = {
         )
       } catch (error) {
         if (error.message === 'Merge conflict') {
-          throw new Error('Merge conflict detected')
+          throw new ApolloError('Merge conflict detected')
         } else {
-          console.log(error.message)
+          throw new ApolloError(error.message)
         }
       }
 
@@ -118,9 +118,9 @@ const resolvers = {
         )
       } catch (error) {
         if (error.message === 'Merge conflict') {
-          throw new Error('Merge conflict detected')
+          throw new ApolloError('Merge conflict detected')
         } else {
-          console.log(error.message)
+          throw new ApolloError(error.message)
         }
       }
 
