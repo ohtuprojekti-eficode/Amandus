@@ -1,24 +1,16 @@
-import { createTestClient } from 'apollo-server-testing'
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/unbound-method */
+import { createTestClient as createNormalTestClient } from 'apollo-server-testing'
+import { createTestClient as createIntegrationTestClient } from 'apollo-server-integration-testing'
 import gql from 'graphql-tag'
 import { closePool } from '../db/connect'
 import { server } from '../index'
 import User from '../model/user'
+import { createToken } from '../utils/token'
 
-const AUTHORIZE_WITH_GH = gql`
-  mutation authorizeWithGithub($code: String!) {
-    authorizeWithGithub(code: $code) {
-      user {
-        id
-        username
-        emails
-        gitHubId
-        gitHubLogin
-        gitHubEmail
-        gitHubReposUrl
-        gitHubToken
-      }
-      token
-    }
+const ADD_SERVICE = gql`
+  mutation connectGitService($service: AddServiceArgs!) {
+    connectGitService(service: $service)
   }
 `
 
@@ -27,13 +19,20 @@ const ME = gql`
     me {
       id
       username
-      emails
-      gitHubId
-      gitHubLogin
-      gitHubEmail
-      gitHubReposUrl
-      gitHubToken
+      email
+      services {
+        serviceName
+        username
+        email
+        reposurl
+      }
     }
+  }
+`
+
+const GH_TOKEN = gql`
+  query {
+    currentToken
   }
 `
 
@@ -67,10 +66,9 @@ describe('User schema register mutations', () => {
   })
 
   it('user can register with valid username, email and password', async () => {
-    const { mutate } = createTestClient(server)
+    const { mutate } = createIntegrationTestClient({ apolloServer: server })
 
-    const res = await mutate({
-      mutation: REGISTER,
+    const mutationResult = await mutate(REGISTER, {
       variables: {
         username: 'testuser2',
         email: 'testuser2@test.com',
@@ -78,12 +76,24 @@ describe('User schema register mutations', () => {
       },
     })
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    expect(res.data?.register?.user?.username).toEqual('testuser2')
+    const expectedUser = await User.findUserByUsername('testuser2')
+    const expectedToken = createToken(expectedUser)
+
+    expect(mutationResult).toEqual({
+      data: {
+        register: {
+          token: expectedToken,
+          user: {
+            id: expectedUser?.id,
+            username: expectedUser?.username,
+          },
+        },
+      },
+    })
   })
 
   it('backend returns a token after user has successfully registered', async () => {
-    const { mutate } = createTestClient(server)
+    const { mutate } = createNormalTestClient(server)
 
     const res = await mutate({
       mutation: REGISTER,
@@ -94,12 +104,11 @@ describe('User schema register mutations', () => {
       },
     })
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     expect(res.data?.register?.token).toBeTruthy()
   })
 
   it('user can not register without a username', async () => {
-    const { mutate } = createTestClient(server)
+    const { mutate } = createNormalTestClient(server)
 
     const res = await mutate({
       mutation: REGISTER,
@@ -114,13 +123,11 @@ describe('User schema register mutations', () => {
       (error) =>
         error.message === 'Username, email or password can not be empty'
     )
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     expect(errorFound).toBeTruthy()
   })
 
   it('user can not register without a password', async () => {
-    const { mutate } = createTestClient(server)
+    const { mutate } = createNormalTestClient(server)
 
     const res = await mutate({
       mutation: REGISTER,
@@ -136,12 +143,11 @@ describe('User schema register mutations', () => {
         error.message === 'Username, email or password can not be empty'
     )
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     expect(errorFound).toBeTruthy()
   })
 
   it('user can not register without an email address', async () => {
-    const { mutate } = createTestClient(server)
+    const { mutate } = createNormalTestClient(server)
 
     const res = await mutate({
       mutation: REGISTER,
@@ -156,8 +162,6 @@ describe('User schema register mutations', () => {
       (error) =>
         error.message === 'Username, email or password can not be empty'
     )
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     expect(errorFound).toBeTruthy()
   })
 })
@@ -176,7 +180,7 @@ describe('User schema login mutations', () => {
   })
 
   it('user can login with valid username and password', async () => {
-    const { mutate } = createTestClient(server)
+    const { mutate } = createNormalTestClient(server)
 
     const res = await mutate({
       mutation: LOGIN,
@@ -191,7 +195,7 @@ describe('User schema login mutations', () => {
   })
 
   it('user can not login without username and password', async () => {
-    const { mutate } = createTestClient(server)
+    const { mutate } = createNormalTestClient(server)
 
     const res = await mutate({
       mutation: LOGIN,
@@ -204,12 +208,11 @@ describe('User schema login mutations', () => {
     const errorFound = res.errors?.some(
       (error) => error.message === 'Invalid username or password'
     )
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     expect(errorFound).toBeTruthy()
   })
 
   it('user can not login without a valid password', async () => {
-    const { mutate } = createTestClient(server)
+    const { mutate } = createNormalTestClient(server)
 
     const res = await mutate({
       mutation: LOGIN,
@@ -222,12 +225,11 @@ describe('User schema login mutations', () => {
     const errorFound = res.errors?.some(
       (error) => error.message === 'Invalid username or password'
     )
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     expect(errorFound).toBeTruthy()
   })
 
   it('user can not login without a valid username', async () => {
-    const { mutate } = createTestClient(server)
+    const { mutate } = createNormalTestClient(server)
 
     const res = await mutate({
       mutation: LOGIN,
@@ -240,50 +242,209 @@ describe('User schema login mutations', () => {
     const errorFound = res.errors?.some(
       (error) => error.message === 'Invalid username or password'
     )
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    expect(errorFound).toBeTruthy()
-  })
-
-  it('user can not authorize with an invalid GitHub code', async () => {
-    const { mutate } = createTestClient(server)
-
-    const res = await mutate({
-      mutation: AUTHORIZE_WITH_GH,
-      variables: { code: 'invalid' },
-    })
-
-    const errorFound = res.errors?.some(
-      (error) => error.message === 'Invalid or expired GitHub code'
-    )
     expect(errorFound).toBeTruthy()
   })
 })
 
-describe('User schema GitHub auth mutations', () => {
-  it('user can not authorize with an invalid GitHub code', async () => {
-    const { mutate } = createTestClient(server)
+describe('User schema add git service mutations', () => {
+  beforeEach(async () => {
+    await User.deleteAll()
+  })
 
-    const res = await mutate({
-      mutation: AUTHORIZE_WITH_GH,
-      variables: { code: 'invalid' },
+  it('users github account can be added to user data', async () => {
+    const userToSave = {
+      username: 'testuser',
+      password: 'testpassword',
+      email: 'test@test.fi',
+    }
+
+    const user = await User.registerUser(userToSave)
+
+    const token = createToken(user)
+
+    const { mutate } = createIntegrationTestClient({
+      apolloServer: server,
+      extendMockRequest: {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      },
     })
 
-    const errorFound = res.errors?.some(
-      (error) => error.message === 'Invalid or expired GitHub code'
-    )
-    expect(errorFound).toBeTruthy()
+    const serviceArgs = {
+      serviceName: 'github',
+      username: 'github_username',
+      email: 'user@githubmail.com',
+      reposurl: 'mygithubrepos.github.com',
+    }
+
+    const mutationResult = await mutate(ADD_SERVICE, {
+      variables: { service: serviceArgs },
+    })
+
+    expect(mutationResult).toEqual({
+      data: {
+        connectGitService: 'success',
+      },
+    })
   })
 })
 
-describe('User schema logged out queries', () => {
+describe('Context currentuser query', () => {
+  beforeEach(async () => {
+    await User.deleteAll()
+  })
+
   it('no user data is returned when user is not logged in', async () => {
-    const { query } = createTestClient(server)
+    const { query } = createIntegrationTestClient({ apolloServer: server })
 
-    const res = await query({
-      query: ME,
+    const queryResult = await query(ME)
+
+    expect(queryResult).toEqual({
+      data: {
+        me: null,
+      },
+    })
+  })
+
+  it('user data and github token is returned when set, no services', async () => {
+    const userToSave = {
+      username: 'testuser',
+      password: 'testpassword',
+      email: 'test@test.fi',
+    }
+
+    const user = await User.registerUser(userToSave)
+    const token = createToken(user)
+
+    const { query } = createIntegrationTestClient({
+      apolloServer: server,
+      extendMockRequest: {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      },
     })
 
-    expect(res.data?.me).toBeNull()
+    const queryResult = await query(ME)
+
+    expect(queryResult).toEqual({
+      data: {
+        me: {
+          id: user.id,
+          username: userToSave.username,
+          email: userToSave.email,
+          services: null,
+        },
+      },
+    })
+  })
+
+  it('user data and github token is returned when set, one service', async () => {
+    const userToSave = {
+      username: 'testuser',
+      password: 'testpassword',
+      email: 'test@test.fi',
+    }
+
+    const user = await User.registerUser(userToSave)
+    const serviceArgs = {
+      serviceName: 'github',
+      username: 'github_username',
+      email: 'user@githubmail.com',
+      reposurl: 'mygithubrepos.github.com',
+    }
+
+    const token = createToken(user, 'githubtoken123')
+
+    const { query, mutate } = createIntegrationTestClient({
+      apolloServer: server,
+      extendMockRequest: {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      },
+    })
+
+    await mutate(ADD_SERVICE, {
+      variables: { service: serviceArgs },
+    })
+
+    const queryResult = await query(ME)
+
+    expect(queryResult).toEqual({
+      data: {
+        me: {
+          id: user.id,
+          username: userToSave.username,
+          email: userToSave.email,
+          services: [serviceArgs],
+        },
+      },
+    })
+  })
+})
+
+describe('Context githubToken query', () => {
+  beforeEach(async () => {
+    await User.deleteAll()
+  })
+  it('no token is returned when set', async () => {
+    const userToSave = {
+      username: 'testuser',
+      password: 'testpassword',
+      email: 'test@test.fi',
+    }
+
+    const user = await User.registerUser(userToSave)
+
+    const token = createToken(user)
+
+    const { query } = createIntegrationTestClient({
+      apolloServer: server,
+      extendMockRequest: {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      },
+    })
+
+    const queryResult = await query(GH_TOKEN)
+
+    expect(queryResult).toEqual({
+      data: {
+        currentToken: null,
+      },
+    })
+  })
+
+  it('correct token is returned when set', async () => {
+    const userToSave = {
+      username: 'testuser',
+      password: 'testpassword',
+      email: 'test@test.fi',
+    }
+
+    const user = await User.registerUser(userToSave)
+
+    const token = createToken(user, 'githubtoken123')
+
+    const { query } = createIntegrationTestClient({
+      apolloServer: server,
+      extendMockRequest: {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      },
+    })
+
+    const queryResult = await query(GH_TOKEN)
+
+    expect(queryResult).toEqual({
+      data: {
+        currentToken: 'githubtoken123',
+      },
+    })
   })
 })
 

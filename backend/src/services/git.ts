@@ -23,13 +23,20 @@ export const switchCurrentBranch = async (
   return await gitCheckout(git, branchName)
 }
 
-export const pullMasterChanges = async (httpsURL: string): Promise<void> => {
+export const pullNewestChanges = async (httpsURL: string): Promise<void> => {
   const url = new URL(httpsURL)
   const repositoryName = url.pathname
+  const repoLocation = `./repositories/${repositoryName}`
+
+  const currentBranch = await getCurrentBranch(repoLocation)
 
   await simpleGit(`./repositories/${repositoryName}`)
     .fetch('origin')
-    .pull('origin', 'master')
+    .branch([`--set-upstream-to=origin/${currentBranch}`, currentBranch])
+    .pull()
+    .catch((error: GitError) => {
+      console.log(error)
+    })
 }
 
 export const cloneRepository = async (httpsURL: string): Promise<void> => {
@@ -41,14 +48,16 @@ export const cloneRepository = async (httpsURL: string): Promise<void> => {
 
 export const saveChanges = async (
   saveArgs: SaveArgs,
-  user: UserType
+  user: UserType,
+  remoteToken: string
 ): Promise<void> => {
-  const { username, gitHubEmail, gitHubToken } = user
+  const { username, email } = user
+
   const { file, branch, commitMessage } = saveArgs
 
   const repositoryName = getRepositoryFromFilePath(file)
 
-  const gitObject = setupGitConfig(username, gitHubEmail ?? '', repositoryName)
+  const gitObject = setupGitConfig(username, email ?? '', repositoryName)
 
   await gitCheckout(gitObject, branch)
 
@@ -65,7 +74,7 @@ export const saveChanges = async (
 
   await gitCommit(gitObject, validCommitMessage)
 
-  await gitPush(gitObject, username, gitHubToken ?? '', branch)
+  await gitPush(gitObject, username, remoteToken, branch)
 }
 
 const getRepositoryFromFilePath = (file: File) => {
@@ -190,4 +199,12 @@ export const getBranches = async (repoLocation: string): Promise<string[]> => {
   const git = simpleGit(repoLocation)
   const branches = await git.branch()
   return branches.all
+}
+
+export const getCurrentBranch = async (
+  repoLocation: string
+): Promise<string> => {
+  const git = simpleGit(repoLocation)
+  const branches = await git.branchLocal()
+  return branches.current
 }
