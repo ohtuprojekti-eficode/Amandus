@@ -23,6 +23,18 @@ export const SAVE_CHANGES = gql`
     saveChanges(file: $file, branch: $branch, commitMessage: $commitMessage)
   }
 `
+export const REGISTER = gql`
+  mutation register($username: String!, $email: String!, $password: String!) {
+    register(username: $username, email: $email, password: $password) {
+      user {
+        id
+        username
+        email
+      }
+      token
+    }
+  }
+`
 
 export const ADD_SERVICE = gql`
   mutation connectGitService($service: AddServiceArgs!) {

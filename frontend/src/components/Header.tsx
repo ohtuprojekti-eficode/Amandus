@@ -27,6 +27,11 @@ const Header = ({ user, logout }: Props) => {
             Login
           </Link>
         )}
+        {!user && (
+          <Link style={padding} to="/register">
+            Register
+          </Link>
+        )}
         {user && (
           <Link style={padding} to="/" onClick={logout}>
             {user.username} - logout
