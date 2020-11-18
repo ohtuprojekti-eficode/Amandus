@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react'
 import Editor from '@monaco-editor/react'
 import { useMutation, useQuery } from '@apollo/client'
 import { ME, REPO_STATE } from '../graphql/queries'
-import { SAVE_CHANGES } from '../graphql/mutations'
+import { SAVE_CHANGES, SAVE_CHANGES_AND_PUSH_TO_REMOTE } from '../graphql/mutations'
 import { Button } from '@material-ui/core'
 import SaveDialog from './SaveDialog'
 import AuthenticateDialog from './AuthenticateDialog'
@@ -38,6 +38,13 @@ const MonacoEditor = ({ content, filename }: Props) => {
 
   const [saveChanges, { loading: mutationSaveLoading }] = useMutation(
     SAVE_CHANGES,
+    {
+      refetchQueries: [{ query: REPO_STATE }],
+    }
+  )
+
+  const [saveChangesAndPushToRemote, { loading: mutationSavePushLoading }] = useMutation(
+    SAVE_CHANGES_AND_PUSH_TO_REMOTE,
     {
       refetchQueries: [{ query: REPO_STATE }],
     }
