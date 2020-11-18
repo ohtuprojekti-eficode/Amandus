@@ -14,7 +14,7 @@ exports.up = (pgm) => {
 
   pgm.sql(`CREATE TABLE SERVICES(
         id serial PRIMARY KEY,
-        name TEXT);`)
+        name TEXT UNIQUE NOT NULL);`)
 
   pgm.sql(`CREATE TABLE SERVICE_USERS(
         id serial PRIMARY KEY,
@@ -22,13 +22,15 @@ exports.up = (pgm) => {
         services_id INTEGER REFERENCES SERVICES(id) ON DELETE CASCADE,
         username TEXT, 
         email TEXT,
-        token TEXT,
-        reposurl TEXT);`)
+        reposurl TEXT,
+        UNIQUE(services_id, username));`)
 
   pgm.sql(`CREATE TABLE REPO(
         id serial PRIMARY KEY,
         service_user_id INTEGER REFERENCES SERVICE_USERS(id) ON DELETE CASCADE,
         web_url TEXT);`)
+
+  pgm.sql(`INSERT INTO SERVICES(name) VALUES('github');`)
 }
 
 exports.down = (pgm) => {

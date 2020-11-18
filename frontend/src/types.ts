@@ -26,15 +26,16 @@ export interface Error {
   message: string
 }
 
-export interface UserType {
-  id?: string
-  emails: string[]
+export interface ServiceUserType {
+  serviceName: string
   username: string
-  password?: string
-  token?: string
-  gitHubid?: string
-  gitHubLogin?: string
-  gitHubEmail?: string
-  gitHubReposUrl?: string
-  gitHubToken?: string
+  email: string
+  reposurl: string
+}
+
+export interface UserType {
+  id: number
+  username: string
+  email: string
+  services?: ServiceUserType[]
 }

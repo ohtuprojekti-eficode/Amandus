@@ -77,12 +77,20 @@ const resolvers = {
       saveArgs: SaveArgs,
       context: AppContext
     ): Promise<string> => {
-      if (!context.currentUser || !context.currentUser.gitHubToken) {
+      if (!context.currentUser) {
         throw new ForbiddenError('You have to login')
       }
 
+      if (!context.githubToken) {
+        throw new ForbiddenError('You need a remote token')
+      }
+
       try {
-        await saveChanges(saveArgs, context.currentUser)
+        await saveChanges(
+          saveArgs,
+          context.currentUser,
+          context.githubToken ?? ''
+        )
       } catch (error) {
         if (error.message === 'Merge conflict') {
           throw new Error('Merge conflict detected')
