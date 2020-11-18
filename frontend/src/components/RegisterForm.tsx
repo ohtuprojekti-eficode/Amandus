@@ -11,7 +11,6 @@ import { useMutation } from '@apollo/client'
 import { REGISTER } from '../graphql/mutations'
 import RegisterSchema from './RegisterSchema'
 
-
 const stylesInUse = makeStyles(() =>
   createStyles({
     root: {
@@ -105,7 +104,6 @@ const RegisterForm = () => {
 
   return (
     <div className={classes.root}>
-
       <Formik
         initialValues={{
           username: '',
@@ -133,10 +131,8 @@ const RegisterForm = () => {
 
           return (
             <Form>
-
               <Grid container direction="row">
-                
-              <Grid item className={classes.title} xs={12}>
+                <Grid item className={classes.title} xs={12}>
                   <h1>Register</h1>
                 </Grid>
 
@@ -188,7 +184,7 @@ const RegisterForm = () => {
                     helperText={
                       touched.password && errors.password
                         ? 'Valid password is atleast 6 characters long and consists atleast 1 uppercase,lowercase,number and special character.'
-                        : 'Make sure your password includes no spaces, is minimum 6 characters long and consists at least 1 uppercase,lowercase,number and special character.'
+                        : 'Make sure your password includes no spaces, is minimum 7 characters long and consists at least 1 uppercase,lowercase,number and special character.'
                     }
                     error={touched.password && errors.password ? true : false}
                   />
@@ -206,9 +202,13 @@ const RegisterForm = () => {
                     helperText={
                       touched.confirmPassword && errors.confirmPassword
                         ? 'Valid password is atleast 6 characters long and consists atleast 1 uppercase,lowercase,number and special character.'
-                        : 'Make sure your password includes no spaces, is minimum 6 characters long and consists at least 1 uppercase,lowercase,number and special character.'
+                        : 'Make sure your password includes no spaces, is minimum 7 characters long and consists at least 1 uppercase,lowercase,number and special character.'
                     }
-                    error={touched.confirmPassword && errors.confirmPassword ? true : false}
+                    error={
+                      touched.confirmPassword && errors.confirmPassword
+                        ? true
+                        : false
+                    }
                   />
                 </Grid>
 
