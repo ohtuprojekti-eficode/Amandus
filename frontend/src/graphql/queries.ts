@@ -45,5 +45,7 @@ export const ME = gql`
 `
 
 export const CURRENT_TOKEN = gql`
-  query currentToken
+  query {
+    currentToken
+  } 
 `
