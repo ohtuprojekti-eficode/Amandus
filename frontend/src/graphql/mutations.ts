@@ -45,7 +45,8 @@ export const LOGIN = gql`
         username
       }
     }
-  `
+  }
+`
 
 export const ADD_SERVICE = gql`
   mutation connectGitService($service: AddServiceArgs!) {
