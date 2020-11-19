@@ -78,11 +78,15 @@ const MyLoginForm = () => {
           password: data.password,
         },
       })
+      setFormStatus(formStatusProps.success)
     } catch (error) {
       setFormStatus(formStatusProps.error)
     }
 
-    setFormStatus(formStatusProps.success)
+    //DEBUG
+    console.log('LOGIN LOADING:', loginLoading)
+    console.log('LOGIN DATA:', loginData)
+
     resetForm({})
     setShowFormStatus(true)
   }
