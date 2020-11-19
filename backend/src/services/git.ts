@@ -15,13 +15,28 @@ export const getCurrentBranchName = async (
   return branches.current
 }
 
-export const pullMasterChanges = async (httpsURL: string): Promise<void> => {
+export const switchCurrentBranch = async (
+  repoLocation: string,
+  branchName: string
+): Promise<string> => {
+  const git = simpleGit(repoLocation)
+  return await gitCheckout(git, branchName)
+}
+
+export const pullNewestChanges = async (httpsURL: string): Promise<void> => {
   const url = new URL(httpsURL)
   const repositoryName = url.pathname
+  const repoLocation = `./repositories/${repositoryName}`
+
+  const currentBranch = await getCurrentBranch(repoLocation)
 
   await simpleGit(`./repositories/${repositoryName}`)
     .fetch('origin')
-    .pull('origin', 'master')
+    .branch([`--set-upstream-to=origin/${currentBranch}`, currentBranch])
+    .pull()
+    .catch((error: GitError) => {
+      console.log(error)
+    })
 }
 
 export const cloneRepository = async (httpsURL: string): Promise<void> => {
@@ -33,14 +48,16 @@ export const cloneRepository = async (httpsURL: string): Promise<void> => {
 
 export const saveChanges = async (
   saveArgs: SaveArgs,
-  user: UserType
+  user: UserType,
+  remoteToken: string
 ): Promise<void> => {
-  const { username, gitHubEmail, gitHubToken } = user
+  const { username, email } = user
+
   const { file, branch, commitMessage } = saveArgs
 
   const repositoryName = getRepositoryFromFilePath(file)
 
-  const gitObject = setupGitConfig(username, gitHubEmail ?? '', repositoryName)
+  const gitObject = setupGitConfig(username, email ?? '', repositoryName)
 
   await gitCheckout(gitObject, branch)
 
@@ -57,7 +74,7 @@ export const saveChanges = async (
 
   await gitCommit(gitObject, validCommitMessage)
 
-  await gitPush(gitObject, username, gitHubToken ?? '', branch)
+  await gitPush(gitObject, username, remoteToken, branch)
 }
 
 const getRepositoryFromFilePath = (file: File) => {
@@ -84,10 +101,10 @@ const gitCheckout = async (git: SimpleGit, branchName: string) => {
 
   if (await branchExists(git, sanitizedBranchName)) {
     await git.checkout([sanitizedBranchName])
-    return
+  } else {
+    await git.checkout(['-b', sanitizedBranchName])
   }
-
-  await git.checkout(['-b', sanitizedBranchName])
+  return sanitizedBranchName
 }
 
 const branchExists = async (
@@ -182,4 +199,12 @@ export const getBranches = async (repoLocation: string): Promise<string[]> => {
   const git = simpleGit(repoLocation)
   const branches = await git.branch()
   return branches.all
+}
+
+export const getCurrentBranch = async (
+  repoLocation: string
+): Promise<string> => {
+  const git = simpleGit(repoLocation)
+  const branches = await git.branchLocal()
+  return branches.current
 }

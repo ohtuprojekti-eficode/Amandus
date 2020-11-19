@@ -3,15 +3,11 @@ import { gql } from '@apollo/client'
 export const AUTHORIZE_WITH_GH = gql`
   mutation authorizeWithGithub($code: String!) {
     authorizeWithGithub(code: $code) {
-      user {
-        id
+      serviceUser {
+        serviceName
         username
-        emails
-        gitHubId
-        gitHubLogin
-        gitHubEmail
-        gitHubReposUrl
-        gitHubToken
+        email
+        reposurl
       }
       token
     }
@@ -27,13 +23,15 @@ export const SAVE_CHANGES = gql`
     saveChanges(file: $file, branch: $branch, commitMessage: $commitMessage)
   }
 `
-
 export const REGISTER = gql`
   mutation register($username: String!, $email: String!, $password: String!) {
     register(username: $username, email: $email, password: $password) {
-      user_id
-      username
-      email
+      user {
+        id
+        username
+        email
+      }
+      token
     }
   }
 `
@@ -47,5 +45,10 @@ export const LOGIN = gql`
         username
       }
     }
+  `
+
+export const ADD_SERVICE = gql`
+  mutation connectGitService($service: AddServiceArgs!) {
+    connectGitService(service: $service)
   }
 `

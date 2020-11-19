@@ -2,16 +2,17 @@
 import {
   cloneRepository,
   getCurrentBranchName,
-  pullMasterChanges,
+  pullNewestChanges,
   saveChanges,
   getBranches,
+  switchCurrentBranch,
 } from '../services/git'
 import { existsSync, readFileSync } from 'fs'
 import readRecursive from 'recursive-readdir'
 import { ForbiddenError } from 'apollo-server'
 import { relative } from 'path'
 import { AppContext } from '../types/user'
-import { SaveArgs } from '../types/params'
+import { BranchSwitchArgs, SaveArgs } from '../types/params'
 import { RepoState } from '../types/repoState'
 
 const typeDef = `
@@ -44,7 +45,7 @@ const resolvers = {
       if (!existsSync(fileLocation)) {
         await cloneRepository(url.href)
       } else {
-        await pullMasterChanges(url.href)
+        await pullNewestChanges(url.href)
       }
       return 'Cloned'
     },
@@ -76,12 +77,20 @@ const resolvers = {
       saveArgs: SaveArgs,
       context: AppContext
     ): Promise<string> => {
-      if (!context.currentUser || !context.currentUser.gitHubToken) {
+      if (!context.currentUser) {
         throw new ForbiddenError('You have to login')
       }
 
+      if (!context.githubToken) {
+        throw new ForbiddenError('You need a remote token')
+      }
+
       try {
-        await saveChanges(saveArgs, context.currentUser)
+        await saveChanges(
+          saveArgs,
+          context.currentUser,
+          context.githubToken ?? ''
+        )
       } catch (error) {
         if (error.message === 'Merge conflict') {
           throw new Error('Merge conflict detected')
@@ -91,6 +100,16 @@ const resolvers = {
       }
 
       return 'Saved'
+    },
+    switchBranch: async (
+      _root: unknown,
+      branchSwitchArgs: BranchSwitchArgs,
+      _context: unknown
+    ): Promise<string> => {
+      const url = new URL(branchSwitchArgs.url)
+      const repositoryName = url.pathname
+      const repoLocation = `./repositories/${repositoryName}`
+      return await switchCurrentBranch(repoLocation, branchSwitchArgs.branch)
     },
   },
 }

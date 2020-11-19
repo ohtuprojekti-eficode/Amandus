@@ -32,14 +32,14 @@ export const GITHUB_LOGIN_URL = gql`
 export const ME = gql`
   query {
     me {
-      id
       username
-      emails
-      gitHubId
-      gitHubLogin
-      gitHubEmail
-      gitHubReposUrl
-      gitHubToken
+      email
+      services {
+        serviceName
+        username
+        email
+        reposurl
+      }
     }
   }
 `
