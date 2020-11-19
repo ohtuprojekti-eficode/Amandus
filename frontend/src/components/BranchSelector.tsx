@@ -1,43 +1,88 @@
 import React from 'react'
+import { makeStyles, Theme, createStyles } from '@material-ui/core/styles'
+import List from '@material-ui/core/List'
+import ListItem from '@material-ui/core/ListItem'
+import ListItemText from '@material-ui/core/ListItemText'
+import MenuItem from '@material-ui/core/MenuItem'
+import Menu from '@material-ui/core/Menu'
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    root: {
+      backgroundColor: theme.palette.background.paper,
+    },
+
+    dropdownHeader: {
+      textAlignLast: 'right' as 'right',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+    },
+
+    dropdown: {
+      border: '2px solid black',
+    },
+  })
+)
 
 interface PropsType {
   branches: string[]
 }
 
 const BranchSelector = ({ branches }: PropsType) => {
+  const classes = useStyles()
+  const [anchorElement, setAnchorElement] = React.useState<null | HTMLElement>(
+    null
+  )
+  const [selectedBranch, setSelectedBranch] = React.useState('master')
+
+  const handleClickListItem = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorElement(event.currentTarget)
+  }
+
+  const handleMenuItemClick = (branch: string) => {
+    setSelectedBranch(branch)
+    setAnchorElement(null)
+  }
+
+  const handleClose = () => {
+    setAnchorElement(null)
+  }
+
   return (
-    <div style={gridContainerStyle}>
-      <h4>On branch:</h4>
-      <select style={dropdownStyles}>
+    <div className={classes.root}>
+      <List component="nav" className={classes.dropdown}>
+        <ListItem
+          button
+          aria-haspopup="true"
+          aria-controls="lock-menu"
+          onClick={handleClickListItem}
+        >
+          <ListItemText>on branch:</ListItemText>
+          <ListItemText
+            className={classes.dropdownHeader}
+            primary={selectedBranch}
+          />
+        </ListItem>
+      </List>
+      <Menu
+        id="lock-menu"
+        anchorEl={anchorElement}
+        keepMounted
+        open={Boolean(anchorElement)}
+        onClose={handleClose}
+      >
         {branches.map((branch) => (
-          <option style={dropdownOptionStyles} key={branch}>
+          <MenuItem
+            key={branch}
+            selected={branch === selectedBranch}
+            onClick={() => handleMenuItemClick(branch)}
+          >
             {branch}
-          </option>
+          </MenuItem>
         ))}
-      </select>
+      </Menu>
     </div>
   )
-}
-
-const gridContainerStyle = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  padding: '0px 0.5em',
-}
-
-const dropdownStyles = {
-  border: '0px',
-  outline: '0px',
-  width: '100%',
-  fontSize: '1.6em',
-  textOverflow: 'ellipsis',
-  textAlignLast: 'right' as 'right',
-  background: 'white',
-}
-
-const dropdownOptionStyles = {
-  fontSize: '.9em',
-  direction: 'rtl' as 'rtl',
 }
 
 export default BranchSelector
