@@ -28,11 +28,12 @@ const EditView = () => {
   const files = repoStateData ? repoStateData.repoState.files : []
   const filename = location.search.slice(3)
   const content = files.find((e) => e.name === filename)?.content
+  const branches = repoStateData ? repoStateData.repoState.branches : []
 
   return (
     <div className={classes.root}>
       <div className={classes.sidebar}>
-        <Sidebar files={files} />
+        <Sidebar files={files} branches={branches} />
       </div>
       <div className={classes.editor}>
         <MonacoEditor content={content} filename={filename} />
