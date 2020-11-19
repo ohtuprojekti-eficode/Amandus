@@ -83,10 +83,19 @@ const resolvers = {
       }
 
       try {
-        await saveChanges(
-          saveArgs,
-          context.currentUser
-        )
+        if (!context.githubToken) {
+          await saveChanges(
+            saveArgs,
+            context.currentUser
+          )
+        } else {
+          await saveChangesAndPush(
+            saveArgs,
+            context.currentUser,
+            context.githubToken ?? ''
+          )
+        }
+        
       } catch (error) {
         if (error.message === 'Merge conflict') {
           throw new ApolloError('Merge conflict detected')
@@ -96,35 +105,6 @@ const resolvers = {
       }
 
       return 'Saved'
-    },
-    saveChangesAndPushToRemote: async (
-      _root: unknown,
-      saveArgs: SaveArgs,
-      context: AppContext
-    ): Promise<string> => {
-      if (!context.currentUser) {
-        throw new ForbiddenError('You have to login')
-      }
-
-      if (!context.githubToken) {
-        throw new ForbiddenError('You need a remote token')
-      }
-
-      try {
-        await saveChangesAndPush(
-          saveArgs,
-          context.currentUser,
-          context.githubToken ?? ''
-        )
-      } catch (error) {
-        if (error.message === 'Merge conflict') {
-          throw new ApolloError('Merge conflict detected')
-        } else {
-          throw new ApolloError(error.message)
-        }
-      }
-
-      return 'Saved to remote repository'
     },
     switchBranch: async (
       _root: unknown,
