@@ -27,9 +27,6 @@ const Header = ({ user, logout }: Props) => {
             <Link style={padding} to="/login">
               Login
             </Link>
-            <Link style={padding} to="/login2">
-              MyLoginForm
-            </Link>
           </div>
         )}
         {!user && (
@@ -42,6 +39,11 @@ const Header = ({ user, logout }: Props) => {
             {user.username} - logout
           </Link>
         )}
+        <div>
+          <Link style={padding} to="/connect">
+            Connect
+          </Link>
+        </div>
       </Toolbar>
     </AppBar>
   )

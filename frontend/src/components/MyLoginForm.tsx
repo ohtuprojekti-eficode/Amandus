@@ -66,26 +66,22 @@ const MyLoginForm = () => {
   const classes = stylesInUse()
   const [showFormStatus, setShowFormStatus] = useState(false)
 
-  const [loginUser, { loading: loginLoading, data: loginData }] = useMutation(
-    LOGIN
-  )
+  const [loginUser] = useMutation(LOGIN)
 
   const logInUser = async (data: LoginFormFields, resetForm: Function) => {
     try {
-      await loginUser({
+      const loginResponse = await loginUser({
         variables: {
           username: data.username,
           password: data.password,
         },
       })
       setFormStatus(formStatusProps.success)
+      localStorage.setItem('token', loginResponse.data.login.token)
+      window.location.href = '/'
     } catch (error) {
       setFormStatus(formStatusProps.error)
     }
-
-    //DEBUG
-    console.log('LOGIN LOADING:', loginLoading)
-    console.log('LOGIN DATA:', loginData)
 
     resetForm({})
     setShowFormStatus(true)
