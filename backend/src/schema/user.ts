@@ -3,7 +3,6 @@ import bcrypt from 'bcryptjs'
 import config from '../utils/config'
 import {
   UserType,
-  AuthResponse,
   AppContext,
   GitHubAuthCode,
   ServiceAuthResponse,
@@ -138,7 +137,7 @@ const resolvers = {
     register: async (
       _root: unknown,
       args: RegisterUserInput
-    ): Promise<AuthResponse> => {
+    ): Promise<string> => {
       if (
         args.username.length === 0 ||
         args.email.length === 0 ||
@@ -157,15 +156,12 @@ const resolvers = {
 
       const token = createToken(user)
 
-      return {
-        user,
-        token,
-      }
+      return token
     },
     login: async (
       _root: unknown,
       args: LoginUserInput
-    ): Promise<AuthResponse> => {
+    ): Promise<string> => {
       const user = await User.findUserByUsername(args.username)
 
       if (!user) {
@@ -183,10 +179,7 @@ const resolvers = {
 
       const token = createToken(user)
 
-      return {
-        user,
-        token,
-      }
+      return token
     },
   },
 }
