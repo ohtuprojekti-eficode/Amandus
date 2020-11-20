@@ -46,13 +46,13 @@ const resolvers = {
     },
     githubLoginUrl: (): string => {
       const cbUrl = config.GITHUB_CB_URL || ''
-      const cliendID = config.GITHUB_CLIENT_ID || ''
+      const clientID = config.GITHUB_CLIENT_ID || ''
 
-      if (!cbUrl || !cliendID) {
-        throw new Error('GitHub cliend id or callback url not set')
+      if (!cbUrl || !clientID) {
+        throw new Error('GitHub client id or callback url not set')
       }
 
-      return `https://github.com/login/oauth/authorize?response_type=code&redirect_uri=${cbUrl}&client_id=${cliendID}`
+      return `https://github.com/login/oauth/authorize?response_type=code&redirect_uri=${cbUrl}&client_id=${clientID}`
     },
     currentToken: (
       _root: unknown,
