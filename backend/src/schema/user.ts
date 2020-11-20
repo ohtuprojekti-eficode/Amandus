@@ -120,8 +120,7 @@ const resolvers = {
         email: gitHubUser.email,
         reposurl: gitHubUser.repos_url,
       }
-
-      const token = createToken(context.currentUser, access_token.access_token)
+      const token = createToken(context.currentUser, access_token.toString())
 
       return {
         serviceUser,
