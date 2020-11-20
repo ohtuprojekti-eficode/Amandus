@@ -40,10 +40,6 @@ const REGISTER = gql`
   mutation register($username: String!, $email: String!, $password: String!) {
     register(username: $username, email: $email, password: $password) {
       token
-      user {
-        id
-        username
-      }
     }
   }
 `
@@ -52,10 +48,6 @@ const LOGIN = gql`
   mutation login($username: String!, $password: String!) {
     login(username: $username, password: $password) {
       token
-      user {
-        id
-        username
-      }
     }
   }
 `
@@ -82,11 +74,7 @@ describe('User schema register mutations', () => {
     expect(mutationResult).toEqual({
       data: {
         register: {
-          token: expectedToken,
-          user: {
-            id: expectedUser?.id,
-            username: expectedUser?.username,
-          },
+          token: expectedToken
         },
       },
     })
@@ -191,7 +179,7 @@ describe('User schema login mutations', () => {
     })
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    expect(res.data?.login?.user?.username).toEqual('testuser')
+    expect(res.data?.login?.token).toBeTruthy()
   })
 
   it('user can not login without username and password', async () => {
