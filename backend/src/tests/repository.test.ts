@@ -1,11 +1,17 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/unbound-method */
 
 import { gql } from 'apollo-server'
 import { createTestClient } from 'apollo-server-testing'
+import { createTestClient as createIntegrationTestClient } from 'apollo-server-integration-testing'
 import { appendFileSync, mkdirSync, rmdirSync } from 'fs'
 import { join } from 'path'
 import simpleGit from 'simple-git'
 import { server } from '../index'
+import User from '../model/user'
+import { closePool } from '../db/connect'
+import { createToken } from '../utils/token'
 
 const GET_REPO_STATE = gql`
   query repoState($url: String!) {
@@ -22,6 +28,16 @@ const GET_REPO_STATE = gql`
 const SWITCH_BRANCH = gql`
   mutation switchBranch($url: String!, $branch: String!) {
     switchBranch(url: $url, branch: $branch)
+  }
+`
+
+const SAVE_CHANGES = gql`
+  mutation saveChanges(
+    $file: FileInput!
+    $branch: String!
+    $commitMessage: String
+  ) {
+    saveChanges(file: $file, branch: $branch, commitMessage: $commitMessage)
   }
 `
 
@@ -250,4 +266,93 @@ describe('switchBranch mutation', () => {
     const branches = await testRepo.branchLocal()
     expect(branches.current).toEqual('thirdBranch')
   })
+})
+
+describe('SaveChanges mutation', () => {
+  const repoPath = join('.', 'repositories', 'testuser', 'testRepo')
+
+  beforeEach(async () => {
+    await User.deleteAll()
+    mkdirSync(repoPath, { recursive: true })
+    await simpleGit(repoPath).init()
+  })
+
+  afterEach(() => {
+    rmdirSync(repoPath, { recursive: true })
+  })
+
+  it('Saving changes works for a local user', async () => {
+    const userToSave = {
+      username: 'testuser',
+      password: 'testpassword',
+      email: 'test@test.fi',
+    }
+
+    const user = await User.registerUser(userToSave)
+
+    const token = createToken(user)
+
+    const { mutate } = createIntegrationTestClient({
+      apolloServer: server,
+      extendMockRequest: {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      },
+    })
+
+    const mutateResult = await mutate(SAVE_CHANGES, {
+      variables: {
+        file: {
+          name: `testuser/testRepo/file.txt`,
+          content: 'test content',
+        },
+        branch: 'master',
+        commitMessage: 'Add test file',
+      },
+    })
+
+    expect(mutateResult).toEqual({
+      data: {
+        saveChanges: 'Saved',
+      },
+    })
+
+    const gitData = await simpleGit(repoPath).show(['--name-only'])
+    const authorIsCorrect = gitData.includes('Author: testuser <test@test.fi>')
+    const filenameIsCorrect = gitData.includes('file.txt')
+    const commitMessageIsCorrect = gitData.includes('Add test file')
+
+    expect([
+      authorIsCorrect,
+      filenameIsCorrect,
+      commitMessageIsCorrect,
+    ]).toEqual([true, true, true])
+  })
+
+  it('Saving changes does not work when user is not defined', async () => {
+    const { mutate } = createTestClient(server)
+
+    const mutateResult = await mutate({
+      mutation: SAVE_CHANGES,
+      variables: {
+        file: {
+          name: `testuser/testRepo/file.txt`,
+          content: 'test content',
+        },
+        branch: 'master',
+        commitMessage: 'Add test file',
+      },
+    })
+
+    const errorFound = mutateResult.errors?.some(
+      (error) => error.message === 'You have to login'
+    )
+
+    expect(errorFound).toBeTruthy()
+  })
+})
+
+afterAll(async () => {
+  await closePool()
 })
