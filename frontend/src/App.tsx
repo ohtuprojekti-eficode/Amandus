@@ -8,6 +8,7 @@ import LoginForm from './components/LoginForm'
 import CallBack from './components/auth/CallBack'
 import { Toolbar } from '@material-ui/core'
 import RegisterForm from './components/RegisterForm'
+import RepositoriesView from './components/RepositoriesView'
 
 const App = () => {
   const { data: user } = useQuery(ME)
@@ -27,6 +28,9 @@ const App = () => {
         </Route>
         <Route path="/edit">
           <EditView />
+        </Route>
+        <Route exact path="/repositories">
+          <RepositoriesView />
         </Route>
         <Route exact path="/login" component={LoginForm} />
         <Route exact path="/register" component={RegisterForm} />

@@ -22,6 +22,10 @@ const Header = ({ user, logout }: Props) => {
         <Link style={padding} to="/edit">
           Edit view
         </Link>
+        {user && (<Link style={padding} to="/repositories">
+          Repositories
+        </Link>
+        )}
         {!user && (
           <Link style={padding} to="/login">
             Login
