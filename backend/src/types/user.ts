@@ -25,11 +25,6 @@ export interface UserType {
   services?: ServiceUserType[]
 }
 
-export interface AuthResponse {
-  user: UserType
-  token: string
-}
-
 export interface ServiceAuthResponse {
   serviceUser: ServiceUserType
   token: string
