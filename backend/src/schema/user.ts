@@ -25,7 +25,7 @@ const typeDef = `
     type ServiceUser {
       serviceName: String!
       username: String!
-      email: String!
+      email: String
       reposurl: String!
     }
     type User {
