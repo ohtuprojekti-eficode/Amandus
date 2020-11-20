@@ -26,7 +26,7 @@ const GitHubAuthBtn = () => {
         startIcon={<GitHubIcon />}
         onClick={btnClickHandler}
       >
-        Login with GitHub
+        Connect GitHub
       </Button>
     </div>
   )
