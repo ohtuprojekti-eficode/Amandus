@@ -8,7 +8,7 @@ const CallBack = () => {
 
   const [
     authenticate,
-    { loading: authenticateLoading, error: authetincateError },
+    { loading: authenticateLoading, error: authenticateError },
   ] = useMutation(AUTHORIZE_WITH_GH, {
     variables: { code: params.get('code') },
   })
@@ -50,7 +50,7 @@ const CallBack = () => {
   return (
     <div>
       {(authenticateLoading || addServiceLoading) && <p>Loading...</p>}
-      {(authetincateError || addServiceError) && (
+      {(authenticateError || addServiceError) && (
         <p>Error :( Please try again</p>
       )}
       {addServiceData && <p>Success</p>}
