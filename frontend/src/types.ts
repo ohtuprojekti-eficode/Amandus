@@ -26,7 +26,7 @@ export interface ServiceUserReturnType {
   __typename: string
   serviceName: string
   username: string
-  email?: string
+  email: string | null
   reposurl: string
 }
 
