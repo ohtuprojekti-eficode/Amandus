@@ -35,7 +35,7 @@ const App = () => {
   })
 
   const logout = () => {
-    localStorage.clear()
+    localStorage.removeItem('token')
     window.location.href = '/'
   }
 
