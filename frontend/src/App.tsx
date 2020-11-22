@@ -14,13 +14,18 @@ const App = () => {
   const { data: user } = useQuery(ME)
 
   const defaultColorTheme = 'light'
-  const [colorTheme, setColorTheme] = useState<'light' | 'dark'>(
-    defaultColorTheme
-  )
+  const [colorTheme, setColorTheme] = useState<'light' | 'dark'>(() => {
+    const userColorTheme = localStorage.getItem('colorTheme')
+    if (userColorTheme === 'light' || userColorTheme === 'dark') {
+      return userColorTheme
+    }
+    return defaultColorTheme
+  })
 
   const toggleColorTheme = () => {
     const newColorTheme = colorTheme === 'light' ? 'dark' : 'light'
     setColorTheme(newColorTheme)
+    localStorage.setItem('colorTheme', newColorTheme)
   }
 
   const theme = createMuiTheme({
