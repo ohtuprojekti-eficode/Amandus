@@ -15,6 +15,21 @@ export interface RepoStateQueryResult {
   }
 }
 
+export interface authorizeWithGHMutationResult {
+  authorizeWithGithub: {
+    serviceUser: ServiceUserReturnType
+    token: string
+  }
+}
+
+export interface ServiceUserReturnType {
+  __typename: string
+  serviceName: string
+  username: string
+  email: string
+  reposurl: string
+}
+
 export interface FileTree {
   name: string
   path: string

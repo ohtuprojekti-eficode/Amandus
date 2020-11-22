@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 import { useMutation } from '@apollo/client'
 import { AUTHORIZE_WITH_GH, ADD_SERVICE } from '../../graphql/mutations'
+import { authorizeWithGHMutationResult } from '../../types'
 
 const CallBack = () => {
   const queryString = window.location.search
@@ -9,7 +10,7 @@ const CallBack = () => {
   const [
     authenticate,
     { loading: authenticateLoading, error: authenticateError },
-  ] = useMutation(AUTHORIZE_WITH_GH, {
+  ] = useMutation<authorizeWithGHMutationResult>(AUTHORIZE_WITH_GH, {
     variables: { code: params.get('code') },
   })
 
@@ -26,7 +27,7 @@ const CallBack = () => {
     ;(async () => {
       try {
         const response = await authenticate()
-        if (response && !response.errors) {
+        if (response.data && !response.errors) {
           const token = response.data.authorizeWithGithub.token
           const {
             __typename,
@@ -38,7 +39,6 @@ const CallBack = () => {
             },
           })
           localStorage.setItem('token', token)
-
           window.location.href = '/'
         }
       } catch (error) {
