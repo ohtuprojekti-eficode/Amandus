@@ -2,12 +2,8 @@ export interface GitHubAuthCode {
   code: string
 }
 
-export interface GitHubAccessToken {
-  access_token: string
-}
-
 export interface GitHubAccessTokenResponse {
-  access_token: GitHubAccessToken
+  access_token: string
 }
 
 export interface GitHubUserType {

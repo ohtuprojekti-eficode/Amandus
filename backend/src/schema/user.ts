@@ -112,7 +112,7 @@ const resolvers = {
         throw new UserInputError('Invalid or expired GitHub code')
       }
 
-      const gitHubUser = await requestGithubUserAccount(access_token.toString())
+      const gitHubUser = await requestGithubUserAccount(access_token)
 
       const serviceUser = {
         serviceName: 'github',
@@ -120,7 +120,7 @@ const resolvers = {
         email: gitHubUser.email,
         reposurl: gitHubUser.repos_url,
       }
-      const token = createToken(context.currentUser, access_token.toString())
+      const token = createToken(context.currentUser, access_token)
 
       return {
         serviceUser,
