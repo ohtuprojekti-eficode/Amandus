@@ -1,6 +1,13 @@
 import React, { useState } from 'react'
-import { AppBar, Switch, Toolbar } from '@material-ui/core'
-import { Link } from 'react-router-dom'
+import {
+  AppBar,
+  createStyles,
+  Link,
+  makeStyles,
+  Switch,
+  Toolbar,
+} from '@material-ui/core'
+import { Link as RouterLink } from 'react-router-dom'
 import { UserType } from '../types'
 
 interface Props {
@@ -10,12 +17,21 @@ interface Props {
   toggleColorTheme: () => void
 }
 
-const padding = {
-  paddingRight: 5,
-}
+const stylesInUse = makeStyles((theme) =>
+  createStyles({
+    appBar: {
+      zIndex: 1250,
+    },
+    link: {
+      paddingRight: 10,
+      color: theme.palette.primary.main,
+    },
+  })
+)
 
 const Header = ({ user, logout, colorTheme, toggleColorTheme }: Props) => {
   const [switchChecked, setSwitchChecked] = useState(colorTheme === 'dark')
+  const classes = stylesInUse()
 
   const handleSwitchToggle = () => {
     setSwitchChecked(!switchChecked)
@@ -23,26 +39,31 @@ const Header = ({ user, logout, colorTheme, toggleColorTheme }: Props) => {
   }
 
   return (
-    <AppBar position="fixed" color="default" style={{ zIndex: 1250 }}>
+    <AppBar position="fixed" color="default" className={classes.appBar}>
       <Toolbar>
-        <Link style={padding} to="/">
+        <Link component={RouterLink} className={classes.link} to="/">
           Main menu
         </Link>
-        <Link style={padding} to="/edit">
+        <Link component={RouterLink} className={classes.link} to="/edit">
           Edit view
         </Link>
         {!user && (
-          <Link style={padding} to="/login">
+          <Link component={RouterLink} className={classes.link} to="/login">
             Login
           </Link>
         )}
         {!user && (
-          <Link style={padding} to="/register">
+          <Link component={RouterLink} className={classes.link} to="/register">
             Register
           </Link>
         )}
         {user && (
-          <Link style={padding} to="/" onClick={logout}>
+          <Link
+            component={RouterLink}
+            className={classes.link}
+            to="/"
+            onClick={logout}
+          >
             {user.username} - logout
           </Link>
         )}
