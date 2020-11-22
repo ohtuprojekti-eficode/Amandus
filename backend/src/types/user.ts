@@ -9,7 +9,7 @@ export interface GitHubAccessTokenResponse {
 export interface GitHubUserType {
   id: string
   login: string
-  email: string
+  email: string | null
   repos_url: string
   access_token: string
 }
@@ -54,6 +54,6 @@ export interface UserJWT {
 export interface ServiceUserType {
   serviceName: string
   username: string
-  email: string
+  email: string | null
   reposurl: string
 }

@@ -26,7 +26,7 @@ export interface ServiceUserReturnType {
   __typename: string
   serviceName: string
   username: string
-  email: string
+  email?: string
   reposurl: string
 }
 
@@ -44,7 +44,7 @@ export interface Error {
 export interface ServiceUserType {
   serviceName: string
   username: string
-  email: string
+  email: string | null
   reposurl: string
 }
 
