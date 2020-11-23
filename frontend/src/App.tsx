@@ -8,32 +8,31 @@ import CallBack from './components/auth/CallBack'
 import RegisterForm from './components/RegisterForm'
 import { CssBaseline, Toolbar } from '@material-ui/core'
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles'
+import { lightTheme, darkTheme } from './styles/themes'
 import RepositoriesView from './components/RepositoriesView'
 import MyLoginForm from './components/MyLoginForm'
 
 const App = () => {
   const { data: user } = useQuery(ME)
 
-  const defaultColorTheme = 'light'
-  const [colorTheme, setColorTheme] = useState<'light' | 'dark'>(() => {
-    const userColorTheme = localStorage.getItem('colorTheme')
-    if (userColorTheme === 'light' || userColorTheme === 'dark') {
-      return userColorTheme
+  const defaultTheme = 'light'
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    const userTheme = localStorage.getItem('theme')
+    if (userTheme === 'light' || userTheme === 'dark') {
+      return userTheme
     }
-    return defaultColorTheme
+    return defaultTheme
   })
 
-  const toggleColorTheme = () => {
-    const newColorTheme = colorTheme === 'light' ? 'dark' : 'light'
-    setColorTheme(newColorTheme)
-    localStorage.setItem('colorTheme', newColorTheme)
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light'
+    setTheme(newTheme)
+    localStorage.setItem('theme', newTheme)
   }
 
-  const theme = createMuiTheme({
-    palette: {
-      type: colorTheme,
-    },
-  })
+  const appliedTheme = createMuiTheme(
+    theme === 'light' ? lightTheme : darkTheme
+  )
 
   const logout = () => {
     localStorage.removeItem('token')
@@ -42,13 +41,13 @@ const App = () => {
 
   return (
     <div>
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={appliedTheme}>
         <CssBaseline />
         <Header
           user={user?.me}
           logout={logout}
-          colorTheme={colorTheme}
-          toggleColorTheme={toggleColorTheme}
+          theme={theme}
+          toggleTheme={toggleTheme}
         />
         <div>
           <Toolbar />

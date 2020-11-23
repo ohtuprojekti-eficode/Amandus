@@ -13,8 +13,8 @@ import { UserType } from '../types'
 interface Props {
   user: UserType
   logout: () => void
-  colorTheme: string
-  toggleColorTheme: () => void
+  theme: string
+  toggleTheme: () => void
 }
 
 const stylesInUse = makeStyles((theme) =>
@@ -24,18 +24,17 @@ const stylesInUse = makeStyles((theme) =>
     },
     link: {
       paddingRight: 10,
-      color: theme.palette.primary.main,
     },
   })
 )
 
-const Header = ({ user, logout, colorTheme, toggleColorTheme }: Props) => {
-  const [switchChecked, setSwitchChecked] = useState(colorTheme === 'dark')
+const Header = ({ user, logout, theme, toggleTheme }: Props) => {
+  const [switchChecked, setSwitchChecked] = useState(theme === 'dark')
   const classes = stylesInUse()
 
   const handleSwitchToggle = () => {
     setSwitchChecked(!switchChecked)
-    toggleColorTheme()
+    toggleTheme()
   }
 
   return (

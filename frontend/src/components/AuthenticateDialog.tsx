@@ -2,31 +2,19 @@ import React from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 import {
   Button,
-  createStyles,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   Grid,
   Link,
-  makeStyles,
 } from '@material-ui/core'
 
 interface Props {
   open: boolean
 }
 
-const stylesInUse = makeStyles((theme) =>
-  createStyles({
-    link: {
-      color: theme.palette.primary.light,
-    },
-  })
-)
-
 const AuthenticateDialog = ({ open }: Props) => {
-  const classes = stylesInUse()
-
   return (
     <Dialog open={open} aria-labelledby="auth-modal-title">
       <DialogTitle id="form-dialog-title">Please log in!</DialogTitle>
@@ -39,7 +27,7 @@ const AuthenticateDialog = ({ open }: Props) => {
       </DialogContent>
       <DialogActions>
         <Button>
-          <Link component={RouterLink} className={classes.link} to="/login">
+          <Link component={RouterLink} to="/login">
             Take me to login
           </Link>
         </Button>
