@@ -5,6 +5,9 @@ import ListItem from '@material-ui/core/ListItem'
 import ListItemText from '@material-ui/core/ListItemText'
 import MenuItem from '@material-ui/core/MenuItem'
 import Menu from '@material-ui/core/Menu'
+import { SWITCH_BRANCH } from '../graphql/mutations'
+import { REPO_STATE } from '../graphql/queries'
+import { useMutation } from '@apollo/client'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -13,35 +16,66 @@ const useStyles = makeStyles((theme: Theme) =>
     },
 
     dropdownHeader: {
+      textAlign: 'right' as 'right',
       textAlignLast: 'right' as 'right',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
     },
 
     dropdown: {
       border: '2px solid black',
+      padding: '0',
+      margin: '0',
+    },
+
+    onBranch: {
+      marginRight: '15%',
+    },
+
+    branchWrapper: {
+      maxHeight: '10vh',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
     },
   })
 )
 
 interface PropsType {
   branches: string[]
+  repoUrl: string
 }
 
-const BranchSelector = ({ branches }: PropsType) => {
+const BranchSelector = ({ repoUrl, branches }: PropsType) => {
   const classes = useStyles()
   const [anchorElement, setAnchorElement] = React.useState<null | HTMLElement>(
     null
   )
   const [selectedBranch, setSelectedBranch] = React.useState('master')
 
+  const [switchBranch, { loading: mutationLoading }] = useMutation(
+    SWITCH_BRANCH,
+    {
+      refetchQueries: [{ query: REPO_STATE }],
+    }
+  )
+
   const handleClickListItem = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElement(event.currentTarget)
   }
 
-  const handleMenuItemClick = (branch: string) => {
+  const handleMenuItemClick = async (branch: string) => {
     setSelectedBranch(branch)
     setAnchorElement(null)
+    console.log('RepoURL:', repoUrl)
+    console.log('branch:', selectedBranch)
+    try {
+      await switchBranch({
+        variables: {
+          url: { repoUrl },
+          branch: { branch },
+        },
+      })
+    } catch (error) {
+      console.log('ERROR:', error)
+    }
   }
 
   const handleClose = () => {
@@ -56,8 +90,10 @@ const BranchSelector = ({ branches }: PropsType) => {
           aria-haspopup="true"
           aria-controls="lock-menu"
           onClick={handleClickListItem}
+          className={classes.branchWrapper}
+          disabled={mutationLoading}
         >
-          <ListItemText>on branch:</ListItemText>
+          <ListItemText className={classes.onBranch}>on branch:</ListItemText>
           <ListItemText
             className={classes.dropdownHeader}
             primary={selectedBranch}
