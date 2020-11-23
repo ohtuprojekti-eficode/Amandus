@@ -172,8 +172,13 @@ describe('User schema login mutations', () => {
       },
     })
 
+    const expectedUser = await User.findUserByUsername('testuser')
+    const expectedToken = createToken(expectedUser)
+
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    expect(res.data?.login).toBeTruthy()
+    expect(res.data).toEqual({
+      login: expectedToken
+    })
   })
 
   it('user can not login without username and password', async () => {
