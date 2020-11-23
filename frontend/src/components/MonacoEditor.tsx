@@ -5,6 +5,7 @@ import { ME, REPO_STATE } from '../graphql/queries'
 import { SAVE_CHANGES } from '../graphql/mutations'
 import { Button } from '@material-ui/core'
 import SaveDialog from './SaveDialog'
+import AuthenticateDialog from './AuthenticateDialog'
 import { RepoStateQueryResult } from '../types'
 
 interface Props {
@@ -97,6 +98,8 @@ const MonacoEditor = ({ content, filename }: Props) => {
         editorDidMount={handleEditorDidMount}
       />
       <div>
+        <AuthenticateDialog open={!user || !user.me} />
+
         <SaveDialog
           open={dialogOpen}
           handleClose={handleDialogClose}
@@ -104,6 +107,7 @@ const MonacoEditor = ({ content, filename }: Props) => {
           currentBranch={currentBranch}
           error={dialogError}
         />
+
         <Button
           color="primary"
           variant="contained"

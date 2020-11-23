@@ -1,30 +1,37 @@
-import { UserInputError } from 'apollo-server'
-import { sign } from 'jsonwebtoken'
+import { UserInputError, ForbiddenError } from 'apollo-server'
+import bcrypt from 'bcryptjs'
 import config from '../utils/config'
 import {
   UserType,
-  GitHubAuthCode,
-  AuthResponse,
   AppContext,
-  LocalUser,
+  GitHubAuthCode,
+  ServiceAuthResponse,
 } from '../types/user'
+import User from '../model/user'
+import Service from '../model/service'
+import { createToken } from '../utils/token'
+import {
+  RegisterUserInput,
+  LoginUserInput,
+  AddServiceArgs,
+} from '../types/params'
 import {
   requestGithubToken,
   requestGithubUserAccount,
 } from '../services/gitHub'
-import User from '../model/user'
-import { RegisterUserInput } from '../types/user'
 
 const typeDef = `
+    type ServiceUser {
+      serviceName: String!
+      username: String!
+      email: String
+      reposurl: String!
+    }
     type User {
-        id: ID
-        username: String
-        emails: [String]
-        gitHubId: String
-        gitHubLogin: String
-        gitHubEmail: String
-        gitHubReposUrl: String
-        gitHubToken: String
+        id: Int!
+        username: String!
+        email: String!
+        services: [ServiceUser!]
     }
 `
 
@@ -39,20 +46,61 @@ const resolvers = {
     },
     githubLoginUrl: (): string => {
       const cbUrl = config.GITHUB_CB_URL || ''
-      const cliendID = config.GITHUB_CLIENT_ID || ''
+      const clientID = config.GITHUB_CLIENT_ID || ''
 
-      if (!cbUrl || !cliendID) {
-        throw new Error('GitHub cliend id or callback url not set')
+      if (!cbUrl || !clientID) {
+        throw new Error('GitHub client id or callback url not set')
       }
 
-      return `https://github.com/login/oauth/authorize?response_type=code&redirect_uri=${cbUrl}&client_id=${cliendID}`
+      return `https://github.com/login/oauth/authorize?response_type=code&redirect_uri=${cbUrl}&client_id=${clientID}`
+    },
+    currentToken: (
+      _root: unknown,
+      _args: unknown,
+      context: AppContext
+    ): string | undefined => {
+      return context.githubToken
     },
   },
   Mutation: {
+    connectGitService: async (
+      _root: unknown,
+      args: AddServiceArgs,
+      context: AppContext
+    ): Promise<string> => {
+      if (!context.currentUser) {
+        throw new ForbiddenError('You have to login')
+      }
+
+      if (!args) {
+        throw new UserInputError('No service account provided')
+      }
+
+      if (args.service.serviceName !== 'github') {
+        throw new UserInputError(
+          `'github' is the only currently supported service`
+        )
+      }
+
+      const service = await Service.getServiceByName(args.service.serviceName)
+
+      await User.addServiceUser({
+        ...args.service,
+        user_id: context.currentUser.id,
+        services_id: service.id,
+      })
+
+      return 'success'
+    },
     authorizeWithGithub: async (
       _root: unknown,
-      args: GitHubAuthCode
-    ): Promise<AuthResponse> => {
+      args: GitHubAuthCode,
+      context: AppContext
+    ): Promise<ServiceAuthResponse> => {
+      if (!context.currentUser) {
+        throw new ForbiddenError('You have to login')
+      }
+
       if (!args.code) {
         throw new UserInputError('GitHub code not provided')
       }
@@ -63,28 +111,18 @@ const resolvers = {
         throw new UserInputError('Invalid or expired GitHub code')
       }
 
-      let gitHubUser = await requestGithubUserAccount(access_token.toString())
-      // store gh token in user for now
-      gitHubUser = {
-        ...gitHubUser,
-        access_token: access_token.toString(),
-      }
-      if (!gitHubUser) {
-        throw new Error('No GitHub user found')
-      }
+      const gitHubUser = await requestGithubUserAccount(access_token)
 
-      const user = User.findOrCreateUserByGitHubUser(gitHubUser)
-
-      const token = sign(
-        {
-          gitHubId: user.gitHubId,
-          gitHubToken: access_token.toString(),
-        },
-        config.JWT_SECRET
-      )
+      const serviceUser = {
+        serviceName: 'github',
+        username: gitHubUser.login,
+        email: gitHubUser.email,
+        reposurl: gitHubUser.repos_url,
+      }
+      const token = createToken(context.currentUser, access_token)
 
       return {
-        user,
+        serviceUser,
         token,
       }
     },
@@ -98,8 +136,49 @@ const resolvers = {
     register: async (
       _root: unknown,
       args: RegisterUserInput
-    ): Promise<LocalUser> => {
-      return await User.registerUser(args)
+    ): Promise<string> => {
+      if (
+        args.username.length === 0 ||
+        args.email.length === 0 ||
+        args.password.length === 0
+      ) {
+        throw new UserInputError('Username, email or password can not be empty')
+      }
+
+      const user = await User.registerUser(args)
+
+      if (!user) {
+        throw new UserInputError(
+          'Could not create a user with given username and password'
+        )
+      }
+
+      const token = createToken(user)
+
+      return token
+    },
+    login: async (
+      _root: unknown,
+      args: LoginUserInput
+    ): Promise<string> => {
+      const user = await User.findUserByUsername(args.username)
+
+      if (!user) {
+        throw new UserInputError('Invalid username or password')
+      }
+
+      const passwordMatch = await bcrypt.compare(
+        args.password,
+        user.password ?? ''
+      )
+
+      if (!passwordMatch) {
+        throw new UserInputError('Invalid username or password')
+      }
+
+      const token = createToken(user)
+
+      return token
     },
   },
 }

@@ -1,38 +1,59 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { useMutation } from '@apollo/client'
-import { AUTHORIZE_WITH_GH } from '../../graphql/mutations'
+import { AUTHORIZE_WITH_GH, ADD_SERVICE } from '../../graphql/mutations'
+import { authorizeWithGHMutationResult } from '../../types'
 
 const CallBack = () => {
-
-  const [userdata, setUserData] = useState(null)
-
   const queryString = window.location.search
   const params = new URLSearchParams(queryString)
 
-  
-  const [authenticate, { loading: mutationLoading, error: mutationError }] = useMutation(AUTHORIZE_WITH_GH,
-    { 
-      variables: { code: params.get('code') },
-    })
-  
+  const [
+    authenticate,
+    { loading: authenticateLoading, error: authenticateError },
+  ] = useMutation<authorizeWithGHMutationResult>(AUTHORIZE_WITH_GH, {
+    variables: { code: params.get('code') },
+  })
+
+  const [
+    addService,
+    {
+      data: addServiceData,
+      loading: addServiceLoading,
+      error: addServiceError,
+    },
+  ] = useMutation(ADD_SERVICE)
+
   useEffect(() => {
-    if(!userdata) {
-      (async () => {
-        const response: any = await authenticate()
-        if(response && !response.errors) {
-          setUserData(response.data)
-          localStorage.setItem('token', response.data.authorizeWithGithub.token)
+    ;(async () => {
+      try {
+        const response = await authenticate()
+        if (response.data && !response.errors) {
+          const token = response.data.authorizeWithGithub.token
+          const {
+            __typename,
+            ...serviceUser
+          } = response.data.authorizeWithGithub.serviceUser
+          await addService({
+            variables: {
+              service: serviceUser,
+            },
+          })
+          localStorage.setItem('token', token)
           window.location.href = '/'
         }
-      })()
-    } 
-  }, [userdata, authenticate])
+      } catch (error) {
+        console.log(error)
+      }
+    })()
+  }, [authenticate, addService])
 
   return (
     <div>
-      {mutationLoading && <p>Loading...</p>}
-      {mutationError && <p>Error :( Please try again</p>}
-      {userdata && <p>Success</p>}
+      {(authenticateLoading || addServiceLoading) && <p>Loading...</p>}
+      {(authenticateError || addServiceError) && (
+        <p>Error :( Please try again</p>
+      )}
+      {addServiceData && <p>Success</p>}
     </div>
   )
 }
