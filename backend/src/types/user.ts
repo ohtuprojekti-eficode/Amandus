@@ -2,18 +2,14 @@ export interface GitHubAuthCode {
   code: string
 }
 
-export interface GitHubAccessToken {
-  access_token: string
-}
-
 export interface GitHubAccessTokenResponse {
-  access_token: GitHubAccessToken
+  access_token: string
 }
 
 export interface GitHubUserType {
   id: string
   login: string
-  email: string
+  email: string | null
   repos_url: string
   access_token: string
 }
@@ -53,6 +49,6 @@ export interface UserJWT {
 export interface ServiceUserType {
   serviceName: string
   username: string
-  email: string
+  email: string | null
   reposurl: string
 }

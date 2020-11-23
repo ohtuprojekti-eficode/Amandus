@@ -1,4 +1,5 @@
 import { File } from './file'
+import { ServiceUserType } from './user'
 
 export interface SaveArgs {
   file: File
@@ -15,7 +16,7 @@ export interface ServiceUserInput {
   user_id: number
   services_id: number
   username: string
-  email: string
+  email: string | null
   reposurl: string
 }
 
@@ -31,10 +32,5 @@ export interface LoginUserInput {
 }
 
 export interface AddServiceArgs {
-  service: {
-    serviceName: string
-    username: string
-    email: string
-    reposurl: string
-  }
+  service: ServiceUserType
 }

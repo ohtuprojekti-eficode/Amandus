@@ -15,6 +15,13 @@ export interface RepoStateQueryResult {
   }
 }
 
+export interface authorizeWithGHMutationResult {
+  authorizeWithGithub: {
+    serviceUser: ServiceUserType & { __typename: string}
+    token: string
+  }
+}
+
 export interface FileTree {
   name: string
   path: string
@@ -29,7 +36,7 @@ export interface Error {
 export interface ServiceUserType {
   serviceName: string
   username: string
-  email: string
+  email: string | null
   reposurl: string
 }
 

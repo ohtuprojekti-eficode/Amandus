@@ -25,7 +25,7 @@ const Mutation = `
     input AddServiceArgs {
         serviceName: String!
         username: String!
-        email: String!
+        email: String
         reposurl: String!
     }
     type GithubAccount {
