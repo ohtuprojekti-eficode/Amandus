@@ -76,7 +76,7 @@ const MonacoEditor = ({ content, filename }: Props) => {
       } catch (error) {
         if (error.message === 'Merge conflict detected') {
           setDialogError({
-            title: 'Merge conflict',
+            title: `Merge conflict on branch ${branchName}`,
             message: 'Cannot push to selected branch. Create a new one.',
           })
         }
