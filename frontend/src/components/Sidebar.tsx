@@ -7,13 +7,14 @@ import BranchSelector from './BranchSelector'
 interface Props {
   files: File[]
   branches: string[]
+  repoUrl: string
 }
 
-const Sidebar = ({ files, branches }: Props) => {
+const Sidebar = ({ repoUrl, files, branches }: Props) => {
   return (
     <Drawer variant="permanent" PaperProps={{ style: { width: '20%' } }}>
       <Toolbar />
-      <BranchSelector branches={branches} />
+      <BranchSelector repoUrl={repoUrl} branches={branches} />
       <FileTreeView files={files} />
     </Drawer>
   )

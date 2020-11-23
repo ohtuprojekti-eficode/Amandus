@@ -11,9 +11,10 @@ const EditView = () => {
   const location = useLocation()
   const classes = useStyles()
 
-  const [repoStateQuery, { data: repoStateData }] = useLazyQuery<
-    RepoStateQueryResult
-  >(REPO_STATE)
+  const [
+    repoStateQuery,
+    { data: repoStateData },
+  ] = useLazyQuery<RepoStateQueryResult>(REPO_STATE)
   const cloneRepoQuery = useQuery(CLONE_REPO, {
     onCompleted: () => repoStateQuery(),
   })
@@ -29,11 +30,12 @@ const EditView = () => {
   const filename = location.search.slice(3)
   const content = files.find((e) => e.name === filename)?.content
   const branches = repoStateData ? repoStateData.repoState.branches : []
+  const url = repoStateData ? repoStateData.repoState.url : ''
 
   return (
     <div className={classes.root}>
       <div className={classes.sidebar}>
-        <Sidebar files={files} branches={branches} />
+        <Sidebar repoUrl={url} files={files} branches={branches} />
       </div>
       <div className={classes.editor}>
         <MonacoEditor content={content} filename={filename} />
