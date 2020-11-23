@@ -27,6 +27,7 @@ const typeDef = `
       currentBranch: String!
       files: [File]!
       branches: [String]!
+      url: String!
     }
 `
 
@@ -53,8 +54,8 @@ const resolvers = {
       args: { url: string },
       _context: unknown
     ): Promise<RepoState> => {
-      const url = new URL(args.url)
-      const repositoryName = url.pathname
+      const urlObject = new URL(args.url)
+      const repositoryName = urlObject.pathname
       const repoLocation = `./repositories/${repositoryName}`
 
       const currentBranch = await getCurrentBranchName(repoLocation)
@@ -66,8 +67,9 @@ const resolvers = {
       }))
 
       const branches = await getBranches(repoLocation)
+      const url = args.url
 
-      return { currentBranch, files, branches }
+      return { currentBranch, files, branches, url }
     },
   },
   Mutation: {

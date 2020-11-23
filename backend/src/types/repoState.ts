@@ -4,4 +4,5 @@ export interface RepoState {
   currentBranch: string
   files: File[]
   branches: string[]
+  url: string
 }
