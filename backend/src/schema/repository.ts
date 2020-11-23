@@ -4,12 +4,13 @@ import {
   getCurrentBranchName,
   pullNewestChanges,
   saveChanges,
+  saveChangesAndPush,
   getBranches,
   switchCurrentBranch,
 } from '../services/git'
 import { existsSync, readFileSync } from 'fs'
 import readRecursive from 'recursive-readdir'
-import { ForbiddenError } from 'apollo-server'
+import { ForbiddenError, ApolloError } from 'apollo-server'
 import { relative } from 'path'
 import { AppContext } from '../types/user'
 import { BranchSwitchArgs, SaveArgs } from '../types/params'
@@ -81,21 +82,25 @@ const resolvers = {
         throw new ForbiddenError('You have to login')
       }
 
-      if (!context.githubToken) {
-        throw new ForbiddenError('You need a remote token')
-      }
-
       try {
-        await saveChanges(
-          saveArgs,
-          context.currentUser,
-          context.githubToken ?? ''
-        )
+        if (!context.githubToken) {
+          await saveChanges(
+            saveArgs,
+            context.currentUser
+          )
+        } else {
+          await saveChangesAndPush(
+            saveArgs,
+            context.currentUser,
+            context.githubToken ?? ''
+          )
+        }
+        
       } catch (error) {
         if (error.message === 'Merge conflict') {
-          throw new Error('Merge conflict detected')
+          throw new ApolloError('Merge conflict detected')
         } else {
-          console.log(error.message)
+          throw new ApolloError(error.message)
         }
       }
 
