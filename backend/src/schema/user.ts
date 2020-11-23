@@ -3,7 +3,6 @@ import bcrypt from 'bcryptjs'
 import config from '../utils/config'
 import {
   UserType,
-  AuthResponse,
   AppContext,
   GitHubAuthCode,
   ServiceAuthResponse,
@@ -47,13 +46,13 @@ const resolvers = {
     },
     githubLoginUrl: (): string => {
       const cbUrl = config.GITHUB_CB_URL || ''
-      const cliendID = config.GITHUB_CLIENT_ID || ''
+      const clientID = config.GITHUB_CLIENT_ID || ''
 
-      if (!cbUrl || !cliendID) {
-        throw new Error('GitHub cliend id or callback url not set')
+      if (!cbUrl || !clientID) {
+        throw new Error('GitHub client id or callback url not set')
       }
 
-      return `https://github.com/login/oauth/authorize?response_type=code&redirect_uri=${cbUrl}&client_id=${cliendID}`
+      return `https://github.com/login/oauth/authorize?response_type=code&redirect_uri=${cbUrl}&client_id=${clientID}`
     },
     currentToken: (
       _root: unknown,
@@ -138,7 +137,7 @@ const resolvers = {
     register: async (
       _root: unknown,
       args: RegisterUserInput
-    ): Promise<AuthResponse> => {
+    ): Promise<string> => {
       if (
         args.username.length === 0 ||
         args.email.length === 0 ||
@@ -157,15 +156,12 @@ const resolvers = {
 
       const token = createToken(user)
 
-      return {
-        user,
-        token,
-      }
+      return token
     },
     login: async (
       _root: unknown,
       args: LoginUserInput
-    ): Promise<AuthResponse> => {
+    ): Promise<string> => {
       const user = await User.findUserByUsername(args.username)
 
       if (!user) {
@@ -183,10 +179,7 @@ const resolvers = {
 
       const token = createToken(user)
 
-      return {
-        user,
-        token,
-      }
+      return token
     },
   },
 }

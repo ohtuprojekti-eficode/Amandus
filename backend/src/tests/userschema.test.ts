@@ -38,25 +38,13 @@ const GH_TOKEN = gql`
 
 const REGISTER = gql`
   mutation register($username: String!, $email: String!, $password: String!) {
-    register(username: $username, email: $email, password: $password) {
-      token
-      user {
-        id
-        username
-      }
-    }
+    register(username: $username, email: $email, password: $password)
   }
 `
 
 const LOGIN = gql`
   mutation login($username: String!, $password: String!) {
-    login(username: $username, password: $password) {
-      token
-      user {
-        id
-        username
-      }
-    }
+    login(username: $username, password: $password)
   }
 `
 
@@ -81,13 +69,7 @@ describe('User schema register mutations', () => {
 
     expect(mutationResult).toEqual({
       data: {
-        register: {
-          token: expectedToken,
-          user: {
-            id: expectedUser?.id,
-            username: expectedUser?.username,
-          },
-        },
+        register: expectedToken
       },
     })
   })
@@ -104,7 +86,7 @@ describe('User schema register mutations', () => {
       },
     })
 
-    expect(res.data?.register?.token).toBeTruthy()
+    expect(res.data?.register).toBeTruthy()
   })
 
   it('user can not register without a username', async () => {
@@ -190,8 +172,13 @@ describe('User schema login mutations', () => {
       },
     })
 
+    const expectedUser = await User.findUserByUsername('testuser')
+    const expectedToken = createToken(expectedUser)
+
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    expect(res.data?.login?.user?.username).toEqual('testuser')
+    expect(res.data).toEqual({
+      login: expectedToken
+    })
   })
 
   it('user can not login without username and password', async () => {

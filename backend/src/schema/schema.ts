@@ -13,10 +13,6 @@ const Query = `
 `
 
 const Mutation = `
-    type AuthResponse {
-        user: User
-        token: String
-    }
     type ServiceAuthResponse {
         serviceUser: ServiceUser
         token: String
@@ -42,11 +38,11 @@ const Mutation = `
             username: String!
             email: String!
             password: String!
-        ): AuthResponse
+        ): String
         login(
             username: String!
             password: String!
-        ): AuthResponse
+        ): String
         saveChanges(
             file: FileInput! 
             branch: String!
