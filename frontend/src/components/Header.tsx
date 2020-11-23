@@ -23,9 +23,11 @@ const Header = ({ user, logout }: Props) => {
           Edit view
         </Link>
         {!user && (
-          <Link style={padding} to="/login">
-            Login
-          </Link>
+          <div>
+            <Link style={padding} to="/login">
+              Login
+            </Link>
+          </div>
         )}
         {!user && (
           <Link style={padding} to="/register">
@@ -37,6 +39,11 @@ const Header = ({ user, logout }: Props) => {
             {user.username} - logout
           </Link>
         )}
+        <div>
+          <Link style={padding} to="/connect">
+            Connect
+          </Link>
+        </div>
       </Toolbar>
     </AppBar>
   )
