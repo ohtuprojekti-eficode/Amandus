@@ -36,6 +36,18 @@ export const REGISTER = gql`
   }
 `
 
+export const LOGIN = gql`
+  mutation login($username: String!, $password: String!) {
+    login(username: $username, password: $password) {
+      token
+      user {
+        id
+        username
+      }
+    }
+  }
+`
+
 export const ADD_SERVICE = gql`
   mutation connectGitService($service: AddServiceArgs!) {
     connectGitService(service: $service)

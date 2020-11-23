@@ -27,9 +27,11 @@ const Header = ({ user, logout }: Props) => {
         </Link>
         )}
         {!user && (
-          <Link style={padding} to="/login">
-            Login
-          </Link>
+          <div>
+            <Link style={padding} to="/login">
+              Login
+            </Link>
+          </div>
         )}
         {!user && (
           <Link style={padding} to="/register">

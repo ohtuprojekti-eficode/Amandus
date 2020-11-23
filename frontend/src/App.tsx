@@ -4,11 +4,11 @@ import { useQuery } from '@apollo/client'
 import { ME } from './graphql/queries'
 import EditView from './components/EditView'
 import Header from './components/Header'
-import LoginForm from './components/LoginForm'
 import CallBack from './components/auth/CallBack'
 import { Toolbar } from '@material-ui/core'
 import RegisterForm from './components/RegisterForm'
 import RepositoriesView from './components/RepositoriesView'
+import MyLoginForm from './components/MyLoginForm'
 
 const App = () => {
   const { data: user } = useQuery(ME)
@@ -32,8 +32,8 @@ const App = () => {
         <Route exact path="/repositories">
           <RepositoriesView />
         </Route>
-        <Route exact path="/login" component={LoginForm} />
         <Route exact path="/register" component={RegisterForm} />
+        <Route exact path="/login" component={MyLoginForm} />
       </div>
     </div>
   )
