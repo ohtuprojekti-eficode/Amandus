@@ -27,3 +27,9 @@ export const SAVE_CHANGES = gql`
     saveChanges(file: $file, branch: $branch, commitMessage: $commitMessage)
   }
 `
+
+export const SWITCH_BRANCH = gql`
+  mutation switchBranch($url: String!, $branch: String!) {
+    switchBranch(url: $url, branch: $branch)
+  }
+`

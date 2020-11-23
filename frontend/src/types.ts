@@ -12,6 +12,7 @@ export interface RepoStateQueryResult {
     currentBranch: string
     files: File[]
     branches: string[]
+    url: string
   }
 }
 
