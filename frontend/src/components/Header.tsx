@@ -47,6 +47,15 @@ const Header = ({ user, logout, colorTheme, toggleColorTheme }: Props) => {
         <Link component={RouterLink} className={classes.link} to="/edit">
           Edit view
         </Link>
+        {user && (
+          <Link
+            component={RouterLink}
+            className={classes.link}
+            to="/repositories"
+          >
+            Repositories
+          </Link>
+        )}
         {!user && (
           <Link component={RouterLink} className={classes.link} to="/login">
             Login

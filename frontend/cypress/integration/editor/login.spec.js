@@ -14,8 +14,8 @@ describe('When visiting the login page, as a user', () => {
     cy.visit(Cypress.env('HOST') + '/login')
   })
 
-  it('I can see the github login button', () => {
+  it('I can see the login text', () => {
     cy.url().should('include', '/login')
-    cy.contains('Login with GitHub')
+    cy.contains('Login')
   })
 })
