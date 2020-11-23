@@ -77,7 +77,7 @@ const MyLoginForm = () => {
         },
       })
       setFormStatus(formStatusProps.success)
-      localStorage.setItem('token', loginResponse.data.login.token)
+      localStorage.setItem('token', loginResponse.data.login)
       window.location.href = '/'
     } catch (error) {
       setFormStatus(formStatusProps.error)
