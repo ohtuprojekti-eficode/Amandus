@@ -183,8 +183,10 @@ const RegisterForm = () => {
                     onBlur={handleBlur}
                     helperText={
                       touched.password && errors.password
-                        ? 'Valid password is atleast 7 characters long and consists atleast 1 uppercase,lowercase,number and special character.'
-                        : 'Make sure your password includes no spaces, is minimum 7 characters long and consists at least 1 uppercase,lowercase,number and special character.'
+                        ? 'Make sure your password is minimum 8 characters long and consists at least 1 uppercase, lowercase, number and one special ' +
+                          'character from !?@#$%^&*(). Password cannot end with empty space.'
+                        : 'Valid password is atleast 8 characters long and consists atleast 1 uppercase, lowercase, number and one special ' +
+                          'character from !?@#$%^&*(). Password cannot end with empty space.'
                     }
                     error={touched.password && errors.password ? true : false}
                   />
@@ -201,8 +203,8 @@ const RegisterForm = () => {
                     onBlur={handleBlur}
                     helperText={
                       touched.confirmPassword && errors.confirmPassword
-                        ? 'Valid password is atleast 7 characters long and consists atleast 1 uppercase,lowercase,number and special character.'
-                        : 'Make sure your password includes no spaces, is minimum 7 characters long and consists at least 1 uppercase,lowercase,number and special character.'
+                        ? 'Your confirmation did not match with the your password. Please try again.'
+                        : 'Re-write your password to confirm it.'
                     }
                     error={
                       touched.confirmPassword && errors.confirmPassword
