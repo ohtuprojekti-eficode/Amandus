@@ -1,7 +1,7 @@
 import simpleGit from 'simple-git'
 import { mkdirSync, rmdirSync, appendFileSync } from 'fs'
 import { join } from 'path'
-import { getBranches } from '../services/git'
+import { getLocalBranches } from '../services/git'
 
 describe('Get branches', () => {
   const repoPath = join(__dirname, 'testRepo')
@@ -18,7 +18,7 @@ describe('Get branches', () => {
     const testRepo = simpleGit(repoPath)
     await testRepo.init()
 
-    const branches = await getBranches(repoPath)
+    const branches = await getLocalBranches(repoPath)
     expect(branches).toEqual([])
   })
 
@@ -37,7 +37,7 @@ describe('Get branches', () => {
       .commit('init commit')
       .branch(['secondBranch'])
 
-    const branches = await getBranches(repoPath)
+    const branches = await getLocalBranches(repoPath)
     expect(branches).toEqual(['master', 'secondBranch'])
   })
 })
