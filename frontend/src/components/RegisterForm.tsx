@@ -8,7 +8,7 @@ import {
   createStyles,
 } from '@material-ui/core'
 import { useMutation } from '@apollo/client'
-import { LOGIN, REGISTER } from '../graphql/mutations'
+import { REGISTER } from '../graphql/mutations'
 import RegisterSchema from './RegisterSchema'
 
 const stylesInUse = makeStyles((theme) =>
@@ -72,30 +72,13 @@ const RegisterForm = () => {
   const [showFormStatus, setShowFormStatus] = useState(false)
 
   const [registerUser] = useMutation(REGISTER)
-  const [loginUser] = useMutation(LOGIN)
-
-  const logInUser = async (data: MyRegisterForm) => {
-    try {
-      const loginResponse = await loginUser({
-        variables: {
-          username: data.username,
-          password: data.password,
-        },
-      })
-      setFormStatus(formStatusProps.success)
-      localStorage.setItem('token', loginResponse.data.login)
-      window.location.href = '/'
-    } catch (error) {
-      setFormStatus(formStatusProps.error)
-    }
-  }
 
   const createNewAccount = async (
     data: MyRegisterForm,
     resetForm: Function
   ) => {
     try {
-      await registerUser({
+      const registerResponse = await registerUser({
         variables: {
           username: data.username,
           email: data.email,
@@ -103,7 +86,8 @@ const RegisterForm = () => {
         },
       })
       setFormStatus(formStatusProps.success)
-      await logInUser(data)
+      localStorage.setItem('token', registerResponse.data.register)
+      window.location.href = '/'
     } catch (error) {
       if (
         error.message.includes('duplicate key value violates unique constraint')
