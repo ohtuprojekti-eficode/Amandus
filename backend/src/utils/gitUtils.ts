@@ -21,15 +21,12 @@ export const commitAddedChanges = async (
   email: string,
   commitMessage: string
 ): Promise<void> => {
-  await git.raw([
-    '-c',
-    `user.name=${username}`,
-    '-c',
-    `user.email=${email}`,
-    'commit',
-    '-m',
-    commitMessage,
-  ])
+  // Overwrites config details in repository location
+  // Appending causes problems with selecting what details to use
+  await git
+    .addConfig('user.name', username)
+    .addConfig('user.email', email)
+    .commit(commitMessage)
 }
 
 export const localBranchExists = async (
@@ -78,7 +75,8 @@ export const checkoutBranch = async (
 
 export const doAutoMerge = async (
   git: SimpleGit,
-  branchName: string
+  branchName: string,
+  oldBranchName: string
 ): Promise<void> => {
   await git.fetch()
 
@@ -98,6 +96,7 @@ export const doAutoMerge = async (
     } catch (e) {
       await git.merge(['--abort'])
       await git.reset(['--hard', 'HEAD~1'])
+      await git.checkout([oldBranchName])
       throw e
     }
   }
@@ -129,14 +128,27 @@ export const cloneRepositoryToSpecificFolder = async (
 }
 
 export const updateBranchFromRemote = async (
-  repoLocation: string,
+  git: SimpleGit,
   branchname: string
 ): Promise<void> => {
-  await simpleGit(repoLocation)
-    .fetch('origin')
-    .branch([`--set-upstream-to=origin/${branchname}`, branchname])
-    .pull()
-    .catch((error: GitError) => {
-      console.log(error)
-    })
+  await git.fetch()
+
+  const remoteBranchName = `remotes/origin/${branchname}`
+  const remoteExists = await remoteBranchExists(git, remoteBranchName)
+
+  if (remoteExists) {
+    await setUpstreamForBranch(git, branchname)
+    await pullToCurrentBranch(git)
+  }
+}
+
+export const setUpstreamForBranch = async (
+  git: SimpleGit,
+  branchname: string
+): Promise<void> => {
+  await git.branch([`--set-upstream-to=origin/${branchname}`, branchname])
+}
+
+export const pullToCurrentBranch = async (git: SimpleGit): Promise<void> => {
+  await git.pull()
 }

@@ -2,7 +2,6 @@
 import {
   cloneRepository,
   getCurrentBranchName,
-  pullNewestChanges,
   saveChanges,
   getLocalBranches,
   switchCurrentBranch,
@@ -40,11 +39,20 @@ const resolvers = {
       _context: unknown
     ): Promise<string> => {
       const repoLocation = getRepoLocationFromUrlString(args.url)
+
+      // TODO: Would be ideal that user's configs are set when repo
+      // is first cloned instead of doing it in commit operation
+      // (because automerges also require username and email)
+      // requires user specific repos & clone only possible
+      // when context.currentuser exists
       if (!existsSync(repoLocation)) {
         await cloneRepository(args.url)
-      } else {
-        await pullNewestChanges(repoLocation)
       }
+
+      // TODO: figure out when to pull newest changes
+      // pulling causes merge commits and issues
+      // if local commits are made and remote branch updated.
+
       return 'Cloned'
     },
     getRepoState: async (

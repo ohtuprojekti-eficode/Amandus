@@ -1,4 +1,6 @@
 import { UserType } from '../types/user'
+import { SaveArgs } from '../types/params'
+import { sanitizeBranchName } from '../utils/sanitize'
 import {
   getFileNameFromFilePath,
   getRepoLocationFromUrlString,
@@ -8,7 +10,6 @@ import {
   writeToFile,
   getRepoLocationFromRepoName,
 } from '../utils/utils'
-import { SaveArgs } from '../types/params'
 import {
   doAutoMerge,
   addChanges,
@@ -20,7 +21,6 @@ import {
   cloneRepositoryToSpecificFolder,
   updateBranchFromRemote,
 } from '../utils/gitUtils'
-import { sanitizeBranchName } from '../utils/sanitize'
 
 export const switchCurrentBranch = async (
   repoLocation: string,
@@ -38,7 +38,8 @@ export const pullNewestChanges = async (
   repoLocation: string
 ): Promise<void> => {
   const currentBranch = await getCurrentBranchName(repoLocation)
-  await updateBranchFromRemote(repoLocation, currentBranch)
+  const gitObject = getGitObject(repoLocation)
+  await updateBranchFromRemote(gitObject, currentBranch)
 }
 
 export const cloneRepository = async (url: string): Promise<void> => {
@@ -65,6 +66,7 @@ export const saveChanges = async (
     realFilename
   )
 
+  const oldBranch = await getCurrentBranchName(repoLocation)
   const gitObject = getGitObject(repoLocation)
 
   await validateBranchName(sanitizedBranchName)
@@ -74,7 +76,7 @@ export const saveChanges = async (
   await commitAddedChanges(gitObject, username, email, validCommitMessage)
 
   if (remoteToken) {
-    await doAutoMerge(gitObject, sanitizedBranchName)
+    await doAutoMerge(gitObject, sanitizedBranchName, oldBranch)
     await pushWithToken(gitObject, username, remoteToken, sanitizedBranchName)
   }
 }
