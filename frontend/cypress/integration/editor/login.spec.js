@@ -41,6 +41,8 @@ describe('When visiting the login page, as a user', () => {
     cy.get('#confirmPassword').type(password)  
     cy.get('form button').click()
 
+    localStorage.removeItem('token')
+    cy.wait(1000)
     cy.visit(Cypress.env('HOST') + '/login')
 
     cy.get('#username').type(username)

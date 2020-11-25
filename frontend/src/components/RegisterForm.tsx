@@ -78,7 +78,7 @@ const RegisterForm = () => {
     resetForm: Function
   ) => {
     try {
-      await registerUser({
+      const registerResponse = await registerUser({
         variables: {
           username: data.username,
           email: data.email,
@@ -86,6 +86,8 @@ const RegisterForm = () => {
         },
       })
       setFormStatus(formStatusProps.success)
+      localStorage.setItem('token', registerResponse.data.register)
+      window.location.href = '/'
     } catch (error) {
       if (
         error.message.includes('duplicate key value violates unique constraint')
