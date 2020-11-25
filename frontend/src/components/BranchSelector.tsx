@@ -50,12 +50,12 @@ const BranchSelector = ({ repoUrl, branches }: PropsType) => {
   )
   const [selectedBranch, setSelectedBranch] = React.useState('master')
 
-  const [
-    switchBranch,
-    { loading: mutationLoading, error: mutationError },
-  ] = useMutation(SWITCH_BRANCH, {
-    refetchQueries: [{ query: REPO_STATE }],
-  })
+  const [switchBranch, { loading: mutationLoading }] = useMutation(
+    SWITCH_BRANCH,
+    {
+      refetchQueries: [{ query: REPO_STATE }],
+    }
+  )
 
   const handleClickListItem = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElement(event.currentTarget)

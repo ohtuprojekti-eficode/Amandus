@@ -12,13 +12,14 @@ export interface RepoStateQueryResult {
     currentBranch: string
     files: File[]
     branches: string[]
+    localBranches: string[]
     url: string
   }
 }
 
 export interface authorizeWithGHMutationResult {
   authorizeWithGithub: {
-    serviceUser: ServiceUserType & { __typename: string}
+    serviceUser: ServiceUserType & { __typename: string }
     token: string
   }
 }
