@@ -6,6 +6,7 @@ import {
   saveChanges,
   saveChangesAndPush,
   getBranches,
+  getLocalBranches,
   switchCurrentBranch,
 } from '../services/git'
 import { existsSync, readFileSync } from 'fs'
@@ -30,6 +31,7 @@ const typeDef = `
       files: [File]!
       branches: [String]!
       url: String!
+      localBranches: [String]!
     }
 `
 
@@ -69,9 +71,10 @@ const resolvers = {
       }))
 
       const branches = await getBranches(repoLocation)
+      const localBranches = await getLocalBranches(repoLocation)
       const url = args.url
 
-      return { currentBranch, files, branches, url }
+      return { currentBranch, files, branches, localBranches, url }
     },
   },
   Mutation: {
@@ -86,10 +89,7 @@ const resolvers = {
 
       try {
         if (!context.githubToken) {
-          await saveChanges(
-            saveArgs,
-            context.currentUser
-          )
+          await saveChanges(saveArgs, context.currentUser)
         } else {
           await saveChangesAndPush(
             saveArgs,
@@ -97,7 +97,6 @@ const resolvers = {
             context.githubToken ?? ''
           )
         }
-        
       } catch (error) {
         if (error.message === 'Merge conflict') {
           throw new ApolloError('Merge conflict detected')

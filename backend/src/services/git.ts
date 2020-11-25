@@ -72,7 +72,6 @@ export const saveChanges = async (
   )
 
   await gitCommit(gitObject, validCommitMessage)
-  
 }
 
 export const saveChangesAndPush = async (
@@ -227,6 +226,14 @@ const gitRemoveRemote = async (git: SimpleGit, remoteId: string) => {
 export const getBranches = async (repoLocation: string): Promise<string[]> => {
   const git = simpleGit(repoLocation)
   const branches = await git.branch()
+  return branches.all
+}
+
+export const getLocalBranches = async (
+  repoLocation: string
+): Promise<string[]> => {
+  const git = simpleGit(repoLocation)
+  const branches = await git.branchLocal()
   return branches.all
 }
 

@@ -5,4 +5,5 @@ export interface RepoState {
   files: File[]
   branches: string[]
   url: string
+  localBranches: string[]
 }
