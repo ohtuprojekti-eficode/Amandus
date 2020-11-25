@@ -32,13 +32,13 @@ describe('When visiting the register page, as a user', () => {
         const randomStr = uuid()
         const username = randomStr.substr(0, 5)
         const email = `${username}@test.com`
-        localStorage.removeItem('token')
 
         cy.get('#username').type(username)  
         cy.get('#email').type(email)
         cy.get('#password').type('testUserPass!111')
         cy.get('#confirmPassword').type('testUserPass!111')  
         cy.get('form button').click()
+        
         cy.contains(`${username} - logout`)
     })
     
