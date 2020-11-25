@@ -3,7 +3,7 @@ import Editor from '@monaco-editor/react'
 import { useMutation, useQuery } from '@apollo/client'
 import { ME, REPO_STATE } from '../graphql/queries'
 import { SAVE_CHANGES } from '../graphql/mutations'
-import { Button } from '@material-ui/core'
+import { Button, useTheme } from '@material-ui/core'
 import SaveDialog from './SaveDialog'
 import AuthenticateDialog from './AuthenticateDialog'
 import { RepoStateQueryResult } from '../types'
@@ -43,6 +43,8 @@ const MonacoEditor = ({ content, filename }: Props) => {
     }
   )
 
+  const theme = useTheme()
+
   const valueGetter = useRef<Getter | null>(null)
 
   const handleEditorDidMount = (_valueGetter: Getter) => {
@@ -76,7 +78,7 @@ const MonacoEditor = ({ content, filename }: Props) => {
       } catch (error) {
         if (error.message === 'Merge conflict detected') {
           setDialogError({
-            title: 'Merge conflict',
+            title: `Merge conflict on branch ${branchName}`,
             message: 'Cannot push to selected branch. Create a new one.',
           })
         }
@@ -94,6 +96,7 @@ const MonacoEditor = ({ content, filename }: Props) => {
       <Editor
         height="75vh"
         language="javascript"
+        theme={theme.palette.type}
         value={content}
         editorDidMount={handleEditorDidMount}
       />
