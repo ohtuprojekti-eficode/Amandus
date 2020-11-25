@@ -59,7 +59,7 @@ const formStatusProps: MyFormStatusProps = {
     type: 'success',
   },
   duplicate: {
-    message: 'Username already exists',
+    message: 'Username already exists.',
     type: 'error',
   },
 }
@@ -166,7 +166,7 @@ const RegisterForm = () => {
                     helperText={
                       touched.email && errors.email
                         ? errors.email
-                        : 'Enter your email-address.'
+                        : 'Enter your email address.'
                     }
                     error={touched.email && errors.email ? true : false}
                   />
@@ -183,10 +183,10 @@ const RegisterForm = () => {
                     onBlur={handleBlur}
                     helperText={
                       touched.password && errors.password
-                        ? 'Make sure your password is minimum 8 characters long and consists at least 1 uppercase, lowercase, number and one special ' +
-                          'character from !?@#$%^&*(). Password cannot end with empty space.'
-                        : 'Valid password is atleast 8 characters long and consists atleast 1 uppercase, lowercase, number and one special ' +
-                          'character from !?@#$%^&*(). Password cannot end with empty space.'
+                        ? 'Make sure your password is minimum of 8 characters long and consists of at least 1 uppercase, lowercase, number and one special ' +
+                          'character from !?@#$%^&*(). Password cannot end with an empty space.'
+                        : 'Valid password is minimum of 8 characters long and consists of at least 1 uppercase, lowercase, number and one special ' +
+                          'character from !?@#$%^&*(). Password cannot end with an empty space.'
                     }
                     error={touched.password && errors.password ? true : false}
                   />
@@ -203,7 +203,7 @@ const RegisterForm = () => {
                     onBlur={handleBlur}
                     helperText={
                       touched.confirmPassword && errors.confirmPassword
-                        ? 'Your confirmation did not match with the your password. Please try again.'
+                        ? 'Your confirmation did not match with your password. Please try again.'
                         : 'Re-write your password to confirm it.'
                     }
                     error={
