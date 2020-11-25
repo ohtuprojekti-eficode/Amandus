@@ -10,12 +10,17 @@ describe('When visiting the edit view page, as a user', () => {
     cy.contains('Please log in!')
   })
 
+  it('I can not save when I am not logged in', () => {
+    cy.url().should('include', '/edit')
+    cy.get('.MuiButton-containedPrimary').should('be.disabled')
+  })
+
   it('I can open the editor when I am logged in', () => {
     
     cy.visit(Cypress.env('HOST') + '/register')
 
     const randomStr = uuid()
-    const username = randomStr.substr(0, 4)
+    const username = randomStr.substr(0, 5)
     const email = `${username}@test.com`
     const password = 'testUserPass!111'
 
@@ -37,8 +42,7 @@ describe('When visiting the edit view page, as a user', () => {
 
     cy.visit(Cypress.env('HOST') + '/edit')
     
-    // TODO: there has to be something on the page to test so we know user is logged in, i.e. class, id attribute or some content.
-    
+    cy.get('.MuiButton-containedPrimary').should('not.be.disabled')
 })
 
 })

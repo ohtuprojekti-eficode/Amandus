@@ -30,7 +30,7 @@ describe('When visiting the register page, as a user', () => {
 
     it('I can register to the app with valid information', () => {
         const randomStr = uuid()
-        const username = randomStr.substr(0, 3)
+        const username = randomStr.substr(0, 5)
         const email = `${username}@test.com`
 
         cy.get('#username').type(username)  

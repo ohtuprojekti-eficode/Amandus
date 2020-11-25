@@ -31,7 +31,7 @@ describe('When visiting the login page, as a user', () => {
     cy.visit(Cypress.env('HOST') + '/register')
     
     const randomStr = uuid()
-    const username = randomStr.substr(0, 3)
+    const username = randomStr.substr(0, 5)
     const email = `${username}@test.com`
     const password = 'testUserPass!111'
 
