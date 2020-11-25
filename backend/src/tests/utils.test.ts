@@ -3,6 +3,7 @@ import {
   getRepositoryFromFilePath,
   makeCommitMessage,
   getRepoLocationFromUrlString,
+  getRepoLocationFromRepoName,
 } from '../utils/utils'
 
 describe('Test getRepositoryFromFilePath', () => {
@@ -66,6 +67,16 @@ describe('Test getRepoLocationFromUrlString', () => {
   it('correct backend repository folder path is returned', () => {
     const urlString = 'https://github.com/ohtuprojekti-eficode/robot-test-files'
     const repoLocation = getRepoLocationFromUrlString(urlString)
+    const expectedLocation =
+      './repositories/ohtuprojekti-eficode/robot-test-files'
+    expect(repoLocation).toBe(expectedLocation)
+  })
+})
+
+describe('Test getRepoLocationFromRepoName', () => {
+  it('correct backend repository folder path is returned', () => {
+    const reponame = 'ohtuprojekti-eficode/robot-test-files'
+    const repoLocation = getRepoLocationFromRepoName(reponame)
     const expectedLocation =
       './repositories/ohtuprojekti-eficode/robot-test-files'
     expect(repoLocation).toBe(expectedLocation)
