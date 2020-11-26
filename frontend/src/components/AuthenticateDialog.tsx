@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link as RouterLink } from 'react-router-dom'
 import {
   Button,
   Dialog,
@@ -7,6 +7,7 @@ import {
   DialogContent,
   DialogTitle,
   Grid,
+  Link,
 } from '@material-ui/core'
 
 interface Props {
@@ -26,7 +27,9 @@ const AuthenticateDialog = ({ open }: Props) => {
       </DialogContent>
       <DialogActions>
         <Button>
-          <Link to="/login">Take me to login</Link>
+          <Link component={RouterLink} to="/login">
+            Take me to login
+          </Link>
         </Button>
       </DialogActions>
     </Dialog>

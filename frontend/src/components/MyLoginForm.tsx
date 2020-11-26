@@ -11,11 +11,10 @@ import {
 import { useMutation } from '@apollo/client'
 import { LOGIN } from '../graphql/mutations'
 
-const stylesInUse = makeStyles(() =>
+const stylesInUse = makeStyles((theme) =>
   createStyles({
     root: {
       maxWidth: '500px',
-      color: 'white',
       display: 'block',
       margin: '0 auto',
     },
@@ -27,9 +26,9 @@ const stylesInUse = makeStyles(() =>
     loginButton: {
       marginTop: '30px',
     },
-    title: { textAlign: 'left', color: 'black' },
-    successMessage: { color: 'green' },
-    errorMessage: { color: 'red' },
+    title: { textAlign: 'left' },
+    successMessage: { color: theme.palette.success.main },
+    errorMessage: { color: theme.palette.error.main },
   })
 )
 
@@ -77,7 +76,7 @@ const MyLoginForm = () => {
         },
       })
       setFormStatus(formStatusProps.success)
-      localStorage.setItem('token', loginResponse.data.login.token)
+      localStorage.setItem('token', loginResponse.data.login)
       window.location.href = '/'
     } catch (error) {
       setFormStatus(formStatusProps.error)

@@ -19,6 +19,7 @@ const GitHubAuthBtn = () => {
     <div>
       <Button
         variant="contained"
+        color="primary"
         startIcon={<GitHubIcon />}
         onClick={btnClickHandler}
       >

@@ -1,4 +1,4 @@
-# WEVC
+# Amandus
 
 Web application to edit Robot Framework files remotely
 

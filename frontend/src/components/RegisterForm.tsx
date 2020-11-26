@@ -11,11 +11,10 @@ import { useMutation } from '@apollo/client'
 import { REGISTER } from '../graphql/mutations'
 import RegisterSchema from './RegisterSchema'
 
-const stylesInUse = makeStyles(() =>
+const stylesInUse = makeStyles((theme) =>
   createStyles({
     root: {
       maxWidth: '500px',
-      color: 'white',
       display: 'block',
       margin: '0 auto',
     },
@@ -27,9 +26,9 @@ const stylesInUse = makeStyles(() =>
     registerButton: {
       marginTop: '30px',
     },
-    title: { textAlign: 'left', color: 'black' },
-    successMessage: { color: 'green' },
-    errorMessage: { color: 'red' },
+    title: { textAlign: 'left' },
+    successMessage: { color: theme.palette.success.main },
+    errorMessage: { color: theme.palette.error.main },
   })
 )
 
@@ -59,7 +58,7 @@ const formStatusProps: MyFormStatusProps = {
     type: 'success',
   },
   duplicate: {
-    message: 'Username already exists',
+    message: 'Username already exists.',
     type: 'error',
   },
 }
@@ -79,7 +78,7 @@ const RegisterForm = () => {
     resetForm: Function
   ) => {
     try {
-      await registerUser({
+      const registerResponse = await registerUser({
         variables: {
           username: data.username,
           email: data.email,
@@ -87,6 +86,8 @@ const RegisterForm = () => {
         },
       })
       setFormStatus(formStatusProps.success)
+      localStorage.setItem('token', registerResponse.data.register)
+      window.location.href = '/'
     } catch (error) {
       if (
         error.message.includes('duplicate key value violates unique constraint')
@@ -166,7 +167,7 @@ const RegisterForm = () => {
                     helperText={
                       touched.email && errors.email
                         ? errors.email
-                        : 'Enter your email-address.'
+                        : 'Enter your email address.'
                     }
                     error={touched.email && errors.email ? true : false}
                   />
@@ -183,8 +184,10 @@ const RegisterForm = () => {
                     onBlur={handleBlur}
                     helperText={
                       touched.password && errors.password
-                        ? 'Valid password is atleast 7 characters long and consists atleast 1 uppercase,lowercase,number and special character.'
-                        : 'Make sure your password includes no spaces, is minimum 7 characters long and consists at least 1 uppercase,lowercase,number and special character.'
+                        ? 'Make sure your password is minimum of 8 characters long and consists of at least 1 uppercase, lowercase, number and one special ' +
+                          'character from !?@#$%^&*(). Password cannot end with an empty space.'
+                        : 'Valid password is minimum of 8 characters long and consists of at least 1 uppercase, lowercase, number and one special ' +
+                          'character from !?@#$%^&*(). Password cannot end with an empty space.'
                     }
                     error={touched.password && errors.password ? true : false}
                   />
@@ -201,8 +204,8 @@ const RegisterForm = () => {
                     onBlur={handleBlur}
                     helperText={
                       touched.confirmPassword && errors.confirmPassword
-                        ? 'Valid password is atleast 7 characters long and consists atleast 1 uppercase,lowercase,number and special character.'
-                        : 'Make sure your password includes no spaces, is minimum 7 characters long and consists at least 1 uppercase,lowercase,number and special character.'
+                        ? 'Your confirmation did not match with your password. Please try again.'
+                        : 'Re-write your password to confirm it.'
                     }
                     error={
                       touched.confirmPassword && errors.confirmPassword
