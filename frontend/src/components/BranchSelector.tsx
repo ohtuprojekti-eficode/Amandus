@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles'
 import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'
@@ -7,7 +7,8 @@ import MenuItem from '@material-ui/core/MenuItem'
 import Menu from '@material-ui/core/Menu'
 import { SWITCH_BRANCH } from '../graphql/mutations'
 import { REPO_STATE } from '../graphql/queries'
-import { useMutation } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client'
+import { RepoStateQueryResult } from '../types'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -38,17 +39,14 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-interface PropsType {
-  branches: string[]
-  repoUrl: string
-}
-
-const BranchSelector = ({ repoUrl, branches }: PropsType) => {
+const BranchSelector = () => {
   const classes = useStyles()
-  const [anchorElement, setAnchorElement] = React.useState<null | HTMLElement>(
-    null
-  )
-  const [selectedBranch, setSelectedBranch] = React.useState('master')
+  const [anchorElement, setAnchorElement] = useState<null | HTMLElement>(null)
+
+  const branchState = useQuery<RepoStateQueryResult>(REPO_STATE)
+  const selectedBranch = branchState.data?.repoState.currentBranch || ''
+  const branches = branchState.data?.repoState.branches || ['']
+  const repoUrl = branchState.data?.repoState.url || ''
 
   const [switchBranch, { loading: mutationLoading }] = useMutation(
     SWITCH_BRANCH,
@@ -62,7 +60,6 @@ const BranchSelector = ({ repoUrl, branches }: PropsType) => {
   }
 
   const handleMenuItemClick = async (branch: string) => {
-    setSelectedBranch(branch)
     setAnchorElement(null)
     try {
       await switchBranch({
