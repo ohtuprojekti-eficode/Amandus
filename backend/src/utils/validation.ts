@@ -28,7 +28,7 @@ export const validateUserArgs = ({
   if (
     !validator.matches(
       password,
-      '/^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[!?@#$%^&*()]).{7,30}S$/'
+      /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[!?@#$%^&*()]).{7,30}\S$/
     )
   ) {
     return {
