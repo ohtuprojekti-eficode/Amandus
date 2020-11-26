@@ -1,20 +1,21 @@
 import { UserInputError, ForbiddenError } from 'apollo-server'
 import bcrypt from 'bcryptjs'
+import User from '../model/user'
+import Service from '../model/service'
+import { createToken } from '../utils/token'
 import config from '../utils/config'
+import { validateUserArgs } from '../utils/validation'
+import {
+  RegisterUserInput,
+  LoginUserInput,
+  AddServiceArgs,
+} from '../types/params'
 import {
   UserType,
   AppContext,
   GitHubAuthCode,
   ServiceAuthResponse,
 } from '../types/user'
-import User from '../model/user'
-import Service from '../model/service'
-import { createToken } from '../utils/token'
-import {
-  RegisterUserInput,
-  LoginUserInput,
-  AddServiceArgs,
-} from '../types/params'
 import {
   requestGithubToken,
   requestGithubUserAccount,
@@ -137,12 +138,9 @@ const resolvers = {
       _root: unknown,
       args: RegisterUserInput
     ): Promise<string> => {
-      if (
-        args.username.length === 0 ||
-        args.email.length === 0 ||
-        args.password.length === 0
-      ) {
-        throw new UserInputError('Username, email or password can not be empty')
+      const { validationFailed, errorMessage } = validateUserArgs(args)
+      if (validationFailed) {
+        throw new UserInputError(errorMessage)
       }
 
       const user = await User.registerUser(args)
@@ -157,10 +155,7 @@ const resolvers = {
 
       return token
     },
-    login: async (
-      _root: unknown,
-      args: LoginUserInput
-    ): Promise<string> => {
+    login: async (_root: unknown, args: LoginUserInput): Promise<string> => {
       const user = await User.findUserByUsername(args.username)
 
       if (!user) {
