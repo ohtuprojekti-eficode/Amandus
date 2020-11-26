@@ -29,7 +29,6 @@ const typeDef = `
     type RepoState {
       currentBranch: String!
       files: [File]!
-      branches: [String]!
       url: String!
       localBranches: [String]!
     }
@@ -70,11 +69,10 @@ const resolvers = {
         content: readFileSync(file, 'utf-8'),
       }))
 
-      const branches = await getBranches(repoLocation)
       const localBranches = await getLocalBranches(repoLocation)
       const url = args.url
 
-      return { currentBranch, files, branches, localBranches, url }
+      return { currentBranch, files, localBranches, url }
     },
   },
   Mutation: {
