@@ -5,7 +5,6 @@ import {
   pullNewestChanges,
   saveChanges,
   saveChangesAndPush,
-  getBranches,
   getLocalBranches,
   switchCurrentBranch,
 } from '../services/git'
