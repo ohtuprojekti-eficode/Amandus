@@ -58,7 +58,7 @@ const formStatusProps: MyFormStatusProps = {
     type: 'success',
   },
   duplicate: {
-    message: 'Username already exists',
+    message: 'Username already exists.',
     type: 'error',
   },
 }
@@ -167,7 +167,7 @@ const RegisterForm = () => {
                     helperText={
                       touched.email && errors.email
                         ? errors.email
-                        : 'Enter your email-address.'
+                        : 'Enter your email address.'
                     }
                     error={touched.email && errors.email ? true : false}
                   />
@@ -184,8 +184,10 @@ const RegisterForm = () => {
                     onBlur={handleBlur}
                     helperText={
                       touched.password && errors.password
-                        ? 'Valid password is atleast 7 characters long and consists atleast 1 uppercase,lowercase,number and special character.'
-                        : 'Make sure your password includes no spaces, is minimum 7 characters long and consists at least 1 uppercase,lowercase,number and special character.'
+                        ? 'Make sure your password is minimum of 8 characters long and consists of at least 1 uppercase, lowercase, number and one special ' +
+                          'character from !?@#$%^&*(). Password cannot end with an empty space.'
+                        : 'Valid password is minimum of 8 characters long and consists of at least 1 uppercase, lowercase, number and one special ' +
+                          'character from !?@#$%^&*(). Password cannot end with an empty space.'
                     }
                     error={touched.password && errors.password ? true : false}
                   />
@@ -202,8 +204,8 @@ const RegisterForm = () => {
                     onBlur={handleBlur}
                     helperText={
                       touched.confirmPassword && errors.confirmPassword
-                        ? 'Valid password is atleast 7 characters long and consists atleast 1 uppercase,lowercase,number and special character.'
-                        : 'Make sure your password includes no spaces, is minimum 7 characters long and consists at least 1 uppercase,lowercase,number and special character.'
+                        ? 'Your confirmation did not match with your password. Please try again.'
+                        : 'Re-write your password to confirm it.'
                     }
                     error={
                       touched.confirmPassword && errors.confirmPassword
