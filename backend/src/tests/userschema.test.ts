@@ -60,7 +60,7 @@ describe('User schema register mutations', () => {
       variables: {
         username: 'testuser2',
         email: 'testuser2@test.com',
-        password: 'mypassword',
+        password: 'mypAssword?45',
       },
     })
 
@@ -69,7 +69,7 @@ describe('User schema register mutations', () => {
 
     expect(mutationResult).toEqual({
       data: {
-        register: expectedToken
+        register: expectedToken,
       },
     })
   })
@@ -82,7 +82,7 @@ describe('User schema register mutations', () => {
       variables: {
         username: 'testuser2',
         email: 'testuser2@test.com',
-        password: 'mypassword',
+        password: 'mypAssword?45',
       },
     })
 
@@ -97,7 +97,7 @@ describe('User schema register mutations', () => {
       variables: {
         username: '',
         email: 'testuser2@test.com',
-        password: 'mypassword',
+        password: 'mypAssword?45',
       },
     })
 
@@ -155,7 +155,7 @@ describe('User schema login mutations', () => {
     const userData = {
       username: 'testuser',
       email: 'testuser@test.com',
-      password: 'testpassword',
+      password: 'mypAssword?45',
     }
 
     await User.registerUser(userData)
@@ -168,7 +168,7 @@ describe('User schema login mutations', () => {
       mutation: LOGIN,
       variables: {
         username: 'testuser',
-        password: 'testpassword',
+        password: 'mypAssword?45',
       },
     })
 
@@ -177,7 +177,7 @@ describe('User schema login mutations', () => {
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     expect(res.data).toEqual({
-      login: expectedToken
+      login: expectedToken,
     })
   })
 
@@ -222,7 +222,7 @@ describe('User schema login mutations', () => {
       mutation: LOGIN,
       variables: {
         username: 'wronguser',
-        password: 'testpassword',
+        password: 'mypAssword?45',
       },
     })
 
@@ -241,7 +241,7 @@ describe('User schema add git service mutations', () => {
   it('users github account can be added to user data', async () => {
     const userToSave = {
       username: 'testuser',
-      password: 'testpassword',
+      password: 'mypAssword?45',
       email: 'test@test.fi',
     }
 
@@ -297,7 +297,7 @@ describe('Context currentuser query', () => {
   it('user data and github token is returned when set, no services', async () => {
     const userToSave = {
       username: 'testuser',
-      password: 'testpassword',
+      password: 'mypAssword?45',
       email: 'test@test.fi',
     }
 
@@ -330,7 +330,7 @@ describe('Context currentuser query', () => {
   it('user data and github token is returned when set, one service', async () => {
     const userToSave = {
       username: 'testuser',
-      password: 'testpassword',
+      password: 'mypAssword?45',
       email: 'test@test.fi',
     }
 
@@ -379,7 +379,7 @@ describe('Context githubToken query', () => {
   it('no token is returned when set', async () => {
     const userToSave = {
       username: 'testuser',
-      password: 'testpassword',
+      password: 'mypAssword?45',
       email: 'test@test.fi',
     }
 
@@ -408,7 +408,7 @@ describe('Context githubToken query', () => {
   it('correct token is returned when set', async () => {
     const userToSave = {
       username: 'testuser',
-      password: 'testpassword',
+      password: 'mypAssword?45',
       email: 'test@test.fi',
     }
 
