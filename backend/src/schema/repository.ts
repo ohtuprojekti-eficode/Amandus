@@ -2,10 +2,7 @@
 import {
   cloneRepository,
   getCurrentBranchName,
-  pullNewestChanges,
   saveChanges,
-  saveChangesAndPush,
-  getBranches,
   getLocalBranches,
   switchCurrentBranch,
 } from '../services/git'
@@ -16,6 +13,7 @@ import { relative } from 'path'
 import { AppContext } from '../types/user'
 import { BranchSwitchArgs, SaveArgs } from '../types/params'
 import { RepoState } from '../types/repoState'
+import { getRepoLocationFromUrlString } from '../utils/utils'
 
 const typeDef = `
     type File {
@@ -29,8 +27,8 @@ const typeDef = `
     type RepoState {
       currentBranch: String!
       files: [File]!
+      branches: [String]!
       url: String!
-      localBranches: [String]!
     }
 `
 
@@ -41,15 +39,21 @@ const resolvers = {
       args: { url: string },
       _context: unknown
     ): Promise<string> => {
-      const url = new URL(args.url)
-      const repositoryName = url.pathname
-      const fileLocation = `./repositories/${repositoryName}`
+      const repoLocation = getRepoLocationFromUrlString(args.url)
 
-      if (!existsSync(fileLocation)) {
-        await cloneRepository(url.href)
-      } else {
-        await pullNewestChanges(url.href)
+      // TODO: Would be ideal that user's configs are set when repo
+      // is first cloned instead of doing it in commit operation
+      // (because automerges also require username and email)
+      // requires user specific repos & clone only possible
+      // when context.currentuser exists
+      if (!existsSync(repoLocation)) {
+        await cloneRepository(args.url)
       }
+
+      // TODO: figure out when to pull newest changes
+      // pulling causes merge commits and issues
+      // if local commits are made and remote branch updated.
+
       return 'Cloned'
     },
     getRepoState: async (
@@ -57,10 +61,7 @@ const resolvers = {
       args: { url: string },
       _context: unknown
     ): Promise<RepoState> => {
-      const urlObject = new URL(args.url)
-      const repositoryName = urlObject.pathname
-      const repoLocation = `./repositories/${repositoryName}`
-
+      const repoLocation = getRepoLocationFromUrlString(args.url)
       const currentBranch = await getCurrentBranchName(repoLocation)
 
       const filePaths = await readRecursive(repoLocation, ['.git'])
@@ -69,10 +70,9 @@ const resolvers = {
         content: readFileSync(file, 'utf-8'),
       }))
 
-      const localBranches = await getLocalBranches(repoLocation)
-      const url = args.url
+      const branches = await getLocalBranches(repoLocation)
 
-      return { currentBranch, files, localBranches, url }
+      return { currentBranch, files, branches, url: args.url }
     },
   },
   Mutation: {
@@ -86,15 +86,7 @@ const resolvers = {
       }
 
       try {
-        if (!context.githubToken) {
-          await saveChanges(saveArgs, context.currentUser)
-        } else {
-          await saveChangesAndPush(
-            saveArgs,
-            context.currentUser,
-            context.githubToken ?? ''
-          )
-        }
+        await saveChanges(saveArgs, context.currentUser, context.githubToken)
       } catch (error) {
         if (error.message === 'Merge conflict') {
           throw new ApolloError('Merge conflict detected')
@@ -110,9 +102,7 @@ const resolvers = {
       branchSwitchArgs: BranchSwitchArgs,
       _context: unknown
     ): Promise<string> => {
-      const url = new URL(branchSwitchArgs.url)
-      const repositoryName = url.pathname
-      const repoLocation = `./repositories/${repositoryName}`
+      const repoLocation = getRepoLocationFromUrlString(branchSwitchArgs.url)
       return await switchCurrentBranch(repoLocation, branchSwitchArgs.branch)
     },
   },

@@ -10,7 +10,7 @@ export const REPO_STATE = gql`
         name
         content
       }
-      localBranches
+      branches
       url
     }
   }

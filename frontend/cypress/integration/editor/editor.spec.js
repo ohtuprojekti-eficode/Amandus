@@ -32,14 +32,6 @@ describe('When visiting the edit view page, as a user', () => {
 
     cy.wait(1000)
 
-    cy.visit(Cypress.env('HOST') + '/login')
-
-    cy.get('#username').type(username)
-    cy.get('#password').type(password)
-    cy.get('form button').click()
-    
-    cy.wait(1000)
-
     cy.visit(Cypress.env('HOST') + '/edit')
     
     cy.get('.MuiButton-containedPrimary').should('not.be.disabled')
