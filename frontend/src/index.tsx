@@ -12,7 +12,7 @@ import { setContext } from '@apollo/client/link/context'
 import { loadWASM } from 'vscode-oniguruma'
 
 import App from './App'
-import { loadVSCodeOnigurumWASM } from './utils/monacoUtils'
+import { loadVSCodeOnigurumWASM } from './utils/wasmLoader'
 ;(async () => {
   const data: ArrayBuffer | Response = await loadVSCodeOnigurumWASM()
   loadWASM(data)

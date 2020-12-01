@@ -11,16 +11,20 @@ import { RepoStateQueryResult } from '../types'
 
 // import { loadVSCodeOnigurumWASM } from '../utils/monacoUtils'
 
-import type { LanguageId } from './register'
-import type { ScopeName, TextMateGrammar, ScopeNameInfo } from './providers'
+import type { LanguageId } from '../utils/languages'
+import type {
+  ScopeName,
+  TextMateGrammar,
+  ScopeNameInfo,
+} from '../utils/providers'
 import { createOnigScanner, createOnigString } from 'vscode-oniguruma'
-import { SimpleLanguageInfoProvider } from './providers'
-import { registerLanguages } from './register'
-import { rehydrateRegexps } from './configuration'
-import VsCodeDarkTheme from './vs-dark-plus-theme'
+import { SimpleLanguageInfoProvider } from '../utils/providers'
+import { registerLanguages } from '../utils/languages'
+import { rehydrateRegexps } from '../utils/configuration'
+import VsCodeDarkTheme from '../themes/vs-dark-plus-theme'
 import { IOnigLib } from 'vscode-textmate'
-import { grammar } from './language'
-import { robotConfiguration } from './robotConfiguration'
+import { grammar } from '../grammars/robot'
+import { robotConfiguration } from '../grammars/robotConfiguration'
 
 interface Props {
   content: string | undefined

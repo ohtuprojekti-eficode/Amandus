@@ -1,15 +1,13 @@
 export async function loadVSCodeOnigurumWASM(): Promise<
   Response | ArrayBuffer
 > {
-  //   const response = await fetch(
-  //     './node_modules/vscode-oniguruma/release/onig.wasm'
-  //   )
-  const response = await fetch('http://localhost:3001/onig')
-  //   console.log(response)
+  const wasmUrl =
+    process.env.NODE_ENV === 'development'
+      ? 'http://localhost:3001/onig'
+      : '/onig'
+  const response = await fetch(wasmUrl)
   const contentType = response.headers.get('content-type')
-  console.log(contentType)
   if (contentType === 'application/wasm') {
-    // console.log('oikein')
     return response
   }
 

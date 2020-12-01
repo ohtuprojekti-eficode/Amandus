@@ -7,7 +7,7 @@ import type {
   IOnigLib,
   StackElement,
 } from 'vscode-textmate'
-import type { LanguageId, LanguageInfo } from './register'
+import type { LanguageId, LanguageInfo } from './languages'
 
 import { INITIAL, Registry, parseRawGrammar } from 'vscode-textmate'
 // @ts-ignore
