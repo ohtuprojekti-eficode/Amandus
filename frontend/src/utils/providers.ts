@@ -1,10 +1,8 @@
-// import type * as monaco from 'monaco-editor'
-// type Monaco = typeof monaco
+import type * as monaco from 'monaco-editor'
 import type {
   IGrammar,
   IRawGrammar,
   IRawTheme,
-  IOnigLib,
   StackElement,
 } from 'vscode-textmate'
 import type { LanguageId, LanguageInfo } from './languages'
@@ -21,20 +19,15 @@ export type TextMateGrammar = {
   grammar: string
 }
 
-interface Language {
-  id: string
-  extensions: string[]
-}
-
 export type SimpleLanguageInfoProviderConfig = {
   // Key is a ScopeName.
   grammars: { [scopeName: string]: ScopeNameInfo }
 
-  fetchGrammar: () => Promise<any>
+  fetchGrammar: () => Promise<TextMateGrammar>
 
   configurations: LanguageId[]
 
-  fetchConfiguration: () => Promise<any>
+  fetchConfiguration: () => Promise<monaco.languages.LanguageConfiguration>
 
   // This must be available synchronously to the SimpleLanguageInfoProvider
   // constructor, so the user is responsible for fetching the theme data rather
@@ -77,12 +70,7 @@ export class SimpleLanguageInfoProvider {
     this.registry = new Registry({
       onigLib,
 
-      async loadGrammar(scopeName: ScopeName): Promise<IRawGrammar | null> {
-        const scopeNameInfo = grammars[scopeName]
-        if (scopeNameInfo == null) {
-          return null
-        }
-
+      async loadGrammar(): Promise<IRawGrammar | null> {
         const { type, grammar } = await fetchGrammar()
         // If this is a JSON grammar, filePath must be specified with a `.json`
         // file extension or else parseRawGrammar() will assume it is a PLIST

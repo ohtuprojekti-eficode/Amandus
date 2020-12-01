@@ -1,3 +1,4 @@
+import type * as monaco from 'monaco-editor'
 /**
  * Fields that, if present in a LanguageConfiguration, must be a RegExp object
  * rather than a string literal.
@@ -28,12 +29,9 @@ const REGEXP_PROPERTIES = [
  * to be specified to the RegExp constructor.
  */
 
-interface Language {
-  id: string
-  extensions: string[]
-}
-
-export function rehydrateRegexps(rawConfiguration: string): Language {
+export function rehydrateRegexps(
+  rawConfiguration: string
+): monaco.languages.LanguageConfiguration {
   const out = JSON.parse(rawConfiguration)
   for (const property of REGEXP_PROPERTIES) {
     const value = getProp(out, property)
