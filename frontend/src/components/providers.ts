@@ -30,11 +30,11 @@ export type SimpleLanguageInfoProviderConfig = {
   // Key is a ScopeName.
   grammars: { [scopeName: string]: ScopeNameInfo }
 
-  fetchGrammar: (scopeName: ScopeName) => Promise<any>
+  fetchGrammar: () => Promise<any>
 
   configurations: LanguageId[]
 
-  fetchConfiguration: (language: LanguageId) => Promise<any>
+  fetchConfiguration: () => Promise<any>
 
   // This must be available synchronously to the SimpleLanguageInfoProvider
   // constructor, so the user is responsible for fetching the theme data rather
@@ -83,7 +83,7 @@ export class SimpleLanguageInfoProvider {
           return null
         }
 
-        const { type, grammar } = await fetchGrammar(scopeName)
+        const { type, grammar } = await fetchGrammar()
         // If this is a JSON grammar, filePath must be specified with a `.json`
         // file extension or else parseRawGrammar() will assume it is a PLIST
         // grammar.
@@ -127,7 +127,7 @@ export class SimpleLanguageInfoProvider {
   async fetchLanguageInfo(language: LanguageId): Promise<LanguageInfo> {
     const [tokensProvider, configuration] = await Promise.all([
       this.getTokensProviderForLanguage(language),
-      this.config.fetchConfiguration(language),
+      this.config.fetchConfiguration(),
     ])
     return { tokensProvider, configuration }
   }

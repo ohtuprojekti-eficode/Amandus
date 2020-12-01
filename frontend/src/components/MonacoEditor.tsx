@@ -114,9 +114,7 @@ const MonacoEditor = ({ content, filename }: Props) => {
   }
 
   monaco.init().then(async (monaco) => {
-    const language = 'robot'
-
-    const languages: any = [
+    const languages = [
       {
         id: 'robot',
         extensions: ['.robot'],
@@ -130,21 +128,13 @@ const MonacoEditor = ({ content, filename }: Props) => {
       },
     }
 
-    const fetchGrammar = async (scopeName: ScopeName): Promise<any> => {
-      // const { path } = grammars[scopeName]
-      // const uri = `/grammars/${path}`
-      // const response = await fetch(uri)
-      // const grammar = await response.text()
+    const fetchGrammar = async (): Promise<any> => {
       const type = 'json'
       const json = JSON.stringify(grammar)
-
       return { type, grammar: json }
     }
 
-    const fetchConfiguration = async (language: LanguageId): Promise<any> => {
-      // const uri = `/configurations/${language}.json`
-      // const response = await fetch(uri)
-      // const rawConfiguration = await response.text()
+    const fetchConfiguration = async (): Promise<any> => {
       const rawConfiguration = JSON.stringify(robotConfiguration)
       return rehydrateRegexps(rawConfiguration)
     }
@@ -168,22 +158,6 @@ const MonacoEditor = ({ content, filename }: Props) => {
       (language: LanguageId) => provider.fetchLanguageInfo(language),
       monaco
     )
-
-    // const value = getSampleCodeForLanguage(language)
-    // const id = 'container'
-    // const element = document.getElementById(id)
-    // if (element == null) {
-    //   throw Error(`could not find element #${id}`)
-    // }
-
-    // monaco.editor.create(element, {
-    //   value,
-    //   language,
-    //   theme: 'vs-dark',
-    //   minimap: {
-    //     enabled: false,
-    //   },
-    // })
 
     monaco.editor.setTheme('vs-dark')
 
