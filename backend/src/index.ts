@@ -10,8 +10,13 @@ import { Req } from './types/request'
 import User from './model/user'
 import path from 'path'
 import { UserJWT } from './types/user'
+import cors from 'cors'
+
+import { readFileSync } from 'fs'
 
 const app = express()
+
+app.use(cors())
 
 const corsOptions = {
   origin: true,
@@ -33,7 +38,19 @@ const server = new ApolloServer({
 })
 
 server.applyMiddleware({ app, path: '/graphql' })
+// server.applyMiddleware({ app, path: '/onig' })
 server.applyMiddleware({ app, cors: corsOptions })
+
+app.get('/onig', (_req, res) => {
+  const wasmFile = readFileSync(
+    `${__dirname}/../node_modules/vscode-oniguruma/release/onig.wasm`
+  )
+  res.setHeader('content-type', 'application/wasm')
+  // res.setHeader('content-type', 'text/plain')
+  // res.setHeader('Access-Control-Allow-Origin')
+  res.send(wasmFile)
+  // res.send('hello')
+})
 
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static('build/frontBuild'))

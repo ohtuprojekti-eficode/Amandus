@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react'
 import Editor from '@monaco-editor/react'
+import { monaco } from '@monaco-editor/react'
 import { useMutation, useQuery } from '@apollo/client'
 import { ME, REPO_STATE } from '../graphql/queries'
 import { SAVE_CHANGES } from '../graphql/mutations'
@@ -7,6 +8,19 @@ import { Button, useTheme } from '@material-ui/core'
 import SaveDialog from './SaveDialog'
 import AuthenticateDialog from './AuthenticateDialog'
 import { RepoStateQueryResult } from '../types'
+
+// import { loadVSCodeOnigurumWASM } from '../utils/monacoUtils'
+
+import type { LanguageId } from './register'
+import type { ScopeName, TextMateGrammar, ScopeNameInfo } from './providers'
+import { createOnigScanner, createOnigString } from 'vscode-oniguruma'
+import { SimpleLanguageInfoProvider } from './providers'
+import { registerLanguages } from './register'
+import { rehydrateRegexps } from './configuration'
+import VsCodeDarkTheme from './vs-dark-plus-theme'
+import { IOnigLib } from 'vscode-textmate'
+import { grammar } from './language'
+import { robotConfiguration } from './robotConfiguration'
 
 interface Props {
   content: string | undefined
@@ -20,6 +34,10 @@ interface Getter {
 interface DialogError {
   title: string
   message: string
+}
+
+interface DemoScopeNameInfo extends ScopeNameInfo {
+  path: string
 }
 
 const MonacoEditor = ({ content, filename }: Props) => {
@@ -90,12 +108,94 @@ const MonacoEditor = ({ content, filename }: Props) => {
     setDialogOpen(true)
   }
 
+  interface Language {
+    id: string
+    extensions: string[]
+  }
+
+  monaco.init().then(async (monaco) => {
+    const language = 'robot'
+
+    const languages: any = [
+      {
+        id: 'robot',
+        extensions: ['.robot'],
+      },
+    ]
+
+    const grammars: { [scopeName: string]: DemoScopeNameInfo } = {
+      'source.robot': {
+        language: 'robot',
+        path: 'robotframework.tmLanguage.json',
+      },
+    }
+
+    const fetchGrammar = async (scopeName: ScopeName): Promise<any> => {
+      // const { path } = grammars[scopeName]
+      // const uri = `/grammars/${path}`
+      // const response = await fetch(uri)
+      // const grammar = await response.text()
+      const type = 'json'
+      const json = JSON.stringify(grammar)
+
+      return { type, grammar: json }
+    }
+
+    const fetchConfiguration = async (language: LanguageId): Promise<any> => {
+      // const uri = `/configurations/${language}.json`
+      // const response = await fetch(uri)
+      // const rawConfiguration = await response.text()
+      const rawConfiguration = JSON.stringify(robotConfiguration)
+      return rehydrateRegexps(rawConfiguration)
+    }
+
+    const onigLib = Promise.resolve({
+      createOnigScanner,
+      createOnigString,
+    })
+
+    const provider = new SimpleLanguageInfoProvider({
+      grammars,
+      fetchGrammar,
+      configurations: languages.map((language: any) => language.id),
+      fetchConfiguration,
+      theme: VsCodeDarkTheme,
+      onigLib,
+      monaco,
+    })
+    registerLanguages(
+      languages,
+      (language: LanguageId) => provider.fetchLanguageInfo(language),
+      monaco
+    )
+
+    // const value = getSampleCodeForLanguage(language)
+    // const id = 'container'
+    // const element = document.getElementById(id)
+    // if (element == null) {
+    //   throw Error(`could not find element #${id}`)
+    // }
+
+    // monaco.editor.create(element, {
+    //   value,
+    //   language,
+    //   theme: 'vs-dark',
+    //   minimap: {
+    //     enabled: false,
+    //   },
+    // })
+
+    monaco.editor.setTheme('vs-dark')
+
+    provider.injectCSS()
+  })
+
   return (
     <div>
       <h2>{filename?.substring(filename.lastIndexOf('/') + 1)}</h2>
       <Editor
         height="75vh"
-        language="javascript"
+        language="robot"
         theme={theme.palette.type}
         value={content}
         editorDidMount={handleEditorDidMount}
@@ -132,6 +232,30 @@ const MonacoEditor = ({ content, filename }: Props) => {
       </div>
     </div>
   )
+}
+
+function getSampleCodeForLanguage(language: LanguageId): string {
+  if (language === 'robot') {
+    return `\
+*** Settings ***
+Documentation     A test suite with a single test for valid login.
+...
+...               This test has a workflow that is created using keywords in
+...               the imported resource file.
+Resource          resource.txt
+
+*** Test Cases ***
+Valid Login
+    Open Browser To Login Page
+    Input Username    demo
+    Input Password    mode
+    Submit Credentials
+    Welcome Page Should Be Open
+    [Teardown]    Close Browser
+`
+  }
+
+  throw Error(`unsupported language: ${language}`)
 }
 
 export default MonacoEditor

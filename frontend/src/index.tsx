@@ -9,7 +9,14 @@ import {
 } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
 
+import { loadWASM } from 'vscode-oniguruma'
+
 import App from './App'
+import { loadVSCodeOnigurumWASM } from './utils/monacoUtils'
+;(async () => {
+  const data: ArrayBuffer | Response = await loadVSCodeOnigurumWASM()
+  loadWASM(data)
+})()
 const httpLink = createHttpLink({
   uri:
     process.env.NODE_ENV === 'development'
