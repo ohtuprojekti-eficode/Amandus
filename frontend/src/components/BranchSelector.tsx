@@ -12,13 +12,9 @@ import { RepoStateQueryResult } from '../types'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    root: {
-      backgroundColor: theme.palette.background.paper,
-    },
-
     dropdownHeader: {
-      textAlign: 'right' as 'right',
-      textAlignLast: 'right' as 'right',
+      textAlign: 'right',
+      textAlignLast: 'right',
     },
 
     dropdown: {
@@ -78,7 +74,7 @@ const BranchSelector = () => {
   }
 
   return (
-    <div className={classes.root}>
+    <div>
       <List component="nav" className={classes.dropdown}>
         <ListItem
           button
