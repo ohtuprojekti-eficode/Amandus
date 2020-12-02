@@ -28,6 +28,7 @@ const typeDef = `
       currentBranch: String!
       files: [File]!
       branches: [String]!
+      url: String!
     }
 `
 
@@ -71,7 +72,7 @@ const resolvers = {
 
       const branches = await getLocalBranches(repoLocation)
 
-      return { currentBranch, files, branches }
+      return { currentBranch, files, branches, url: args.url }
     },
   },
   Mutation: {

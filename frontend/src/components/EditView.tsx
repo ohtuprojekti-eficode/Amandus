@@ -11,9 +11,10 @@ const EditView = () => {
   const location = useLocation()
   const classes = useStyles()
 
-  const [repoStateQuery, { data: repoStateData }] = useLazyQuery<
-    RepoStateQueryResult
-  >(REPO_STATE)
+  const [
+    repoStateQuery,
+    { data: repoStateData },
+  ] = useLazyQuery<RepoStateQueryResult>(REPO_STATE)
   const cloneRepoQuery = useQuery(CLONE_REPO, {
     onCompleted: () => repoStateQuery(),
   })

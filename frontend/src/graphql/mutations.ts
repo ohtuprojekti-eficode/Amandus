@@ -41,3 +41,9 @@ export const ADD_SERVICE = gql`
     connectGitService(service: $service)
   }
 `
+
+export const SWITCH_BRANCH = gql`
+  mutation switchBranch($url: String!, $branch: String!) {
+    switchBranch(url: $url, branch: $branch)
+  }
+`
