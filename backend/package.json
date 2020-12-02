@@ -37,7 +37,8 @@
     "recursive-readdir": "^2.2.2",
     "simple-git": "^2.20.1",
     "typescript": "^4.0.3",
-    "uuid": "^8.3.0"
+    "uuid": "^8.3.0",
+    "vscode-oniguruma": "^1.4.0"
   },
   "scripts": {
     "build": "tsc",

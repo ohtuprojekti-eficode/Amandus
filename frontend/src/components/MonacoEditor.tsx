@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react'
 import Editor from '@monaco-editor/react'
+import { monaco } from '@monaco-editor/react'
 import { useMutation, useQuery } from '@apollo/client'
 import { ME, REPO_STATE } from '../graphql/queries'
 import { SAVE_CHANGES } from '../graphql/mutations'
@@ -7,6 +8,7 @@ import { Button, useTheme } from '@material-ui/core'
 import SaveDialog from './SaveDialog'
 import AuthenticateDialog from './AuthenticateDialog'
 import { RepoStateQueryResult } from '../types'
+import { initMonaco } from '../utils/monacoInitializer'
 
 interface Props {
   content: string | undefined
@@ -90,12 +92,16 @@ const MonacoEditor = ({ content, filename }: Props) => {
     setDialogOpen(true)
   }
 
+  monaco.init().then(async (monaco) => {
+    initMonaco(monaco)
+  })
+
   return (
     <div>
       <h2>{filename?.substring(filename.lastIndexOf('/') + 1)}</h2>
       <Editor
         height="75vh"
-        language="javascript"
+        language="robot"
         theme={theme.palette.type}
         value={content}
         editorDidMount={handleEditorDidMount}
