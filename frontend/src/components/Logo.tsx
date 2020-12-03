@@ -3,6 +3,7 @@ import { Link as RouterLink } from 'react-router-dom'
 import {
     createStyles,
     makeStyles,
+    Link,
   } from '@material-ui/core'
 
 interface Props {
@@ -31,13 +32,13 @@ const Logo = ({ theme }: Props) => {
   const logoImg = theme === 'dark' ? '/img/logo-dark.jpg' : '/img/logo-light.jpg'
 
   return (
-    <RouterLink component={RouterLink} className={classes.logo} to="/">      
+    <Link component={RouterLink} className={classes.logo} to="/">      
         <img 
             src={process.env.PUBLIC_URL + logoImg} 
             className={classes.logoImg} 
             alt="Amandus"
         />
-    </RouterLink>
+    </Link>
   )
 }
 
