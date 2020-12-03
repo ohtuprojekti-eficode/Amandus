@@ -29,7 +29,7 @@ const Logo = ({ theme }: Props) => {
   
   const classes = stylesInUse()
   
-  const logoImg = theme === 'dark' ? '/img/logo-dark.jpg' : '/img/logo-light.jpg'
+  const logoImg = theme === 'dark' ? '/img/logo-dark.png' : '/img/logo-light.png'
 
   return (
     <Link component={RouterLink} className={classes.logo} to="/">      

@@ -44,9 +44,6 @@ const Header = ({ user, logout, theme, toggleTheme }: Props) => {
         
         <Logo theme={theme} />
 
-        <Link component={RouterLink} className={classes.link} to="/">
-          Main menu
-        </Link>
         <Link component={RouterLink} className={classes.link} to="/edit">
           Edit view
         </Link>
