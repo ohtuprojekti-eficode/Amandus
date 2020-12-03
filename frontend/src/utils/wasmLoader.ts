@@ -1,3 +1,4 @@
+// modified version of code from https://github.com/bolinfest/monaco-tm
 export async function loadVSCodeOnigurumWASM(): Promise<
   Response | ArrayBuffer
 > {

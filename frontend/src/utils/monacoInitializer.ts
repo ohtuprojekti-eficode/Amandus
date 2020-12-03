@@ -1,3 +1,4 @@
+// modified version of code from https://github.com/bolinfest/monaco-tm
 import type { LanguageId } from '../utils/languages'
 import type { TextMateGrammar, ScopeNameInfo } from '../utils/providers'
 import { createOnigScanner, createOnigString } from 'vscode-oniguruma'

@@ -1,3 +1,4 @@
+// modified version of code from https://github.com/bolinfest/monaco-tm
 import type * as monaco from 'monaco-editor'
 /**
  * Fields that, if present in a LanguageConfiguration, must be a RegExp object

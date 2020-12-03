@@ -1,3 +1,4 @@
+// from https://github.com/bolinfest/monaco-tm
 // Theme data derived from:
 // https://github.com/microsoft/vscode/raw/a716714a88891cad69c0753fb95923870df295f5/extensions/theme-defaults/themes/dark_plus.json
 
@@ -401,7 +402,11 @@ export default {
       },
     },
     {
-      scope: ['string', 'entity.name.operator.custom-literal.string', 'meta.embedded.assembly'],
+      scope: [
+        'string',
+        'entity.name.operator.custom-literal.string',
+        'meta.embedded.assembly',
+      ],
       settings: {
         foreground: '#ce9178',
       },
@@ -491,7 +496,10 @@ export default {
       },
     },
     {
-      scope: ['punctuation.section.embedded.begin.php', 'punctuation.section.embedded.end.php'],
+      scope: [
+        'punctuation.section.embedded.begin.php',
+        'punctuation.section.embedded.end.php',
+      ],
       settings: {
         foreground: '#569cd6',
       },
@@ -527,4 +535,4 @@ export default {
       },
     },
   ],
-};
+}
