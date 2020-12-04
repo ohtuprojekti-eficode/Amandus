@@ -123,7 +123,12 @@ export const getLocalBranchSummary = async (
 export const getLastCommitMessage = async (
   git: SimpleGit,
 ): Promise<string> => {
-  return await git.raw(['show', '-s', '--format=%s'])
+  try {
+    const commitMessage = await git.raw(['show', '-s', '--format=%s'])
+    return commitMessage
+  } catch (e) {
+    return ''
+  }
 }
 
 export const cloneRepositoryToSpecificFolder = async (
