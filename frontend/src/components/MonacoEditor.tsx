@@ -13,6 +13,7 @@ import { initMonaco } from '../utils/monacoInitializer'
 interface Props {
   content: string | undefined
   filename: string | undefined
+  commitMessage: string | undefined
 }
 
 interface Getter {
@@ -24,13 +25,14 @@ interface DialogError {
   message: string
 }
 
-const MonacoEditor = ({ content, filename }: Props) => {
+const MonacoEditor = ({ content, filename, commitMessage }: Props) => {
   const [dialogOpen, setDialogOpen] = useState(false)
   const branchState = useQuery<RepoStateQueryResult>(REPO_STATE)
   const currentBranch = branchState.data?.repoState.currentBranch || ''
   const [dialogError, setDialogError] = useState<DialogError | undefined>(
     undefined
   )
+  const [newCommitMessage, setNewCommitMessage] = useState('')
 
   const {
     loading: userQueryLoading,
@@ -60,7 +62,7 @@ const MonacoEditor = ({ content, filename }: Props) => {
   const handleDialogSubmit = async (
     createNewBranch: boolean,
     newBranch: string,
-    commitMessage: string
+    newCommitMessage: string
   ) => {
     if (valueGetter.current) {
       const branchName = createNewBranch ? newBranch : currentBranch
@@ -72,11 +74,13 @@ const MonacoEditor = ({ content, filename }: Props) => {
               content: valueGetter.current(),
             },
             branch: branchName,
-            commitMessage: commitMessage,
+            commitMessage: newCommitMessage,
           },
         })
         setDialogOpen(false)
         setDialogError(undefined)
+        const file = filename?.split('/').pop()
+        setNewCommitMessage(newCommitMessage || `Update ${file}`)
       } catch (error) {
         if (error.message === 'Merge conflict detected') {
           setDialogError({
@@ -134,7 +138,7 @@ const MonacoEditor = ({ content, filename }: Props) => {
       </div>
       <div style={{ fontSize: 14, marginTop: 5, marginBottom: 5 }}>
         {(!user || !user.me) && 'Please login to enable saving'}
-        {user?.me && currentBranch && `On branch ${currentBranch}`}
+        {commitMessage && `Last commit: ${commitMessage}`}
       </div>
     </div>
   )
