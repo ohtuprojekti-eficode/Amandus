@@ -44,6 +44,10 @@ const stylesInUse = makeStyles((theme) =>
         opacity: 0.8,
       }
     },
+    loginGreet: {
+      fontSize: '.95em',
+      marginRight: '1em',
+    },
     section: {
       flexGrow: 1,
     }
@@ -101,14 +105,17 @@ const Header = ({ user, logout, theme, toggleTheme }: Props) => {
               </Link>
             )}
             {user && (
-              <Link
-                component={RouterLink}
-                className={classes.linkBtnTransparent}
-                to="/"
-                onClick={logout}
-              >
-                {user.username} - logout
-              </Link>
+              <div>
+              <span className={classes.loginGreet}>Hello, {user.username}</span>
+                <Link
+                  component={RouterLink}
+                  className={classes.linkBtnBordered}
+                  to="/"
+                  onClick={logout}
+                >
+                  Logout
+                </Link>
+              </div>
             )}
           </div>
           
