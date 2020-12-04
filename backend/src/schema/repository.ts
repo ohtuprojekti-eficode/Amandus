@@ -30,6 +30,7 @@ const typeDef = `
       files: [File]!
       branches: [String]!
       url: String!
+      commitMessage: String!
     }
 `
 
