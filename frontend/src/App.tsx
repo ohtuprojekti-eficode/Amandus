@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Route } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
 import { ME } from './graphql/queries'
+import Home from './components/Home'
 import EditView from './components/EditView'
 import Header from './components/Header'
 import CallBack from './components/auth/CallBack'
@@ -51,15 +52,23 @@ const App = () => {
         />
         <div>
           <Toolbar />
+          
+          <Route exact path="/">
+            <Home />
+          </Route>
+
           <Route path="/auth/github/callback">
             <CallBack />
           </Route>
+          
           <Route path="/edit">
             <EditView />
           </Route>
+          
           <Route exact path="/repositories">
             <RepositoriesView />
           </Route>
+          
           <Route exact path="/register" component={RegisterForm} />
           <Route exact path="/login" component={MyLoginForm} />
         </div>
