@@ -1,3 +1,4 @@
+// modified version of code from https://github.com/bolinfest/monaco-tm
 import type * as monaco from 'monaco-editor'
 import type {
   IGrammar,
