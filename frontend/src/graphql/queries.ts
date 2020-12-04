@@ -12,6 +12,7 @@ export const REPO_STATE = gql`
       }
       branches
       url
+      commitMessage
     }
   }
 `
