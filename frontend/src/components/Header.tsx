@@ -9,6 +9,7 @@ import {
 } from '@material-ui/core'
 import { Link as RouterLink } from 'react-router-dom'
 import { UserType } from '../types'
+import Logo from './Logo'
 
 interface Props {
   user: UserType
@@ -40,9 +41,9 @@ const Header = ({ user, logout, theme, toggleTheme }: Props) => {
   return (
     <AppBar position="fixed" color="default" className={classes.appBar}>
       <Toolbar>
-        <Link component={RouterLink} className={classes.link} to="/">
-          Main menu
-        </Link>
+        
+        <Logo theme={theme} />
+
         <Link component={RouterLink} className={classes.link} to="/edit">
           Edit view
         </Link>
