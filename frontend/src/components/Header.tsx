@@ -18,7 +18,7 @@ interface Props {
   toggleTheme: () => void
 }
 
-const stylesInUse = makeStyles((theme) =>
+const stylesInUse = makeStyles(() =>
   createStyles({
     root: {
       flexGrow: 1,
