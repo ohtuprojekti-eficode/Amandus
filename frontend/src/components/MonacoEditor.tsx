@@ -32,7 +32,6 @@ const MonacoEditor = ({ content, filename, commitMessage }: Props) => {
   const [dialogError, setDialogError] = useState<DialogError | undefined>(
     undefined
   )
-  const [newCommitMessage, setNewCommitMessage] = useState('')
 
   const {
     loading: userQueryLoading,
@@ -79,8 +78,6 @@ const MonacoEditor = ({ content, filename, commitMessage }: Props) => {
         })
         setDialogOpen(false)
         setDialogError(undefined)
-        const file = filename?.split('/').pop()
-        setNewCommitMessage(newCommitMessage || `Update ${file}`)
       } catch (error) {
         if (error.message === 'Merge conflict detected') {
           setDialogError({
