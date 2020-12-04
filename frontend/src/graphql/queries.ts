@@ -16,6 +16,12 @@ export const REPO_STATE = gql`
   }
 `
 
+export const IS_GH_CONNECTED = gql`
+  query {
+    isGithubConnected
+  }
+`
+
 export const CLONE_REPO = gql`
   query {
     cloneRepo: cloneRepository(
