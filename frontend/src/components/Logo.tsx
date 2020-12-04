@@ -10,7 +10,7 @@ interface Props {
   theme: string
 }
 
-const stylesInUse = makeStyles((theme) =>
+const stylesInUse = makeStyles(() =>
   createStyles({
     logo: {
       zIndex: 1250,
