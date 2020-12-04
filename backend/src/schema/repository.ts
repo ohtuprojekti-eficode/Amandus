@@ -2,6 +2,7 @@
 import {
   cloneRepository,
   getCurrentBranchName,
+  getCurrentCommitMessage,
   saveChanges,
   getLocalBranches,
   switchCurrentBranch,
@@ -63,6 +64,7 @@ const resolvers = {
     ): Promise<RepoState> => {
       const repoLocation = getRepoLocationFromUrlString(args.url)
       const currentBranch = await getCurrentBranchName(repoLocation)
+      const commitMessage = await getCurrentCommitMessage(repoLocation)
 
       const filePaths = await readRecursive(repoLocation, ['.git'])
       const files = filePaths.map((file) => ({
@@ -72,7 +74,7 @@ const resolvers = {
 
       const branches = await getLocalBranches(repoLocation)
 
-      return { currentBranch, files, branches, url: args.url }
+      return { currentBranch, files, branches, url: args.url, commitMessage }
     },
   },
   Mutation: {
