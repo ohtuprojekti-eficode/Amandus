@@ -49,7 +49,8 @@ describe('When visiting the login page, as a user', () => {
     cy.get('#password').type(password)
     cy.get('form button').click()
     
-    cy.contains(`${username} - logout`)
+    cy.contains(`Hello, ${username}`)
+    cy.contains(`Logout`)
   })
 
 })
