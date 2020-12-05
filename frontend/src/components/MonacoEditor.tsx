@@ -134,8 +134,7 @@ const MonacoEditor = ({ content, filename, commitMessage }: Props) => {
         </Button>
       </div>
       <div style={{ fontSize: 14, marginTop: 5, marginBottom: 5 }}>
-        {(!user || !user.me) && 'Please login to enable saving'}
-        {commitMessage && `Last commit: ${commitMessage}`}
+        {user && user.me && commitMessage && `Latest commit message: ${commitMessage}`}
       </div>
     </div>
   )
