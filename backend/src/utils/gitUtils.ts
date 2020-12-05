@@ -125,7 +125,7 @@ export const getLastCommitMessage = async (
 ): Promise<string> => {
   try {
     const commitMessage = await git.raw(['show', '-s', '--format=%s'])
-    return commitMessage
+    return commitMessage.replace('\n', '')
   } catch (e) {
     return ''
   }
