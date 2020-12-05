@@ -28,7 +28,7 @@ interface DialogError {
 const GHConnected = ({ isGithubConnected }: { isGithubConnected: boolean }) => {
   const githubConnected = () => {
     return (
-      <Tooltip title="gitHub is connected. Saving will push to github">
+      <Tooltip title="GitHub is connected. Saving will push to GitHub">
         <GitHub />
       </Tooltip>
     )
@@ -41,7 +41,7 @@ const GHConnected = ({ isGithubConnected }: { isGithubConnected: boolean }) => {
         verticalAlign: 'middle',
       }}
     >
-      {isGithubConnected ? githubConnected() : 'Github is not connected'}
+      {isGithubConnected ? githubConnected() : 'GitHub is not connected'}
     </span>
   )
 }
