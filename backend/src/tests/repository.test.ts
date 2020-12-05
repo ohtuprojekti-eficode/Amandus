@@ -195,6 +195,32 @@ describe('getRepoState query', () => {
     const commitMessage = res.data?.getRepoState.commitMessage
     expect(commitMessage).toEqual('')
   })
+
+  it('latest commit message is correct', async () => {
+    appendFileSync(
+      `${repoPath}/file.txt`,
+      'Commit and add file to create master branch'
+    )
+
+    const testRepo = simpleGit(repoPath)
+    await testRepo
+      .addConfig('user.name', 'Some One')
+      .addConfig('user.email', 'some@one.com')
+      .add('.')
+      .commit('new commit')
+
+    const { query } = createTestClient(server)
+
+    const res = await query({
+      query: GET_REPO_STATE,
+      variables: {
+        url: 'http://www.remote.org/testRepo',
+      },
+    })
+
+    const commitMessage = res.data?.getRepoState.commitMessage
+    expect(commitMessage).toEqual('new commit')
+  })
 })
 
 describe('switchBranch mutation', () => {
