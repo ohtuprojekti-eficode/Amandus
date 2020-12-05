@@ -45,6 +45,13 @@ const resolvers = {
     ): UserType | undefined => {
       return context.currentUser
     },
+    isGithubConnected: (
+      _root: unknown,
+      _args: unknown,
+      context: AppContext
+    ): boolean => {
+      return !!context.githubToken
+    },
     githubLoginUrl: (): string => {
       const cbUrl = config.GITHUB_CB_URL || ''
       const clientID = config.GITHUB_CLIENT_ID || ''

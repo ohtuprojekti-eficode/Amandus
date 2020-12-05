@@ -7,6 +7,7 @@ import { closePool } from '../db/connect'
 import { server } from '../index'
 import User from '../model/user'
 import { createToken } from '../utils/token'
+import { v4 as uuid } from 'uuid'
 
 const ADD_SERVICE = gql`
   mutation connectGitService($service: AddServiceArgs!) {
@@ -33,6 +34,12 @@ const ME = gql`
 const GH_TOKEN = gql`
   query {
     currentToken
+  }
+`
+
+const IS_GH_CONNECTED = gql`
+  query {
+    isGithubConnected
   }
 `
 
@@ -376,6 +383,7 @@ describe('Context githubToken query', () => {
   beforeEach(async () => {
     await User.deleteAll()
   })
+
   it('no token is returned when set', async () => {
     const userToSave = {
       username: 'testuser',
@@ -435,6 +443,69 @@ describe('Context githubToken query', () => {
   })
 })
 
+describe('isGithubConnected', () => {
+  beforeEach(async () => {
+    await User.deleteAll()
+  })
+
+  it('returns true if githubToken is in user context', async () => {
+    const userToSave = {
+      username: 'testuser',
+      password: 'mypAssword?45',
+      email: 'test@test.fi',
+    }
+
+    const user = await User.registerUser(userToSave)
+    const githubToken = uuid()
+    const frontendJWT = createToken(user, githubToken)
+
+    const { query } = createIntegrationTestClient({
+      apolloServer: server,
+      extendMockRequest: {
+        headers: {
+          authorization: `Bearer ${frontendJWT}`,
+        },
+      },
+    })
+
+    const queryResult = await query(IS_GH_CONNECTED)
+
+    expect(queryResult).toEqual({
+      data: {
+        isGithubConnected: true,
+      },
+    })
+  })
+
+  it('returns false if githubToken is not in user context', async () => {
+    const userToSave = {
+      username: 'testuser',
+      password: 'mypAssword?45',
+      email: 'test@test.fi',
+    }
+
+    const user = await User.registerUser(userToSave)
+
+    const frontendJWT = createToken(user)
+
+    const { query } = createIntegrationTestClient({
+      apolloServer: server,
+      extendMockRequest: {
+        headers: {
+          authorization: `Bearer ${frontendJWT}`,
+        },
+      },
+    })
+
+    const queryResult = await query(IS_GH_CONNECTED)
+
+    expect(queryResult).toEqual({
+      data: {
+        isGithubConnected: false,
+      },
+    })
+  })
+})
 afterAll(async () => {
   await closePool()
 })
