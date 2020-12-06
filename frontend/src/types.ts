@@ -54,7 +54,6 @@ export interface ServiceUserType {
 }
 
 export interface UserType {
-  id: number
   username: string
   email: string
   services?: ServiceUserType[]
