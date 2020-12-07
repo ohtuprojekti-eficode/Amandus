@@ -37,11 +37,24 @@ const stylesInUse = makeStyles((theme) =>
       fontSize: '1.6rem',
       marginTop: 0
     },
-    colorBtn: {
+    containedBtn: {
       backgroundColor: '#df0cc4',
-      padding: '12px 45px',
+      padding: '12px 0',
       fontWeight: 'bold',
-    }
+      margin: '0 0.5em',
+      width: 180
+    },
+    outlinedBtn: {
+      padding: '12px 0',
+      fontWeight: 'bold',
+      color: '#ffffff',
+      margin: '0 0.5em',
+      width: 180,
+      borderColor: 'rgba(255,255,255,0.5)',
+      '&:hover': {
+        borderColor: '#fff'
+      }
+    },
   })
 )
 
@@ -54,16 +67,28 @@ const Home = () => {
           <div className={classes.intro}>
             <h1 className={classes.heading}>Test automation made easy</h1>
             <p className={classes.introText}>Amandus is an open source web based IDE with integrated version control and support for Robot Framework.</p>
-            <Button
-              color="primary"
-              className={classes.colorBtn}
-              variant="contained"
-              href="/register"
-              size="large"
-              disableElevation
-            >
-                Register
-            </Button>
+      
+              <Button
+                color="primary"
+                className={classes.containedBtn}
+                variant="contained"
+                href="/register"
+                size="large"
+                disableElevation
+              >
+                  Register   
+              </Button>
+              <Button
+                color="secondary"
+                className={classes.outlinedBtn}
+                variant="outlined"
+                href="/login"
+                size="large"
+                disableElevation
+              >
+                  Login
+              </Button>
+      
           </div>
         </div>
     )
