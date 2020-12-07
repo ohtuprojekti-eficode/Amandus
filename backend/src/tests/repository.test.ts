@@ -22,6 +22,7 @@ const GET_REPO_STATE = gql`
         content
       }
       branches
+      commitMessage
     }
   }
 `
@@ -179,6 +180,72 @@ describe('getRepoState query', () => {
 
     const currentBranch = res.data?.getRepoState.currentBranch
     expect(currentBranch).toEqual('master')
+  })
+
+  it('latest commit message is empty when status is unknown', async () => {
+    const { query } = createTestClient(server)
+
+    const res = await query({
+      query: GET_REPO_STATE,
+      variables: {
+        url: 'http://www.remote.org/testRepo',
+      },
+    })
+
+    const commitMessage = res.data?.getRepoState.commitMessage
+    expect(commitMessage).toEqual('')
+  })
+
+  it('latest commit message is correct', async () => {
+    appendFileSync(
+      `${repoPath}/file.txt`,
+      'Commit and add file to create master branch'
+    )
+
+    const testRepo = simpleGit(repoPath)
+    await testRepo
+      .addConfig('user.name', 'Some One')
+      .addConfig('user.email', 'some@one.com')
+      .add('.')
+      .commit('new commit')
+
+    const { query } = createTestClient(server)
+
+    const res = await query({
+      query: GET_REPO_STATE,
+      variables: {
+        url: 'http://www.remote.org/testRepo',
+      },
+    })
+
+    const commitMessage = res.data?.getRepoState.commitMessage
+    expect(commitMessage).toEqual('new commit')
+  })
+
+  it('too long commit message is cutted correctly', async () => {
+    appendFileSync(
+      `${repoPath}/file.txt`,
+      'Commit and add file to create master branch'
+    )
+
+    const testRepo = simpleGit(repoPath)
+    await testRepo
+      .addConfig('user.name', 'Some One')
+      .addConfig('user.email', 'some@one.com')
+      .add('.')
+      .commit('a'.repeat(73))
+
+    const { query } = createTestClient(server)
+
+    const res = await query({
+      query: GET_REPO_STATE,
+      variables: {
+        url: 'http://www.remote.org/testRepo',
+      },
+    })
+
+    const commitMessage = res.data?.getRepoState.commitMessage
+    expect(commitMessage).toEqual('a'.repeat(72).concat('...'))
   })
 })
 

@@ -25,6 +25,7 @@ export interface RepoStateQueryResult {
     files: File[]
     branches: string[]
     url: string
+    commitMessage: string
   }
 }
 
