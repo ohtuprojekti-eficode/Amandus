@@ -53,6 +53,7 @@ const GHConnected = ({ isGithubConnected }: { isGithubConnected: boolean }) => {
 
 const MonacoEditor = ({ content, filename, commitMessage }: Props) => {
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [waitingToSave, setWaitingToSave] = useState(false)
   const branchState = useQuery<RepoStateQueryResult>(REPO_STATE)
   const { data: GHConnectedQuery } = useQuery<IsGithubConnectedResult>(
     IS_GH_CONNECTED
@@ -95,6 +96,7 @@ const MonacoEditor = ({ content, filename, commitMessage }: Props) => {
     if (valueGetter.current) {
       const branchName = createNewBranch ? newBranch : currentBranch
       try {
+        setWaitingToSave(true)
         await saveChanges({
           variables: {
             file: {
@@ -114,6 +116,8 @@ const MonacoEditor = ({ content, filename, commitMessage }: Props) => {
             message: 'Cannot push to selected branch. Create a new one.',
           })
         }
+      } finally {
+        setWaitingToSave(false)
       }
     }
   }
@@ -145,6 +149,7 @@ const MonacoEditor = ({ content, filename, commitMessage }: Props) => {
           handleSubmit={handleDialogSubmit}
           currentBranch={currentBranch}
           error={dialogError}
+          waitingToSave={waitingToSave}
         />
 
         <div>
