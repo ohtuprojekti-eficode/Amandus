@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
 import {
   Button,
+  CircularProgress,
   Collapse,
+  createStyles,
   Dialog,
   DialogActions,
   DialogContent,
@@ -11,6 +13,7 @@ import {
   FormControlLabel,
   FormLabel,
   Grid,
+  makeStyles,
   Radio,
   RadioGroup,
   TextField,
@@ -28,7 +31,22 @@ interface Props {
   handleSubmit: (newBranch: boolean, name: string, message: string) => void
   error: Error | undefined
   currentBranch: string
+  waitingToSave: boolean
 }
+
+const stylesInUse = makeStyles((theme) =>
+  createStyles({
+    saveButton: {
+      width: '4.3rem',
+      '&:disabled': {
+        backgroundColor: theme.palette.primary.main,
+      },
+    },
+    saveProgress: {
+      color: theme.palette.text.primary,
+    },
+  })
+)
 
 const SaveDialog = ({
   open,
@@ -36,10 +54,13 @@ const SaveDialog = ({
   handleSubmit,
   currentBranch,
   error,
+  waitingToSave,
 }: Props) => {
   const [createNewBranch, setCreateNewBranch] = useState(false)
   const [branchName, setBranchName] = useState('')
   const [commitMessage, setCommitMessage] = useState('')
+
+  const classes = stylesInUse()
 
   const handleExit = () => {
     setCreateNewBranch(false)
@@ -128,8 +149,17 @@ const SaveDialog = ({
           onClick={() =>
             handleSubmit(createNewBranch, branchName, commitMessage)
           }
+          className={classes.saveButton}
+          disabled={waitingToSave}
         >
-          Save
+          {waitingToSave ? (
+            <CircularProgress
+              className={classes.saveProgress}
+              size={'1.53rem'}
+            />
+          ) : (
+            'Save'
+          )}
         </Button>
       </DialogActions>
     </Dialog>
