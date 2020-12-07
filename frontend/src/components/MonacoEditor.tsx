@@ -4,7 +4,13 @@ import { monaco } from '@monaco-editor/react'
 import { useMutation, useQuery } from '@apollo/client'
 import { IS_GH_CONNECTED, ME, REPO_STATE } from '../graphql/queries'
 import { SAVE_CHANGES } from '../graphql/mutations'
-import { Button, Tooltip, useTheme } from '@material-ui/core'
+import {
+  Button,
+  createStyles,
+  makeStyles,
+  Tooltip,
+  useTheme,
+} from '@material-ui/core'
 import { GitHub } from '@material-ui/icons'
 import SaveDialog from './SaveDialog'
 import AuthenticateDialog from './AuthenticateDialog'
@@ -43,13 +49,27 @@ const GHConnected = ({ isGithubConnected }: { isGithubConnected: boolean }) => {
     <span
       style={{
         marginLeft: '1rem',
-        verticalAlign: 'middle',
       }}
     >
       {isGithubConnected ? githubConnected() : 'GitHub is not connected'}
     </span>
   )
 }
+
+const stylesInUse = makeStyles(() =>
+  createStyles({
+    saveGroup: {
+      margin: '10px 20px',
+    },
+    buttonAndStatus: {
+      display: 'flex',
+      alignItems: 'center',
+    },
+    commitMessage: {
+      marginTop: 5,
+    },
+  })
+)
 
 const MonacoEditor = ({ content, filename, commitMessage }: Props) => {
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -62,6 +82,8 @@ const MonacoEditor = ({ content, filename, commitMessage }: Props) => {
   const [dialogError, setDialogError] = useState<DialogError | undefined>(
     undefined
   )
+
+  const classes = stylesInUse()
 
   const {
     loading: userQueryLoading,
@@ -152,30 +174,32 @@ const MonacoEditor = ({ content, filename, commitMessage }: Props) => {
           waitingToSave={waitingToSave}
         />
 
-        <div>
-          <Button
-            color="primary"
-            variant="contained"
-            disabled={
-              userQueryLoading ||
-              !!userQueryError ||
-              mutationSaveLoading ||
-              !user?.me ||
-              branchState.loading
-            }
-            onClick={handleSaveButton}
-          >
-            Save
-          </Button>
-          {GHConnectedQuery && (
-            <GHConnected
-              isGithubConnected={GHConnectedQuery.isGithubConnected}
-            />
-          )}
+        <div className={classes.saveGroup}>
+          <div className={classes.buttonAndStatus}>
+            <Button
+              color="primary"
+              variant="contained"
+              disabled={
+                userQueryLoading ||
+                !!userQueryError ||
+                mutationSaveLoading ||
+                !user?.me ||
+                branchState.loading
+              }
+              onClick={handleSaveButton}
+            >
+              Save
+            </Button>
+            {GHConnectedQuery && (
+              <GHConnected
+                isGithubConnected={GHConnectedQuery.isGithubConnected}
+              />
+            )}
+          </div>
+          <div className={classes.commitMessage}>
+            {user?.me && commitMessage && `Latest commit: ${commitMessage}`}
+          </div>
         </div>
-      </div>
-      <div style={{ fontSize: 14, marginTop: 5, marginBottom: 5 }}>
-        {user?.me && commitMessage && `Latest commit: ${commitMessage}`}
       </div>
     </div>
   )
