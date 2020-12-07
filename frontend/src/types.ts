@@ -7,6 +7,10 @@ export interface FileListQueryResult {
   files: File[]
 }
 
+export interface isGithubConnectedResult {
+  isGithubConnected: boolean
+}
+
 export interface RepoStateQueryResult {
   repoState: {
     currentBranch: string

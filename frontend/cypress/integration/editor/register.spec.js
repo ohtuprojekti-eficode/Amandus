@@ -39,7 +39,8 @@ describe('When visiting the register page, as a user', () => {
         cy.get('#confirmPassword').type('testUserPass!111')  
         cy.get('form button').click()
         
-        cy.contains(`${username} - logout`)
+        cy.contains(`Hello, ${username}`)
+        cy.contains(`Logout`)
     })
     
 })

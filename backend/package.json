@@ -47,7 +47,7 @@
     "dev": "ts-node-dev --respawn --transpile-only --exit-child src/",
     "start": "NODE_ENV=production node ./build/index.js",
     "test": "cross-env NODE_ENV=test jest --verbose --runInBand",
-    "test:watch": "jest --watchAll",
+    "test:watch": "jest --watchAll --runInBand",
     "test-ci": "cross-env NODE_ENV=test jest --verbose --runInBand",
     "pretest": "DATABASE_URL=postgres://test:test@localhost:5432/test node-pg-migrate -m ./src/db/migrations up",
     "migrate": "node-pg-migrate",

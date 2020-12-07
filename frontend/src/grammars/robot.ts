@@ -1,3 +1,4 @@
+// from https://github.com/robocorp/robotframework-lsp/blob/master/robotframework-ls/syntaxes/robotframework.tmLanguage.json
 export const grammar = {
   $schema:
     'https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json',

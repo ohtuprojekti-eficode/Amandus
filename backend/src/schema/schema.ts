@@ -6,6 +6,7 @@ const Query = `
     type Query {
         githubLoginUrl: String!
         me: User
+        isGithubConnected: Boolean!
         getRepoState(url: String): RepoState!
         cloneRepository(url: String!): String
         currentToken: String
