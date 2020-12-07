@@ -12,7 +12,7 @@ import { UserType } from '../types'
 import Logo from './Logo'
 
 interface Props {
-  user: UserType
+  user: UserType | undefined
   logout: () => void
   theme: string
   toggleTheme: () => void

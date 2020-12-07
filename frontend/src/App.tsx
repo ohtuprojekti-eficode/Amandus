@@ -12,9 +12,10 @@ import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles'
 import { lightTheme, darkTheme } from './styles/themes'
 import RepositoriesView from './components/RepositoriesView'
 import MyLoginForm from './components/MyLoginForm'
+import { MeQueryResult } from './types'
 
 const App = () => {
-  const { data: user } = useQuery(ME)
+  const { data: user } = useQuery<MeQueryResult>(ME)
 
   const defaultTheme = 'light'
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {

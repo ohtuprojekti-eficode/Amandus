@@ -1,16 +1,20 @@
 import React, { useEffect } from 'react'
 import { useMutation } from '@apollo/client'
+import { useHistory, useLocation } from 'react-router-dom'
 import { AUTHORIZE_WITH_GH, ADD_SERVICE } from '../../graphql/mutations'
-import { authorizeWithGHMutationResult } from '../../types'
+import { ME } from '../../graphql/queries'
+import { AuthorizeWithGHMutationResult } from '../../types'
 
 const CallBack = () => {
-  const queryString = window.location.search
-  const params = new URLSearchParams(queryString)
+  const history = useHistory()
+  const location = useLocation()
+
+  const params = new URLSearchParams(location.search)
 
   const [
     authenticate,
     { loading: authenticateLoading, error: authenticateError },
-  ] = useMutation<authorizeWithGHMutationResult>(AUTHORIZE_WITH_GH, {
+  ] = useMutation<AuthorizeWithGHMutationResult>(AUTHORIZE_WITH_GH, {
     variables: { code: params.get('code') },
   })
 
@@ -37,15 +41,16 @@ const CallBack = () => {
             variables: {
               service: serviceUser,
             },
+            refetchQueries: [{ query: ME }],
           })
           localStorage.setItem('token', token)
-          window.location.href = '/'
+          history.push('/edit')
         }
       } catch (error) {
         console.log(error)
       }
     })()
-  }, [authenticate, addService])
+  }, [authenticate, addService, history])
 
   return (
     <div>

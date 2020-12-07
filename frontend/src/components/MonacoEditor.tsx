@@ -5,11 +5,15 @@ import { useMutation, useQuery } from '@apollo/client'
 import { IS_GH_CONNECTED, ME, REPO_STATE } from '../graphql/queries'
 import { SAVE_CHANGES } from '../graphql/mutations'
 import { Button, Tooltip, useTheme } from '@material-ui/core'
+import { GitHub } from '@material-ui/icons'
 import SaveDialog from './SaveDialog'
 import AuthenticateDialog from './AuthenticateDialog'
-import { isGithubConnectedResult, RepoStateQueryResult } from '../types'
+import {
+  IsGithubConnectedResult,
+  MeQueryResult,
+  RepoStateQueryResult,
+} from '../types'
 import { initMonaco } from '../utils/monacoInitializer'
-import { GitHub } from '@material-ui/icons'
 
 interface Props {
   content: string | undefined
@@ -50,7 +54,7 @@ const GHConnected = ({ isGithubConnected }: { isGithubConnected: boolean }) => {
 const MonacoEditor = ({ content, filename, commitMessage }: Props) => {
   const [dialogOpen, setDialogOpen] = useState(false)
   const branchState = useQuery<RepoStateQueryResult>(REPO_STATE)
-  const { data: GHConnectedQuery } = useQuery<isGithubConnectedResult>(
+  const { data: GHConnectedQuery } = useQuery<IsGithubConnectedResult>(
     IS_GH_CONNECTED
   )
   const currentBranch = branchState.data?.repoState.currentBranch || ''
@@ -62,7 +66,7 @@ const MonacoEditor = ({ content, filename, commitMessage }: Props) => {
     loading: userQueryLoading,
     error: userQueryError,
     data: user,
-  } = useQuery(ME)
+  } = useQuery<MeQueryResult>(ME)
 
   const [saveChanges, { loading: mutationSaveLoading }] = useMutation(
     SAVE_CHANGES,
@@ -151,7 +155,7 @@ const MonacoEditor = ({ content, filename, commitMessage }: Props) => {
               userQueryLoading ||
               !!userQueryError ||
               mutationSaveLoading ||
-              !user.me ||
+              !user?.me ||
               branchState.loading
             }
             onClick={handleSaveButton}

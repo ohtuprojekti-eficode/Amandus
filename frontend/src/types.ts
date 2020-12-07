@@ -7,8 +7,16 @@ export interface FileListQueryResult {
   files: File[]
 }
 
-export interface isGithubConnectedResult {
+export interface IsGithubConnectedResult {
   isGithubConnected: boolean
+}
+
+export interface GithubLoginURLQueryResult {
+  githubLoginUrl: string
+}
+
+export interface MeQueryResult {
+  me: UserType
 }
 
 export interface RepoStateQueryResult {
@@ -21,7 +29,7 @@ export interface RepoStateQueryResult {
   }
 }
 
-export interface authorizeWithGHMutationResult {
+export interface AuthorizeWithGHMutationResult {
   authorizeWithGithub: {
     serviceUser: ServiceUserType & { __typename: string }
     token: string
@@ -47,7 +55,6 @@ export interface ServiceUserType {
 }
 
 export interface UserType {
-  id: number
   username: string
   email: string
   services?: ServiceUserType[]
