@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import { useMutation } from '@apollo/client'
 import { useHistory, useLocation } from 'react-router-dom'
 import { AUTHORIZE_WITH_GH, ADD_SERVICE } from '../../graphql/mutations'
+import { ME } from '../../graphql/queries'
 import { AuthorizeWithGHMutationResult } from '../../types'
 
 const CallBack = () => {
@@ -40,6 +41,7 @@ const CallBack = () => {
             variables: {
               service: serviceUser,
             },
+            refetchQueries: [{ query: ME }],
           })
           localStorage.setItem('token', token)
           history.push('/edit')
