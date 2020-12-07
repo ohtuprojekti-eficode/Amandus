@@ -43,7 +43,7 @@ const stylesInUse = makeStyles((theme) =>
       },
     },
     saveProgress: {
-      color: theme.palette.text.primary,
+      color: theme.palette.primary.contrastText,
     },
   })
 )
