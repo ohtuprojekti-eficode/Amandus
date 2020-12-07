@@ -29,6 +29,7 @@ const EditView = () => {
   const files = repoStateData ? repoStateData.repoState.files : []
   const filename = location.search.slice(3)
   const content = files.find((e) => e.name === filename)?.content
+  const commitMessage = repoStateData ? repoStateData.repoState.commitMessage : ''
 
   return (
     <div className={classes.root}>
@@ -36,7 +37,7 @@ const EditView = () => {
         <Sidebar files={files} />
       </div>
       <div className={classes.editor}>
-        <MonacoEditor content={content} filename={filename} />
+        <MonacoEditor content={content} filename={filename} commitMessage={commitMessage}/>
       </div>
     </div>
   )

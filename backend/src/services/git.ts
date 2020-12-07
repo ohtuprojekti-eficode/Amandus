@@ -20,6 +20,7 @@ import {
   getLocalBranchSummary,
   cloneRepositoryToSpecificFolder,
   updateBranchFromRemote,
+  getLastCommitMessage,
 } from '../utils/gitUtils'
 
 export const switchCurrentBranch = async (
@@ -95,4 +96,12 @@ export const getCurrentBranchName = async (
   const gitObject = getGitObject(repoLocation)
   const branchSummary = await getLocalBranchSummary(gitObject)
   return branchSummary.current
+}
+
+export const getCurrentCommitMessage = async (
+  repoLocation: string
+): Promise<string> => {
+  const gitObject = getGitObject(repoLocation)
+  const commitMessage = await getLastCommitMessage(gitObject)
+  return commitMessage
 }
