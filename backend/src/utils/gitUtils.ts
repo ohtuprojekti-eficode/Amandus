@@ -120,6 +120,20 @@ export const getLocalBranchSummary = async (
   return await git.branchLocal()
 }
 
+export const getLastCommitMessage = async (
+  git: SimpleGit,
+): Promise<string> => {
+  try {
+    const commitMessage = await git.raw(['show', '-s', '--format=%s'])
+    if (commitMessage.length > 73) {
+      return commitMessage.slice(0, 72).concat('...').replace('\n', '')
+    }
+    return commitMessage.replace('\n', '')
+  } catch (e) {
+    return ''
+  }
+}
+
 export const cloneRepositoryToSpecificFolder = async (
   url: string,
   repoLocation: string
