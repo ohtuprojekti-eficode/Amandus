@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { makeStyles, Theme, createStyles } from '@material-ui/core/styles'
+import { makeStyles, createStyles } from '@material-ui/core/styles'
 import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'
 import ListItemText from '@material-ui/core/ListItemText'
@@ -10,7 +10,7 @@ import { REPO_STATE } from '../graphql/queries'
 import { useMutation, useQuery } from '@apollo/client'
 import { RepoStateQueryResult } from '../types'
 
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles(() =>
   createStyles({
     dropdownHeader: {
       textAlign: 'right',
