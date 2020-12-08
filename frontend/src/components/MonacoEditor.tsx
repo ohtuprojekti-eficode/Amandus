@@ -164,7 +164,7 @@ const MonacoEditor = ({ content, filename, commitMessage }: Props) => {
         {filename?.substring(filename.lastIndexOf('/') + 1)}
       </h2>
       <Editor
-        height="80vh"
+        height="78vh"
         language="robot"
         theme={theme.palette.type}
         value={content}

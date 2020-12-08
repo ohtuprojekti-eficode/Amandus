@@ -29,7 +29,7 @@ const stylesInUse = makeStyles(() =>
     linkBtnTransparent: {
       padding: '0.8em 1em',
       border: '1px solid transparent',
-      "&:hover": {
+      '&:hover': {
         textDecoration: 'none',
         opacity: 0.8,
       },
@@ -38,11 +38,11 @@ const stylesInUse = makeStyles(() =>
       padding: '0.8em 1em',
       borderRadius: '4px',
       border: '1px solid rgba(98,0,238, 0.4)',
-      "&:hover": {
+      '&:hover': {
         textDecoration: 'none',
         backgroundColor: 'rgba(0,0,0,0.02)',
         opacity: 0.8,
-      }
+      },
     },
     loginGreet: {
       fontSize: '.95em',
@@ -50,7 +50,10 @@ const stylesInUse = makeStyles(() =>
     },
     section: {
       flexGrow: 1,
-    }
+    },
+    toggleButton: {
+      marginRight: 25,
+    },
   })
 )
 
@@ -67,14 +70,15 @@ const Header = ({ user, logout, theme, toggleTheme }: Props) => {
     <div className={classes.root}>
       <AppBar position="fixed" color="default" className={classes.appBar}>
         <Toolbar>
-          
           <Logo theme={theme} />
-
           <div className={classes.section}>
-            <Link component={RouterLink} className={classes.linkBtnTransparent} to="/edit">
+            <Link
+              component={RouterLink}
+              className={classes.linkBtnTransparent}
+              to="/edit"
+            >
               Edit view
             </Link>
-          
             {user && (
               <Link
                 component={RouterLink}
@@ -84,29 +88,38 @@ const Header = ({ user, logout, theme, toggleTheme }: Props) => {
                 Repositories
               </Link>
             )}
-
-            <Switch
-              checked={switchChecked}
-              onChange={handleSwitchToggle}
-              color="primary"
-              inputProps={{ 'aria-label': 'primary checkbox' }}
-            />
           </div>
-
+          <Switch
+            checked={switchChecked}
+            onChange={handleSwitchToggle}
+            color="primary"
+            inputProps={{ 'aria-label': 'primary checkbox' }}
+            className={classes.toggleButton}
+          />
           <div>
             {!user && (
-              <Link component={RouterLink} className={classes.linkBtnTransparent} to="/login">
+              <Link
+                component={RouterLink}
+                className={classes.linkBtnTransparent}
+                to="/login"
+              >
                 Login
               </Link>
             )}
             {!user && (
-              <Link component={RouterLink} className={classes.linkBtnBordered} to="/register">
+              <Link
+                component={RouterLink}
+                className={classes.linkBtnBordered}
+                to="/register"
+              >
                 Register
               </Link>
             )}
             {user && (
               <div>
-              <span className={classes.loginGreet}>Hello, {user.username}</span>
+                <span className={classes.loginGreet}>
+                  Hello, {user.username}
+                </span>
                 <Link
                   component={RouterLink}
                   className={classes.linkBtnBordered}
@@ -118,7 +131,6 @@ const Header = ({ user, logout, theme, toggleTheme }: Props) => {
               </div>
             )}
           </div>
-          
         </Toolbar>
       </AppBar>
     </div>
