@@ -1,3 +1,21 @@
+# Draft: Summary documentation
+
+## Language server
+
+### Status
+
+Robot framework language server was briefly tested during sprint 0. The repository has a branch named “lang-server-test” that has a prototype for running a language server and the monaco editor together. The instructions on how to get started are in the README of that branch. 
+The initial discovery was that the language server responded with some suggestions to the typed content in Monaco Editor but we had no idea how it would link to syntax highlighting. The responses were in JSON format and could be logged to console. No further investigation was done after this and no parts of the prototype were used.
+
+### Future considerations
+
+If the language server is to be integrated to the existing structure, we feel that it should be a separate service that is somehow connected with the current frontend. 
+
+## 
+
+
+# Not in drive below this
+
 # Future considerations for the project
 This document is a running list of things that should/could be improved, added or otherwise better specified.
 
