@@ -11,8 +11,36 @@ The initial discovery was that the language server responded with some suggestio
 
 If the language server is to be integrated to the existing structure, we feel that it should be a separate service that is somehow connected with the current frontend. 
 
-## 
+## Authentication
 
+### Status
+
+At this moment, **all users have to register & login to the application in order to use the editor**. 
+
+* When a user has logged in to the application and saves their changes, these changes will be automatically commited to a local repository on our server.
+* If a user wants to push changes into a remote repository, e.g. a repository in GitHub, they have to first authorize the application with that external service. 
+
+In practice, authorizing the application with an external service means that the user has to click on the "connect GitHub" button on the frontend and give our application the permission to perform operations on their behalf. After this, when the user saves their changes, those changes will be automatically commited and pushed to the remote repository as well.
+
+**Note**: 
+
+* For now, as mentioned, the application supports only GitHub.
+* When a user has authorized with GitHub, some of their GitHub account information is saved in the application's database (i.e. username, user id and user email). See "enabling users to connect onto multiple external Git services".
+* Users are not able to clone any repositories or create repositories of their own; the application simply clones one and the same repository for all users to use. For discussion, see "support for multiple users".
+
+#### Security issues
+
+Currently the authorization token is stored in the browser’s LocalStorage, which we recognize is a great security risk. The token contains the user’s id, username and the GitHub authorization token. Neither the local token nor GitHub token expire, which means that **if the app token ends up in the wrong hands, they could not only gain access to this application, but also potentially to the user’s GitHub account**.
+
+For these reasons, **it is important to remove the token from LocalStorage after each session, by either logging out or manually removing the token**.
+
+### Future considerations
+
+For the above mentioned reasons, we see that it would be best  
+
+* to set an expiry time for auth tokens, 
+* use refresh tokens and 
+* store the tokens in memory instead of LocalStorage.
 
 # Not in drive below this
 
