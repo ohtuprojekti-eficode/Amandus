@@ -11,7 +11,20 @@ The initial discovery was that the language server responded with some suggestio
 
 If the language server is to be integrated to the existing structure, we feel that it should be a separate service that is somehow connected with the current frontend. 
 
-## Authentication
+## Robot syntax highlighting
+
+### Status 
+
+Syntax highlighting for the robot framework was implemented during sprint 6 and it was heavily influenced by an existing [open-source repository](https://github.com/bolinfest/monaco-tm). The version of Monaco Editor we use is different from this example repository and requires no webpack configuration. The original Monaco Editor dependency is included for typing the functions needed in setting up the language rules. Syntax highlighting is implemented with [vscode-textmate](https://github.com/microsoft/vscode-textmate) and [vscode-oniguruma](https://github.com/microsoft/vscode-oniguruma).
+
+* Oniguruma is a regex library and it’s loaded to our frontend in WebAssembly. The vscode-oniguruma handles all the loading of the WASM file but our frontend has to fetch it from our backend first
+* Textmate requires a language configuration file in json or plist format. We got the language token rules in json format for the robot framework from the [official robocorp repository](https://github.com/robocorp/robotframework-lsp).
+
+### Future
+
+Adding a new syntax highlighting ruleset should be possible by composing a valid token rules file and applying it similarly. The [previously mentioned repository](https://github.com/bolinfest/monaco-tm) has a setup for python but the monaco-editor package used also contains many common languages by default. Information regarding default languages can be found [here](https://github.com/suren-atoyan/monaco-react).  
+
+## Authentication 
 
 ### Status
 
