@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import Editor from '@monaco-editor/react'
 import { monaco } from '@monaco-editor/react'
 import { useMutation, useQuery } from '@apollo/client'
@@ -20,6 +20,9 @@ import {
   RepoStateQueryResult,
 } from '../types'
 import { initMonaco } from '../utils/monacoInitializer'
+import { SimpleLanguageInfoProvider } from '../utils/providers'
+import VsCodeDarkTheme from '../styles/editor-themes/vs-dark-plus-theme'
+import VsCodeLightTheme from '../styles/editor-themes/vs-light-plus-theme'
 
 interface Props {
   content: string | undefined
@@ -80,6 +83,8 @@ const stylesInUse = makeStyles(() =>
 const MonacoEditor = ({ content, filename, commitMessage }: Props) => {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [waitingToSave, setWaitingToSave] = useState(false)
+  const [editorReady, setEditorReady] = useState(false)
+  const providerRef = useRef<SimpleLanguageInfoProvider>()
   const branchState = useQuery<RepoStateQueryResult>(REPO_STATE)
   const { data: GHConnectedQuery } = useQuery<IsGithubConnectedResult>(
     IS_GH_CONNECTED
@@ -154,9 +159,23 @@ const MonacoEditor = ({ content, filename, commitMessage }: Props) => {
     setDialogOpen(true)
   }
 
-  monaco.init().then(async (monaco) => {
-    initMonaco(monaco)
-  })
+  useEffect(() => {
+    monaco.init().then((monaco) => {
+      providerRef.current = initMonaco(monaco, theme.palette.type)
+      setEditorReady(true)
+    })
+    // Need to have an empty dependency array for this to work correctly
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const updateTheme = () => {
+    if (editorReady && providerRef.current) {
+      const editorTheme =
+        theme.palette.type === 'dark' ? VsCodeDarkTheme : VsCodeLightTheme
+      providerRef.current.changeTheme(editorTheme)
+      providerRef.current.injectCSS()
+    }
+  }
 
   return (
     <div>
@@ -170,8 +189,11 @@ const MonacoEditor = ({ content, filename, commitMessage }: Props) => {
         value={content}
         editorDidMount={handleEditorDidMount}
       />
+      {
+        // Updating the theme here so we override things set by <Editor>
+        updateTheme()
+      }
       <AuthenticateDialog open={!user || !user.me} />
-
       <SaveDialog
         open={dialogOpen}
         handleClose={handleDialogClose}
