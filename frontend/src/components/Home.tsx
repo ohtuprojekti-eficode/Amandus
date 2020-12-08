@@ -36,6 +36,7 @@ const stylesInUse = makeStyles(() =>
       backgroundColor: '#df0cc4',
       padding: '12px 0',
       fontWeight: 'bold',
+      color: '#ffffff',
       margin: '0 0.5em',
       width: 180,
     },
