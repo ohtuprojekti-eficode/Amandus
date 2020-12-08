@@ -1,4 +1,5 @@
 // modified version of code from https://github.com/bolinfest/monaco-tm
+// most comments are from original code, new ones signed with "ohtu"
 import type * as monaco from 'monaco-editor'
 import type {
   IGrammar,
@@ -100,6 +101,12 @@ export class SimpleLanguageInfoProvider {
     })
 
     this.tokensProviderCache = new TokensProviderCache(this.registry)
+  }
+
+  // Change the theme. Call injectCSS afterwards
+  // -ohtu
+  changeTheme(theme: IRawTheme) {
+    this.registry.setTheme(theme)
   }
 
   /**
@@ -213,13 +220,24 @@ class TokensProviderCache {
 function createStyleElementForColorsCSS(): HTMLStyleElement {
   // We want to ensure that our <style> element appears after Monaco's so that
   // we can override some styles it inserted for the default theme.
-  const style = document.createElement('style')
+
+  // Returning the previously created <style> element if it exists. Had to do this get theme switching to work
+  // -ohtu
+  let style = document.getElementById(
+    'monaco-css-injection-point'
+  ) as HTMLStyleElement
+  if (style) {
+    return style
+  }
+
+  style = document.createElement('style')
 
   // We expect the styles we need to override to be in an element with the class
   // name 'monaco-colors' based on:
   // https://github.com/microsoft/vscode/blob/f78d84606cd16d75549c82c68888de91d8bdec9f/src/vs/editor/standalone/browser/standaloneThemeServiceImpl.ts#L206-L214
   const monacoColors = document.getElementsByClassName('monaco-colors')[0]
   if (monacoColors) {
+    style.id = 'monaco-css-injection-point'
     monacoColors.parentElement?.insertBefore(style, monacoColors.nextSibling)
   } else {
     // Though if we cannot find it, just append to <head>.

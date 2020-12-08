@@ -5,7 +5,8 @@ import { createOnigScanner, createOnigString } from 'vscode-oniguruma'
 import { SimpleLanguageInfoProvider } from '../utils/providers'
 import { registerLanguages } from '../utils/languages'
 import { rehydrateRegexps } from '../utils/configuration'
-import VsCodeDarkTheme from '../themes/vs-dark-plus-theme'
+import VsCodeDarkTheme from '../styles/editor-themes/vs-dark-plus-theme'
+import VsCodeLightTheme from '../styles/editor-themes/vs-light-plus-theme'
 import { grammar } from '../grammars/robot'
 import { robotConfiguration } from '../grammars/robotConfiguration'
 
@@ -13,7 +14,7 @@ interface DemoScopeNameInfo extends ScopeNameInfo {
   path: string
 }
 
-export const initMonaco = async (monaco: typeof import('monaco-editor')) => {
+export const initMonaco = (monaco: typeof import('monaco-editor'), themeName: string) => {
   const languages = [
     {
       id: 'robot',
@@ -49,7 +50,7 @@ export const initMonaco = async (monaco: typeof import('monaco-editor')) => {
     fetchGrammar,
     configurations: languages.map((language) => language.id),
     fetchConfiguration,
-    theme: VsCodeDarkTheme,
+    theme: themeName === 'light' ? VsCodeLightTheme : VsCodeDarkTheme,
     onigLib,
     monaco,
   })
@@ -59,7 +60,7 @@ export const initMonaco = async (monaco: typeof import('monaco-editor')) => {
     monaco
   )
 
-  monaco.editor.setTheme('vs-dark')
-
   provider.injectCSS()
+
+  return provider
 }
