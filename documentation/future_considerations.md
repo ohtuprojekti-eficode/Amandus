@@ -104,6 +104,40 @@ For the above mentioned security reasons, we see that it would be best
 * use refresh tokens and 
 * store the tokens in memory instead of LocalStorage.
 
+## Enabling users to connect onto multiple external Git services 
+
+### Status
+
+Currently, a User entity in the database can relate to multiple ServiceUser entities, where a single ServiceUser contains the user account data (username, email, user id, etc.) on an external Git service such as GitHub, GitLab and BitBucket. 
+
+However, for now the application supports only connecting to GitHub and the auth token from GitHub is added into the application’s authorization token in a way that does not allow multiple ServiceUser accounts to be simultaneously in use. 
+
+The local auth token contains currently the following fields 
+
+* **id**: user’s id in database, 
+* **username**: user’s local username and 
+* **githubToken**: GitHub authorization token.
+
+### Future considerations
+
+To allow users to use multiple service accounts if they wish to connect into multiple services, we suggest the tokens from external services could be included in the local token as a list of objects, i.e.
+
+```
+[
+    { 
+       serviceUserId: “local ServiceUser entity id here”},
+       token: “GitHub authorization token string here”
+    },
+    { 
+       serviceUserId: “local ServiceUser entity id here”},
+       token: “BitBucket authorization token string here”
+    },
+    …..
+]
+```
+
+Note: we are not yet certain how other git services like BitBucket and GitLab have enabled third party authentication and authorization, but we believe that similar information could be retrieved from all of them. 
+
 
 
 # Not in drive below this
