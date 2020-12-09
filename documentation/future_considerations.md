@@ -4,7 +4,7 @@
 
 ### Status
 
-Robot framework language server was briefly tested during sprint 0. The repository has a branch named “lang-server-test” that has a prototype for running a language server and the monaco editor together. The instructions on how to get started are in the README of that branch. 
+Robot Framework language server was briefly tested during sprint 0. The repository has a branch named “lang-server-test” that has a prototype for running a language server and the monaco editor together. The instructions on how to get started are in the README of that branch. 
 The initial discovery was that the language server responded with some suggestions to the typed content in Monaco Editor but we had no idea how it would link to syntax highlighting. The responses were in JSON format and could be logged to console. No further investigation was done after this and no parts of the prototype were used.
 
 ### Future considerations
@@ -30,36 +30,36 @@ Adding a new syntax highlighting ruleset should be possible by composing a valid
 
 At this moment, **all users have to register & login to the application in order to use the editor**. 
 
-* When a user has logged in to the application and saves their changes, these changes will be automatically commited to a local repository on our server.
+* When a user has logged in to the application and saves their changes, these changes will be automatically committed to a local repository on our server.
 * If a user wants to push changes into a remote repository, e.g. a repository in GitHub, they have to first authorize the application with that external service. See [Authorizing with external Git services](#authorizing-with-external-git-services).
 
 **Note**: Users are not able to clone any repositories or create repositories of their own; the application simply clones one and the same repository from GitHub for all users to use, no matter whether they have connected to GitHub or not. For discussion, see [support for multiple users](#support-for-multiple-users).
 
 When a user logs in to the application, the following happens:
 
-1. The given username and password is sent as parameters to backend GraphQL with mutation login.
+1. The given username and password are sent as parameters to backend GraphQL with mutation login.
 2. Backend queries the database for a user with the given username and if a user is returned, it checks if given password matches with the one saved in the database with the `bcryptjs` library. 
 2. If a user is found and the password matches, a token is created with `jsonwebtoken` library. The token is encoded with fields 
     * **id**: user's id in the database, 
     * **username**: username and 
     * **githubToken**: value undefined at this point. 
-3. This token is then returend with the response to the frontend, where the token is saved to the LocalStorage. 
+3. This token is then returned with the response to the frontend, where the token is saved to LocalStorage. 
 4. The token is read from LocalStorage and added to authorization header with each request made to the backend. 
 5. The backend checks for a token with each incoming request in the context. If a token is found, 
-    * the database is queried for a user with the id in the decoded token. If a user is found, it is attached to context in field `currentUser`.
+    * The database is queried for a user with the id in the decoded token. If a user is found, it is attached to context in field `currentUser`.
     * The field `githubToken`is also decoded from the token and attached to context, whether it is undefined or not. 
 
 #### Security issues
 
-Currently, the authorization token is stored in LocalStorage, which we recognize is a great security risk. As explained above, the token contains the user’s id, username and the GitHub authorization token if it exists. Neither the local token nor GitHub token expire, which means that **if the app token ends up in the wrong hands, they could not only gain access to this application, but also potentially to the user’s GitHub account**.
+Currently, the authorization token is stored in LocalStorage, which we recognize as a great security risk. As explained above, the token contains the user’s id, username and the GitHub authorization token if it exists. Neither the local token nor GitHub token expire, which means that **if the app token ends up in wrong hands, they could not only gain access to this application, but also potentially to the user’s GitHub account**.
 
 For these reasons, **it is important to remove the token from LocalStorage after each session, by either logging out or manually removing the token**.
 
 ### Future considerations
 
-For the above mentioned reasons, we see that it would be best  
+For the reasons mentioned above, we see that it would be best  
 
-* to set an expiry time for auth tokens, 
+* to set an expiration time for auth tokens, 
 * use refresh tokens and 
 * store the tokens in memory instead of LocalStorage.
 
@@ -71,36 +71,36 @@ As explained in the [previous section](#authentication-and-authorization), if a 
 
 **Note**: 
 * For now, the application supports only GitHub.
-* Currently, uUsers are not able to clone any repositories or create repositories of their own; the application simply clones one and the same repository for all users to use. 
+* Currently, users are not able to clone any repositories or create repositories of their own; the application simply clones one and the same repository for all users to use. 
 
-From the user's point of view, authorizing the application with an external service means that the user has to click on the **connect GitHub** button on the frontend and give our application the permission to perform operations on their behalf. After this, when the user saves their changes, those changes will be automatically commited and pushed to the remote repository as well.
+From the user's point of view, authorizing the application with an external service means that the user has to click on the **Connect GitHub** button in frontend and give our application the permission to perform operations on their behalf. After this, when the user saves their changes, those changes will be automatically committed and pushed to the remote repository as well.
 
 More specifically, when the user authorizes the application with GitHub, the following happens
 
-1. The user is taken to an authorization page on GitHub (`https://github.com/login/oauth/authorize`) where the user can login and give permission for our application to perform git operations. 
-2. If the user accepts the request, GitHub redirects to a callback url in our application (`/auth/github/callback`) with a temporary code in a code parameter. The temporary code will expire after 10 minutes. 
+1. The user is taken to an authorization page on GitHub (`https://github.com/login/oauth/authorize`) where the user can login and give permission for our application to perform git operations.
+2. If the user accepts the request, GitHub redirects to a callback url in our application (`/auth/github/callback`) with a temporary code in a code parameter. The temporary code will expire after 10 minutes.
 3. Next, this temporary code will be exhanged for a GitHub access token and the GH access token will be in turn used to authorize a request to get the user's account from GitHub:
-    * first, our callback component dispatches the temporary code as a parameter with `authorizeWithGithub` mutation to backend.
-    * Backend requests an access token from GitHub with the temporary code and 
-    * with this access token, backend then requests the user account from GitHub.
+    * First, our callback component dispatches the temporary code as a parameter with `authorizeWithGithub` mutation to backend.
+    * Backend requests an access token from GitHub with the temporary code and
+    * With this access token, backend then requests the user account from GitHub.
 4. After receiving the access token and the GitHub user account, our backend returns
     * a new token created with `jsonwebtoken`library, with the GitHub access token now included, and
-    * a serviceUser object with the fields 
-         * **serviceName**: 'github', 
-         * **username**: GitHub username, 
-         * **email**: GitHub user email, 
+    * a serviceUser object with the fields
+         * **serviceName**: 'github',
+         * **username**: GitHub username,
+         * **email**: GitHub user email,
          * **reposurl**: GitHub user's repositories url,
-5. Finally, our callback component in frontend 
-    * dispatches the serviceUser to backend as parameter with `connectGitService` mutation, which will save the GitHub user data to ServiceUser table in the database.
+5. Finally, our callback component in frontend
+    * Dispatches the serviceUser to backend as parameter with `connectGitService` mutation, which will save the GitHub user data to ServiceUser table in the database.
     * Stores the new access token to LocalStorage.
 
-See more information on [GitHub OAuth on GitHub API documentation](https://docs.github.com/en/free-pro-team@latest/developers/apps/authorizing-oauth-apps). 
+See more information on [GitHub OAuth on GitHub API documentation](https://docs.github.com/en/free-pro-team@latest/developers/apps/authorizing-oauth-apps).
 
 ### Future considerations
 
-For the above mentioned security reasons, we see that it would be best  
+For the security reasons mentioned above, we see that it would be best  
 
-* to set an expiry time for all auth tokens, 
+* to set an expiration time for all auth tokens, 
 * use refresh tokens and 
 * store the tokens in memory instead of LocalStorage.
 
@@ -136,7 +136,7 @@ To allow users to use multiple service accounts if they wish to connect into mul
 ]
 ```
 
-Note: we are not yet certain how other git services like BitBucket and GitLab have enabled third party authentication and authorization, but we believe that similar information could be retrieved from all of them. 
+Note: we are not yet certain how other git services like BitBucket or GitLab have enabled third party authentication and authorization, but we believe that similar information could be retrieved from all of them. 
 
 
 
@@ -157,14 +157,14 @@ This section covers concrete features to be solved in code.
         * Keyword suggestions
             * This seemingly needs its own LSP-server in order to get working. This hasn't been started yet, but some research has been done and it seems plausible to get working by connecting Amandus editor with <a href="https://github.com/robocorp/robotframework-lsp" ><underline>this package from RoboCorp</underline></a>.
 - BitBucket & GitLab authentication
-    * Github authentication is working and the user can create a service account to which he/she can connect a Github-account.
+    * Github authentication is working and the user can create a service account to which he/she can connect a GitHub account.
     * How many/What services to be used is up for discussion, but BitBucket and GitLab have been in the plans. Due to them being some of the more used services besides GitHub.
 
 ### Other things to consider
 - Git vs Repository service provider API
-    * We have built our product to do the pulling, committing and pushing all through a <a href="#">git package for NPM</a>, but another way to handle may be to handle pushing through the different account service providers' APIs. This was the plan we had in the beginning, but later changed to only use git in order to make the code more modular and eventually usable for other things aswell. This may not be the best solution though.
+    * We have built our product to do the pulling, committing and pushing all through a <a href="#">git package for NPM</a>, but another way to handle may be to handle pushing through the different account service providers' APIs. This was the plan we had in the beginning, but later changed to only use git in order to make the code more modular and eventually usable for other things as well. This may not be the best solution though.
 - Multiple concurrent user support
-    * The application seems to work fine for multiple concurrent users, but the product could do with a general overhaul of the editing process(maybe with threading?) to allow for some way of more easily handling multiple concurrent users editing different files.
+    * The application seems to work fine for multiple concurrent users, but the product could do with a general overhaul of the editing process (maybe with threading?) to allow for some way of more easily handling multiple concurrent users editing different files.
 
 
 ## Concept design
