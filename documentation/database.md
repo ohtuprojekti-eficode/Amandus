@@ -26,3 +26,7 @@
   - Tables are changed (more or less tables or different fields in tables)
   
 - Development `docker-compose` also runs the `yarn migrate-up-dev` command to create database tables during startup so everything should work automatically 
+
+Below is the described database structure
+
+![Database](https://github.com/ohtuprojekti-eficode/Amandus/blob/issue246-manual/documentation/Amandus%20DB.png)
