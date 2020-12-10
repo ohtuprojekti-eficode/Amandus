@@ -29,4 +29,4 @@
 
 Below is the described database structure
 
-![Database](https://github.com/ohtuprojekti-eficode/Amandus/blob/issue246-manual/documentation/Amandus%20DB.png)
+![Database](/documentation/Amandus%20DB.png)
