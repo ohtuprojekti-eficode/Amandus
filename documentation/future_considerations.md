@@ -136,7 +136,15 @@ To allow users to use multiple service accounts if they wish to connect into mul
 ]
 ```
 
-Note: we are not yet certain how other git services like BitBucket or GitLab have enabled third party authentication and authorization, but we believe that similar information could be retrieved from all of them. 
+Note: we are not yet certain how other git services like BitBucket or GitLab have enabled third party authentication and authorization, but we believe that similar information could be retrieved from all of them.
+
+## Concept design
+
+### Status
+Version 1 of the concept design is done and covers the general feel, features and rough look we have in mind for the project. All of the concept art were made in <a href="https://www.figma.com/">Figma</a>, and future concept art and prototyping work could continue off of what has been done already. A link to the Figma document, with edit access is in the Google drive concept design folder.
+
+### Future considerations
+Future concept design work could revolve around thinking about usability and intuitiveness. Not all parts of the application have been prototyped 100%, but a good bit of the main functionality is done. This probably is part of the question of what functionality should be available aswell, and many of the menus for example are quite lackluster to allow for restructuring with new feature ideas. Although revised, discussed and polished multiple times, our versions is still v1 and for us served the purpose of feature list as well as a visual guide of what we were building. As the determined direction of the UI grows more sure, some more hi-fi prototypes could be in place.
 
 
 
@@ -166,6 +174,3 @@ This section covers concrete features to be solved in code.
 - Multiple concurrent user support
     * The application seems to work fine for multiple concurrent users, but the product could do with a general overhaul of the editing process (maybe with threading?) to allow for some way of more easily handling multiple concurrent users editing different files.
 
-
-## Concept design
-Version 1 of the concept design is done and covers the general feel, features and rough look we have in mind for the project. These are in no way final and much can be improved in further development of this product. All of the concept art were made in <a href="https://www.figma.com/">Figma</a>.
