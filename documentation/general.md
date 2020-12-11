@@ -22,15 +22,38 @@ The application has a feature to fetch user details and an authorization token f
 
 5. The application has environment values `GH_CLIENT_ID`, `GH_CLIENT_SECRET` & `GH_CB_URL`. These are the client id, client secret and callback url from your newly created app. The [backend documentation](backend.md) has more information regarding the environment values required.
 
-### Running the application locally
+### Running the application locally for development
 
 ##### Without docker-compose
 
 * Follow the instructions in [frontend documentation](frontend.md) and [backend documentation](backend.md) to start the services individually
+* Remember to also setup a `postgresql` database and configure the backend's `DATABASE_URL` accordingly
 
 ##### With docker-compose
 
-* In the root of this repository run:
-  1. `sudo docker-compose build`
-  2. `sudo docker-compose up`
-* The application should be viewable in `localhost:3000`
+1. Setup the correct backend environment values as described in [backend documentation](backend.md)
+2. Run `yarn` in both `/frontend` & `/backend` folders 
+3. Run `sudo docker-compose build` 
+4. Run `sudo docker-compose up`
+    * Sometimes the backend fails to start during the first run due to `postgresql` not starting fully before migrations run. Restarting this a couple of times has always fixed the issue. 
+5. The application should be viewable in `localhost:3000` and the graphlql playground at `localhost:3001`
+
+
+### Running the application in production
+
+The production version is ran with the `Dockerfile` found in the root of this repository. The easiest way to use it with our `docker-compose.server.yml`, also found in the root. The `docker-compose.server.yml` has placeholders for all the environment values required. It also has `docker/watchtower` configuration in place. This is not vital if you do not wish to use it for automatic updating of the image from `dockerhub`.
+
+#### Fastest way to get the application running by pulling from dockerhub
+
+1. Fill the environment values in `docker-compose.server.yml` as described in [backend documentation](backend.md)
+3. Fill in the desired ports
+3. Change the `image: ''` placeholder to `image: ohtuprojekti/wevc:application-production`. This pulls the production tag from [our dockerhub](https://hub.docker.com/repository/docker/ohtuprojekti/wevc). Github actions builds and pushes this image when the `master` branch is updated.
+4. Run `sudo docker-compose up` to start the application to the port you configured
+
+#### Build the production version locally and run it
+
+1. Fill the environment values in `docker-compose.server.yml` as described in [backend documentation](backend.md)
+3. Fill in the desired ports
+3. Change the `image: ''` to `build: .`
+4. Run `sudo docker-compose build` to build the `Dockerfile`
+5. Run `sudo docker-compose run` to start the application to the port you configured
