@@ -22,14 +22,14 @@ The application has a feature to fetch user details and an authorization token f
 
 5. The application has environment values `GH_CLIENT_ID`, `GH_CLIENT_SECRET` & `GH_CB_URL`. These are the client id, client secret and callback url from your newly created app. The [backend documentation](backend.md) has more information regarding the environment values required.
 
-### Running the application locally for development
+## Running the application locally for development
 
-##### Without docker-compose
+#### Without docker-compose
 
 * Follow the instructions in [frontend documentation](frontend.md) and [backend documentation](backend.md) to start the services individually
 * Remember to also setup a `postgresql` database and configure the backend's `DATABASE_URL` accordingly
 
-##### With docker-compose
+#### With docker-compose
 
 1. Setup the correct backend environment values as described in [backend documentation](backend.md)
 2. Run `yarn` in both `/frontend` & `/backend` folders 
@@ -41,11 +41,11 @@ The application has a feature to fetch user details and an authorization token f
 6. Running `sudo docker-compose down --volumes` shuts down the application and clears the database
 
 
-### Running the application in production
+## Running the application in production
 
 The production version is ran with the `Dockerfile` found in the root of this repository. The easiest way to use it with our `docker-compose.server.yml`, also found in the root. The `docker-compose.server.yml` has placeholders for all the environment values required. It also has `docker/watchtower` configuration in place. This is not vital if you do not wish to use it for automatic updating of the image from `dockerhub`.
 
-#### Fastest way to get the application running by pulling from dockerhub
+### Fastest way to get the application running by pulling from dockerhub
 
 1. Fill the environment values in `docker-compose.server.yml` as described in [backend documentation](backend.md)
 3. Fill in the desired ports
@@ -54,7 +54,7 @@ The production version is ran with the `Dockerfile` found in the root of this re
     * Sometimes the application fails to start during the first run due to `postgresql` not starting fully before migrations run. Restarting this a couple of times has always fixed the issue. 
 5. Running `sudo docker-compose -f docker-compose.server.yml down --volumes` shuts down the application and clears the database
 
-#### Build the production version locally and run it
+### Build the production version locally and run it
 
 1. Fill the environment values in `docker-compose.server.yml` as described in [backend documentation](backend.md)
 3. Fill in the desired ports
