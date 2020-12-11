@@ -36,7 +36,7 @@ The application has a feature to fetch user details and an authorization token f
 3. Run `sudo docker-compose build` 
 4. Run `sudo docker-compose up`
     * Sometimes the backend fails to start during the first run due to `postgresql` not starting fully before migrations run. Restarting this a couple of times has always fixed the issue. 
-5. The application should be viewable in `localhost:3000` and the graphlql playground at `localhost:3001`
+5. The application should be viewable in `localhost:3000` and the graphlql playground at `localhost:3001/graphql`
     * Hot-reload is configured and the application uses your local `node_modules`
 6. Running `sudo docker-compose down --volumes` shuts down the application and clears the database
 
