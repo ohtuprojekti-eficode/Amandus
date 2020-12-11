@@ -164,6 +164,16 @@ The two `docker-compose` files in our server are set to track these images with 
 * The watchtower tracking of new images might not be an optimal solution unless docker credentials are also setup at the server side
 * Maybe more specific image tags should be built instead of just `application-latest`
 
+## Testing
+
+### Status
+
+Most of the applications testing is integration testing in backend. We tested all of the important graphql mutations that handle saving a file and registering and logging in to our application. We also had some simple unit tests for functions that sanitize user inputs and define repository locations. We also have E2E-tests written in cypress that test registering and logging in to our application. 
+
+### Future considerations
+
+Most difficult part of testing our application is that it relies so heavily on external services. Testing things like saving file contents or connecting a github user seemed to be very hard in E2E testing because they all relied on connection to the github. Even in the integration testing we did not get proper mocking working to test the saving to remote and connecting to github. The monaco editor syntax highlighting is also completely untested because we had very little idea how it could be tested. We feel that this was somewhat acceptable for an MVP application but definitely more thinking on testing is required.
+
 # Not in drive below this
 
 # Future considerations for the project
