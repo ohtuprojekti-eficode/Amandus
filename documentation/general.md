@@ -49,6 +49,7 @@ The production version is ran with the `Dockerfile` found in the root of this re
 3. Fill in the desired ports
 3. Change the `image: ''` placeholder to `image: ohtuprojekti/wevc:application-production`. This pulls the production tag from [our dockerhub](https://hub.docker.com/repository/docker/ohtuprojekti/wevc). Github actions builds and pushes this image when the `master` branch is updated.
 4. Run `sudo docker-compose up` to start the application to the port you configured
+    * Sometimes the application fails to start during the first run due to `postgresql` not starting fully before migrations run. Restarting this a couple of times has always fixed the issue. 
 
 #### Build the production version locally and run it
 
@@ -56,4 +57,5 @@ The production version is ran with the `Dockerfile` found in the root of this re
 3. Fill in the desired ports
 3. Change the `image: ''` to `build: .`
 4. Run `sudo docker-compose build` to build the `Dockerfile`
-5. Run `sudo docker-compose run` to start the application to the port you configured
+5. Run `sudo docker-compose up` to start the application to the port you configured
+    * Sometimes the application fails to start during the first run due to `postgresql` not starting fully before migrations run. Restarting this a couple of times has always fixed the issue. 
