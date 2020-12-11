@@ -146,7 +146,23 @@ Version 1 of the concept design is done and covers the general feel, features an
 ### Future considerations
 Future concept design work could revolve around thinking about usability and intuitiveness. Not all parts of the application have been prototyped 100%, but a good bit of the main functionality is done. This probably is part of the question of what functionality should be available aswell, and many of the menus for example are quite lackluster to allow for restructuring with new feature ideas. Although revised, discussed and polished multiple times, our versions is still v1 and for us served the purpose of feature list as well as a visual guide of what we were building. As the determined direction of the UI grows more sure, some more hi-fi prototypes could be in place.
 
+## Deployment to production
 
+### Status
+
+Github actions runs all the testing and deployment. This repository has a `staging` branch and `master` acts as a production branch. Our server runs two `docker-compose` files, one for staging and one for production. Github actions builds and deploys the staging version when `staging` branch is updated. The image is tagged as `application-latest`. When the `master` branch is updated, an image tagged as `application-production` is pushed. Our dockerhub repository is [here](https://hub.docker.com/repository/docker/ohtuprojekti/wevc).
+
+The two `docker-compose` files in our server are set to track these images with [Docker watchtower](https://github.com/containrrr/watchtower). The watchtower interval is set to 15 minutes because an unregistered docker user has a limit of 100 pulls per 6 hours. Further information regarding on what is required to setup our application can be found in the [general documentation](general.md)
+
+
+### Future considerations
+
+* The Github actions user credentials to dockerhub are in Github secrets. These will be removed after the course is over and new configuration is required to keep using the pipeline.
+  * `DOCKER_REPO` is the link to our current [repository](https://hub.docker.com/repository/docker/ohtuprojekti/wevc). Maybe next users will create a new one.
+  * `DOCKER_USER` should be a valid Docker user
+  * `DOCKER_TOKEN` should be a valid Docker token for the user
+* The watchtower tracking of new images might not be an optimal solution unless docker credentials are also setup at the server side
+* Maybe more specific image tags should be built instead of just `application-latest`
 
 # Not in drive below this
 
