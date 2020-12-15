@@ -33,7 +33,7 @@ At this moment, **all users have to register & login to the application in order
 * When a user has logged in to the application and saves their changes, these changes will be automatically committed to a local repository on our server.
 * If a user wants to push changes into a remote repository, e.g. a repository in GitHub, they have to first authorize the application with that external service. See [Authorizing with external Git services](#authorizing-with-external-git-services).
 
-**Note**: Users are not able to clone any repositories or create repositories of their own; the application simply clones one and the same repository from GitHub for all users to use, no matter whether they have connected to GitHub or not. For discussion, see [support for multiple users](#support-for-multiple-users).
+**Note**: Users are not able to clone any repositories or create repositories of their own; the application simply clones one and the same repository from GitHub for all users to use, no matter whether they have connected to GitHub or not. 
 
 When a user logs in to the application, the following happens:
 
