@@ -138,6 +138,32 @@ To allow users to use multiple service accounts if they wish to connect into mul
 
 Note: we are not yet certain how other git services like BitBucket or GitLab have enabled third party authentication and authorization, but we believe that similar information could be retrieved from all of them.
 
+## Git operations with SimpleGit library
+
+### Status
+
+Git operations in the backend are done with [SimpleGit library](https://github.com/elastic/simple-git). The features we have managed to implement are the following:
+
+* Cloning a repository with an URL
+* Checking out a local branch
+* Writing to file (not a git operation but related), adding and committing changes
+* Pushing with a remote token that acts as a password
+* Checking for a merge conflict in a push operation and catching the error
+
+Cloning a repository and committing changes seem to work as is. However, commit operation sets the username and password to global Git config, which will probably lead to problems as discussed in “support for multiple users”. We feel that the Git config should be set in the cloning repository phase when the users have unique repository folders. 
+
+The commit operations are also always made with the details that the user provided when registering to the application. The original idea was to clone only repositories from a connected git service (such as GitHub) and thus, the username and email should be the ones from github (or other service). The implementation is now like this for simplicity while working with the example repository.
+
+Pushing operation is done by first creating a new git remote with a random id. The remote address is the same as origin, but with the added credentials (token) in the url that act as an authentication. After the push is done, the newly created random remote address is deleted so that the token is not saved to the repository git config details. Another approach would be to just set the git credentials to the repository config but this would need some configuration and thinking when to actually set it. Safety might also be a concern because the token acts as a password.
+
+Merge conflict solving is handled in the push operation by first fetching the latest remote changes with git fetch and then trying to do a merge commit. If the automatic merge is impossible, the backend throws an error with a message: “merge conflict”. When any error in this step is caught, the commit is deleted and the repository is checked out to the previous branch, if changed (git reset and git checkout). The frontend catches this error and informs that the merge conflict was detected.
+Checking out a branch works for local branches and the list in frontend only includes the ones created in the application because of this. Checking out to remote branches is not supported at this time.
+
+### Future
+
+Future work on git operations could be started by first having a user specific repositories and making sure the git config is always set correctly. It would also be important to think when to do git pull operations to update the repository. Doing git pull at the wrong time will lead to issues with either conflicting files or missing git config details for automatic merge commits. Checking out to remote repositories could be supported by creating local branches that are set to track remote branches.
+
+
 ## Concept design
 
 ### Status
