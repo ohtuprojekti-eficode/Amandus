@@ -150,7 +150,9 @@ Git operations in the backend are done with [SimpleGit library](https://github.c
 * Pushing with a remote token that acts as a password
 * Checking for a merge conflict in a push operation and catching the error
 
-Cloning a repository and committing changes seem to work as is. However, commit operation sets the username and password to global Git config, which will probably lead to problems as discussed in “support for multiple users”. We feel that the Git config should be set in the cloning repository phase when the users have unique repository folders. 
+Cloning a repository and committing changes seem to work as is. 
+
+However, *commit operation sets the username and password to global Git config*, which will probably lead to problems as discussed in “support for multiple users”. We feel that the Git config should be set in the cloning repository phase when the users have unique repository folders. 
 
 The commit operations are also always made with the details that the user provided when registering to the application. The original idea was to clone only repositories from a connected git service (such as GitHub) and thus, the username and email should be the ones from github (or other service). The implementation is now like this for simplicity while working with the example repository.
 
