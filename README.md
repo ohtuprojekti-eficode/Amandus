@@ -29,6 +29,8 @@ Web application to edit Robot Framework files remotely
 
 [Database documentation](/documentation/database.md)
 
+[Manual](/documentation/manual.md)
+
 [Working hours](https://docs.google.com/spreadsheets/d/1YDC3QcxFgtNw_KvYTQlDE8rA0DA7rvMYv_ZlsHXdvww)
 
 ### Definition of done
