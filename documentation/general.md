@@ -26,20 +26,19 @@ The application has a feature to fetch user details and an authorization token f
 
 #### Without docker-compose
 
-* Follow the instructions in [frontend documentation](frontend.md) and [backend documentation](backend.md) to start the services individually
-* Remember to also setup a `postgresql` database and configure the backend's `DATABASE_URL` accordingly
+- Follow the instructions in [frontend documentation](frontend.md) and [backend documentation](backend.md) to start the services individually
+- Remember to also setup a `postgresql` database and configure the backend's `DATABASE_URL` accordingly
 
 #### With docker-compose
 
 1. Setup the correct backend environment values as described in [backend documentation](backend.md)
-2. Run `yarn` in both `/frontend` & `/backend` folders 
-3. Run `sudo docker-compose build` 
+2. Run `yarn` in both `/frontend` & `/backend` folders
+3. Run `sudo docker-compose build`
 4. Run `sudo docker-compose up`
-    * Sometimes the backend fails to start during the first run due to `postgresql` not starting fully before migrations run. Restarting this a couple of times has always fixed the issue. 
+   - Sometimes the backend fails to start during the first run due to `postgresql` not starting fully before migrations run. Restarting this a couple of times has always fixed the issue.
 5. The application should be viewable in `localhost:3000` and the graphlql playground at `localhost:3001/graphql`
-    * Hot-reload is configured and the application uses your local `node_modules`
+   - Hot-reload is configured and the application uses your local `node_modules`
 6. Running `sudo docker-compose down --volumes` shuts down the application and clears the database
-
 
 ## Running the application in production
 
@@ -48,18 +47,22 @@ The production version is ran with the `Dockerfile` found in the root of this re
 ### Fastest way to get the application running by pulling from dockerhub
 
 1. Fill the environment values in `docker-compose.server.yml` as described in [backend documentation](backend.md)
-3. Fill in the desired ports
+2. Fill in the desired ports
 3. Change the `image: ''` placeholder to `image: ohtuprojekti/wevc:application-production`. This pulls the production tag from [our dockerhub](https://hub.docker.com/repository/docker/ohtuprojekti/wevc). Github actions builds and pushes this image when the `master` branch is updated.
 4. Run `sudo docker-compose -f docker-compose.server.yml up` to start the application to the port you configured
-    * Sometimes the application fails to start during the first run due to `postgresql` not starting fully before migrations run. Restarting this a couple of times has always fixed the issue. 
+   - Sometimes the application fails to start during the first run due to `postgresql` not starting fully before migrations run. Restarting this a couple of times has always fixed the issue.
 5. Running `sudo docker-compose -f docker-compose.server.yml down --volumes` shuts down the application and clears the database
 
 ### Build the production version locally and run it
 
 1. Fill the environment values in `docker-compose.server.yml` as described in [backend documentation](backend.md)
-3. Fill in the desired ports
+2. Fill in the desired ports
 3. Change the `image: ''` to `build: .`
 4. Run `sudo docker-compose -f docker-compose.server.yml build` to build the `Dockerfile`
 5. Run `sudo docker-compose -f docker-compose.server.yml up` to start the application to the port you configured
-    * Sometimes the application fails to start during the first run due to `postgresql` not starting fully before migrations run. Restarting this a couple of times has always fixed the issue. 
+   - Sometimes the application fails to start during the first run due to `postgresql` not starting fully before migrations run. Restarting this a couple of times has always fixed the issue.
 6. Running `sudo docker-compose -f docker-compose.server.yml down --volumes` shuts down the application and clears the database
+
+### Package diagram
+
+![Package diagram](./imgs/package-diagram.png)
