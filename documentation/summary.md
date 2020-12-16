@@ -20,7 +20,7 @@ Syntax highlighting for the robot framework was implemented during sprint 6 and 
 * Oniguruma is a regex library and it’s loaded to our frontend in WebAssembly. The vscode-oniguruma handles all the loading of the WASM file but our frontend has to fetch it from our backend first
 * Textmate requires a language configuration file in json or plist format. We got the language token rules in json format for the robot framework from the [official robocorp repository](https://github.com/robocorp/robotframework-lsp).
 
-### Future
+### Future considerations
 
 Adding a new syntax highlighting ruleset should be possible by composing a valid token rules file and applying it similarly. The [previously mentioned repository](https://github.com/bolinfest/monaco-tm) has a setup for python but the monaco-editor package used also contains many common languages by default. Information regarding default languages can be found [here](https://github.com/suren-atoyan/monaco-react).  
 
@@ -154,14 +154,14 @@ Cloning a repository and committing changes seem to work as is.
 
 However, *commit operation sets the username and password to global Git config*, which will probably lead to problems as discussed in “support for multiple users”. We feel that the Git config should be set in the cloning repository phase when the users have unique repository folders. 
 
-The commit operations are also always made with the details that the user provided when registering to the application. The original idea was to clone only repositories from a connected git service (such as GitHub) and thus, the username and email should be the ones from github (or other service). The implementation is now like this for simplicity while working with the example repository.
+The commit operations are also always made with the details that the user provided when registering to the application. The original idea was to clone only repositories from a connected git service (such as GitHub) and thus, the username and email should be the ones from GitHub (or other service). The implementation is now like this for simplicity while working with the example repository.
 
 Pushing operation is done by first creating a new git remote with a random id. The remote address is the same as origin, but with the added credentials (token) in the url that act as an authentication. After the push is done, the newly created random remote address is deleted so that the token is not saved to the repository git config details. Another approach would be to just set the git credentials to the repository config but this would need some configuration and thinking when to actually set it. Safety might also be a concern because the token acts as a password.
 
 Merge conflict solving is handled in the push operation by first fetching the latest remote changes with git fetch and then trying to do a merge commit. If the automatic merge is impossible, the backend throws an error with a message: “merge conflict”. When any error in this step is caught, the commit is deleted and the repository is checked out to the previous branch, if changed (git reset and git checkout). The frontend catches this error and informs that the merge conflict was detected.
 Checking out a branch works for local branches and the list in frontend only includes the ones created in the application because of this. Checking out to remote branches is not supported at this time.
 
-### Future
+### Future considerations
 
 Future work on git operations could be started by first having a user specific repositories and making sure the git config is always set correctly. It would also be important to think when to do git pull operations to update the repository. Doing git pull at the wrong time will lead to issues with either conflicting files or missing git config details for automatic merge commits. Checking out to remote repositories could be supported by creating local branches that are set to track remote branches.
 
@@ -169,23 +169,23 @@ Future work on git operations could be started by first having a user specific r
 ## Concept design
 
 ### Status
-Version 1 of the concept design is done and covers the general feel, features and rough look we have in mind for the project. All of the concept art were made in <a href="https://www.figma.com/">Figma</a>, and future concept art and prototyping work could continue off of what has been done already. A link to the Figma document, with edit access is in the Google drive concept design folder.
+Version 1 of the concept design is done and covers the general feel, features and rough look we have in mind for the project. All of the concept art were made in <a href="https://www.figma.com/">Figma</a>, and future concept art and prototyping work could continue off of what has been done already. A link to the Figma document, with edit access is in the Google Drive concept design folder.
 
 ### Future considerations
-Future concept design work could revolve around thinking about usability and intuitiveness. Not all parts of the application have been prototyped 100%, but a good bit of the main functionality is done. This probably is part of the question of what functionality should be available aswell, and many of the menus for example are quite lackluster to allow for restructuring with new feature ideas. Although revised, discussed and polished multiple times, our versions is still v1 and for us served the purpose of feature list as well as a visual guide of what we were building. As the determined direction of the UI grows more sure, some more hi-fi prototypes could be in place.
+Future concept design work could revolve around thinking about usability and intuitiveness. Not all parts of the application have been prototyped 100%, but a good bit of the main functionality is done. This probably is part of the question of what functionality should be available as well, and many of the menus for example are quite lackluster to allow for restructuring with new feature ideas. Although revised, discussed and polished multiple times, our version is still v1 and for us served the purpose of feature list as well as a visual guide of what we were building. As the determined direction of the UI grows more sure, some more hi-fi prototypes could be in place.
 
 ## Deployment to production
 
 ### Status
 
-Github actions runs all the testing and deployment. This repository has a `staging` branch and `master` acts as a production branch. Our server runs two `docker-compose` files, one for staging and one for production. Github actions builds and deploys the staging version when `staging` branch is updated. The image is tagged as `application-latest`. When the `master` branch is updated, an image tagged as `application-production` is pushed. Our dockerhub repository is [here](https://hub.docker.com/repository/docker/ohtuprojekti/wevc).
+GitHub Actions runs all the testing and deployment. This repository has a `staging` branch and `master` acts as a production branch. Our server runs two `docker-compose` files, one for staging and one for production. GitHub Actions builds and deploys the staging version when `staging` branch is updated. The image is tagged as `application-latest`. When the `master` branch is updated, an image tagged as `application-production` is pushed. Our Docker Hub repository is [here](https://hub.docker.com/repository/docker/ohtuprojekti/wevc).
 
 The two `docker-compose` files in our server are set to track these images with [Docker watchtower](https://github.com/containrrr/watchtower). The watchtower interval is set to 15 minutes because an unregistered docker user has a limit of 100 pulls per 6 hours. Further information regarding on what is required to setup our application can be found in the [general documentation](general.md)
 
 
 ### Future considerations
 
-* The Github actions user credentials to dockerhub are in Github secrets. These will be removed after the course is over and new configuration is required to keep using the pipeline.
+* The GitHub Actions user credentials to Docker Hub are in GitHub secrets. These will be removed after the course is over and new configuration is required to keep using the pipeline.
   * `DOCKER_REPO` is the link to our current [repository](https://hub.docker.com/repository/docker/ohtuprojekti/wevc). Maybe next users will create a new one.
   * `DOCKER_USER` should be a valid Docker user
   * `DOCKER_TOKEN` should be a valid Docker token for the user
@@ -196,11 +196,11 @@ The two `docker-compose` files in our server are set to track these images with 
 
 ### Status
 
-Most of the applications testing is integration testing in backend. We tested all of the important graphql mutations that handle saving a file and registering and logging in to our application. We also had some simple unit tests for functions that sanitize user inputs and define repository locations. We also have E2E-tests written in cypress that test registering and logging in to our application. 
+Most of the application testing is integration testing in backend. We tested all of the important graphql mutations that handle saving a file and registering and logging in to our application. We also had some simple unit tests for functions that sanitize user inputs and define repository locations. We also have E2E-tests written in cypress that test registering and logging in to our application. 
 
 ### Future considerations
 
-Most difficult part of testing our application is that it relies so heavily on external services. Testing things like saving file contents or connecting a github user seemed to be very hard in E2E testing because they all relied on connection to the github. Even in the integration testing we did not get proper mocking working to test the saving to remote and connecting to github. The monaco editor syntax highlighting is also completely untested because we had very little idea how it could be tested. We feel that this was somewhat acceptable for an MVP application but definitely more thinking on testing is required.
+The most difficult part of testing our application is that it relies so heavily on external services. Testing things like saving file contents or connecting a GitHub user seemed to be very hard in E2E testing because they all relied on connection to GitHub. Even in the integration testing we did not get proper mocking working to test the saving to remote and connecting to GitHub. The monaco editor syntax highlighting is also completely untested because we had very little idea how it could be tested. We feel that this was somewhat acceptable for an MVP application but definitely more thinking on testing is required.
 
 # Not in drive below this
 
