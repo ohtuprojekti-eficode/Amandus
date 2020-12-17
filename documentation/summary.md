@@ -1,4 +1,4 @@
-# Draft: Summary documentation
+# Summary documentation
 
 ## Language server
 
@@ -165,6 +165,8 @@ Checking out a branch works for local branches and the list in frontend only inc
 
 Future work on git operations could be started by first having a user specific repositories and making sure the git config is always set correctly. It would also be important to think when to do git pull operations to update the repository. Doing git pull at the wrong time will lead to issues with either conflicting files or missing git config details for automatic merge commits. Checking out to remote repositories could be supported by creating local branches that are set to track remote branches.
 
+We have built our product to do the pulling, committing and pushing all through a git package for NPM, but another way to handle may be to handle pushing through the different account service providers' APIs. This was the plan we had in the beginning, but later changed to only use git in order to make the code more modular and eventually usable for other things as well. This may not be the best solution though.
+
 
 ## Concept design
 
@@ -201,12 +203,4 @@ Most of the application testing is integration testing in backend. We tested all
 ### Future considerations
 
 The most difficult part of testing our application is that it relies so heavily on external services. Testing things like saving file contents or connecting a GitHub user seemed to be very hard in E2E testing because they all relied on connection to GitHub. Even in the integration testing we did not get proper mocking working to test the saving to remote and connecting to GitHub. The monaco editor syntax highlighting is also completely untested because we had very little idea how it could be tested. We feel that this was somewhat acceptable for an MVP application but definitely more thinking on testing is required.
-
-# Not in drive below this
-
-### Other things to consider - Edit these things to upper part if wanted
-- Git vs Repository service provider API
-    * We have built our product to do the pulling, committing and pushing all through a <a href="#">git package for NPM</a>, but another way to handle may be to handle pushing through the different account service providers' APIs. This was the plan we had in the beginning, but later changed to only use git in order to make the code more modular and eventually usable for other things as well. This may not be the best solution though.
-- Multiple concurrent user support
-    * The application seems to work fine for multiple concurrent users, but the product could do with a general overhaul of the editing process (maybe with threading?) to allow for some way of more easily handling multiple concurrent users editing different files.
 
