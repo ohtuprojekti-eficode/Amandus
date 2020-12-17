@@ -48,7 +48,7 @@ The production version is ran with the `Dockerfile` found in the root of this re
 
 1. Fill the environment values in `docker-compose.server.yml` as described in [backend documentation](backend.md)
 2. Fill in the desired ports
-3. Change the `image: ''` placeholder to `image: ohtuprojekti/wevc:application-production`. This pulls the production tag from [our dockerhub](https://hub.docker.com/repository/docker/ohtuprojekti/wevc). Github actions builds and pushes this image when the `master` branch is updated.
+3. Change the `image: ''` placeholder to `image: ohtuprojekti/wevc:application-production`. This pulls the production tag from [our dockerhub](https://hub.docker.com/r/ohtuprojekti/wevc). Github actions builds and pushes this image when the `master` branch is updated.
 4. Run `sudo docker-compose -f docker-compose.server.yml up` to start the application to the port you configured
    - Sometimes the application fails to start during the first run due to `postgresql` not starting fully before migrations run. Restarting this a couple of times has always fixed the issue.
 5. Running `sudo docker-compose -f docker-compose.server.yml down --volumes` shuts down the application and clears the database
