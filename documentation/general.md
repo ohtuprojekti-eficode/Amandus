@@ -63,6 +63,9 @@ The production version is ran with the `Dockerfile` found in the root of this re
    - Sometimes the application fails to start during the first run due to `postgresql` not starting fully before migrations run. Restarting this a couple of times has always fixed the issue.
 6. Running `sudo docker-compose -f docker-compose.server.yml down --volumes` shuts down the application and clears the database
 
+### CI/CD
+CI/CD is handled with [GitHub Actions](https://docs.github.com/en/free-pro-team@latest/actions). Our GitHub Actions workflow configurations can be found [here](../.github/workflows). Our deployment configuration is described better in [summary document](../documentation/summary.md#deployment-to-production).
+
 ### Package diagram
 
 ![Package diagram](./imgs/package-diagram.png)
