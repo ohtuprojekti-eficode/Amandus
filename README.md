@@ -40,5 +40,5 @@ Web application to edit Robot Framework files remotely
 - Feature is implemented
 - Tests are passed
 - Documentation is updated to match the state of the application
-- Code is reviewed: at least 2 persons have accepted changes in the pull request
+- Code is reviewed: at least 1 person have accepted changes in the pull request
 - The feature works in production environment
