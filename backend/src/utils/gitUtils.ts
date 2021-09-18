@@ -57,7 +57,7 @@ export const gitAddRemote = async (
 ): Promise<void> => {
   await git.addRemote(
     remoteId,
-    `https://${username}:${token}@github.com/ohtuprojekti-eficode/robot-test-files`
+    `https://${username}:${token}@github.com/Ohtu-project-Eficode/robot-test-files`
   )
 }
 

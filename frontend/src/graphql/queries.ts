@@ -3,7 +3,7 @@ import { gql } from '@apollo/client'
 export const REPO_STATE = gql`
   query {
     repoState: getRepoState(
-      url: "https://github.com/ohtuprojekti-eficode/robot-test-files"
+      url: "https://github.com/Ohtu-project-Eficode/robot-test-files"
     ) {
       currentBranch
       files {
@@ -26,7 +26,7 @@ export const IS_GH_CONNECTED = gql`
 export const CLONE_REPO = gql`
   query {
     cloneRepo: cloneRepository(
-      url: "https://github.com/ohtuprojekti-eficode/robot-test-files"
+      url: "https://github.com/Ohtu-project-Eficode/robot-test-files"
     )
   }
 `

@@ -60,7 +60,7 @@ const resolvers = {
         throw new Error('GitHub client id or callback url not set')
       }
 
-      return `https://github.com/login/oauth/authorize?response_type=code&redirect_uri=${cbUrl}&client_id=${clientID}`
+      return `https://github.com/login/oauth/authorize?response_type=code&redirect_uri=${cbUrl}&client_id=${clientID}&scope=repo`
     },
     currentToken: (
       _root: unknown,
