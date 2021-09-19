@@ -38,7 +38,7 @@ Web application to edit Robot Framework files remotely
 ### Definition of done
 
 - Feature is implemented
-- Tests are passed
+- Features are tested and tests are passed 
 - Documentation is updated to match the state of the application
 - Code is reviewed: at least 1 person have accepted changes in the pull request
 - The feature works in production environment
