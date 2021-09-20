@@ -31,6 +31,7 @@ exports.up = (pgm) => {
         web_url TEXT);`)
 
   pgm.sql(`INSERT INTO SERVICES(name) VALUES('github');`)
+  pgm.sql(`INSERT INTO SERVICES(name) VALUES('gitlab');`)
 }
 
 exports.down = (pgm) => {

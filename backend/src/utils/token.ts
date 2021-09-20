@@ -4,13 +4,16 @@ import config from './config'
 
 export const createToken = (
   user: UserType | null,
-  githubToken?: string
+  githubToken?: string,
+  gitlabToken?: string,
 ): string => {
+  
   const token = sign(
     {
       id: user?.id,
       username: user?.username,
-      githubToken,
+      githubToken: githubToken,
+      gitlabToken: gitlabToken,
     },
     config.JWT_SECRET
   )

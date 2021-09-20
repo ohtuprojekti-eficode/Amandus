@@ -23,6 +23,12 @@ export const IS_GH_CONNECTED = gql`
   }
 `
 
+export const IS_GL_CONNECTED = gql`
+  query {
+    isGitLabConnected
+  }
+`
+
 export const CLONE_REPO = gql`
   query {
     cloneRepo: cloneRepository(
@@ -34,6 +40,12 @@ export const CLONE_REPO = gql`
 export const GITHUB_LOGIN_URL = gql`
   query {
     githubLoginUrl
+  }
+`
+
+export const GITLAB_LOGIN_URL = gql`
+  query {
+    gitLabLoginUrl
   }
 `
 

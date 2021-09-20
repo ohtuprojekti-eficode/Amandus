@@ -14,6 +14,27 @@ export interface GitHubUserType {
   access_token: string
 }
 
+export interface GitLabAuthCode {
+  code: string
+}
+
+export interface GitLabAccessTokenResponse {
+  access_token: string
+  token_type: string
+  refresh_token: string
+  expires_in: number
+  created_at: number
+}
+
+export interface GitLabUserType {
+  id: string
+  username: string
+  email: string | null
+  repos_url: string
+  access_token: string
+  refresh_token: string
+}
+
 export interface UserType {
   id: number
   username: string
@@ -29,6 +50,7 @@ export interface ServiceAuthResponse {
 export interface AppContext {
   currentUser: UserType
   githubToken?: string
+  gitlabToken?: string
 }
 
 export interface UserRecord {
@@ -44,6 +66,7 @@ export interface UserJWT {
   id: number
   username: string
   githubToken?: string
+  gitlabToken?: string
 }
 
 export interface ServiceUserType {
