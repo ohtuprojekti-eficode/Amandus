@@ -14,6 +14,20 @@ export const AUTHORIZE_WITH_GH = gql`
   }
 `
 
+export const AUTHORIZE_WITH_BB = gql`
+  mutation authorizeWithBitbucket($code: String!) {
+    authorizeWithBitbucket(code: $code) {
+      serviceUser {
+        serviceName
+        username
+        email
+        reposurl
+      }
+      token
+    }
+  }
+`
+
 export const SAVE_CHANGES = gql`
   mutation saveChanges(
     $file: FileInput!

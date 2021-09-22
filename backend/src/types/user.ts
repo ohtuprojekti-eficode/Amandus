@@ -2,7 +2,15 @@ export interface GitHubAuthCode {
   code: string
 }
 
+export interface BitbucketAuthCode {
+  code: string
+}
+
 export interface GitHubAccessTokenResponse {
+  access_token: string
+}
+
+export interface BitbucketAccessTokenResponse {
   access_token: string
 }
 
@@ -12,6 +20,23 @@ export interface GitHubUserType {
   email: string | null
   repos_url: string
   access_token: string
+}
+
+export interface BitbucketUserType {
+  Account: {
+    username: string
+    repositories: {
+      name: string
+    }
+  },
+
+  User: {
+    account_id: string
+  }
+}
+
+export interface BitbucketEmail {
+  emails: string[]
 }
 
 export interface UserType {
@@ -29,6 +54,7 @@ export interface ServiceAuthResponse {
 export interface AppContext {
   currentUser: UserType
   githubToken?: string
+  bitbucketToken?: string
 }
 
 export interface UserRecord {

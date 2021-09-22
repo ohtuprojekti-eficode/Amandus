@@ -5,6 +5,8 @@ import user from './user'
 const Query = `
     type Query {
         githubLoginUrl: String!
+        bitbucketLoginUrl: String!
+        isBitbucketConnected: Boolean!
         me: User
         isGithubConnected: Boolean!
         getRepoState(url: String): RepoState!
@@ -57,6 +59,9 @@ const Mutation = `
             branch: String!
         ): String
         authorizeWithGithub(
+            code: String!
+        ): ServiceAuthResponse
+        authorizeWithBitbucket(
             code: String!
         ): ServiceAuthResponse
     }

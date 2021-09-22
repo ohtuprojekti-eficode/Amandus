@@ -6,6 +6,7 @@ import Home from './components/Home'
 import EditView from './components/EditView'
 import Header from './components/Header'
 import CallBack from './components/auth/CallBack'
+import BbCallBack from './components/auth/BbCallBack'
 import RegisterForm from './components/RegisterForm'
 import { CssBaseline, Toolbar } from '@material-ui/core'
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles'
@@ -60,6 +61,10 @@ const App = () => {
 
           <Route path="/auth/github/callback">
             <CallBack />
+          </Route>
+
+          <Route path="/auth/bitbucket/callback">
+            <BbCallBack />
           </Route>
           
           <Route path="/edit">

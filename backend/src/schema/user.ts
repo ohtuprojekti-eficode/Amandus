@@ -14,12 +14,19 @@ import {
   UserType,
   AppContext,
   GitHubAuthCode,
+  BitbucketAuthCode,
   ServiceAuthResponse,
 } from '../types/user'
 import {
   requestGithubToken,
   requestGithubUserAccount,
 } from '../services/gitHub'
+import {
+  requestBitbucketToken,
+  requestBitbucketUserAccount,
+  requestBitbucketUserEmail,
+} from '../services/bitbucket'
+
 
 const typeDef = `
     type ServiceUser {
@@ -62,6 +69,25 @@ const resolvers = {
 
       return `https://github.com/login/oauth/authorize?response_type=code&redirect_uri=${cbUrl}&client_id=${clientID}`
     },
+
+    isBitbucketConnected: (
+      _root: unknown,
+      _args: unknown,
+      context: AppContext
+    ): boolean => {
+      return !!context.bitbucketToken
+    },
+    bitbucketLoginUrl: (): string => {
+      const cbUrl = config.BITBUCKET_CB_URL || ''
+      const clientID = config.BITBUCKET_CLIENT_ID || ''
+
+      if (!cbUrl || !clientID) {
+        throw new Error('Bitbucket client id or callback url not set')
+      }
+
+      return `https://bitbucket.org/site/oauth2/authorize?client_id=${clientID}&response_type=code`
+    },
+
     currentToken: (
       _root: unknown,
       _args: unknown,
@@ -132,6 +158,42 @@ const resolvers = {
       return {
         serviceUser,
         token,
+      }
+    },
+
+    authorizeWithBitbucket: async(
+      _root: unknown,
+      args: BitbucketAuthCode,
+      context: AppContext
+    ): Promise<ServiceAuthResponse> => {
+      if (!context.currentUser) {
+        throw new ForbiddenError('You have to login')
+      }
+
+      if (!args.code) {
+        throw new UserInputError('Bitbucket code not provided')
+      }
+
+      const { access_token } = await requestBitbucketToken(args.code)
+
+      if (!access_token) {
+        throw new UserInputError('Invalid or expired Bitbucket code')
+      }
+      
+      const bitBucketUser = await requestBitbucketUserAccount(access_token)
+      const bitbucketUserEmail = await requestBitbucketUserEmail(access_token)
+
+      const serviceUser = {
+        serviceName: 'bitbucket',
+        username: bitBucketUser.Account.username,
+        email: bitbucketUserEmail.emails[0], //bitbucket uses different api for fetching email: https://developer.atlassian.com/bitbucket/api/2/reference/resource/user/emails
+        reposurl: bitBucketUser.Account.repositories.name,
+      }
+      const token = createToken(context.currentUser, access_token)
+
+      return {
+        serviceUser,
+        token
       }
     },
     logout: (

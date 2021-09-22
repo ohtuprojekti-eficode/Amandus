@@ -37,6 +37,12 @@ export const GITHUB_LOGIN_URL = gql`
   }
 `
 
+export const BITBUCKET_LOGIN_URL = gql`
+  query {
+    bitbucketLoginUrl
+  }
+`
+
 export const ME = gql`
   query {
     me {
