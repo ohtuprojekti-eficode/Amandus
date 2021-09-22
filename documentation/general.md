@@ -2,7 +2,7 @@
 
 ## Setting up a Github application
 
-The application has a feature to fetch user details and an authorization token from Github. This requires settings up a Github application and configuring it correctly. The procedure is as follows:
+The application has a feature to fetch user details and an authorization tokens from Github, GitLab and BitBucket. This requires settings up corresponding applications and configuring them correctly. The procedures are as follows:
 
 1. Navigate to your personal or organization settings and find the `developer settings` to register a new application.
 
@@ -21,6 +21,23 @@ The application has a feature to fetch user details and an authorization token f
 ![Configuration after creating](./imgs/configuration_after_creating.PNG)
 
 5. The application has environment values `GH_CLIENT_ID`, `GH_CLIENT_SECRET` & `GH_CB_URL`. These are the client id, client secret and callback url from your newly created app. The [backend documentation](backend.md) has more information regarding the environment values required.
+
+## Setting up a GitLab application
+
+1. Head over to GitLab and navigate to the settings. GitLab application can be created by using group or personal account.
+
+2. Application details
+
+- Fill in the application name and redirect uri. In this case `redirect uri` is `https://65.21.107.16:4000/auth/gitlab/callback` because our application is currently running that address. For local development use `http://localhost:3000/auth/gitlab/callback`.
+- From the scope list you should check `read_user`, `write_repository` and `read_repository` which will give the necessary authorization for the application to perform actions on user's behalf.
+
+![Registering the gitlab application](./imgs/create_gitlab_app.png)
+
+3. Once you have clicked 'Save application' you are given values which will be used to identify your application with GitLab.
+
+![Gitlab configurations](./imgs/gitlab_configurations.png)
+
+4. These are environment values for `GL_CLIENT_ID`, `GL_CLIENT_SECRET` and `GL_CALLBACK_URL`. Please refer to [backend documentation](backend.md) how to set them up.
 
 ## Running the application locally for development
 
