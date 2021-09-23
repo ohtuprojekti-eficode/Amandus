@@ -6,6 +6,7 @@ import {
   saveChanges,
   getLocalBranches,
   switchCurrentBranch,
+  pullNewestChanges
 } from '../services/git'
 import { existsSync, readFileSync } from 'fs'
 import readRecursive from 'recursive-readdir'
@@ -42,7 +43,6 @@ const resolvers = {
       _context: unknown
     ): Promise<string> => {
       const repoLocation = getRepoLocationFromUrlString(args.url)
-
       // TODO: Would be ideal that user's configs are set when repo
       // is first cloned instead of doing it in commit operation
       // (because automerges also require username and email)
@@ -50,13 +50,41 @@ const resolvers = {
       // when context.currentuser exists
       if (!existsSync(repoLocation)) {
         await cloneRepository(args.url)
+      } 
+      
+      else {
+        try {
+          await pullNewestChanges(repoLocation)
+        } catch(error) {
+          // In case of merge conflict
+          if (error.message === 'Merge conflict') {
+            throw new ApolloError('Merge conflict detected')
+          } else {
+            throw new ApolloError(error.message)
+          } 
+        }
       }
-
-      // TODO: figure out when to pull newest changes
-      // pulling causes merge commits and issues
-      // if local commits are made and remote branch updated.
+      // Pulling now if the repo is cloned from before
 
       return 'Cloned'
+    },
+    pullRepository: async (
+      _root: unknown,
+      args: { url: string },
+      _context: unknown
+    ): Promise<string> => {
+      const repoLocation = getRepoLocationFromUrlString(args.url)
+      try {
+        await pullNewestChanges(repoLocation)
+      } catch(error) {
+        // In case of merge conflict
+        if (error.message === 'Merge conflict') {
+          throw new ApolloError('Merge conflict detected')
+        } else {
+          throw new ApolloError(error.message)
+        }
+      }
+      return 'Pulled'
     },
     getRepoState: async (
       _root: unknown,

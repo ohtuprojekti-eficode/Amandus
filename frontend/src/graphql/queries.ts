@@ -1,5 +1,6 @@
 import { gql } from '@apollo/client'
 
+
 export const REPO_STATE = gql`
   query {
     repoState: getRepoState(
@@ -29,6 +30,13 @@ export const CLONE_REPO = gql`
       url: "https://github.com/Ohtu-project-Eficode/robot-test-files"
     )
   }
+`
+export const PULL_REPO = gql`
+query {
+  pullRepo: pullRepository(
+    url: "https://github.com/Ohtu-project-Eficode/robot-test-files"
+  )
+}
 `
 
 export const GITHUB_LOGIN_URL = gql`
