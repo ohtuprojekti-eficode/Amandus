@@ -282,6 +282,44 @@ describe('User schema add git service mutations', () => {
       },
     })
   })
+
+  it('users GitLab account can be added to user data', async () => {
+    const userToSave = {
+      username: 'testuser',
+      password: 'mypAssword?45',
+      email: 'test@test.fi',
+    }
+
+    const user = await User.registerUser(userToSave)
+
+    const token = createToken(user)
+
+    const { mutate } = createIntegrationTestClient({
+      apolloServer: server,
+      extendMockRequest: {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      },
+    })
+
+    const serviceArgs = {
+      serviceName: 'gitlab',
+      username: 'gitlab_username',
+      email: 'user@gitlabmail.com',
+      reposurl: 'gitlab.com/users/1234/projects',
+    }
+
+    const mutationResult = await mutate(ADD_SERVICE, {
+      variables: { service: serviceArgs },
+    })
+
+    expect(mutationResult).toEqual({
+      data: {
+        connectGitService: 'success',
+      },
+    })
+  })
 })
 
 describe('Context currentuser query', () => {

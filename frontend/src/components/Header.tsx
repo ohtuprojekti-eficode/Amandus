@@ -88,6 +88,15 @@ const Header = ({ user, logout, theme, toggleTheme }: Props) => {
                 Repositories
               </Link>
             )}
+            {user && (
+            <Link
+              component={RouterLink}
+              className={classes.linkBtnTransparent}
+              to="/connections"
+            >
+              Connections
+            </Link>
+            )}
           </div>
           <Switch
             checked={switchChecked}

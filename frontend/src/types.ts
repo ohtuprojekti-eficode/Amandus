@@ -15,6 +15,14 @@ export interface GithubLoginURLQueryResult {
   githubLoginUrl: string
 }
 
+export interface IsGitLabConnectedResult {
+  isGitLabConnected: boolean
+}
+
+export interface GitLabLoginURLQueryResult {
+  gitLabLoginUrl: string
+}
+
 export interface MeQueryResult {
   me: UserType
 }
@@ -31,6 +39,13 @@ export interface RepoStateQueryResult {
 
 export interface AuthorizeWithGHMutationResult {
   authorizeWithGithub: {
+    serviceUser: ServiceUserType & { __typename: string }
+    token: string
+  }
+}
+
+export interface AuthorizeWithGLMutationResult {
+  authorizeWithGitLab: {
     serviceUser: ServiceUserType & { __typename: string }
     token: string
   }
