@@ -165,7 +165,6 @@ const resolvers = {
     },
     login: async (_root: unknown, args: LoginUserInput): Promise<Tokens> => {
       const user = await User.findUserByUsername(args.username)
-
       if (!user) {
         throw new UserInputError('Invalid username or password')
       }
@@ -180,7 +179,6 @@ const resolvers = {
       }
 
       const token = createToken(user)
-
       return token
     },
   },

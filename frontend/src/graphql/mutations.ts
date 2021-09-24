@@ -9,7 +9,10 @@ export const AUTHORIZE_WITH_GH = gql`
         email
         reposurl
       }
-      token
+      token {
+        accessToken
+        refreshToken
+      }
     }
   }
 `
@@ -32,7 +35,10 @@ export const REGISTER = gql`
 
 export const LOGIN = gql`
   mutation login($username: String!, $password: String!) {
-    login(username: $username, password: $password)
+    login(username: $username, password: $password) {
+      accessToken
+      refreshToken
+    }
   }
 `
 

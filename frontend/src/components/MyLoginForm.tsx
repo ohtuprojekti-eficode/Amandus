@@ -76,7 +76,9 @@ const MyLoginForm = () => {
         },
       })
       setFormStatus(formStatusProps.success)
-      localStorage.setItem('token', loginResponse.data.login)
+      localStorage.setItem('amandus-user-access-token', loginResponse.data.login.accessToken)
+      localStorage.setItem('amandus-user-refresh-token', loginResponse.data.login.refreshToken)
+
       window.location.href = '/'
     } catch (error) {
       setFormStatus(formStatusProps.error)

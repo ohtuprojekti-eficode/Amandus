@@ -34,6 +34,10 @@ const Mutation = `
         username: String
         email: String
     }
+    type Tokens {
+        accessToken: String
+        refreshToken: String
+    }
     type Mutation {
         logout: String
         register(
@@ -44,7 +48,7 @@ const Mutation = `
         login(
             username: String!
             password: String!
-        ): String
+        ): Tokens
         saveChanges(
             file: FileInput! 
             branch: String!
