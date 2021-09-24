@@ -31,7 +31,8 @@ const server = new ApolloServer({
       const currentUser = await User.getUserById(decodedToken.id)
       const githubToken = decodedToken.githubToken
       const bitbucketToken = decodedToken.bitbucketToken
-      return { currentUser, githubToken, bitbucketToken }
+      const gitlabToken = decodedToken.gitlabToken
+      return { currentUser, githubToken, gitlabToken, bitbucketToken }
     }
     return
   },

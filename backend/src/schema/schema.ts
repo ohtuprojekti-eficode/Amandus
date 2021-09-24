@@ -6,12 +6,15 @@ const Query = `
     type Query {
         githubLoginUrl: String!
         bitbucketLoginUrl: String!
-        isBitbucketConnected: Boolean!
+        gitLabLoginUrl: String!
         me: User
         isGithubConnected: Boolean!
+        isGitLabConnected: Boolean!
+        isBitbucketConnected: Boolean!
         getRepoState(url: String): RepoState!
         cloneRepository(url: String!): String
         currentToken: String
+        pullRepository(url: String!): String
     },
 `
 
@@ -62,6 +65,9 @@ const Mutation = `
             code: String!
         ): ServiceAuthResponse
         authorizeWithBitbucket(
+            code: String!
+        ): ServiceAuthResponse
+        authorizeWithGitLab(
             code: String!
         ): ServiceAuthResponse
     }

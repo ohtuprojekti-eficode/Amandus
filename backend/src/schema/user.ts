@@ -1,5 +1,6 @@
 import { UserInputError, ForbiddenError } from 'apollo-server'
 import bcrypt from 'bcryptjs'
+import Crypto from 'crypto'
 import User from '../model/user'
 import Service from '../model/service'
 import { createToken } from '../utils/token'
@@ -15,6 +16,7 @@ import {
   AppContext,
   GitHubAuthCode,
   BitbucketAuthCode,
+  GitLabAuthCode,
   ServiceAuthResponse,
 } from '../types/user'
 import {
@@ -27,6 +29,10 @@ import {
   requestBitbucketUserEmail,
 } from '../services/bitbucket'
 
+import {
+  requestGitLabToken,
+  requestGitLabUserAccount,
+} from '../services/gitLab'
 
 const typeDef = `
     type ServiceUser {
@@ -59,6 +65,13 @@ const resolvers = {
     ): boolean => {
       return !!context.githubToken
     },
+    isGitLabConnected: (
+      _root: unknown,
+      _args: unknown,
+      context: AppContext
+    ): boolean => {
+      return !!context.gitlabToken
+    },
     githubLoginUrl: (): string => {
       const cbUrl = config.GITHUB_CB_URL || ''
       const clientID = config.GITHUB_CLIENT_ID || ''
@@ -86,6 +99,17 @@ const resolvers = {
       }
 
       return `https://bitbucket.org/site/oauth2/authorize?client_id=${clientID}&response_type=code`
+    },
+    gitLabLoginUrl: (): string => {
+      const cbUrl = config.GITLAB_CB_URL || ''
+      const clientID = config.GITLAB_CLIENT_ID || ''
+      const state = Crypto.randomBytes(24).toString('hex')
+
+      if (!cbUrl || !clientID) {
+        throw new Error('GitLab client id or callback url not set')
+      }
+
+      return `https://gitlab.com/oauth/authorize?client_id=${clientID}&redirect_uri=${cbUrl}&response_type=code&state=${state}&scope=read_user+read_repository+write_repository`
     },
 
     currentToken: (
@@ -119,7 +143,7 @@ const resolvers = {
       }
 
       const service = await Service.getServiceByName(args.service.serviceName)
-
+      
       await User.addServiceUser({
         ...args.service,
         user_id: context.currentUser.id,
@@ -155,7 +179,45 @@ const resolvers = {
         email: gitHubUser.email,
         reposurl: gitHubUser.repos_url,
       }
-      const token = createToken(context.currentUser, access_token, context.bitbucketToken)
+
+      const token = createToken(context.currentUser, access_token, context.githubToken)
+
+      return {
+        serviceUser,
+        token,
+      }
+    },
+
+    authorizeWithGitLab: async (
+      _root: unknown,
+      args: GitLabAuthCode,
+      context: AppContext
+    ): Promise<ServiceAuthResponse> => {
+      if (!context.currentUser) {
+        throw new ForbiddenError('You have to login')
+      }
+
+      if (!args.code) {
+        throw new UserInputError('GitLab code not provided')
+      }
+
+      
+      const { access_token } = await requestGitLabToken(args.code)
+
+      if (!access_token) {
+        throw new UserInputError('Invalid or expired GitLab code')
+      }
+
+      const gitLabUser = await requestGitLabUserAccount(access_token)
+
+      const serviceUser = {
+        serviceName: 'gitlab',
+        username: gitLabUser.username,
+        email: gitLabUser.email,
+        reposurl: 'https://gitlab.com/api/v4/users/' + gitLabUser.id + '/projects',
+      }
+
+      const token = createToken(context.currentUser, context.gitlabToken, access_token)
 
       return {
         serviceUser,
@@ -204,6 +266,7 @@ const resolvers = {
         token
       }
     },
+
     logout: (
       _root: unknown,
       _args: undefined,
@@ -211,6 +274,7 @@ const resolvers = {
     ): string => {
       return 'logout'
     },
+
     register: async (
       _root: unknown,
       args: RegisterUserInput
@@ -232,6 +296,7 @@ const resolvers = {
 
       return token
     },
+    
     login: async (_root: unknown, args: LoginUserInput): Promise<string> => {
       const user = await User.findUserByUsername(args.username)
 

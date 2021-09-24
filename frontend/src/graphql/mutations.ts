@@ -28,6 +28,20 @@ export const AUTHORIZE_WITH_BB = gql`
   }
 `
 
+export const AUTHORIZE_WITH_GL = gql`
+  mutation authorizeWithGitLab($code: String!) {
+    authorizeWithGitLab(code: $code) {
+      serviceUser {
+        serviceName
+        username
+        email
+        reposurl
+      }
+      token
+    }
+  }
+`
+
 export const SAVE_CHANGES = gql`
   mutation saveChanges(
     $file: FileInput!

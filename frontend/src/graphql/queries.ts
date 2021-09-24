@@ -1,9 +1,10 @@
 import { gql } from '@apollo/client'
 
+
 export const REPO_STATE = gql`
   query {
     repoState: getRepoState(
-      url: "https://github.com/ohtuprojekti-eficode/robot-test-files"
+      url: "https://github.com/Ohtu-project-Eficode/robot-test-files"
     ) {
       currentBranch
       files {
@@ -29,12 +30,25 @@ export const IS_BB_CONNECTED = gql`
   }
 `
 
+export const IS_GL_CONNECTED = gql`
+  query {
+    isGitLabConnected
+  }
+`
+
 export const CLONE_REPO = gql`
   query {
     cloneRepo: cloneRepository(
       url: "https://github.com/Ohtu-project-Eficode/robot-test-files"
     )
   }
+`
+export const PULL_REPO = gql`
+query {
+  pullRepo: pullRepository(
+    url: "https://github.com/Ohtu-project-Eficode/robot-test-files"
+  )
+}
 `
 
 export const GITHUB_LOGIN_URL = gql`
@@ -46,6 +60,12 @@ export const GITHUB_LOGIN_URL = gql`
 export const BITBUCKET_LOGIN_URL = gql`
   query {
     bitbucketLoginUrl
+  }
+`
+
+export const GITLAB_LOGIN_URL = gql`
+  query {
+    gitLabLoginUrl
   }
 `
 

@@ -2,15 +2,7 @@ export interface GitHubAuthCode {
   code: string
 }
 
-export interface BitbucketAuthCode {
-  code: string
-}
-
 export interface GitHubAccessTokenResponse {
-  access_token: string
-}
-
-export interface BitbucketAccessTokenResponse {
   access_token: string
 }
 
@@ -19,6 +11,14 @@ export interface GitHubUserType {
   login: string
   email: string | null
   repos_url: string
+  access_token: string
+}
+
+export interface BitbucketAuthCode {
+  code: string
+}
+
+export interface BitbucketAccessTokenResponse {
   access_token: string
 }
 
@@ -42,6 +42,27 @@ export interface BitbucketEmail {
   ]
 }
 
+export interface GitLabAuthCode {
+  code: string
+}
+
+export interface GitLabAccessTokenResponse {
+  access_token: string
+  token_type: string
+  refresh_token: string
+  expires_in: number
+  created_at: number
+}
+
+export interface GitLabUserType {
+  id: string
+  username: string
+  email: string | null
+  repos_url: string
+  access_token: string
+  refresh_token: string
+}
+
 export interface UserType {
   id: number
   username: string
@@ -58,6 +79,7 @@ export interface AppContext {
   currentUser: UserType
   githubToken?: string
   bitbucketToken?: string
+  gitlabToken?: string
 }
 
 export interface UserRecord {
@@ -74,6 +96,7 @@ export interface UserJWT {
   username: string
   githubToken?: string
   bitbucketToken?: string
+  gitlabToken?: string
 }
 
 export interface ServiceUserType {

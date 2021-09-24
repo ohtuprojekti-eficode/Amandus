@@ -5,13 +5,15 @@ import { ME } from './graphql/queries'
 import Home from './components/Home'
 import EditView from './components/EditView'
 import Header from './components/Header'
-import CallBack from './components/auth/CallBack'
-import BbCallBack from './components/auth/BbCallBack'
+import BBCallBack from './components/auth/BBCallBack'
+import GHCallBack from './components/auth/GHCallBack'
+import GLCallBack from './components/auth/GLCallBack'
 import RegisterForm from './components/RegisterForm'
 import { CssBaseline, Toolbar } from '@material-ui/core'
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles'
 import { lightTheme, darkTheme } from './styles/themes'
 import RepositoriesView from './components/RepositoriesView'
+import Connections from './components/Connections'
 import MyLoginForm from './components/MyLoginForm'
 import { MeQueryResult } from './types'
 
@@ -54,27 +56,34 @@ const App = () => {
         />
         <div>
           <Toolbar />
-          
+
           <Route exact path="/">
             <Home />
           </Route>
 
-          <Route path="/auth/github/callback">
-            <CallBack />
+          <Route exact path="/auth/github/callback">
+            <GHCallBack />
+          </Route>
+          <Route exact path="/auth/gitlab/callback">
+            <GLCallBack />
           </Route>
 
-          <Route path="/auth/bitbucket/callback">
-            <BbCallBack />
+          <Route exact path="/auth/bitbucket/callback">
+            <BBCallBack />
           </Route>
           
           <Route path="/edit">
             <EditView />
           </Route>
-          
+
           <Route exact path="/repositories">
             <RepositoriesView />
           </Route>
-          
+
+          <Route exact path="/connections">
+            <Connections />
+          </Route>
+
           <Route exact path="/register" component={RegisterForm} />
           <Route exact path="/login" component={MyLoginForm} />
         </div>
