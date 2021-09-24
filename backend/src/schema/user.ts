@@ -21,6 +21,8 @@ import {
   requestGithubUserAccount,
 } from '../services/gitHub'
 
+import tokenService from '../services/token'
+
 const typeDef = `
     type ServiceUser {
       serviceName: String!
@@ -121,13 +123,15 @@ const resolvers = {
 
       const gitHubUser = await requestGithubUserAccount(access_token)
 
+      tokenService.setToken(context.currentUser.id, 'github', access_token)
+
       const serviceUser = {
         serviceName: 'github',
         username: gitHubUser.login,
         email: gitHubUser.email,
         reposurl: gitHubUser.repos_url,
       }
-      const token = createToken(context.currentUser, access_token)
+      const token = createToken(context.currentUser)
 
       return {
         serviceUser,

@@ -13,6 +13,8 @@ import User from './model/user'
 import path from 'path'
 import { UserJWT } from './types/user'
 
+import tokenService from './services/token'
+
 const app = express()
 
 app.use(cors())
@@ -29,8 +31,12 @@ const server = new ApolloServer({
     if (auth && auth.toLowerCase().startsWith('bearer')) {
       const decodedToken = <UserJWT>verify(auth.substring(7), config.JWT_SECRET)
       const currentUser = await User.getUserById(decodedToken.id)
-      const githubToken = decodedToken.githubToken
-      return { currentUser, githubToken }
+
+      const userTokens = tokenService.getTokensForApolloContextById(
+        currentUser.id
+      )
+
+      return { currentUser, ...userTokens }
     }
     return
   },
