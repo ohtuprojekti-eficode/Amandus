@@ -23,20 +23,23 @@ export interface GitHubUserType {
 }
 
 export interface BitbucketUserType {
-  Account: {
-    username: string
+  username: string,
+  account_id: string,
+  links: {
     repositories: {
-      name: string
+      href: string
     }
   },
-
-  User: {
-    account_id: string
-  }
+  access_Token: string
 }
 
 export interface BitbucketEmail {
-  emails: string[]
+  values: [
+    {
+      is_primary: boolean
+      email: string
+    }
+  ]
 }
 
 export interface UserType {
@@ -70,6 +73,7 @@ export interface UserJWT {
   id: number
   username: string
   githubToken?: string
+  bitbucketToken?: string
 }
 
 export interface ServiceUserType {

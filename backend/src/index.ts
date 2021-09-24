@@ -30,7 +30,8 @@ const server = new ApolloServer({
       const decodedToken = <UserJWT>verify(auth.substring(7), config.JWT_SECRET)
       const currentUser = await User.getUserById(decodedToken.id)
       const githubToken = decodedToken.githubToken
-      return { currentUser, githubToken }
+      const bitbucketToken = decodedToken.bitbucketToken
+      return { currentUser, githubToken, bitbucketToken }
     }
     return
   },

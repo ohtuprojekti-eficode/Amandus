@@ -67,7 +67,7 @@ const resolvers = {
         throw new Error('GitHub client id or callback url not set')
       }
 
-      return `https://github.com/login/oauth/authorize?response_type=code&redirect_uri=${cbUrl}&client_id=${clientID}`
+      return `https://github.com/login/oauth/authorize?response_type=code&redirect_uri=${cbUrl}&client_id=${clientID}&scope=repo`
     },
 
     isBitbucketConnected: (
@@ -110,9 +110,11 @@ const resolvers = {
         throw new UserInputError('No service account provided')
       }
 
-      if (args.service.serviceName !== 'github') {
+      const validServices = ['github', 'bitbucket', 'gitlab']
+
+      if (!validServices.includes(args.service.serviceName)) {
         throw new UserInputError(
-          `'github' is the only currently supported service`
+          `'Currently supported services are 'github', 'bitbucket' and 'gitlab'`
         )
       }
 
@@ -153,7 +155,7 @@ const resolvers = {
         email: gitHubUser.email,
         reposurl: gitHubUser.repos_url,
       }
-      const token = createToken(context.currentUser, access_token)
+      const token = createToken(context.currentUser, access_token, context.bitbucketToken)
 
       return {
         serviceUser,
@@ -183,13 +185,19 @@ const resolvers = {
       const bitBucketUser = await requestBitbucketUserAccount(access_token)
       const bitbucketUserEmail = await requestBitbucketUserEmail(access_token)
 
+      const email = bitbucketUserEmail.values.find(email => email.is_primary)?.email
+
+      if(!email){
+        throw new Error('Bitbucket email not found!')
+      }
+
       const serviceUser = {
         serviceName: 'bitbucket',
-        username: bitBucketUser.Account.username,
-        email: bitbucketUserEmail.emails[0], //bitbucket uses different api for fetching email: https://developer.atlassian.com/bitbucket/api/2/reference/resource/user/emails
-        reposurl: bitBucketUser.Account.repositories.name,
+        username: bitBucketUser.username,
+        email: email, 
+        reposurl: bitBucketUser.links.repositories.href,
       }
-      const token = createToken(context.currentUser, access_token)
+      const token = createToken(context.currentUser, access_token, context.bitbucketToken)
 
       return {
         serviceUser,

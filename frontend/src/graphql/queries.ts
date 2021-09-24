@@ -23,10 +23,16 @@ export const IS_GH_CONNECTED = gql`
   }
 `
 
+export const IS_BB_CONNECTED = gql`
+  query {
+    isBitbucketConnected
+  }
+`
+
 export const CLONE_REPO = gql`
   query {
     cloneRepo: cloneRepository(
-      url: "https://github.com/ohtuprojekti-eficode/robot-test-files"
+      url: "https://github.com/Ohtu-project-Eficode/robot-test-files"
     )
   }
 `

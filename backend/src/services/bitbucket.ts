@@ -5,19 +5,29 @@ import config from '../utils/config'
 export const requestBitbucketToken = (
   code: string
 ): Promise<BitbucketAccessTokenResponse> => {
+  
   const credentials = {
     client_id: config.BITBUCKET_CLIENT_ID || '',
-    //client_secret: config.BITBUCKET_CLIENT_SECRET || '',
+    client_secret: config.BITBUCKET_CLIENT_SECRET || '',
     code,
   }
 
-  return fetch('https://bitbucket.org/site/oauth2/access_token', {
+  const digested = Buffer.from(`${credentials.client_id}:${credentials.client_secret}`).toString('base64')
+  
+  const params = new URLSearchParams({
+    grant_type: "authorization_code",
+    code: `${code}`
+  });
+  
+
+   return fetch('https://bitbucket.org/site/oauth2/access_token', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/x-www-form-urlencoded',
       Accept: 'application/json',
+      Authorization: `Basic ${digested}`
     },
-    body: JSON.stringify(credentials),
+    body: params
   })
     .then<BitbucketAccessTokenResponse>((res) => res.json())
     .catch((error: Error) => {
@@ -30,7 +40,7 @@ export const requestBitbucketUserAccount = (
 ): Promise<BitbucketUserType> => {
   return fetch('https://api.bitbucket.org/2.0/user', {
     headers: {
-      Authorization: `token ${token}`,
+      Authorization: `Bearer ${token}`,
     },
   })
     .then<BitbucketUserType>((res) => res.json())
@@ -44,7 +54,7 @@ export const requestBitbucketUserEmail = (
 ): Promise<BitbucketEmail> => {
   return fetch('https://api.bitbucket.org/2.0/user/emails', {
     headers: {
-      Authorization: `token ${token}`,
+      Authorization: `Bearer ${token}`,
     },
   })
   .then<BitbucketEmail>((res) => res.json())

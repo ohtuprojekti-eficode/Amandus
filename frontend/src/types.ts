@@ -15,6 +15,10 @@ export interface GithubLoginURLQueryResult {
   githubLoginUrl: string
 }
 
+export interface IsBitbucketConnectedResult {
+  isBitbucketConnected: boolean
+}
+
 export interface BitbucketLoginURLQueryResult {
   bitbucketLoginUrl: string
 }
