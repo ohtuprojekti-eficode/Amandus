@@ -63,10 +63,15 @@ const getTokensForApolloContextById = (userId: number): ContextTokens => {
   return contextTokens
 }
 
+const clearStorage = (): void => {
+  tokenStorage.clear()
+}
+
 export default {
   setToken,
   getTokenMap,
   getTokenMapById,
   getTokensForApolloContext,
   getTokensForApolloContextById,
+  clearStorage,
 }
