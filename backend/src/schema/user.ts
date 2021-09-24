@@ -20,6 +20,7 @@ import {
   requestGithubToken,
   requestGithubUserAccount,
 } from '../services/gitHub'
+import { Tokens } from '../types/tokens'
 
 const typeDef = `
     type ServiceUser {
@@ -144,7 +145,7 @@ const resolvers = {
     register: async (
       _root: unknown,
       args: RegisterUserInput
-    ): Promise<string> => {
+    ): Promise<Tokens> => {
       const { validationFailed, errorMessage } = validateUserArgs(args)
       if (validationFailed) {
         throw new UserInputError(errorMessage)
@@ -162,7 +163,7 @@ const resolvers = {
 
       return token
     },
-    login: async (_root: unknown, args: LoginUserInput): Promise<string> => {
+    login: async (_root: unknown, args: LoginUserInput): Promise<Tokens> => {
       const user = await User.findUserByUsername(args.username)
 
       if (!user) {

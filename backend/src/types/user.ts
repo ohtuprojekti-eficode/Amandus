@@ -1,3 +1,5 @@
+import { Tokens } from "./tokens";
+
 export interface GitHubAuthCode {
   code: string
 }
@@ -23,7 +25,7 @@ export interface UserType {
 
 export interface ServiceAuthResponse {
   serviceUser: ServiceUserType
-  token: string
+  token: Tokens
 }
 
 export interface AppContext {
