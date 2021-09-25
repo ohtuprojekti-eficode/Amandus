@@ -6,7 +6,7 @@ import gql from 'graphql-tag'
 import { closePool } from '../db/connect'
 import { server } from '../index'
 import User from '../model/user'
-import { createToken } from '../utils/token'
+import { createTokens } from '../utils/tokens'
 import { v4 as uuid } from 'uuid'
 
 const ADD_SERVICE = gql`
@@ -72,7 +72,7 @@ describe('User schema register mutations', () => {
     })
 
     const expectedUser = await User.findUserByUsername('testuser2')
-    const expectedToken = createToken(expectedUser)
+    const expectedToken = createTokens(expectedUser)
 
     expect(mutationResult).toEqual({
       data: {
@@ -180,7 +180,7 @@ describe('User schema login mutations', () => {
     })
 
     const expectedUser = await User.findUserByUsername('testuser')
-    const expectedToken = createToken(expectedUser)
+    const expectedToken = createTokens(expectedUser)
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     expect(res.data).toEqual({
@@ -254,7 +254,7 @@ describe('User schema add git service mutations', () => {
 
     const user = await User.registerUser(userToSave)
 
-    const token = createToken(user)
+    const token = createTokens(user)
 
     const { mutate } = createIntegrationTestClient({
       apolloServer: server,
@@ -292,7 +292,7 @@ describe('User schema add git service mutations', () => {
 
     const user = await User.registerUser(userToSave)
 
-    const token = createToken(user)
+    const token = createTokens(user)
 
     const { mutate } = createIntegrationTestClient({
       apolloServer: server,
@@ -347,7 +347,7 @@ describe('Context currentuser query', () => {
     }
 
     const user = await User.registerUser(userToSave)
-    const token = createToken(user)
+    const token = createTokens(user)
 
     const { query } = createIntegrationTestClient({
       apolloServer: server,
@@ -387,7 +387,7 @@ describe('Context currentuser query', () => {
       reposurl: 'mygithubrepos.github.com',
     }
 
-    const token = createToken(user, 'githubtoken123')
+    const token = createTokens(user, 'githubtoken123')
 
     const { query, mutate } = createIntegrationTestClient({
       apolloServer: server,
@@ -431,7 +431,7 @@ describe('Context githubToken query', () => {
 
     const user = await User.registerUser(userToSave)
 
-    const token = createToken(user)
+    const token = createTokens(user)
 
     const { query } = createIntegrationTestClient({
       apolloServer: server,
@@ -460,7 +460,7 @@ describe('Context githubToken query', () => {
 
     const user = await User.registerUser(userToSave)
 
-    const token = createToken(user, 'githubtoken123')
+    const token = createTokens(user, 'githubtoken123')
 
     const { query } = createIntegrationTestClient({
       apolloServer: server,
@@ -495,7 +495,7 @@ describe('isGithubConnected', () => {
 
     const user = await User.registerUser(userToSave)
     const githubToken = uuid()
-    const frontendJWT = createToken(user, githubToken)
+    const frontendJWT = createTokens(user, githubToken)
 
     const { query } = createIntegrationTestClient({
       apolloServer: server,
@@ -524,7 +524,7 @@ describe('isGithubConnected', () => {
 
     const user = await User.registerUser(userToSave)
 
-    const frontendJWT = createToken(user)
+    const frontendJWT = createTokens(user)
 
     const { query } = createIntegrationTestClient({
       apolloServer: server,

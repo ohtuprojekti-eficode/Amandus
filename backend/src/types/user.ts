@@ -74,7 +74,7 @@ export interface UserType {
 
 export interface ServiceAuthResponse {
   serviceUser: ServiceUserType
-  token: Tokens
+  tokens: Tokens
 }
 
 export interface AppContext {

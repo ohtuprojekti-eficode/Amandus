@@ -5,7 +5,7 @@ import jwt, { verify } from 'jsonwebtoken'
 import cors from 'cors'
 import { readFileSync } from 'fs'
 
-import { createToken } from './utils/token'
+import { createTokens } from './utils/tokens'
 
 import config from './utils/config'
 import schema from './schema/schema'
@@ -53,7 +53,7 @@ const server = new ApolloServer({
           if (!decodedRefreshToken.id) return
 
           const user = await User.getUserById(decodedRefreshToken.id)
-          const userTokens = createToken(user);
+          const userTokens = createTokens(user);
 
           res.set({
             "Access-Control-Expose-Headers": "x-access-token,x-refresh-token",

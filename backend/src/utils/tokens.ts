@@ -3,7 +3,7 @@ import { Tokens } from '../types/tokens'
 import { UserType } from '../types/user'
 import config from './config'
 
-export const createToken = (
+export const createTokens = (
   user: UserType | null,
   githubToken?: string,
   bitbucketToken?: string,
@@ -19,16 +19,19 @@ export const createToken = (
       gitlabToken: gitlabToken,
     },
     config.JWT_SECRET,
-    { expiresIn: '15m' }
+    { expiresIn: '15 min' }
   )
 
   const refreshToken = sign(
     {
       id: user?.id,
       username: user?.username,
-      githubToken,
+      githubToken: githubToken,
+      bitbucketToken: bitbucketToken,
+      gitlabToken: gitlabToken
+      // todo: should have "count"
     },    
-    config.JWT_SECRET,//!!! TODO: Should have different secret!
+    config.JWT_SECRET,//!!! TODO: Should have different secret! 
     { expiresIn: '7 days' }
   )
   return {accessToken, refreshToken}

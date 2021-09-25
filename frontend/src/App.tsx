@@ -40,7 +40,8 @@ const App = () => {
   )
 
   const logout = () => {
-    localStorage.removeItem('token')
+    localStorage.removeItem('amandus-user-access-token')
+    localStorage.removeItem('amandus-user-refresh-token')
     window.location.href = '/'
   }
 

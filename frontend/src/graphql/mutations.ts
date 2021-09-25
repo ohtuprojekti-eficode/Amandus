@@ -9,7 +9,7 @@ export const AUTHORIZE_WITH_GH = gql`
         email
         reposurl
       }
-      token {
+      tokens {
         accessToken
         refreshToken
       }
@@ -26,7 +26,10 @@ export const AUTHORIZE_WITH_BB = gql`
         email
         reposurl
       }
-      token
+      tokens {
+        accessToken
+        refreshToken
+      }
     }
   }
 `
@@ -40,7 +43,10 @@ export const AUTHORIZE_WITH_GL = gql`
         email
         reposurl
       }
-      token
+      tokens {
+        accessToken
+        refreshToken
+      }
     }
   }
 `

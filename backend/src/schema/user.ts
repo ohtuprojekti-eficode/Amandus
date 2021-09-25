@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs'
 import Crypto from 'crypto'
 import User from '../model/user'
 import Service from '../model/service'
-import { createToken } from '../utils/token'
+import { createTokens } from '../utils/tokens'
 import config from '../utils/config'
 import { validateUserArgs } from '../utils/validation'
 import {
@@ -182,11 +182,12 @@ const resolvers = {
         reposurl: gitHubUser.repos_url,
       }
 
-      const token = createToken(context.currentUser, access_token, context.githubToken)
+      const githubToken = access_token
+      const tokens = createTokens(context.currentUser, githubToken)
 
       return {
         serviceUser,
-        token,
+        tokens,
       }
     },
 
@@ -219,11 +220,14 @@ const resolvers = {
         reposurl: 'https://gitlab.com/api/v4/users/' + gitLabUser.id + '/projects',
       }
 
-      const token = createToken(context.currentUser, context.gitlabToken, access_token)
+      const gitlabToken = access_token
+
+      //this is dumb, but service tokens will be saved somewhere else anyway later
+      const tokens = createTokens(context.currentUser, undefined, undefined, gitlabToken) 
 
       return {
         serviceUser,
-        token,
+        tokens,
       }
     },
 
@@ -261,11 +265,12 @@ const resolvers = {
         email: email, 
         reposurl: bitBucketUser.links.repositories.href,
       }
-      const token = createToken(context.currentUser, access_token, context.bitbucketToken)
+      const bitbucketToken = access_token;
+      const tokens = createTokens(context.currentUser,undefined,bitbucketToken)
 
       return {
         serviceUser,
-        token
+        tokens
       }
     },
 
@@ -294,9 +299,9 @@ const resolvers = {
         )
       }
 
-      const token = createToken(user)
+      const tokens = createTokens(user)
 
-      return token
+      return tokens
     },
     login: async (_root: unknown, args: LoginUserInput): Promise<Tokens> => {
       const user = await User.findUserByUsername(args.username)
@@ -313,8 +318,8 @@ const resolvers = {
         throw new UserInputError('Invalid username or password')
       }
 
-      const token = createToken(user)
-      return token
+      const tokens = createTokens(user)
+      return tokens
     },
   },
 }

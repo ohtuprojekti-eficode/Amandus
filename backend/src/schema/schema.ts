@@ -19,9 +19,13 @@ const Query = `
 `
 
 const Mutation = `
+    type Tokens {
+        accessToken: String
+        refreshToken: String
+    }
     type ServiceAuthResponse {
         serviceUser: ServiceUser
-        token: String
+        tokens: Tokens
     }
     type LocalUser {
         user_id: Int
@@ -37,10 +41,6 @@ const Mutation = `
     type GithubAccount {
         username: String
         email: String
-    }
-    type Tokens {
-        accessToken: String
-        refreshToken: String
     }
     type Mutation {
         logout: String

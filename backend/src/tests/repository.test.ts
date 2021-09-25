@@ -11,7 +11,7 @@ import simpleGit from 'simple-git'
 import { server } from '../index'
 import User from '../model/user'
 import { closePool } from '../db/connect'
-import { createToken } from '../utils/token'
+import { createTokens } from '../utils/tokens'
 
 const GET_REPO_STATE = gql`
   query repoState($url: String!) {
@@ -357,7 +357,7 @@ describe('SaveChanges mutation', () => {
 
     const user = await User.registerUser(userToSave)
 
-    const token = createToken(user)
+    const token = createTokens(user)
 
     const { mutate } = createIntegrationTestClient({
       apolloServer: server,
