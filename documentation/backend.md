@@ -18,9 +18,14 @@
 - `GH_CLIENT_ID` = Client ID of GitHub App, **required**
 - `GH_CLIENT_SECRET` = Client secret of GitHub App, **required**
 - `GH_CB_URL` = GitHub App login callback url, defaults to `http://localhost:3000/auth/github/callback`, **not required for local dev**
+- `GL_CLIENT_ID` = Client ID of GitLab App, **required**
+- `GL_CLIENT_SECRET` = Client secret of GitLab App, **required**
+- `GL_CB_URL` = GitLab App login callback url, defaults to `http://localhost:3000/auth/gitlab/callback`, **not required for local dev**
+- `BB_CLIENT_ID` = Client ID of Bitbucket App, **required**
+- `BB_CLIENT_SECRET` = Client secret of Bitbucket App, **required**
+- `BB_CB_URL` = Bitbucket App login callback url, defaults to `http://localhost:3000/auth/bitbucket/callback`, **not required for local dev**
 - `DATABASE_URL` = Postgresql connection URL, **not required for local dev with docker**
 - `DATABASE_URL_TEST` = Postgresql connection URL when `NODE_ENV=test`, **required for tests**
-
 ### Starting backend without frontend
 
 1. Go to `backend` folder

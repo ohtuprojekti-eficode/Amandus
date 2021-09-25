@@ -5,8 +5,12 @@ import user from './user'
 const Query = `
     type Query {
         githubLoginUrl: String!
+        bitbucketLoginUrl: String!
+        gitLabLoginUrl: String!
         me: User
         isGithubConnected: Boolean!
+        isGitLabConnected: Boolean!
+        isBitbucketConnected: Boolean!
         getRepoState(url: String): RepoState!
         cloneRepository(url: String!): String
         currentToken: String
@@ -62,6 +66,12 @@ const Mutation = `
             branch: String!
         ): String
         authorizeWithGithub(
+            code: String!
+        ): ServiceAuthResponse
+        authorizeWithBitbucket(
+            code: String!
+        ): ServiceAuthResponse
+        authorizeWithGitLab(
             code: String!
         ): ServiceAuthResponse
     }

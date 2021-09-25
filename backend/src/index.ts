@@ -40,9 +40,11 @@ const server = new ApolloServer({
       if (!decodedAccessToken.id) return
       const currentUser = await User.getUserById(decodedAccessToken.id)
       const githubToken = decodedAccessToken.githubToken
+      const bitbucketToken = decodedAccessToken.bitbucketToken
+      const gitlabToken = decodedAccessToken.gitlabToken
 
       //const currentUser = await User.findById(decodedAccessToken.id)
-      return { currentUser, githubToken }
+      return { currentUser, githubToken, bitbucketToken, gitlabToken }
     } catch (e) {
       if (e instanceof jwt.TokenExpiredError) {
         // trying to access with expired access token...

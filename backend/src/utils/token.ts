@@ -5,14 +5,18 @@ import config from './config'
 
 export const createToken = (
   user: UserType | null,
-  githubToken?: string
+  githubToken?: string,
+  bitbucketToken?: string,
+  gitlabToken?: string,
 ): Tokens => {
   
   const accessToken = sign(
     {
       id: user?.id,
       username: user?.username,
-      githubToken,
+      githubToken: githubToken,
+      bitbucketToken: bitbucketToken,
+      gitlabToken: gitlabToken,
     },
     config.JWT_SECRET,
     { expiresIn: '15m' }

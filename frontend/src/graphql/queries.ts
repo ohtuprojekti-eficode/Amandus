@@ -24,6 +24,18 @@ export const IS_GH_CONNECTED = gql`
   }
 `
 
+export const IS_BB_CONNECTED = gql`
+  query {
+    isBitbucketConnected
+  }
+`
+
+export const IS_GL_CONNECTED = gql`
+  query {
+    isGitLabConnected
+  }
+`
+
 export const CLONE_REPO = gql`
   query {
     cloneRepo: cloneRepository(
@@ -42,6 +54,18 @@ query {
 export const GITHUB_LOGIN_URL = gql`
   query {
     githubLoginUrl
+  }
+`
+
+export const BITBUCKET_LOGIN_URL = gql`
+  query {
+    bitbucketLoginUrl
+  }
+`
+
+export const GITLAB_LOGIN_URL = gql`
+  query {
+    gitLabLoginUrl
   }
 `
 
