@@ -5,6 +5,7 @@ import { ME } from './graphql/queries'
 import Home from './components/Home'
 import EditView from './components/EditView'
 import Header from './components/Header'
+import BBCallBack from './components/auth/BBCallBack'
 import GHCallBack from './components/auth/GHCallBack'
 import GLCallBack from './components/auth/GLCallBack'
 import RegisterForm from './components/RegisterForm'
@@ -67,6 +68,10 @@ const App = () => {
             <GLCallBack />
           </Route>
 
+          <Route exact path="/auth/bitbucket/callback">
+            <BBCallBack />
+          </Route>
+          
           <Route path="/edit">
             <EditView />
           </Route>

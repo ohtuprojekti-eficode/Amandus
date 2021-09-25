@@ -19,6 +19,10 @@ const EditView = () => {
     onCompleted: () => repoStateQuery(),
   })
 
+  if (cloneRepoQuery.error){
+    console.log(`Clone error: ${cloneRepoQuery.error}`)
+  }
+
   if (cloneRepoQuery.loading) return <div>Cloning repo...</div>
   if (cloneRepoQuery.error) return <div>Error cloning repo...</div>
 

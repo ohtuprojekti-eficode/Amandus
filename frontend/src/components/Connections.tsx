@@ -3,6 +3,7 @@ import { makeStyles, createStyles } from '@material-ui/core/styles'
 import { Container, Grid } from '@material-ui/core/'
 import GitHubAuthBtn from './auth/GitHubAuthBtn'
 import GitLabAuthBtn from './auth/GitLabAuthBtn'
+import BitbucketAuthBtn from './auth/BitbucketAuthBtn'
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -35,6 +36,9 @@ const Connections = () => {
         </Grid>
         <Grid item>
           <GitLabAuthBtn />
+        </Grid>
+        <Grid item>
+          <BitbucketAuthBtn />
         </Grid>
       </Grid>
     </Container>

@@ -24,6 +24,12 @@ export const IS_GH_CONNECTED = gql`
   }
 `
 
+export const IS_BB_CONNECTED = gql`
+  query {
+    isBitbucketConnected
+  }
+`
+
 export const IS_GL_CONNECTED = gql`
   query {
     isGitLabConnected
@@ -48,6 +54,12 @@ query {
 export const GITHUB_LOGIN_URL = gql`
   query {
     githubLoginUrl
+  }
+`
+
+export const BITBUCKET_LOGIN_URL = gql`
+  query {
+    bitbucketLoginUrl
   }
 `
 

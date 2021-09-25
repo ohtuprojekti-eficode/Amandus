@@ -14,6 +14,34 @@ export interface GitHubUserType {
   access_token: string
 }
 
+export interface BitbucketAuthCode {
+  code: string
+}
+
+export interface BitbucketAccessTokenResponse {
+  access_token: string
+}
+
+export interface BitbucketUserType {
+  username: string,
+  account_id: string,
+  links: {
+    repositories: {
+      href: string
+    }
+  },
+  access_Token: string
+}
+
+export interface BitbucketEmail {
+  values: [
+    {
+      is_primary: boolean
+      email: string
+    }
+  ]
+}
+
 export interface GitLabAuthCode {
   code: string
 }
@@ -50,6 +78,7 @@ export interface ServiceAuthResponse {
 export interface AppContext {
   currentUser: UserType
   githubToken?: string
+  bitbucketToken?: string
   gitlabToken?: string
 }
 
@@ -66,6 +95,7 @@ export interface UserJWT {
   id: number
   username: string
   githubToken?: string
+  bitbucketToken?: string
   gitlabToken?: string
 }
 
