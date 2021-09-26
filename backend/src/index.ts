@@ -15,6 +15,8 @@ import User from './model/user'
 import path from 'path'
 import { UserJWT } from './types/user'
 
+import tokenService from './services/token'
+
 const app = express()
 
 app.use(cors())
@@ -36,13 +38,13 @@ const server = new ApolloServer({
       // client is accessing with non-expired access token...
       const decodedAccessToken = <UserJWT>verify(accessToken, config.JWT_SECRET)
       if (!decodedAccessToken.id) return
-
+      
       const currentUser = await User.getUserById(decodedAccessToken.id)
-      const githubToken = decodedAccessToken.githubToken
-      const bitbucketToken = decodedAccessToken.bitbucketToken
-      const gitlabToken = decodedAccessToken.gitlabToken
+      const userTokens = tokenService.getTokensForApolloContextById(
+        currentUser.id
+      )
 
-      return { currentUser, githubToken, bitbucketToken, gitlabToken }
+      return { currentUser, ...userTokens}
     } catch (e) {
       if (e instanceof jwt.TokenExpiredError) {
         // trying to access with expired access token...
@@ -56,19 +58,19 @@ const server = new ApolloServer({
           if (!currentUser /*|| currentUser.refreshTokenCount !== decodedRefreshToken.count*/) return
 
           // generate new tokens for the user
-          const userTokens = createTokens(currentUser);
+          const newTokens = createTokens(currentUser);
 
           // send new tokens to the client in headers
           res.set({
             "Access-Control-Expose-Headers": "x-access-token,x-refresh-token",
-            "x-access-token": userTokens.accessToken,
-            "x-refresh-token": userTokens.refreshToken
+            "x-access-token": newTokens.accessToken,
+            "x-refresh-token": newTokens.refreshToken
           })
 
-          const githubToken = decodedRefreshToken.githubToken
-          const bitbucketToken = decodedRefreshToken.bitbucketToken
-          const gitlabToken = decodedRefreshToken.gitlabToken
-          return { currentUser, githubToken, bitbucketToken, gitlabToken }
+          const userTokens = tokenService.getTokensForApolloContextById(
+            currentUser.id
+          )
+          return { currentUser, ...userTokens }
         } catch (e) {
           // client is accessing with expired access token and refresh token...
           if (e instanceof jwt.TokenExpiredError) return

@@ -8,6 +8,7 @@ import { server } from '../index'
 import User from '../model/user'
 import { createTokens } from '../utils/tokens'
 import { v4 as uuid } from 'uuid'
+import tokenService from '../services/token'
 
 const ADD_SERVICE = gql`
   mutation connectGitService($service: AddServiceArgs!) {
@@ -387,7 +388,7 @@ describe('Context currentuser query', () => {
       reposurl: 'mygithubrepos.github.com',
     }
 
-    const token = createTokens(user, 'githubtoken123')
+    const token = createTokens(user)
 
     const { query, mutate } = createIntegrationTestClient({
       apolloServer: server,
@@ -460,7 +461,9 @@ describe('Context githubToken query', () => {
 
     const user = await User.registerUser(userToSave)
 
-    const token = createTokens(user, 'githubtoken123')
+    tokenService.setToken(user.id, 'github', 'githubtoken123')
+
+    const token = createToken(user)
 
     const { query } = createIntegrationTestClient({
       apolloServer: server,
@@ -494,8 +497,8 @@ describe('isGithubConnected', () => {
     }
 
     const user = await User.registerUser(userToSave)
-    const githubToken = uuid()
-    const frontendJWT = createTokens(user, githubToken)
+    const frontendJWT = createToken(user)
+    tokenService.setToken(user.id, 'github', uuid())
 
     const { query } = createIntegrationTestClient({
       apolloServer: server,

@@ -36,6 +36,8 @@ import {
 
 import { Tokens } from '../types/tokens'
 
+import tokenService from '../services/token'
+
 const typeDef = `
     type ServiceUser {
       serviceName: String!
@@ -174,6 +176,8 @@ const resolvers = {
       }
 
       const gitHubUser = await requestGithubUserAccount(access_token)
+
+      tokenService.setToken(context.currentUser.id, 'github', access_token)
 
       const serviceUser = {
         serviceName: 'github',

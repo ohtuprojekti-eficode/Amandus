@@ -1,4 +1,5 @@
 import { Tokens } from "./tokens";
+import { ServiceTokenType } from './service'
 
 export interface GitHubAuthCode {
   code: string
@@ -77,11 +78,12 @@ export interface ServiceAuthResponse {
   tokens: Tokens
 }
 
-export interface AppContext {
+export type ContextTokens = {
+  [key in ServiceTokenType]?: string
+}
+
+export interface AppContext extends ContextTokens {
   currentUser: UserType
-  githubToken?: string
-  bitbucketToken?: string
-  gitlabToken?: string
 }
 
 export interface UserRecord {
