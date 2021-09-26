@@ -4,19 +4,13 @@ import { UserType } from '../types/user'
 import config from './config'
 
 export const createTokens = (
-  user: UserType | null,
-  githubToken?: string,
-  bitbucketToken?: string,
-  gitlabToken?: string,
+  user: UserType | null
 ): Tokens => {
   
   const accessToken = sign(
     {
       id: user?.id,
-      username: user?.username,
-      githubToken: githubToken,
-      bitbucketToken: bitbucketToken,
-      gitlabToken: gitlabToken,
+      username: user?.username
     },
     config.JWT_SECRET,
     { expiresIn: '15 min' }
@@ -26,9 +20,6 @@ export const createTokens = (
     {
       id: user?.id,
       username: user?.username,
-      githubToken: githubToken,
-      bitbucketToken: bitbucketToken,
-      gitlabToken: gitlabToken
       // todo: should have "count"
     },    
     config.JWT_SECRET,//!!! TODO: Should have different secret! 
