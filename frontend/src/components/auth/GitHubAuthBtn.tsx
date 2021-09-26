@@ -5,7 +5,11 @@ import { useQuery } from '@apollo/client'
 import { GITHUB_LOGIN_URL } from '../../graphql/queries'
 import { GithubLoginURLQueryResult } from '../../types'
 
-const GitHubAuthBtn = () => {
+interface AuthBtnProps {
+  connected: boolean
+}
+
+const GitHubAuthBtn = ({ connected }: AuthBtnProps) => {
   const { data, error } = useQuery<GithubLoginURLQueryResult>(GITHUB_LOGIN_URL)
 
   const btnClickHandler = (): void => {
@@ -23,8 +27,9 @@ const GitHubAuthBtn = () => {
         color="primary"
         startIcon={<GitHubIcon />}
         onClick={btnClickHandler}
+        disabled={connected}
       >
-        Connect GitHub
+        {connected ? 'Github connected' : 'Connect GitHub'}
       </Button>
     </div>
   )
