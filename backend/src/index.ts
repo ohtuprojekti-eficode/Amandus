@@ -40,6 +40,8 @@ const server = new ApolloServer({
       if (!decodedAccessToken.id) return
       
       const currentUser = await User.getUserById(decodedAccessToken.id)
+      if (!currentUser) return
+
       const userTokens = tokenService.getTokensForApolloContextById(
         currentUser.id
       )
@@ -53,9 +55,10 @@ const server = new ApolloServer({
           if (!decodedRefreshToken.id) return
 
           const currentUser = await User.getUserById(decodedRefreshToken.id)
+          if (!currentUser) return
 
-          // check if the user does not exists in db
-          if (!currentUser /*|| currentUser.refreshTokenCount !== decodedRefreshToken.count*/) return
+          // todo: token has been revoked
+          // if (currentUser.refreshTokenCount !== decodedRefreshToken.count) return
 
           // generate new tokens for the user
           const newTokens = createTokens(currentUser);

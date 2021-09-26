@@ -59,7 +59,7 @@ const addServiceUser = async ({
   ])
 }
 
-const getUserById = async (id: number): Promise<UserType> => {
+const getUserById = async (id: number): Promise<UserType | null > => {
   const sql = `
     SELECT row_to_json(t) AS user
     FROM (
@@ -81,6 +81,7 @@ const getUserById = async (id: number): Promise<UserType> => {
   ) t;`
 
   const queryResult = await pool.query<{ user: UserType }>(sql, [id])
+  if (queryResult.rowCount == 0) return null
   return queryResult.rows[0].user
 }
 

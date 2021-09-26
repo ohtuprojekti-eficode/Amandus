@@ -48,7 +48,7 @@ const Mutation = `
             username: String!
             email: String!
             password: String!
-        ): String
+        ): Tokens
         login(
             username: String!
             password: String!
