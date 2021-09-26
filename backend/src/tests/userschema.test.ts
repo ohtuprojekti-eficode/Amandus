@@ -46,13 +46,19 @@ const IS_GH_CONNECTED = gql`
 
 const REGISTER = gql`
   mutation register($username: String!, $email: String!, $password: String!) {
-    register(username: $username, email: $email, password: $password)
+    register(username: $username, email: $email, password: $password) {
+      accessToken
+      refreshToken
+    }
   }
 `
 
 const LOGIN = gql`
   mutation login($username: String!, $password: String!) {
-    login(username: $username, password: $password)
+    login(username: $username, password: $password) {
+      accessToken
+      refreshToken
+    }
   }
 `
 
@@ -261,9 +267,9 @@ describe('User schema add git service mutations', () => {
       apolloServer: server,
       extendMockRequest: {
         headers: {
-          "x-access-token": tokens.accessToken,
-          "x-refresh-token": tokens.refreshToken
-        }
+          'x-access-token': tokens.accessToken,
+          'x-refresh-token': tokens.refreshToken,
+        },
       },
     })
 
@@ -300,9 +306,9 @@ describe('User schema add git service mutations', () => {
       apolloServer: server,
       extendMockRequest: {
         headers: {
-          "x-access-token": tokens.accessToken,
-          "x-refresh-token": tokens.refreshToken
-        }
+          'x-access-token': tokens.accessToken,
+          'x-refresh-token': tokens.refreshToken,
+        },
       },
     })
 
@@ -356,12 +362,12 @@ describe('Context currentuser query', () => {
       apolloServer: server,
       extendMockRequest: {
         headers: {
-          "x-access-token": tokens.accessToken,
-          "x-refresh-token": tokens.refreshToken
-        }
+          'x-access-token': tokens.accessToken,
+          'x-refresh-token': tokens.refreshToken,
+        },
       },
     })
-    
+
     const queryResult = await query(ME)
 
     expect(queryResult).toEqual({
@@ -397,9 +403,9 @@ describe('Context currentuser query', () => {
       apolloServer: server,
       extendMockRequest: {
         headers: {
-          "x-access-token": tokens.accessToken,
-          "x-refresh-token": tokens.refreshToken
-        }
+          'x-access-token': tokens.accessToken,
+          'x-refresh-token': tokens.refreshToken,
+        },
       },
     })
 
@@ -442,9 +448,9 @@ describe('Context githubToken query', () => {
       apolloServer: server,
       extendMockRequest: {
         headers: {
-          "x-access-token": tokens.accessToken,
-          "x-refresh-token": tokens.refreshToken
-        }
+          'x-access-token': tokens.accessToken,
+          'x-refresh-token': tokens.refreshToken,
+        },
       },
     })
 
@@ -474,9 +480,9 @@ describe('Context githubToken query', () => {
       apolloServer: server,
       extendMockRequest: {
         headers: {
-          "x-access-token": tokens.accessToken,
-          "x-refresh-token": tokens.refreshToken
-        }
+          'x-access-token': tokens.accessToken,
+          'x-refresh-token': tokens.refreshToken,
+        },
       },
     })
 
@@ -510,12 +516,12 @@ describe('isGithubConnected', () => {
       apolloServer: server,
       extendMockRequest: {
         headers: {
-          "x-access-token": frontendJWTs.accessToken,
-          "x-refresh-token": frontendJWTs.refreshToken
-        }
+          'x-access-token': frontendJWTs.accessToken,
+          'x-refresh-token': frontendJWTs.refreshToken,
+        },
       },
     })
-    
+
     const queryResult = await query(IS_GH_CONNECTED)
 
     expect(queryResult).toEqual({
@@ -539,9 +545,9 @@ describe('isGithubConnected', () => {
       apolloServer: server,
       extendMockRequest: {
         headers: {
-          "x-access-token": frontendJWTs.accessToken,
-          "x-refresh-token": frontendJWTs.refreshToken
-        }
+          'x-access-token': frontendJWTs.accessToken,
+          'x-refresh-token': frontendJWTs.refreshToken,
+        },
       },
     })
 

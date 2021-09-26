@@ -1,8 +1,9 @@
-import { createToken } from './../utils/token'
+import { createTokens } from '../utils/tokens'
 import tokenService from '../services/token'
 
 const createAmandusToken = () => {
-  return createToken({ id: 1, username: 'testuser', email: 'test@email.com' })
+  return createTokens({ id: 1, username: 'testuser', email: 'test@email.com' })
+    .accessToken
 }
 
 describe('token service (credential store)', () => {
