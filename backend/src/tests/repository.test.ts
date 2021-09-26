@@ -357,14 +357,15 @@ describe('SaveChanges mutation', () => {
 
     const user = await User.registerUser(userToSave)
 
-    const token = createTokens(user)
+    const tokens = createTokens(user)
 
     const { mutate } = createIntegrationTestClient({
       apolloServer: server,
       extendMockRequest: {
         headers: {
-          authorization: `Bearer ${token}`,
-        },
+          "x-access-token": tokens.accessToken,
+          "x-refresh-token": tokens.refreshToken
+        }
       },
     })
 

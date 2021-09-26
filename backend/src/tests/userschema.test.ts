@@ -73,11 +73,11 @@ describe('User schema register mutations', () => {
     })
 
     const expectedUser = await User.findUserByUsername('testuser2')
-    const expectedToken = createTokens(expectedUser)
+    const expectedTokens = createTokens(expectedUser)
 
     expect(mutationResult).toEqual({
       data: {
-        register: expectedToken,
+        register: expectedTokens,
       },
     })
   })
@@ -255,14 +255,15 @@ describe('User schema add git service mutations', () => {
 
     const user = await User.registerUser(userToSave)
 
-    const token = createTokens(user)
+    const tokens = createTokens(user)
 
     const { mutate } = createIntegrationTestClient({
       apolloServer: server,
       extendMockRequest: {
         headers: {
-          authorization: `Bearer ${token}`,
-        },
+          "x-access-token": tokens.accessToken,
+          "x-refresh-token": tokens.refreshToken
+        }
       },
     })
 
@@ -293,14 +294,15 @@ describe('User schema add git service mutations', () => {
 
     const user = await User.registerUser(userToSave)
 
-    const token = createTokens(user)
+    const tokens = createTokens(user)
 
     const { mutate } = createIntegrationTestClient({
       apolloServer: server,
       extendMockRequest: {
         headers: {
-          authorization: `Bearer ${token}`,
-        },
+          "x-access-token": tokens.accessToken,
+          "x-refresh-token": tokens.refreshToken
+        }
       },
     })
 
@@ -348,17 +350,18 @@ describe('Context currentuser query', () => {
     }
 
     const user = await User.registerUser(userToSave)
-    const token = createTokens(user)
+    const tokens = createTokens(user)
 
     const { query } = createIntegrationTestClient({
       apolloServer: server,
       extendMockRequest: {
         headers: {
-          authorization: `Bearer ${token}`,
-        },
+          "x-access-token": tokens.accessToken,
+          "x-refresh-token": tokens.refreshToken
+        }
       },
     })
-
+    
     const queryResult = await query(ME)
 
     expect(queryResult).toEqual({
@@ -388,14 +391,15 @@ describe('Context currentuser query', () => {
       reposurl: 'mygithubrepos.github.com',
     }
 
-    const token = createTokens(user)
+    const tokens = createTokens(user)
 
     const { query, mutate } = createIntegrationTestClient({
       apolloServer: server,
       extendMockRequest: {
         headers: {
-          authorization: `Bearer ${token}`,
-        },
+          "x-access-token": tokens.accessToken,
+          "x-refresh-token": tokens.refreshToken
+        }
       },
     })
 
@@ -432,14 +436,15 @@ describe('Context githubToken query', () => {
 
     const user = await User.registerUser(userToSave)
 
-    const token = createTokens(user)
+    const tokens = createTokens(user)
 
     const { query } = createIntegrationTestClient({
       apolloServer: server,
       extendMockRequest: {
         headers: {
-          authorization: `Bearer ${token}`,
-        },
+          "x-access-token": tokens.accessToken,
+          "x-refresh-token": tokens.refreshToken
+        }
       },
     })
 
@@ -463,14 +468,15 @@ describe('Context githubToken query', () => {
 
     tokenService.setToken(user.id, 'github', 'githubtoken123')
 
-    const token = createToken(user)
+    const tokens = createTokens(user)
 
     const { query } = createIntegrationTestClient({
       apolloServer: server,
       extendMockRequest: {
         headers: {
-          authorization: `Bearer ${token}`,
-        },
+          "x-access-token": tokens.accessToken,
+          "x-refresh-token": tokens.refreshToken
+        }
       },
     })
 
@@ -497,18 +503,19 @@ describe('isGithubConnected', () => {
     }
 
     const user = await User.registerUser(userToSave)
-    const frontendJWT = createToken(user)
+    const frontendJWTs = createTokens(user)
     tokenService.setToken(user.id, 'github', uuid())
 
     const { query } = createIntegrationTestClient({
       apolloServer: server,
       extendMockRequest: {
         headers: {
-          authorization: `Bearer ${frontendJWT}`,
-        },
+          "x-access-token": frontendJWTs.accessToken,
+          "x-refresh-token": frontendJWTs.refreshToken
+        }
       },
     })
-
+    
     const queryResult = await query(IS_GH_CONNECTED)
 
     expect(queryResult).toEqual({
@@ -526,15 +533,15 @@ describe('isGithubConnected', () => {
     }
 
     const user = await User.registerUser(userToSave)
-
-    const frontendJWT = createTokens(user)
+    const frontendJWTs = createTokens(user)
 
     const { query } = createIntegrationTestClient({
       apolloServer: server,
       extendMockRequest: {
         headers: {
-          authorization: `Bearer ${frontendJWT}`,
-        },
+          "x-access-token": frontendJWTs.accessToken,
+          "x-refresh-token": frontendJWTs.refreshToken
+        }
       },
     })
 
