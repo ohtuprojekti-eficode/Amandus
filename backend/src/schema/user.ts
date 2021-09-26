@@ -147,7 +147,7 @@ const resolvers = {
       }
 
       const service = await Service.getServiceByName(args.service.serviceName)
-      
+
       await User.addServiceUser({
         ...args.service,
         user_id: context.currentUser.id,
@@ -186,8 +186,7 @@ const resolvers = {
         reposurl: gitHubUser.repos_url,
       }
 
-      const githubToken = access_token
-      const tokens = createTokens(context.currentUser, githubToken)
+      const tokens = createTokens(context.currentUser)
 
       return {
         serviceUser,
@@ -208,7 +207,6 @@ const resolvers = {
         throw new UserInputError('GitLab code not provided')
       }
 
-      
       const { access_token } = await requestGitLabToken(args.code)
 
       if (!access_token) {
@@ -217,17 +215,17 @@ const resolvers = {
 
       const gitLabUser = await requestGitLabUserAccount(access_token)
 
+      tokenService.setToken(context.currentUser.id, 'gitlab', access_token)
+
       const serviceUser = {
         serviceName: 'gitlab',
         username: gitLabUser.username,
         email: gitLabUser.email,
-        reposurl: 'https://gitlab.com/api/v4/users/' + gitLabUser.id + '/projects',
+        reposurl:
+          'https://gitlab.com/api/v4/users/' + gitLabUser.id + '/projects',
       }
 
-      const gitlabToken = access_token
-
-      //this is dumb, but service tokens will be saved somewhere else anyway later
-      const tokens = createTokens(context.currentUser, undefined, undefined, gitlabToken) 
+      const tokens = createTokens(context.currentUser)
 
       return {
         serviceUser,
@@ -235,7 +233,7 @@ const resolvers = {
       }
     },
 
-    authorizeWithBitbucket: async(
+    authorizeWithBitbucket: async (
       _root: unknown,
       args: BitbucketAuthCode,
       context: AppContext
@@ -253,28 +251,32 @@ const resolvers = {
       if (!access_token) {
         throw new UserInputError('Invalid or expired Bitbucket code')
       }
-      
+
       const bitBucketUser = await requestBitbucketUserAccount(access_token)
       const bitbucketUserEmail = await requestBitbucketUserEmail(access_token)
 
-      const email = bitbucketUserEmail.values.find(email => email.is_primary)?.email
+      tokenService.setToken(context.currentUser.id, 'bitbucket', access_token)
 
-      if(!email){
+      const email = bitbucketUserEmail.values.find(
+        (email) => email.is_primary
+      )?.email
+
+      if (!email) {
         throw new Error('Bitbucket email not found!')
       }
 
       const serviceUser = {
         serviceName: 'bitbucket',
         username: bitBucketUser.username,
-        email: email, 
+        email: email,
         reposurl: bitBucketUser.links.repositories.href,
       }
-      const bitbucketToken = access_token;
-      const tokens = createTokens(context.currentUser,undefined,bitbucketToken)
+
+      const tokens = createTokens(context.currentUser)
 
       return {
         serviceUser,
-        tokens
+        tokens,
       }
     },
 
