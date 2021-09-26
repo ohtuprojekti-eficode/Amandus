@@ -19,9 +19,13 @@ const Query = `
 `
 
 const Mutation = `
+    type Tokens {
+        accessToken: String
+        refreshToken: String
+    }
     type ServiceAuthResponse {
         serviceUser: ServiceUser
-        token: String
+        tokens: Tokens
     }
     type LocalUser {
         user_id: Int
@@ -44,11 +48,11 @@ const Mutation = `
             username: String!
             email: String!
             password: String!
-        ): String
+        ): Tokens
         login(
             username: String!
             password: String!
-        ): String
+        ): Tokens
         saveChanges(
             file: FileInput! 
             branch: String!

@@ -32,7 +32,6 @@ const CallBack = () => {
       try {
         const response = await authenticate()
         if (response.data && !response.errors) {
-          const token = response.data.authorizeWithBitbucket.token
           const {
             __typename,
             ...serviceUser
@@ -43,7 +42,10 @@ const CallBack = () => {
             },
             refetchQueries: [{ query: ME }],
           })
-          localStorage.setItem('token', token)
+          const accessToken = response.data.authorizeWithBitbucket.tokens.accessToken
+          const refreshToken = response.data.authorizeWithBitbucket.tokens.refreshToken
+          localStorage.setItem('amandus-user-access-token', accessToken)
+          localStorage.setItem('amandus-user-refresh-token', refreshToken) 
           history.push('/edit')
         }
       } catch (error) {

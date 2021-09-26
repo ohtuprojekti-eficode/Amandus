@@ -1,4 +1,8 @@
 export interface Service {
   id: number
-  name: string
+  name: ServiceName
 }
+
+export type ServiceName = 'github' | 'bitbucket' | 'gitlab'
+
+export type ServiceTokenType = `${ServiceName}Token`

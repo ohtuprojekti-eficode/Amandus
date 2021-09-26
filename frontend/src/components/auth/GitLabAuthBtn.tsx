@@ -9,11 +9,15 @@ const useStyles = makeStyles({
   imageIcon: {
     display: 'flex',
     width: '1em',
-    height: '1em'
-  }
+    height: '1em',
+  },
 })
 
-const GitLabAuthBtn = () => {
+interface AuthBtnProps {
+  connected: boolean
+}
+
+const GitLabAuthBtn = ({ connected }: AuthBtnProps) => {
   const { data, error } = useQuery<GitLabLoginURLQueryResult>(GITLAB_LOGIN_URL)
   const classes = useStyles()
 
@@ -22,10 +26,11 @@ const GitLabAuthBtn = () => {
   }
 
   const gitLabIcon = (
-    <img 
-      className={classes.imageIcon} 
-      alt="GitLab icon" 
-      src="/img/gitlab-icon-rgb.svg" />
+    <img
+      className={classes.imageIcon}
+      alt="GitLab icon"
+      src="/img/gitlab-icon-rgb.svg"
+    />
   )
 
   if (error || !data) {
@@ -39,8 +44,9 @@ const GitLabAuthBtn = () => {
         variant="contained"
         color="primary"
         onClick={btnClickHandler}
+        disabled={connected}
       >
-        Connect GitLab
+        {connected ? 'Gitlab connected' : 'Connect GitLab'}
       </Button>
     </div>
   )

@@ -6,8 +6,9 @@ import gql from 'graphql-tag'
 import { closePool } from '../db/connect'
 import { server } from '../index'
 import User from '../model/user'
-import { createToken } from '../utils/token'
+import { createTokens } from '../utils/tokens'
 import { v4 as uuid } from 'uuid'
+import tokenService from '../services/token'
 
 const ADD_SERVICE = gql`
   mutation connectGitService($service: AddServiceArgs!) {
@@ -45,13 +46,19 @@ const IS_GH_CONNECTED = gql`
 
 const REGISTER = gql`
   mutation register($username: String!, $email: String!, $password: String!) {
-    register(username: $username, email: $email, password: $password)
+    register(username: $username, email: $email, password: $password) {
+      accessToken
+      refreshToken
+    }
   }
 `
 
 const LOGIN = gql`
   mutation login($username: String!, $password: String!) {
-    login(username: $username, password: $password)
+    login(username: $username, password: $password) {
+      accessToken
+      refreshToken
+    }
   }
 `
 
@@ -72,11 +79,11 @@ describe('User schema register mutations', () => {
     })
 
     const expectedUser = await User.findUserByUsername('testuser2')
-    const expectedToken = createToken(expectedUser)
+    const expectedTokens = createTokens(expectedUser)
 
     expect(mutationResult).toEqual({
       data: {
-        register: expectedToken,
+        register: expectedTokens,
       },
     })
   })
@@ -180,7 +187,7 @@ describe('User schema login mutations', () => {
     })
 
     const expectedUser = await User.findUserByUsername('testuser')
-    const expectedToken = createToken(expectedUser)
+    const expectedToken = createTokens(expectedUser)
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     expect(res.data).toEqual({
@@ -254,13 +261,14 @@ describe('User schema add git service mutations', () => {
 
     const user = await User.registerUser(userToSave)
 
-    const token = createToken(user)
+    const tokens = createTokens(user)
 
     const { mutate } = createIntegrationTestClient({
       apolloServer: server,
       extendMockRequest: {
         headers: {
-          authorization: `Bearer ${token}`,
+          'x-access-token': tokens.accessToken,
+          'x-refresh-token': tokens.refreshToken,
         },
       },
     })
@@ -292,13 +300,14 @@ describe('User schema add git service mutations', () => {
 
     const user = await User.registerUser(userToSave)
 
-    const token = createToken(user)
+    const tokens = createTokens(user)
 
     const { mutate } = createIntegrationTestClient({
       apolloServer: server,
       extendMockRequest: {
         headers: {
-          authorization: `Bearer ${token}`,
+          'x-access-token': tokens.accessToken,
+          'x-refresh-token': tokens.refreshToken,
         },
       },
     })
@@ -347,13 +356,14 @@ describe('Context currentuser query', () => {
     }
 
     const user = await User.registerUser(userToSave)
-    const token = createToken(user)
+    const tokens = createTokens(user)
 
     const { query } = createIntegrationTestClient({
       apolloServer: server,
       extendMockRequest: {
         headers: {
-          authorization: `Bearer ${token}`,
+          'x-access-token': tokens.accessToken,
+          'x-refresh-token': tokens.refreshToken,
         },
       },
     })
@@ -387,13 +397,14 @@ describe('Context currentuser query', () => {
       reposurl: 'mygithubrepos.github.com',
     }
 
-    const token = createToken(user, 'githubtoken123')
+    const tokens = createTokens(user)
 
     const { query, mutate } = createIntegrationTestClient({
       apolloServer: server,
       extendMockRequest: {
         headers: {
-          authorization: `Bearer ${token}`,
+          'x-access-token': tokens.accessToken,
+          'x-refresh-token': tokens.refreshToken,
         },
       },
     })
@@ -431,13 +442,14 @@ describe('Context githubToken query', () => {
 
     const user = await User.registerUser(userToSave)
 
-    const token = createToken(user)
+    const tokens = createTokens(user)
 
     const { query } = createIntegrationTestClient({
       apolloServer: server,
       extendMockRequest: {
         headers: {
-          authorization: `Bearer ${token}`,
+          'x-access-token': tokens.accessToken,
+          'x-refresh-token': tokens.refreshToken,
         },
       },
     })
@@ -460,13 +472,16 @@ describe('Context githubToken query', () => {
 
     const user = await User.registerUser(userToSave)
 
-    const token = createToken(user, 'githubtoken123')
+    tokenService.setToken(user.id, 'github', 'githubtoken123')
+
+    const tokens = createTokens(user)
 
     const { query } = createIntegrationTestClient({
       apolloServer: server,
       extendMockRequest: {
         headers: {
-          authorization: `Bearer ${token}`,
+          'x-access-token': tokens.accessToken,
+          'x-refresh-token': tokens.refreshToken,
         },
       },
     })
@@ -494,14 +509,15 @@ describe('isGithubConnected', () => {
     }
 
     const user = await User.registerUser(userToSave)
-    const githubToken = uuid()
-    const frontendJWT = createToken(user, githubToken)
+    const frontendJWTs = createTokens(user)
+    tokenService.setToken(user.id, 'github', uuid())
 
     const { query } = createIntegrationTestClient({
       apolloServer: server,
       extendMockRequest: {
         headers: {
-          authorization: `Bearer ${frontendJWT}`,
+          'x-access-token': frontendJWTs.accessToken,
+          'x-refresh-token': frontendJWTs.refreshToken,
         },
       },
     })
@@ -523,14 +539,14 @@ describe('isGithubConnected', () => {
     }
 
     const user = await User.registerUser(userToSave)
-
-    const frontendJWT = createToken(user)
+    const frontendJWTs = createTokens(user)
 
     const { query } = createIntegrationTestClient({
       apolloServer: server,
       extendMockRequest: {
         headers: {
-          authorization: `Bearer ${frontendJWT}`,
+          'x-access-token': frontendJWTs.accessToken,
+          'x-refresh-token': frontendJWTs.refreshToken,
         },
       },
     })

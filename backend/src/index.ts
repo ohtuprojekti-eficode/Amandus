@@ -1,17 +1,21 @@
 import express from 'express'
 import { ApolloServer } from 'apollo-server-express'
 import { createServer } from 'http'
-import { verify } from 'jsonwebtoken'
+import jwt, { verify } from 'jsonwebtoken'
 import cors from 'cors'
 import { readFileSync } from 'fs'
+
+import { createTokens } from './utils/tokens'
 
 import config from './utils/config'
 import schema from './schema/schema'
 
-import { Req } from './types/request'
+//import { Req } from './types/request'
 import User from './model/user'
 import path from 'path'
 import { UserJWT } from './types/user'
+
+import tokenService from './services/token'
 
 const app = express()
 
@@ -24,17 +28,62 @@ const corsOptions = {
 
 const server = new ApolloServer({
   schema,
-  context: async ({ req }: Req) => {
-    const auth = req && req.headers.authorization
-    if (auth && auth.toLowerCase().startsWith('bearer')) {
-      const decodedToken = <UserJWT>verify(auth.substring(7), config.JWT_SECRET)
-      const currentUser = await User.getUserById(decodedToken.id)
-      const githubToken = decodedToken.githubToken
-      const bitbucketToken = decodedToken.bitbucketToken
-      const gitlabToken = decodedToken.gitlabToken
-      return { currentUser, githubToken, gitlabToken, bitbucketToken }
+  context: async ({ req, res }) => {
+    const accessToken: any = req && req.headers["x-access-token"]
+    const refreshToken: any = req && req.headers["x-refresh-token"]
+
+    if (!accessToken || !refreshToken) return
+
+    try {
+      // client is accessing with non-expired access token...
+      const decodedAccessToken = <UserJWT>verify(accessToken, config.JWT_SECRET)
+      if (!decodedAccessToken.id) return
+      
+      const currentUser = await User.getUserById(decodedAccessToken.id)
+      if (!currentUser) return
+
+      const userTokens = tokenService.getTokensForApolloContextById(
+        currentUser.id
+      )
+
+      return { currentUser, ...userTokens}
+    } catch (e) {
+      if (e instanceof jwt.TokenExpiredError) {
+        // trying to access with expired access token...
+        try {
+          const decodedRefreshToken = <UserJWT>verify(refreshToken, config.JWT_SECRET)
+          if (!decodedRefreshToken.id) return
+
+          const currentUser = await User.getUserById(decodedRefreshToken.id)
+          if (!currentUser) return
+
+          // todo: token has been revoked
+          // if (currentUser.refreshTokenCount !== decodedRefreshToken.count) return
+
+          // generate new tokens for the user
+          const newTokens = createTokens(currentUser);
+
+          // send new tokens to the client in headers
+          res.set({
+            "Access-Control-Expose-Headers": "x-access-token,x-refresh-token",
+            "x-access-token": newTokens.accessToken,
+            "x-refresh-token": newTokens.refreshToken
+          })
+
+          const userTokens = tokenService.getTokensForApolloContextById(
+            currentUser.id
+          )
+          return { currentUser, ...userTokens }
+        } catch (e) {
+          // client is accessing with expired access token and refresh token...
+          if (e instanceof jwt.TokenExpiredError) return
+          throw (e)
+        }
+
+      } else {
+        throw e
+      }
     }
-    return
   },
 })
 

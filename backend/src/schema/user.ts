@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs'
 import Crypto from 'crypto'
 import User from '../model/user'
 import Service from '../model/service'
-import { createToken } from '../utils/token'
+import { createTokens } from '../utils/tokens'
 import config from '../utils/config'
 import { validateUserArgs } from '../utils/validation'
 import {
@@ -33,6 +33,10 @@ import {
   requestGitLabToken,
   requestGitLabUserAccount,
 } from '../services/gitLab'
+
+import { Tokens } from '../types/tokens'
+
+import tokenService from '../services/token'
 
 const typeDef = `
     type ServiceUser {
@@ -143,7 +147,7 @@ const resolvers = {
       }
 
       const service = await Service.getServiceByName(args.service.serviceName)
-      
+
       await User.addServiceUser({
         ...args.service,
         user_id: context.currentUser.id,
@@ -173,6 +177,8 @@ const resolvers = {
 
       const gitHubUser = await requestGithubUserAccount(access_token)
 
+      tokenService.setToken(context.currentUser.id, 'github', access_token)
+
       const serviceUser = {
         serviceName: 'github',
         username: gitHubUser.login,
@@ -180,11 +186,11 @@ const resolvers = {
         reposurl: gitHubUser.repos_url,
       }
 
-      const token = createToken(context.currentUser, access_token, context.githubToken)
+      const tokens = createTokens(context.currentUser)
 
       return {
         serviceUser,
-        token,
+        tokens,
       }
     },
 
@@ -201,7 +207,6 @@ const resolvers = {
         throw new UserInputError('GitLab code not provided')
       }
 
-      
       const { access_token } = await requestGitLabToken(args.code)
 
       if (!access_token) {
@@ -210,22 +215,25 @@ const resolvers = {
 
       const gitLabUser = await requestGitLabUserAccount(access_token)
 
+      tokenService.setToken(context.currentUser.id, 'gitlab', access_token)
+
       const serviceUser = {
         serviceName: 'gitlab',
         username: gitLabUser.username,
         email: gitLabUser.email,
-        reposurl: 'https://gitlab.com/api/v4/users/' + gitLabUser.id + '/projects',
+        reposurl:
+          'https://gitlab.com/api/v4/users/' + gitLabUser.id + '/projects',
       }
 
-      const token = createToken(context.currentUser, context.gitlabToken, access_token)
+      const tokens = createTokens(context.currentUser)
 
       return {
         serviceUser,
-        token,
+        tokens,
       }
     },
 
-    authorizeWithBitbucket: async(
+    authorizeWithBitbucket: async (
       _root: unknown,
       args: BitbucketAuthCode,
       context: AppContext
@@ -243,27 +251,32 @@ const resolvers = {
       if (!access_token) {
         throw new UserInputError('Invalid or expired Bitbucket code')
       }
-      
+
       const bitBucketUser = await requestBitbucketUserAccount(access_token)
       const bitbucketUserEmail = await requestBitbucketUserEmail(access_token)
 
-      const email = bitbucketUserEmail.values.find(email => email.is_primary)?.email
+      tokenService.setToken(context.currentUser.id, 'bitbucket', access_token)
 
-      if(!email){
+      const email = bitbucketUserEmail.values.find(
+        (email) => email.is_primary
+      )?.email
+
+      if (!email) {
         throw new Error('Bitbucket email not found!')
       }
 
       const serviceUser = {
         serviceName: 'bitbucket',
         username: bitBucketUser.username,
-        email: email, 
+        email: email,
         reposurl: bitBucketUser.links.repositories.href,
       }
-      const token = createToken(context.currentUser, access_token, context.bitbucketToken)
+
+      const tokens = createTokens(context.currentUser)
 
       return {
         serviceUser,
-        token
+        tokens,
       }
     },
 
@@ -278,7 +291,7 @@ const resolvers = {
     register: async (
       _root: unknown,
       args: RegisterUserInput
-    ): Promise<string> => {
+    ): Promise<Tokens> => {
       const { validationFailed, errorMessage } = validateUserArgs(args)
       if (validationFailed) {
         throw new UserInputError(errorMessage)
@@ -292,14 +305,12 @@ const resolvers = {
         )
       }
 
-      const token = createToken(user)
+      const tokens = createTokens(user)
 
-      return token
+      return tokens
     },
-    
-    login: async (_root: unknown, args: LoginUserInput): Promise<string> => {
+    login: async (_root: unknown, args: LoginUserInput): Promise<Tokens> => {
       const user = await User.findUserByUsername(args.username)
-
       if (!user) {
         throw new UserInputError('Invalid username or password')
       }
@@ -313,9 +324,8 @@ const resolvers = {
         throw new UserInputError('Invalid username or password')
       }
 
-      const token = createToken(user)
-
-      return token
+      const tokens = createTokens(user)
+      return tokens
     },
   },
 }

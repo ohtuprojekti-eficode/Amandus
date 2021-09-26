@@ -4,8 +4,13 @@ import { useQuery } from '@apollo/client'
 import { BITBUCKET_LOGIN_URL } from '../../graphql/queries'
 import { BitbucketLoginURLQueryResult } from '../../types'
 
-const BitbucketAuthBtn = () => {
-  const { data, error } = useQuery<BitbucketLoginURLQueryResult>(BITBUCKET_LOGIN_URL)
+interface AuthBtnProps {
+  connected: boolean
+}
+
+const BitbucketAuthBtn = ({ connected }: AuthBtnProps) => {
+  const { data, error } =
+    useQuery<BitbucketLoginURLQueryResult>(BITBUCKET_LOGIN_URL)
 
   const btnClickHandler = (): void => {
     window.location.href = data!.bitbucketLoginUrl
@@ -21,8 +26,9 @@ const BitbucketAuthBtn = () => {
         variant="contained"
         color="primary"
         onClick={btnClickHandler}
+        disabled={connected}
       >
-        Connect Bitbucket
+        {connected ? 'Bitbucket connected' : 'Connect Bitbucket'}
       </Button>
     </div>
   )

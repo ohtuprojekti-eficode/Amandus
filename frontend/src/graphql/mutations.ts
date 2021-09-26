@@ -9,7 +9,10 @@ export const AUTHORIZE_WITH_GH = gql`
         email
         reposurl
       }
-      token
+      tokens {
+        accessToken
+        refreshToken
+      }
     }
   }
 `
@@ -23,7 +26,10 @@ export const AUTHORIZE_WITH_BB = gql`
         email
         reposurl
       }
-      token
+      tokens {
+        accessToken
+        refreshToken
+      }
     }
   }
 `
@@ -37,7 +43,10 @@ export const AUTHORIZE_WITH_GL = gql`
         email
         reposurl
       }
-      token
+      tokens {
+        accessToken
+        refreshToken
+      }
     }
   }
 `
@@ -54,13 +63,19 @@ export const SAVE_CHANGES = gql`
 
 export const REGISTER = gql`
   mutation register($username: String!, $email: String!, $password: String!) {
-    register(username: $username, email: $email, password: $password)
+    register(username: $username, email: $email, password: $password) {
+      accessToken
+      refreshToken
+    }
   }
 `
 
 export const LOGIN = gql`
   mutation login($username: String!, $password: String!) {
-    login(username: $username, password: $password)
+    login(username: $username, password: $password) {
+      accessToken
+      refreshToken
+    }
   }
 `
 

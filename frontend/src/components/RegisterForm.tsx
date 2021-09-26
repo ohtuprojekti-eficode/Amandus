@@ -86,10 +86,20 @@ const RegisterForm = () => {
         },
       })
       setFormStatus(formStatusProps.success)
-      localStorage.setItem('token', registerResponse.data.register)
+      localStorage.setItem(
+        'amandus-user-access-token',
+        registerResponse.data.register.accessToken
+      )
+      localStorage.setItem(
+        'amandus-user-refresh-token',
+        registerResponse.data.register.refreshToken
+      )
+
       window.location.href = '/'
     } catch (error) {
       if (
+        /** gets rid of ts error "Object is of type 'unknown'" */
+        error instanceof Error &&
         error.message.includes('duplicate key value violates unique constraint')
       ) {
         setFormStatus(formStatusProps.duplicate)

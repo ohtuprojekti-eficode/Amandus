@@ -35,6 +35,11 @@ export interface MeQueryResult {
   me: UserType
 }
 
+export interface Tokens {
+  accessToken: string
+  refreshToken: string
+}
+
 export interface RepoStateQueryResult {
   repoState: {
     currentBranch: string
@@ -48,21 +53,21 @@ export interface RepoStateQueryResult {
 export interface AuthorizeWithGHMutationResult {
   authorizeWithGithub: {
     serviceUser: ServiceUserType & { __typename: string }
-    token: string
+    tokens: Tokens
   }
 }
 
 export interface AuthorizeWithBBMutationResult {
   authorizeWithBitbucket: {
     serviceUser: ServiceUserType & { __typename: string}
-    token: string
+    tokens: Tokens
   }
 }
 
 export interface AuthorizeWithGLMutationResult {
   authorizeWithGitLab: {
     serviceUser: ServiceUserType & { __typename: string }
-    token: string
+    tokens: Tokens
   }
 }
 
