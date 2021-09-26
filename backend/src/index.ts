@@ -33,17 +33,15 @@ const server = new ApolloServer({
     if (!accessToken || !refreshToken) return
 
     try {
-      // accessing with working access token
+      // client is accessing with non-expired access token...
       const decodedAccessToken = <UserJWT>verify(accessToken, config.JWT_SECRET)
-
-
       if (!decodedAccessToken.id) return
+
       const currentUser = await User.getUserById(decodedAccessToken.id)
       const githubToken = decodedAccessToken.githubToken
       const bitbucketToken = decodedAccessToken.bitbucketToken
       const gitlabToken = decodedAccessToken.gitlabToken
 
-      //const currentUser = await User.findById(decodedAccessToken.id)
       return { currentUser, githubToken, bitbucketToken, gitlabToken }
     } catch (e) {
       if (e instanceof jwt.TokenExpiredError) {
@@ -52,32 +50,35 @@ const server = new ApolloServer({
           const decodedRefreshToken = <UserJWT>verify(refreshToken, config.JWT_SECRET)
           if (!decodedRefreshToken.id) return
 
-          const user = await User.getUserById(decodedRefreshToken.id)
-          const userTokens = createTokens(user);
+          const currentUser = await User.getUserById(decodedRefreshToken.id)
 
+          // check if the user does not exists in db
+          if (!currentUser /*|| currentUser.refreshTokenCount !== decodedRefreshToken.count*/) return
+
+          // generate new tokens for the user
+          const userTokens = createTokens(currentUser);
+
+          // send new tokens to the client in headers
           res.set({
             "Access-Control-Expose-Headers": "x-access-token,x-refresh-token",
             "x-access-token": userTokens.accessToken,
             "x-refresh-token": userTokens.refreshToken
           })
+
+          const githubToken = decodedRefreshToken.githubToken
+          const bitbucketToken = decodedRefreshToken.bitbucketToken
+          const gitlabToken = decodedRefreshToken.gitlabToken
+          return { currentUser, githubToken, bitbucketToken, gitlabToken }
         } catch (e) {
-          // invalid refresh token -> do nothing
-          return
+          // client is accessing with expired access token and refresh token...
+          if (e instanceof jwt.TokenExpiredError) return
+          throw (e)
         }
 
       } else {
         throw e
       }
     }
-    return
-    //const auth = req && req.headers.authorization
-    //if (auth && auth.toLowerCase().startsWith('bearer')) {
-    //  const decodedToken = <UserJWT>verify(auth.substring(7), config.JWT_SECRET)
-    //  const currentUser = await User.getUserById(decodedToken.id)
-    //  const githubToken = decodedToken.githubToken
-    //  return { currentUser, githubToken }
-    //}
-    //return
   },
 })
 
