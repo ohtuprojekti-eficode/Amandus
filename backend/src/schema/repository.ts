@@ -6,7 +6,7 @@ import {
   saveChanges,
   getLocalBranches,
   switchCurrentBranch,
-  pullNewestChanges
+  pullNewestChanges,
 } from '../services/git'
 import { existsSync, readFileSync } from 'fs'
 import readRecursive from 'recursive-readdir'
@@ -50,42 +50,23 @@ const resolvers = {
       // when context.currentuser exists
       if (!existsSync(repoLocation)) {
         await cloneRepository(args.url)
-      } 
-      
-      else {
+      } else {
         try {
           await pullNewestChanges(repoLocation)
-        } catch(error) {
+        } catch (error) {
           // In case of merge conflict
           if (error.message === 'Merge conflict') {
             throw new ApolloError('Merge conflict detected')
           } else {
             throw new ApolloError(error.message)
-          } 
+          }
         }
       }
       // Pulling now if the repo is cloned from before
 
       return 'Cloned'
     },
-    pullRepository: async (
-      _root: unknown,
-      args: { url: string },
-      _context: unknown
-    ): Promise<string> => {
-      const repoLocation = getRepoLocationFromUrlString(args.url)
-      try {
-        await pullNewestChanges(repoLocation)
-      } catch(error) {
-        // In case of merge conflict
-        if (error.message === 'Merge conflict') {
-          throw new ApolloError('Merge conflict detected')
-        } else {
-          throw new ApolloError(error.message)
-        }
-      }
-      return 'Pulled'
-    },
+
     getRepoState: async (
       _root: unknown,
       args: { url: string },
@@ -135,6 +116,24 @@ const resolvers = {
     ): Promise<string> => {
       const repoLocation = getRepoLocationFromUrlString(branchSwitchArgs.url)
       return await switchCurrentBranch(repoLocation, branchSwitchArgs.branch)
+    },
+    pullRepository: async (
+      _root: unknown,
+      args: { url: string },
+      _context: unknown
+    ): Promise<string> => {
+      const repoLocation = getRepoLocationFromUrlString(args.url)
+      try {
+        await pullNewestChanges(repoLocation)
+      } catch (error) {
+        // In case of merge conflict
+        if (error.message === 'Merge conflict') {
+          throw new ApolloError('Merge conflict detected')
+        } else {
+          throw new ApolloError(error.message)
+        }
+      }
+      return 'Pulled'
     },
   },
 }

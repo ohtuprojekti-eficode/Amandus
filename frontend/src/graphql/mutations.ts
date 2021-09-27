@@ -90,3 +90,11 @@ export const SWITCH_BRANCH = gql`
     switchBranch(url: $url, branch: $branch)
   }
 `
+
+export const PULL_REPO = gql`
+  mutation {
+    pullRepo: pullRepository(
+      url: "https://github.com/Ohtu-project-Eficode/robot-test-files"
+    )
+  }
+`
