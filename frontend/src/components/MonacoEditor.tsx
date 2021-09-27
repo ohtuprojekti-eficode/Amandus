@@ -3,7 +3,7 @@ import Editor from '@monaco-editor/react'
 import { monaco } from '@monaco-editor/react'
 import { useMutation, useQuery } from '@apollo/client'
 import { IS_GH_CONNECTED, ME, REPO_STATE } from '../graphql/queries'
-import { SAVE_CHANGES } from '../graphql/mutations'
+import { PULL_REPO, SAVE_CHANGES } from '../graphql/mutations'
 import {
   Button,
   createStyles,
@@ -86,9 +86,8 @@ const MonacoEditor = ({ content, filename, commitMessage }: Props) => {
   const [editorReady, setEditorReady] = useState(false)
   const providerRef = useRef<SimpleLanguageInfoProvider>()
   const branchState = useQuery<RepoStateQueryResult>(REPO_STATE)
-  const { data: GHConnectedQuery } = useQuery<IsGithubConnectedResult>(
-    IS_GH_CONNECTED
-  )
+  const { data: GHConnectedQuery } =
+    useQuery<IsGithubConnectedResult>(IS_GH_CONNECTED)
   const currentBranch = branchState.data?.repoState.currentBranch || ''
   const [dialogError, setDialogError] = useState<DialogError | undefined>(
     undefined
@@ -108,6 +107,10 @@ const MonacoEditor = ({ content, filename, commitMessage }: Props) => {
       refetchQueries: [{ query: REPO_STATE }],
     }
   )
+
+  const [pullRepo, { loading: pullLoading }] = useMutation(PULL_REPO, {
+    refetchQueries: [{ query: REPO_STATE }],
+  })
 
   const theme = useTheme()
 
@@ -143,7 +146,10 @@ const MonacoEditor = ({ content, filename, commitMessage }: Props) => {
         setDialogOpen(false)
         setDialogError(undefined)
       } catch (error) {
-        if (error.message === 'Merge conflict detected') {
+        if (
+          error instanceof Error &&
+          error.message === 'Merge conflict detected'
+        ) {
           setDialogError({
             title: `Merge conflict on branch ${branchName}`,
             message: 'Cannot push to selected branch. Create a new one.',
@@ -157,6 +163,14 @@ const MonacoEditor = ({ content, filename, commitMessage }: Props) => {
 
   const handleSaveButton = () => {
     setDialogOpen(true)
+  }
+
+  const handlePull = async () => {
+    try {
+      await pullRepo()
+    } catch (error) {
+      console.error('error pulling')
+    }
   }
 
   useEffect(() => {
@@ -206,9 +220,26 @@ const MonacoEditor = ({ content, filename, commitMessage }: Props) => {
       <div className={classes.saveGroup}>
         <div className={classes.buttonAndStatus}>
           <Button
+            style={{ marginRight: 5 }}
+            color="secondary"
+            variant="contained"
+            onClick={handlePull}
+            disabled={
+              pullLoading ||
+              userQueryLoading ||
+              !!userQueryError ||
+              mutationSaveLoading ||
+              !user?.me ||
+              branchState.loading
+            }
+          >
+            Pull
+          </Button>
+          <Button
             color="primary"
             variant="contained"
             disabled={
+              pullLoading ||
               userQueryLoading ||
               !!userQueryError ||
               mutationSaveLoading ||
