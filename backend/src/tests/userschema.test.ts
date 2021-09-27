@@ -329,6 +329,45 @@ describe('User schema add git service mutations', () => {
       },
     })
   })
+
+  it('users Bitbucket account can be added to user data', async () => {
+    const userToSave = {
+      username: 'testuser',
+      password: 'mypAssword?45',
+      email: 'test@test.fi',
+    }
+
+    const user = await User.registerUser(userToSave)
+
+    const tokens = createTokens(user)
+
+    const { mutate } = createIntegrationTestClient({
+      apolloServer: server,
+      extendMockRequest: {
+        headers: {
+          'x-access-token': tokens.accessToken,
+          'x-refresh-token': tokens.refreshToken,
+        },
+      },
+    })
+
+    const serviceArgs = {
+      serviceName: 'bitbucket',
+      username: 'bitbucket_username',
+      email: 'user@bitbucketmail.com',
+      reposurl: 'bitbucket.com/user/repos'
+    }
+
+    const mutationResult = await mutate(ADD_SERVICE, {
+      variables: { service: serviceArgs }
+    })
+
+    expect(mutationResult).toEqual({
+      data: {
+        connectGitService: 'success'
+      }
+    })
+  })
 })
 
 describe('Context currentuser query', () => {
