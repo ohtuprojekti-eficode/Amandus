@@ -31,7 +31,7 @@ Adding a new syntax highlighting ruleset should be possible by composing a valid
 At this moment, **all users have to register & login to the application in order to use the editor**. 
 
 * When a user has logged in to the application and saves their changes, these changes will be automatically committed to a local repository on our server.
-* If a user wants to push changes into a remote repository, e.g. a repository in GitHub, they have to first authorize the application with that external service. See [Authorizing with external Git services](#authorizing-with-external-git-services).
+* If a user wants to push changes into a remote repository, they have to first authorize the application with that external service. See [Authorizing with external Git services](#authorizing-with-external-git-services).
 
 **Note**: Users are not able to clone any repositories or create repositories of their own; the application simply clones one and the same repository from GitHub for all users to use, no matter whether they have connected to GitHub or not. 
 
@@ -49,94 +49,27 @@ When a user logs in to the application, the following happens:
     * The database is queried for a user with the id in the decoded token. If a user is found, it is attached to context in field `currentUser`.
     * The field `githubToken`is also decoded from the token and attached to context, whether it is undefined or not. 
 
-#### Security issues
-
-Currently, the authorization token is stored in LocalStorage, which we recognize as a great security risk. As explained above, the token contains the user’s id, username and the GitHub authorization token if it exists. Neither the local token nor GitHub token expire, which means that **if the app token ends up in wrong hands, they could not only gain access to this application, but also potentially to the user’s GitHub account**.
-
-For these reasons, **it is important to remove the token from LocalStorage after each session, by either logging out or manually removing the token**.
-
-### Future considerations
-
-For the reasons mentioned above, we see that it would be best  
-
-* to set an expiration time for auth tokens, 
-* use refresh tokens and 
-* store the tokens in memory instead of LocalStorage.
-
 ## Authorizing with external Git services
 
 ### Status
 
-As explained in the [previous section](#authentication-and-authorization), if a user wants to push changes into a remote repository, e.g. a repository in GitHub, they have to first authorize the application with that external service. 
+As explained in the [previous section](#authentication-and-authorization), if a user wants to push changes into a remote repository, they have to first authorize the application with that external service. 
 
 **Note**: 
-* For now, the application supports only GitHub.
+* For now, the application supports Github, Gitlab and Bitbucket.
 * Currently, users are not able to clone any repositories or create repositories of their own; the application simply clones one and the same repository for all users to use. 
 
-From the user's point of view, authorizing the application with an external service means that the user has to click on the **Connect GitHub** button in frontend and give our application the permission to perform operations on their behalf. After this, when the user saves their changes, those changes will be automatically committed and pushed to the remote repository as well.
-
-More specifically, when the user authorizes the application with GitHub, the following happens
-
-1. The user is taken to an authorization page on GitHub (`https://github.com/login/oauth/authorize`) where the user can login and give permission for our application to perform git operations.
-2. If the user accepts the request, GitHub redirects to a callback url in our application (`/auth/github/callback`) with a temporary code in a code parameter. The temporary code will expire after 10 minutes.
-3. Next, this temporary code will be exhanged for a GitHub access token and the GH access token will be in turn used to authorize a request to get the user's account from GitHub:
-    * First, our callback component dispatches the temporary code as a parameter with `authorizeWithGithub` mutation to backend.
-    * Backend requests an access token from GitHub with the temporary code and
-    * With this access token, backend then requests the user account from GitHub.
-4. After receiving the access token and the GitHub user account, our backend returns
-    * a new token created with `jsonwebtoken`library, with the GitHub access token now included, and
-    * a serviceUser object with the fields
-         * **serviceName**: 'github',
-         * **username**: GitHub username,
-         * **email**: GitHub user email,
-         * **reposurl**: GitHub user's repositories url,
-5. Finally, our callback component in frontend
-    * Dispatches the serviceUser to backend as parameter with `connectGitService` mutation, which will save the GitHub user data to ServiceUser table in the database.
-    * Stores the new access token to LocalStorage.
-
-See more information on [GitHub OAuth on GitHub API documentation](https://docs.github.com/en/free-pro-team@latest/developers/apps/authorizing-oauth-apps).
-
-### Future considerations
-
-For the security reasons mentioned above, we see that it would be best  
-
-* to set an expiration time for all auth tokens, 
-* use refresh tokens and 
-* store the tokens in memory instead of LocalStorage.
+From the user's point of view, authorizing the application with an external service means that the user has to click on the **Connect Github** (or Gitlab / Bitbucket) button in frontend and give our application the permission to perform operations on their behalf. After this, when the user saves their changes, those changes will be automatically committed and pushed to the remote repository as well.
 
 ## Enabling users to connect onto multiple external Git services 
 
 ### Status
 
-Currently, a User entity in the database can relate to multiple ServiceUser entities, where a single ServiceUser contains the user account data (username, email, user id, etc.) on an external Git service such as GitHub, GitLab and BitBucket. 
-
-However, for now the application supports only connecting to GitHub and the auth token from GitHub is added into the application’s authorization token in a way that does not allow multiple ServiceUser accounts to be simultaneously in use. 
-
-The local auth token contains currently the following fields 
-
-* **id**: user’s id in database, 
-* **username**: user’s local username and 
-* **githubToken**: GitHub authorization token.
+Previously the users were able to authenticate only with Github. Having received an update, Amandus now accepts Bitbucket and Gitlab services too as a way of authentication. 
 
 ### Future considerations
 
-To allow users to use multiple service accounts if they wish to connect into multiple services, we suggest the tokens from external services could be included in the local token as a list of objects, i.e.
-
-```
-[
-    { 
-       serviceUserId: “local ServiceUser entity id here”},
-       token: “GitHub authorization token string here”
-    },
-    { 
-       serviceUserId: “local ServiceUser entity id here”},
-       token: “BitBucket authorization token string here”
-    },
-    …..
-]
-```
-
-Note: we are not yet certain how other git services like BitBucket or GitLab have enabled third party authentication and authorization, but we believe that similar information could be retrieved from all of them.
+In case other version control platform services emerge and if they are relevant for the Amandus userbase, they should be considered as potential additions to the ways of authentication in Amandus. 
 
 ## Git operations with SimpleGit library
 
