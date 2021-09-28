@@ -126,9 +126,14 @@ const Header = ({ user, logout, theme, toggleTheme }: Props) => {
             )}
             {user && (
               <div>
+                {user.user_role === 'admin' ? 
+                <span className={classes.loginGreet}>
+                  (ADMIN)
+                </span>  : ''  
+                }
                 <span className={classes.loginGreet}>
                   Hello, {user.username}
-                </span>
+                </span> 
                 <Link
                   component={RouterLink}
                   className={classes.linkBtnBordered}

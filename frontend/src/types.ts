@@ -91,6 +91,7 @@ export interface ServiceUserType {
 
 export interface UserType {
   username: string
+  user_role: String
   email: string
   services?: ServiceUserType[]
 }

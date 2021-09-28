@@ -45,6 +45,7 @@ const Mutation = `
         logout: String
         register(
             username: String!
+            user_role: String
             email: String!
             password: String!
         ): Tokens

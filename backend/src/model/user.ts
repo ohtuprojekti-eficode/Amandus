@@ -6,10 +6,10 @@ import { ServiceUserInput, RegisterUserInput } from '../types/params'
 const registerUser = async ({
   username,
   email,
-  password,
+  password
 }: RegisterUserInput): Promise<UserType> => {
   const queryText =
-    'INSERT INTO USERS(username, email, password) VALUES($1, $2, $3) RETURNING id, username, email'
+    'INSERT INTO USERS(username, email, password) VALUES($1, $2, $3) RETURNING id, username, user_role, email'
   const cryptedPassword = bcrypt.hashSync(password, 10)
   const queryResult = await pool.query<UserRecord>(queryText, [
     username,
@@ -18,6 +18,25 @@ const registerUser = async ({
   ])
 
   return queryResult.rows[0]
+}
+
+const registerAdmin = async ({
+  username,
+  email,
+  password
+}: RegisterUserInput): Promise<UserType> => {
+  const user_role = 'admin'
+  const queryText =
+  'INSERT INTO USERS(username, user_role, email, password) VALUES($1, $2, $3, $4) RETURNING id, username, user_role, email'
+const cryptedPassword = bcrypt.hashSync(password, 10)
+const queryResult = await pool.query<UserRecord>(queryText, [
+  username,
+  user_role,
+  email,
+  cryptedPassword,
+])
+
+return queryResult.rows[0]
 }
 
 const findUserByUsername = async (
@@ -87,6 +106,7 @@ const getUserById = async (id: number): Promise<UserType | null > => {
 
 export default {
   registerUser,
+  registerAdmin,
   findUserByUsername,
   deleteAll,
   addServiceUser,
