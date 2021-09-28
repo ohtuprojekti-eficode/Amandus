@@ -24,6 +24,7 @@ describe('getUser query return right user data', () => {
     const expectedObject: UserType = {
       id: user.id,
       username: 'pentti',
+      user_role: 'non-admin',
       email: 'rix@rax.com',
       services: [
         {
@@ -65,6 +66,7 @@ describe('getUser query return right user data', () => {
     const expectedObject: UserType = {
       id: user.id,
       username: 'pentti',
+      user_role: 'non-admin',
       email: 'rix@rax.com',
       services: [
         {

@@ -2,7 +2,7 @@ import { createTokens } from '../utils/tokens'
 import tokenService from '../services/token'
 
 const createAmandusToken = () => {
-  return createTokens({ id: 1, username: 'testuser', email: 'test@email.com' })
+  return createTokens({ id: 1, username: 'testuser', user_role: 'non-admin', email: 'test@email.com' })
     .accessToken
 }
 
