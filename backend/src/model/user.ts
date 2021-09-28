@@ -63,7 +63,7 @@ const getUserById = async (id: number): Promise<UserType | null > => {
   const sql = `
     SELECT row_to_json(t) AS user
     FROM (
-      SELECT id, username, email,
+      SELECT id, username, user_role, email,
         (
           SELECT json_agg(json_build_object(
             'username', service_users.username,
