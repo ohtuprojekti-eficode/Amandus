@@ -1,10 +1,7 @@
 import { v4 as uuid } from 'uuid'
 
 describe('When deleting user', () => {
-  beforeEach(() => {
-    cy.visit(Cypress.env('HOST') + '/login')
-  })
-
+  
   it('I can delete my user account', () => {
     
     cy.visit(Cypress.env('HOST') + '/register')
@@ -30,5 +27,4 @@ describe('When deleting user', () => {
     cy.contains(`Register`)
     cy.contains(`Login`)
   })
-
 })

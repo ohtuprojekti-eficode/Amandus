@@ -37,7 +37,6 @@ import {
 import { Tokens } from '../types/tokens'
 
 import tokenService from '../services/token'
-import user from '../model/user'
 
 const typeDef = `
     type ServiceUser {
@@ -340,7 +339,10 @@ const resolvers = {
           'User not valid'
         )
       }
-      await user.deleteUser(username)
+      await User.deleteUser(username)
+
+      
+    //  await user.deleteUser
     }
   }
 }
