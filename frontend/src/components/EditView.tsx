@@ -1,5 +1,5 @@
 import React from 'react'
-import MonacoEditor from './MonacoEditor'
+import MonacoDiffEditor from './MonacoDiffEditor'
 import Sidebar from './Sidebar'
 import { useLocation } from 'react-router-dom'
 import { useLazyQuery, useQuery } from '@apollo/client'
@@ -41,7 +41,7 @@ const EditView = () => {
         <Sidebar files={files} />
       </div>
       <div className={classes.editor}>
-        <MonacoEditor content={content} filename={filename} commitMessage={commitMessage}/>
+        <MonacoDiffEditor original="previous state of code" modified="incoming changes" content={content} filename={filename} commitMessage={commitMessage}/>
       </div>
     </div>
   )
