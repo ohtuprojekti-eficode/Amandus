@@ -38,6 +38,8 @@ const DeleteAccount = ({ user }: Props) => {
         </p>
 
         <Button
+          id="delete-button"
+          name="delete-button"
           color="primary"
           variant="contained"
           onClick={deleteUserAccount}
