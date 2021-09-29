@@ -97,6 +97,15 @@ const Header = ({ user, logout, theme, toggleTheme }: Props) => {
               Connections
             </Link>
             )}
+            {user && (
+              <Link
+              component={RouterLink}
+              className={classes.linkBtnTransparent}
+              to="/deleteAccount"
+            >
+              Delete Account
+            </Link>
+            )}
           </div>
           <Switch
             checked={switchChecked}
@@ -144,6 +153,7 @@ const Header = ({ user, logout, theme, toggleTheme }: Props) => {
                 </Link>
               </div>
             )}
+            
           </div>
         </Toolbar>
       </AppBar>

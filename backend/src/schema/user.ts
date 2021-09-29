@@ -37,6 +37,7 @@ import {
 import { Tokens } from '../types/tokens'
 
 import tokenService from '../services/token'
+import user from '../model/user'
 
 const typeDef = `
     type ServiceUser {
@@ -328,7 +329,20 @@ const resolvers = {
       const tokens = createTokens(user)
       return tokens
     },
-  },
+    deleteUser: async (
+      _root: unknown,
+      args: UserType,
+      _context: AppContext
+    ): Promise<void> => {
+      const username = args.username
+      if (!username) {
+        throw new UserInputError(
+          'User not valid'
+        )
+      }
+      await user.deleteUser(username)
+    }
+  }
 }
 
 export default {

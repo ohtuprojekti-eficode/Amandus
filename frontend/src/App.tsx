@@ -16,6 +16,7 @@ import RepositoriesView from './components/RepositoriesView'
 import Connections from './components/Connections'
 import MyLoginForm from './components/MyLoginForm'
 import { MeQueryResult } from './types'
+import DeleteAccount from './components/DeleteAccount'
 
 const App = () => {
   const { data: user } = useQuery<MeQueryResult>(ME)
@@ -83,6 +84,12 @@ const App = () => {
 
           <Route exact path="/connections">
             <Connections />
+          </Route>
+
+          <Route exact path="/deleteAccount">
+            <DeleteAccount 
+             user = {user?.me}
+            />
           </Route>
 
           <Route exact path="/register" component={RegisterForm} />

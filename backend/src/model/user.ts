@@ -104,6 +104,14 @@ const getUserById = async (id: number): Promise<UserType | null > => {
   return queryResult.rows[0].user
 }
 
+const deleteUser = async (username: string): Promise<void> => {
+  const queryText = `
+  DELETE FROM Users WHERE username=$1
+  `
+  await pool.query(queryText, [username])
+
+}
+
 export default {
   registerUser,
   registerAdmin,
@@ -111,4 +119,5 @@ export default {
   deleteAll,
   addServiceUser,
   getUserById,
+  deleteUser
 }
