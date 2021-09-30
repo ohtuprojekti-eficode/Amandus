@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useState } from 'react'
+import MonacoEditor from './MonacoEditor'
 import MonacoDiffEditor from './MonacoDiffEditor'
 import Sidebar from './Sidebar'
 import { useLocation } from 'react-router-dom'
@@ -10,6 +11,7 @@ import { createStyles, makeStyles } from '@material-ui/core/styles'
 const EditView = () => {
   const location = useLocation()
   const classes = useStyles()
+  const [mergeConflictExists, setMergeConflictExists] = useState(false)
 
   const [
     repoStateQuery,
@@ -35,13 +37,31 @@ const EditView = () => {
   const content = files.find((e) => e.name === filename)?.content
   const commitMessage = repoStateData ? repoStateData.repoState.commitMessage : ''
 
+  const renderEditor = () => {
+    if (mergeConflictExists) {
+//     repoStateQuery here 
+//      if result exists: 
+        return (
+          <div className={classes.editor}>
+            <MonacoDiffEditor setMergeConflictState={setMergeConflictExists} original={content} modified={content} filename={filename} commitMessage={commitMessage}/>
+          </div>
+        )
+    } else {
+      return (
+        <div className={classes.editor}>
+          <MonacoEditor setMergeConflictState={setMergeConflictExists} content={content} filename={filename} commitMessage={commitMessage}/>
+        </div>
+      )
+    }
+  }
+
   return (
     <div className={classes.root}>
       <div className={classes.sidebar}>
         <Sidebar files={files} />
       </div>
       <div className={classes.editor}>
-        <MonacoDiffEditor original="previous state of code" modified="incoming changes" content={content} filename={filename} commitMessage={commitMessage}/>
+        {renderEditor()}
       </div>
     </div>
   )

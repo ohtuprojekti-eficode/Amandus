@@ -24,11 +24,11 @@ import VsCodeDarkTheme from '../styles/editor-themes/vs-dark-plus-theme'
 import VsCodeLightTheme from '../styles/editor-themes/vs-light-plus-theme'
 
 interface Props {
-  content: string | undefined
+  original: string | undefined
+  modified: string | undefined
   filename: string | undefined
   commitMessage: string | undefined
-  original: string
-  modified: string
+  setMergeConflictState: (active: boolean) => void 
 }
 
 interface Getter {
@@ -81,7 +81,7 @@ const stylesInUse = makeStyles(() =>
   })
 )
 
-const MonacoDiffEditor = ({ original, modified, filename, commitMessage }: Props) => {
+const MonacoDiffEditor = ({ setMergeConflictState, original, modified, filename, commitMessage }: Props) => {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [waitingToSave, setWaitingToSave] = useState(false)
   const [editorReady, setEditorReady] = useState(false)
@@ -178,6 +178,10 @@ const MonacoDiffEditor = ({ original, modified, filename, commitMessage }: Props
     }
   }
 
+  const options = {
+    "isInEmbeddedEditor": true
+  }
+  
   return (
     <div>
       <h2 className={classes.title}>

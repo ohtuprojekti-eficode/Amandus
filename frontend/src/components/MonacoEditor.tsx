@@ -23,11 +23,13 @@ import { initMonaco } from '../utils/monacoInitializer'
 import { SimpleLanguageInfoProvider } from '../utils/providers'
 import VsCodeDarkTheme from '../styles/editor-themes/vs-dark-plus-theme'
 import VsCodeLightTheme from '../styles/editor-themes/vs-light-plus-theme'
+import { Console } from 'console'
 
 interface Props {
   content: string | undefined
   filename: string | undefined
   commitMessage: string | undefined
+  setMergeConflictState: (active: boolean) => void 
 }
 
 interface Getter {
@@ -80,7 +82,7 @@ const stylesInUse = makeStyles(() =>
   })
 )
 
-const MonacoEditor = ({ content, filename, commitMessage }: Props) => {
+const MonacoEditor = ({ setMergeConflictState, content, filename, commitMessage }: Props) => {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [waitingToSave, setWaitingToSave] = useState(false)
   const [editorReady, setEditorReady] = useState(false)
@@ -150,6 +152,7 @@ const MonacoEditor = ({ content, filename, commitMessage }: Props) => {
           error instanceof Error &&
           error.message === 'Merge conflict detected'
         ) {
+          setMergeConflictState(true)
           setDialogError({
             title: `Merge conflict on branch ${branchName}`,
             message: 'Cannot push to selected branch. Create a new one.',
