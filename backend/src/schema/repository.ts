@@ -17,6 +17,7 @@ import { BranchSwitchArgs, SaveArgs } from '../types/params'
 import { RepoState } from '../types/repoState'
 import { getRepoLocationFromUrlString } from '../utils/utils'
 import { getRepoList } from '../services/gitHub'
+import { Repo } from '../types/repo'
 
 const typeDef = `
     type File {
@@ -34,8 +35,11 @@ const typeDef = `
       url: String!
       commitMessage: String!
     }
-    type RepoList {
-      full_names: [String] 
+    type Repo {
+      id: String!
+      name: String!
+      full_name: String!
+      clone_url: String!
     }
 `
 
@@ -102,7 +106,18 @@ const resolvers = {
         const service = context.currentUser.services.find(s => s.serviceName === 'github')
         const list = service && await getRepoList(service, context.githubToken)
         
-        const repolist = list.map((repo: { full_name: any }) => repo.full_name)
+        const repolist = list.map((repo: Repo) => {
+          let repoObject: Repo = {
+            id: repo.id,
+            name: repo.name,
+            full_name: repo.full_name,
+            clone_url: repo.clone_url
+          }
+          return (
+            repoObject
+            )}
+          )
+
         return repolist
       }
       return 'list'
