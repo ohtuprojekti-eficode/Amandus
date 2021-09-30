@@ -22,14 +22,6 @@ const authLink = setContext((_, { headers }) => {
   const accessToken = localStorage.getItem('amandus-user-access-token')
   const refreshToken = localStorage.getItem('amandus-user-refresh-token')
 
-  
- // const token = localStorage.getItem('token')
- // return {
- //   headers: {
- //     ...headers,
- //     authorization: token ? `Bearer ${token}` : '',
- //   },
- // }
   if (!accessToken || !refreshToken) return
 
   return {

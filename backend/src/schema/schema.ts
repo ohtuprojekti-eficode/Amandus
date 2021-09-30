@@ -45,6 +45,7 @@ const Mutation = `
         logout: String
         register(
             username: String!
+            user_role: String
             email: String!
             password: String!
         ): Tokens
@@ -74,6 +75,7 @@ const Mutation = `
             code: String!
         ): ServiceAuthResponse
         pullRepository(url: String!): String
+        deleteUser(username: String!): String
     }
 `
 

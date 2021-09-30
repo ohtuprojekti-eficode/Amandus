@@ -48,6 +48,7 @@ const typeDef = `
     type User {
         id: Int!
         username: String!
+        user_role: String!
         email: String!
         services: [ServiceUser!]
     }
@@ -327,7 +328,23 @@ const resolvers = {
       const tokens = createTokens(user)
       return tokens
     },
-  },
+    deleteUser: async (
+      _root: unknown,
+      args: UserType,
+      _context: AppContext
+    ): Promise<void> => {
+      const username = args.username
+      if (!username) {
+        throw new UserInputError(
+          'User not valid'
+        )
+      }
+      await User.deleteUser(username)
+
+      
+    //  await user.deleteUser
+    }
+  }
 }
 
 export default {

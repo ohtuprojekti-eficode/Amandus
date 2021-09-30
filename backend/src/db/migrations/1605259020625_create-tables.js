@@ -4,9 +4,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 exports.up = (pgm) => {
+
+  pgm.sql`CREATE TYPE user_role AS ENUM ('admin', 'non-admin');`
+
   pgm.sql(`CREATE TABLE USERS(
         id serial PRIMARY KEY,    
         username TEXT UNIQUE NOT NULL,
+        user_role user_role DEFAULT 'non-admin',
         email TEXT,
         password TEXT NOT NULL,
         created_on TIMESTAMP NOT NULL DEFAULT NOW(),
