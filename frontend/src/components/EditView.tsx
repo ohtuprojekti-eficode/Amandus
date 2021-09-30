@@ -11,11 +11,13 @@ const EditView = () => {
   const location = useLocation()
   const classes = useStyles()
 
+  const url: String = 'https://github.com/anadis504/lapio-w2.git'
   const [
     repoStateQuery,
     { data: repoStateData },
   ] = useLazyQuery<RepoStateQueryResult>(REPO_STATE)
   const cloneRepoQuery = useQuery(CLONE_REPO, {
+    variables: {url},
     onCompleted: () => repoStateQuery(),
   })
 

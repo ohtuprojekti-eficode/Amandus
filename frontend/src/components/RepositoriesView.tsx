@@ -1,6 +1,7 @@
 import React from 'react'
 import { GET_REPO_LIST } from '../graphql/queries'
 import { useQuery } from '@apollo/client'
+import { Repo } from '../types'
 
 
 
@@ -13,19 +14,24 @@ const RepositoriesView = () => {
       <p>loading...</p>
     )
   }
+  if (getRepoList.error) {
+    return (
+      <p>error getting repos...</p>
+    )
+  }
   return (
     <div>
       <h3>
         Github repos
       </h3>
-      <ol>
+      <ul>
         {getRepoList.data.getRepoListFromService.map(
-          (name:String,i:number) => 
+          (repo: Repo, i:number) => 
           <li key={i}>
-            {name}
+            {repo.name}
           </li>
         )}
-      </ol>
+      </ul>
     </div> 
   )
 }

@@ -36,10 +36,8 @@ export const IS_GL_CONNECTED = gql`
 `
 
 export const CLONE_REPO = gql`
-  query {
-    cloneRepo: cloneRepository(
-      url: "https://github.com/Ohtu-project-Eficode/robot-test-files"
-    )
+  query cloneRepo($url: String!) {
+    cloneRepository(url: $url)
   }
 `
 
@@ -78,6 +76,11 @@ export const ME = gql`
 `
 export const GET_REPO_LIST = gql`
   query {
-    getRepoListFromService 
+    getRepoListFromService {
+      id
+      name
+      full_name
+      clone_url
+    }
   }
 `
