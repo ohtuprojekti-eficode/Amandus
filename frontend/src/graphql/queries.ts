@@ -76,3 +76,8 @@ export const ME = gql`
     }
   }
 `
+export const GET_REPO_LIST = gql`
+  query {
+    getRepoListFromService 
+  }
+`

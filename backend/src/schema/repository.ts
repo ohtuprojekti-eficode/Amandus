@@ -16,6 +16,7 @@ import { AppContext } from '../types/user'
 import { BranchSwitchArgs, SaveArgs } from '../types/params'
 import { RepoState } from '../types/repoState'
 import { getRepoLocationFromUrlString } from '../utils/utils'
+import { getRepoList } from '../services/gitHub'
 
 const typeDef = `
     type File {
@@ -32,6 +33,9 @@ const typeDef = `
       branches: [String]!
       url: String!
       commitMessage: String!
+    }
+    type RepoList {
+      full_names: [String] 
     }
 `
 
@@ -83,10 +87,28 @@ const resolvers = {
       }))
 
       const branches = await getLocalBranches(repoLocation)
-
       return { currentBranch, files, branches, url: args.url, commitMessage }
     },
+    getRepoListFromService: async (
+      _root: unknown,
+      _args: unknown,
+      context: AppContext
+    ): Promise<String> => {
+      if (!context.currentUser) {
+        throw new ForbiddenError('You have to login')
+      }
+      if (context.githubToken && context.currentUser.services) {
+        
+        const service = context.currentUser.services.find(s => s.serviceName === 'github')
+        const list = service && await getRepoList(service, context.githubToken)
+        
+        const repolist = list.map((repo: { full_name: any }) => repo.full_name)
+        return repolist
+      }
+      return 'list'
+    },
   },
+    
   Mutation: {
     saveChanges: async (
       _root: unknown,
