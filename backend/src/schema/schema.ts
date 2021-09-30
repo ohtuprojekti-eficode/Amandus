@@ -18,6 +18,11 @@ const Query = `
 `
 
 const Mutation = `
+    enum ServiceName {
+        github
+        bitbucket
+        gitlab
+    }
     type Tokens {
         accessToken: String
         refreshToken: String
@@ -55,7 +60,8 @@ const Mutation = `
         saveChanges(
             file: FileInput! 
             branch: String!
-            commitMessage: String
+            commitMessage: String,
+            usedService: ServiceName
         ): String
         connectGitService(
             service: AddServiceArgs!

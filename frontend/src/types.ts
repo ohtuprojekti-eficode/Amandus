@@ -94,3 +94,5 @@ export interface UserType {
   email: string
   services?: ServiceUserType[]
 }
+
+export type ServiceName = 'github' | 'bitbucket' | 'gitlab'

@@ -57,7 +57,12 @@ export const SAVE_CHANGES = gql`
     $branch: String!
     $commitMessage: String
   ) {
-    saveChanges(file: $file, branch: $branch, commitMessage: $commitMessage)
+    saveChanges(
+      file: $file,
+      branch: $branch,
+      commitMessage: $commitMessage,
+      usedService: $usedService
+    )
   }
 `
 

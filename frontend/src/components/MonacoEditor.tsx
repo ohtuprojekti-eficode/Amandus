@@ -18,6 +18,7 @@ import {
   IsGithubConnectedResult,
   MeQueryResult,
   RepoStateQueryResult,
+  ServiceName,
 } from '../types'
 import { initMonaco } from '../utils/monacoInitializer'
 import { SimpleLanguageInfoProvider } from '../utils/providers'
@@ -28,6 +29,7 @@ interface Props {
   content: string | undefined
   filename: string | undefined
   commitMessage: string | undefined
+  usedService: ServiceName
 }
 
 interface Getter {
@@ -80,7 +82,7 @@ const stylesInUse = makeStyles(() =>
   })
 )
 
-const MonacoEditor = ({ content, filename, commitMessage }: Props) => {
+const MonacoEditor = ({ content, filename, commitMessage, usedService }: Props) => {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [waitingToSave, setWaitingToSave] = useState(false)
   const [editorReady, setEditorReady] = useState(false)
@@ -141,6 +143,7 @@ const MonacoEditor = ({ content, filename, commitMessage }: Props) => {
             },
             branch: branchName,
             commitMessage: newCommitMessage,
+            usedService: usedService
           },
         })
         setDialogOpen(false)

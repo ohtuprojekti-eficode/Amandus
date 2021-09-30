@@ -98,7 +98,7 @@ const resolvers = {
       }
 
       try {
-        await saveChanges(saveArgs, context.currentUser, context.githubToken)
+        await saveChanges(saveArgs, context)
       } catch (error) {
         if (error.message === 'Merge conflict') {
           throw new ApolloError('Merge conflict detected')

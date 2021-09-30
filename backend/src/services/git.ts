@@ -1,4 +1,4 @@
-import { UserType } from '../types/user'
+import { AppContext } from '../types/user'
 import { SaveArgs } from '../types/params'
 import { sanitizeBranchName } from '../utils/sanitize'
 import {
@@ -22,6 +22,7 @@ import {
   updateBranchFromRemote,
   getLastCommitMessage,
 } from '../utils/gitUtils'
+import { ServiceTokenType } from '../types/service'
 
 export const switchCurrentBranch = async (
   repoLocation: string,
@@ -50,11 +51,16 @@ export const cloneRepository = async (url: string): Promise<void> => {
 
 export const saveChanges = async (
   saveArgs: SaveArgs,
-  user: UserType,
-  remoteToken: string | undefined
+  context: AppContext
 ): Promise<void> => {
-  const { username, email } = user
-  const { file, branch, commitMessage } = saveArgs
+  const { file, branch, commitMessage, usedService } = saveArgs
+  const currentService = context.currentUser
+    .services?.find(s => s.serviceName === usedService)
+
+  const username = currentService?.username || context.currentUser.username
+  const email = currentService?.email || context.currentUser.email
+  
+  const remoteToken = context[`${usedService}Token`] as ServiceTokenType
 
   const repositoryName = getRepositoryFromFilePath(file)
   const repoLocation = getRepoLocationFromRepoName(repositoryName)

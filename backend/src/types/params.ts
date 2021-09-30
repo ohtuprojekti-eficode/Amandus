@@ -1,10 +1,12 @@
 import { File } from './file'
+import { ServiceName } from './service'
 import { ServiceUserType } from './user'
 
 export interface SaveArgs {
   file: File
   branch: string
   commitMessage: string
+  usedService: ServiceName
 }
 
 export interface BranchSwitchArgs {
