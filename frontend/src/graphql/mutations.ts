@@ -103,3 +103,9 @@ export const PULL_REPO = gql`
     )
   }
 `
+
+export const DELETE_USER = gql`
+  mutation deleteUser($username: String!) {
+    deleteUser(username: $username)
+  }
+`

@@ -21,6 +21,7 @@ const ME = gql`
     me {
       id
       username
+      user_role
       email
       services {
         serviceName
@@ -95,6 +96,22 @@ describe('User schema register mutations', () => {
       mutation: REGISTER,
       variables: {
         username: 'testuser2',
+        email: 'testuser2@test.com',
+        password: 'mypAssword?45',
+      },
+    })
+
+    expect(res.data?.register).toBeTruthy()
+  })
+
+  it('can register admin user', async () => {
+    const { mutate } = createNormalTestClient(server)
+
+    const res = await mutate({
+      mutation: REGISTER,
+      variables: {
+        username: 'testuser2',
+        user_role: 'admin',
         email: 'testuser2@test.com',
         password: 'mypAssword?45',
       },
@@ -414,6 +431,7 @@ describe('Context currentuser query', () => {
         me: {
           id: user.id,
           username: userToSave.username,
+          user_role: 'non-admin',
           email: userToSave.email,
           services: null,
         },
@@ -459,8 +477,76 @@ describe('Context currentuser query', () => {
         me: {
           id: user.id,
           username: userToSave.username,
+          user_role: 'non-admin',
           email: userToSave.email,
           services: [serviceArgs],
+        },
+      },
+    })
+  })
+
+  it('user_role is returned with currentuser query', async () => {
+    const adminUserToSave = {
+      username: 'testuser',
+      password: 'mypAssword?45',
+      email: 'test@test.fi',
+    } 
+    const user = await User.registerUser(adminUserToSave)
+    const tokens = createTokens(user)
+
+    const { query } = createIntegrationTestClient({
+      apolloServer: server,
+      extendMockRequest: {
+        headers: {
+          'x-access-token': tokens.accessToken,
+          'x-refresh-token': tokens.refreshToken,
+        },
+      },
+    })
+
+    const queryResult = await query(ME)
+
+    expect(queryResult).toEqual({
+      data: {
+        me: {
+          id: user.id,
+          username: adminUserToSave.username,
+          user_role: 'non-admin',
+          email: adminUserToSave.email,
+          services: null,
+        },
+      },
+    })
+  })
+  it('admin is returned with currentuser query', async () => {
+    const adminUserToSave = {
+      username: 'testuser',
+      password: 'mypAssword?45',
+      email: 'test@test.fi',
+    } 
+    const user = await User.registerAdmin(adminUserToSave)
+    const tokens = createTokens(user)
+
+    const { query } = createIntegrationTestClient({
+      apolloServer: server,
+      extendMockRequest: {
+        headers: {
+          'x-access-token': tokens.accessToken,
+          'x-refresh-token': tokens.refreshToken,
+        },
+      },
+    })
+
+    const queryResult = await query(ME)
+
+    expect(queryResult).toEqual({
+      data: {
+        me: {
+          id: user.id,
+          username: adminUserToSave.username,
+          user_role: 'admin',
+          email: adminUserToSave.email,
+          services: null,
         },
       },
     })

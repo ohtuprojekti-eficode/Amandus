@@ -69,6 +69,7 @@ export interface GitLabUserType {
 export interface UserType {
   id: number
   username: string
+  user_role: string
   email: string
   services?: ServiceUserType[]
 }
@@ -89,6 +90,7 @@ export interface AppContext extends ContextTokens {
 export interface UserRecord {
   id: number
   username: string
+  user_role: string
   email: string
   password: string
   created_on: string
