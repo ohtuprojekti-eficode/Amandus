@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import MonacoEditor from './MonacoEditor'
 import MonacoDiffEditor from './MonacoDiffEditor'
 import Sidebar from './Sidebar'
@@ -11,19 +11,37 @@ import { createStyles, makeStyles } from '@material-ui/core/styles'
 const EditView = () => {
   const location = useLocation()
   const classes = useStyles()
-  const [mergeConflictExists, setMergeConflictExists] = useState(false)
+  const [hasRefetched, setHasRefetched] = useState(false)
+  const [mergeConflictExists, setMergeConflictExists] = useState(true)
 
+  /*
   const [
     repoStateQuery,
     { data: repoStateData },
   ] = useLazyQuery<RepoStateQueryResult>(REPO_STATE)
+  */
+  
+  
+  const [repoStateQuery, { data: repoStateData }] =
+    useLazyQuery<RepoStateQueryResult>(REPO_STATE, {
+      fetchPolicy: 'network-only'
+  })
+
   const cloneRepoQuery = useQuery(CLONE_REPO, {
     onCompleted: () => repoStateQuery(),
   })
+  
 
   if (cloneRepoQuery.error){
     console.log(`Clone error: ${cloneRepoQuery.error}`)
   }
+
+  useEffect(() => {
+    if (!hasRefetched && mergeConflictExists) {
+      repoStateQuery()
+      setHasRefetched(true)
+    }
+  }, [hasRefetched, mergeConflictExists])
 
   if (cloneRepoQuery.loading) return <div>Cloning repo...</div>
   if (cloneRepoQuery.error) return <div>Error cloning repo...</div>
@@ -39,20 +57,28 @@ const EditView = () => {
 
   const renderEditor = () => {
     if (mergeConflictExists) {
-//     repoStateQuery here 
-//      if result exists: 
         return (
           <div className={classes.editor}>
-            <MonacoDiffEditor setMergeConflictState={setMergeConflictExists} original={content} modified={content} filename={filename} commitMessage={commitMessage}/>
+            <MonacoDiffEditor 
+            setMergeConflictState={setMergeConflictExists} 
+            original={content} 
+            modified={content} 
+            filename={filename} 
+            commitMessage={commitMessage}/>
           </div>
         )
-    } else {
-      return (
-        <div className={classes.editor}>
-          <MonacoEditor setMergeConflictState={setMergeConflictExists} content={content} filename={filename} commitMessage={commitMessage}/>
-        </div>
-      )
-    }
+    } 
+    
+    return (
+      <div className={classes.editor}>
+        <MonacoEditor 
+        setMergeConflictState={setMergeConflictExists} 
+        content={content} 
+        filename={filename} 
+        commitMessage={commitMessage}/>
+      </div>
+    )
+    
   }
 
   return (
@@ -60,9 +86,7 @@ const EditView = () => {
       <div className={classes.sidebar}>
         <Sidebar files={files} />
       </div>
-      <div className={classes.editor}>
-        {renderEditor()}
-      </div>
+      <div className={classes.editor}>{renderEditor()}</div>
     </div>
   )
 }

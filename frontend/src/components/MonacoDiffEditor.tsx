@@ -179,9 +179,9 @@ const MonacoDiffEditor = ({ setMergeConflictState, original, modified, filename,
   }
 
   const options = {
-    "isInEmbeddedEditor": true
+    "renderSideBySide": false 
   }
-  
+
   return (
     <div>
       <h2 className={classes.title}>
@@ -194,6 +194,7 @@ const MonacoDiffEditor = ({ setMergeConflictState, original, modified, filename,
         modified={modified}
         theme={theme.palette.type}
         editorDidMount={handleEditorDidMount}
+        options={options}
       />
       {
         // Updating the theme here so we override things set by <Editor>
