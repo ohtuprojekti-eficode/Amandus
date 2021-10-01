@@ -9,6 +9,8 @@ import {
   validateBranchName,
   writeToFile,
   getRepoLocationFromRepoName,
+  getServiceFromFilePath,
+  getServiceTokenFromAppContext,
 } from '../utils/utils'
 import {
   doAutoMerge,
@@ -22,7 +24,7 @@ import {
   updateBranchFromRemote,
   getLastCommitMessage,
 } from '../utils/gitUtils'
-import { ServiceTokenType } from '../types/service'
+// import { ServiceTokenType } from '../types/service'
 
 export const switchCurrentBranch = async (
   repoLocation: string,
@@ -54,7 +56,8 @@ export const saveChanges = async (
   context: AppContext
 ): Promise<void> => {
   const { file, branch, commitMessage } = saveArgs
-  const usedService = 'github' // !!! hard coded !!!
+  //const usedService = 'github' // !!! hard coded !!!
+  const usedService = getServiceFromFilePath(file)
   const currentService = context.currentUser
     .services?.find(s => s.serviceName === usedService)
 
@@ -62,8 +65,9 @@ export const saveChanges = async (
   const gitUsername = currentService?.username || amandusUser.username
   const email = currentService?.email || amandusUser.email
 
-  const remoteToken = context[`${usedService}Token`] as ServiceTokenType
-
+  //const remoteToken = context[`${usedService}Token`] as ServiceTokenType
+  const remoteToken = getServiceTokenFromAppContext({service: usedService, appContext: context})
+  console.log('token: ', remoteToken)
   const repositoryName = getRepositoryFromFilePath(file)
   const repoLocation =
     getRepoLocationFromRepoName(

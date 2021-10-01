@@ -4,7 +4,8 @@ import { promisify } from 'util'
 import { writeFileSync } from 'fs'
 import { File } from '../types/file'
 import { sanitizeCommitMessage } from './sanitize'
-import { ServiceName } from '../types/service'
+import { ServiceName, ServiceTokenType } from '../types/service'
+import { AppContext } from '../types/user'
 
 const execProm = promisify(exec)
 
@@ -27,8 +28,30 @@ export const getRepositoryFromFilePath = (file: File): string => {
   return file.name.split('/').slice(2, 4).join('/')
 }
 
+export const getServiceFromFilePath = (file: File): ServiceName => {
+  return file.name.split('/')[1] as ServiceName
+}
 export const getFileNameFromFilePath = (file: File): string => {
   return file.name.replace(/^.*[\\/]/, '')
+}
+
+interface ServiceProps {
+  service: ServiceName
+  appContext: AppContext
+}
+
+export const getServiceTokenFromAppContext = ({service, appContext}: ServiceProps): ServiceTokenType | undefined => {
+  let tokenToReturn: ServiceTokenType | undefined
+  switch(service) {
+    case 'gitlab' : 
+    tokenToReturn = appContext.gitlabToken as ServiceTokenType 
+    break
+    case 'bitbucket' :
+    tokenToReturn = appContext.bitbucketToken as ServiceTokenType
+    break
+    default: tokenToReturn = appContext.githubToken as ServiceTokenType
+  }
+  return tokenToReturn 
 }
 
 export const writeToFile = (file: File): void => {
