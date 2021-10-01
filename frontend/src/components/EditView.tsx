@@ -1,16 +1,15 @@
-import React, { useState } from 'react'
+import React from 'react'
 import MonacoEditor from './MonacoEditor'
 import Sidebar from './Sidebar'
 import { useLocation } from 'react-router-dom'
 import { useLazyQuery, useQuery } from '@apollo/client'
-import { RepoStateQueryResult, ServiceName } from '../types'
+import { RepoStateQueryResult } from '../types'
 import { REPO_STATE, CLONE_REPO } from '../graphql/queries'
 import { createStyles, makeStyles } from '@material-ui/core/styles'
 
 const EditView = () => {
   const location = useLocation()
   const classes = useStyles()
-  const [usedService, setUsedService] = useState<ServiceName>('github') // lets put this in the state for now
 
   const [
     repoStateQuery,
@@ -42,7 +41,7 @@ const EditView = () => {
         <Sidebar files={files} />
       </div>
       <div className={classes.editor}>
-        <MonacoEditor content={content} filename={filename} commitMessage={commitMessage} usedService={usedService}/>
+        <MonacoEditor content={content} filename={filename} commitMessage={commitMessage}/>
       </div>
     </div>
   )

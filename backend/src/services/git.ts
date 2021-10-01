@@ -53,7 +53,8 @@ export const saveChanges = async (
   saveArgs: SaveArgs,
   context: AppContext
 ): Promise<void> => {
-  const { file, branch, commitMessage, usedService } = saveArgs
+  const { file, branch, commitMessage } = saveArgs
+  const usedService = 'github' // !!! hard coded !!!
   const currentService = context.currentUser
     .services?.find(s => s.serviceName === usedService)
 

@@ -61,8 +61,7 @@ const Mutation = `
         saveChanges(
             file: FileInput! 
             branch: String!
-            commitMessage: String,
-            usedService: ServiceName
+            commitMessage: String
         ): String
         connectGitService(
             service: AddServiceArgs!
