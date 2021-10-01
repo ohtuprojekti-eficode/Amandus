@@ -4,6 +4,7 @@ import { promisify } from 'util'
 import { writeFileSync } from 'fs'
 import { File } from '../types/file'
 import { sanitizeCommitMessage } from './sanitize'
+import { ServiceName } from '../types/service'
 
 const execProm = promisify(exec)
 
@@ -23,14 +24,11 @@ export const pipe = <T>(...fns: Array<(a: T) => T>) => (x: T): T =>
   fns.reduce((value, func) => func(value), x)
 
 export const getRepositoryFromFilePath = (file: File): string => {
-  return file.name.split('/').slice(0, 2).join('/')
+  return file.name.split('/').slice(2, 4).join('/')
 }
 
-export const getFileNameFromFilePath = (
-  file: File,
-  repositoryName: string
-): string => {
-  return file.name.replace(`${repositoryName}/`, '') || file.name
+export const getFileNameFromFilePath = (file: File): string => {
+  return file.name.replace(/^.*[\\/]/, '')
 }
 
 export const writeToFile = (file: File): void => {
@@ -47,14 +45,29 @@ export const makeCommitMessage = (
     : `User ${username} modified file ${realFilename}`
 }
 
-export const getRepoLocationFromUrlString = (urlString: string): string => {
+export const getRepoLocationFromUrlString = (
+  urlString: string,
+  username: string
+): string => {
   const url = new URL(urlString)
+  const service = getServiceNameFromUrlString(urlString) || 'other'
   const repositoryName = url.pathname
-  const repoLocation = `./repositories${repositoryName}`
+  const repoLocation = `./repositories/${username}/${service}${repositoryName}`
   return repoLocation
 }
 
-export const getRepoLocationFromRepoName = (repositoryName: string): string => {
-  const repoLocation = `./repositories/${repositoryName}`
+export const getRepoLocationFromRepoName = (
+  repositoryName: string,
+  username: string,
+  service: ServiceName
+): string => {
+  const repoLocation = `./repositories/${username}/${service}/${repositoryName}`
   return repoLocation
+}
+
+const getServiceNameFromUrlString = (urlString: string): ServiceName | undefined => {
+  if (urlString.includes('github')) return 'github'
+  if (urlString.includes('gitlab')) return 'gitlab'
+  if (urlString.includes('bitbucket')) return 'bitbucket'
+  return undefined
 }

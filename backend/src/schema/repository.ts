@@ -40,16 +40,16 @@ const resolvers = {
     cloneRepository: async (
       _root: unknown,
       args: { url: string },
-      _context: unknown
+      context: AppContext
     ): Promise<string> => {
-      const repoLocation = getRepoLocationFromUrlString(args.url)
+      const repoLocation = getRepoLocationFromUrlString(args.url, context.currentUser.username)
       // TODO: Would be ideal that user's configs are set when repo
       // is first cloned instead of doing it in commit operation
       // (because automerges also require username and email)
       // requires user specific repos & clone only possible
       // when context.currentuser exists
       if (!existsSync(repoLocation)) {
-        await cloneRepository(args.url)
+        await cloneRepository(args.url, context.currentUser.username)
       } else {
         try {
           await pullNewestChanges(repoLocation)
@@ -70,9 +70,9 @@ const resolvers = {
     getRepoState: async (
       _root: unknown,
       args: { url: string },
-      _context: unknown
+      context: AppContext
     ): Promise<RepoState> => {
-      const repoLocation = getRepoLocationFromUrlString(args.url)
+      const repoLocation = getRepoLocationFromUrlString(args.url, context.currentUser.username)
       const currentBranch = await getCurrentBranchName(repoLocation)
       const commitMessage = await getCurrentCommitMessage(repoLocation)
 
@@ -112,17 +112,17 @@ const resolvers = {
     switchBranch: async (
       _root: unknown,
       branchSwitchArgs: BranchSwitchArgs,
-      _context: unknown
+      context: AppContext
     ): Promise<string> => {
-      const repoLocation = getRepoLocationFromUrlString(branchSwitchArgs.url)
+      const repoLocation = getRepoLocationFromUrlString(branchSwitchArgs.url, context.currentUser.username)
       return await switchCurrentBranch(repoLocation, branchSwitchArgs.branch)
     },
     pullRepository: async (
       _root: unknown,
       args: { url: string },
-      _context: unknown
+      context: AppContext
     ): Promise<string> => {
-      const repoLocation = getRepoLocationFromUrlString(args.url)
+      const repoLocation = getRepoLocationFromUrlString(args.url, context.currentUser.username)
       try {
         await pullNewestChanges(repoLocation)
       } catch (error) {

@@ -44,8 +44,8 @@ export const pullNewestChanges = async (
   await updateBranchFromRemote(gitObject, currentBranch)
 }
 
-export const cloneRepository = async (url: string): Promise<void> => {
-  const repoLocation = getRepoLocationFromUrlString(url)
+export const cloneRepository = async (url: string, username: string): Promise<void> => {
+  const repoLocation = getRepoLocationFromUrlString(url, username)
   await cloneRepositoryToSpecificFolder(url, repoLocation)
 }
 
@@ -58,19 +58,24 @@ export const saveChanges = async (
   const currentService = context.currentUser
     .services?.find(s => s.serviceName === usedService)
 
-  const username = currentService?.username || context.currentUser.username
-  const email = currentService?.email || context.currentUser.email
-  
+  const amandusUser = context.currentUser
+  const gitUsername = currentService?.username || amandusUser.username
+  const email = currentService?.email || amandusUser.email
+
   const remoteToken = context[`${usedService}Token`] as ServiceTokenType
 
   const repositoryName = getRepositoryFromFilePath(file)
-  const repoLocation = getRepoLocationFromRepoName(repositoryName)
-
-  const realFilename = getFileNameFromFilePath(file, repositoryName)
+  const repoLocation =
+    getRepoLocationFromRepoName(
+      repositoryName,
+      amandusUser.username,
+      usedService
+    )
+  const realFilename = getFileNameFromFilePath(file)
   const sanitizedBranchName = sanitizeBranchName(branch)
   const validCommitMessage = makeCommitMessage(
     commitMessage,
-    username,
+    gitUsername,
     realFilename
   )
 
@@ -79,13 +84,15 @@ export const saveChanges = async (
 
   await validateBranchName(sanitizedBranchName)
   await checkoutBranch(gitObject, sanitizedBranchName)
+
   writeToFile(file)
+
   await addChanges(gitObject, [realFilename])
-  await commitAddedChanges(gitObject, username, email, validCommitMessage)
+  await commitAddedChanges(gitObject, gitUsername, email, validCommitMessage)
 
   if (remoteToken) {
     await doAutoMerge(gitObject, sanitizedBranchName, oldBranch)
-    await pushWithToken(gitObject, username, remoteToken, sanitizedBranchName)
+    await pushWithToken(gitObject, gitUsername, remoteToken, sanitizedBranchName)
   }
 }
 
