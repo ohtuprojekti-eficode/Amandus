@@ -75,8 +75,7 @@ export const checkoutBranch = async (
 
 export const doAutoMerge = async (
   git: SimpleGit,
-  branchName: string,
-  oldBranchName: string
+  branchName: string
 ): Promise<void> => {
   await git.fetch()
 
@@ -94,10 +93,11 @@ export const doAutoMerge = async (
         throw new Error('Unexpected error')
       })
     } catch (e) {
-      await git.merge(['--abort'])
-      await git.reset(['--hard', 'HEAD~1'])
-      await git.checkout([oldBranchName])
-      throw e
+      // this can be used if user wants to revert merge
+      // await git.merge(['--abort'])
+      // await git.reset(['--hard', 'HEAD~1'])
+      // await git.checkout([oldBranchName])
+      // throw e
     }
   }
 }
@@ -120,9 +120,7 @@ export const getLocalBranchSummary = async (
   return await git.branchLocal()
 }
 
-export const getLastCommitMessage = async (
-  git: SimpleGit,
-): Promise<string> => {
+export const getLastCommitMessage = async (git: SimpleGit): Promise<string> => {
   try {
     const commitMessage = await git.raw(['show', '-s', '--format=%s'])
     if (commitMessage.length > 73) {

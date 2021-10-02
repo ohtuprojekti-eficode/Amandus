@@ -67,7 +67,6 @@ export const saveChanges = async (
     realFilename
   )
 
-  const oldBranch = await getCurrentBranchName(repoLocation)
   const gitObject = getGitObject(repoLocation)
 
   await validateBranchName(sanitizedBranchName)
@@ -77,8 +76,38 @@ export const saveChanges = async (
   await commitAddedChanges(gitObject, username, email, validCommitMessage)
 
   if (remoteToken) {
-    await doAutoMerge(gitObject, sanitizedBranchName, oldBranch)
+    await doAutoMerge(gitObject, sanitizedBranchName)
     await pushWithToken(gitObject, username, remoteToken, sanitizedBranchName)
+  }
+}
+
+export const saveMerge = async (
+  saveArgs: SaveArgs,
+  user: UserType,
+  remoteToken: string | undefined
+): Promise<void> => {
+  const { username, email } = user
+  const { file, commitMessage } = saveArgs
+
+  const repositoryName = getRepositoryFromFilePath(file)
+  const repoLocation = getRepoLocationFromRepoName(repositoryName)
+  const realFilename = getFileNameFromFilePath(file, repositoryName)
+  const currentBranch = await getCurrentBranchName(repoLocation)
+
+  const validCommitMessage = makeCommitMessage(
+    commitMessage,
+    username,
+    realFilename
+  )
+
+  const gitObject = getGitObject(repoLocation)
+
+  writeToFile(file)
+  await addChanges(gitObject, [realFilename])
+  await commitAddedChanges(gitObject, username, email, validCommitMessage)
+
+  if (remoteToken) {
+    await pushWithToken(gitObject, username, remoteToken, currentBranch)
   }
 }
 
