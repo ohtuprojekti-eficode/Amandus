@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { monaco, DiffEditor } from '@monaco-editor/react'
 import { useMutation, useQuery } from '@apollo/client'
 import { IS_GH_CONNECTED, ME, REPO_STATE } from '../graphql/queries'
-import { SAVE_CHANGES } from '../graphql/mutations'
+import { SAVE_CHANGES, SAVE_MERGE } from '../graphql/mutations'
 import {
   Button,
   createStyles,
@@ -28,7 +28,7 @@ interface Props {
   modified: string | undefined
   filename: string | undefined
   commitMessage: string | undefined
-  setMergeConflictState: (active: boolean) => void 
+  setMergeConflictState: (active: boolean) => void
 }
 
 interface Getter {
@@ -81,15 +81,20 @@ const stylesInUse = makeStyles(() =>
   })
 )
 
-const MonacoDiffEditor = ({ setMergeConflictState, original, modified, filename, commitMessage }: Props) => {
+const MonacoDiffEditor = ({
+  setMergeConflictState,
+  original,
+  modified,
+  filename,
+  commitMessage,
+}: Props) => {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [waitingToSave, setWaitingToSave] = useState(false)
   const [editorReady, setEditorReady] = useState(false)
   const providerRef = useRef<SimpleLanguageInfoProvider>()
   const branchState = useQuery<RepoStateQueryResult>(REPO_STATE)
-  const { data: GHConnectedQuery } = useQuery<IsGithubConnectedResult>(
-    IS_GH_CONNECTED
-  )
+  const { data: GHConnectedQuery } =
+    useQuery<IsGithubConnectedResult>(IS_GH_CONNECTED)
   const currentBranch = branchState.data?.repoState.currentBranch || ''
   const [dialogError, setDialogError] = useState<DialogError | undefined>(
     undefined
@@ -109,6 +114,10 @@ const MonacoDiffEditor = ({ setMergeConflictState, original, modified, filename,
       refetchQueries: [{ query: REPO_STATE }],
     }
   )
+
+  const [saveMergeEdit] = useMutation(SAVE_MERGE, {
+    refetchQueries: [{ query: REPO_STATE }],
+  })
 
   const theme = useTheme()
 
@@ -160,6 +169,24 @@ const MonacoDiffEditor = ({ setMergeConflictState, original, modified, filename,
     setDialogOpen(true)
   }
 
+  const handleMerge = async () => {
+    if (valueGetter.current) {
+      try {
+        await saveMergeEdit({
+          variables: {
+            file: {
+              name: filename,
+              content: valueGetter.current(),
+            },
+            commitMessage: 'merge test',
+          },
+        })
+      } catch (error) {
+        console.log(error.message)
+      }
+    }
+  }
+
   useEffect(() => {
     monaco.init().then((monaco) => {
       providerRef.current = initMonaco(monaco, theme.palette.type)
@@ -179,7 +206,7 @@ const MonacoDiffEditor = ({ setMergeConflictState, original, modified, filename,
   }
 
   const options = {
-    "renderSideBySide": false 
+    renderSideBySide: false,
   }
 
   return (
@@ -225,6 +252,9 @@ const MonacoDiffEditor = ({ setMergeConflictState, original, modified, filename,
             onClick={handleSaveButton}
           >
             Save
+          </Button>
+          <Button color="primary" variant="contained" onClick={handleMerge}>
+            Merge
           </Button>
           {GHConnectedQuery && (
             <GHConnected
