@@ -85,20 +85,12 @@ export const doAutoMerge = async (
   )
 
   if (remoteExists) {
-    try {
-      await git.merge([`origin/${branchName}`]).catch((error: GitError) => {
-        if (error.message.includes('CONFLICT')) {
-          throw new Error('Merge conflict')
-        }
-        throw new Error('Unexpected error')
-      })
-    } catch (e) {
-      // this can be used if user wants to revert merge
-      // await git.merge(['--abort'])
-      // await git.reset(['--hard', 'HEAD~1'])
-      // await git.checkout([oldBranchName])
-      // throw e
-    }
+    await git.merge([`origin/${branchName}`]).catch((error: GitError) => {
+      if (error.message.includes('CONFLICT')) {
+        throw new Error('Merge conflict')
+      }
+      throw new Error('Unexpected error')
+    })
   }
 }
 
