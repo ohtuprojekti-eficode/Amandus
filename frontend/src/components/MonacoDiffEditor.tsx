@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { monaco, DiffEditor } from '@monaco-editor/react'
+import { loader, DiffEditor, Monaco } from '@monaco-editor/react'
+import { editor } from 'monaco-editor'
 import { useMutation, useQuery } from '@apollo/client'
 import { IS_GH_CONNECTED, ME, REPO_STATE } from '../graphql/queries'
 import { SAVE_CHANGES, SAVE_MERGE } from '../graphql/mutations'
@@ -121,10 +122,13 @@ const MonacoDiffEditor = ({
 
   const theme = useTheme()
 
-  const valueGetter = useRef<Getter | null>(null)
+  const editorRef = useRef<editor.IStandaloneDiffEditor | null>(null)
 
-  const handleEditorDidMount = (_valueGetter: Getter) => {
-    valueGetter.current = _valueGetter
+  const handleEditorDidMount = (
+    editor: editor.IStandaloneDiffEditor,
+    monaco: Monaco
+  ) => {
+    editorRef.current = editor
   }
 
   const handleDialogClose = () => {
@@ -136,7 +140,7 @@ const MonacoDiffEditor = ({
     newBranch: string,
     newCommitMessage: string
   ) => {
-    if (valueGetter.current) {
+    if (editorRef.current) {
       const branchName = createNewBranch ? newBranch : currentBranch
       try {
         setWaitingToSave(true)
@@ -144,7 +148,7 @@ const MonacoDiffEditor = ({
           variables: {
             file: {
               name: filename,
-              content: valueGetter.current(),
+              content: editorRef.current.getModifiedEditor().getValue(),
             },
             branch: branchName,
             commitMessage: newCommitMessage,
@@ -153,6 +157,7 @@ const MonacoDiffEditor = ({
         setDialogOpen(false)
         setDialogError(undefined)
       } catch (error) {
+        // @ts-ignore
         if (error.message === 'Merge conflict detected') {
           setDialogError({
             title: `Merge conflict on branch ${branchName}`,
@@ -170,26 +175,28 @@ const MonacoDiffEditor = ({
   }
 
   const handleMerge = async () => {
-    if (valueGetter.current) {
+    if (editorRef.current) {
       try {
         await saveMergeEdit({
           variables: {
             file: {
               name: filename,
-              content: valueGetter.current(),
+              content: editorRef.current.getModifiedEditor().getValue(),
             },
             commitMessage: 'merge test',
           },
         })
       } catch (error) {
+        // @ts-ignore
         console.log(error.message)
       }
     }
   }
 
   useEffect(() => {
-    monaco.init().then((monaco) => {
+    loader.init().then((monaco: Monaco) => {
       providerRef.current = initMonaco(monaco, theme.palette.type)
+
       setEditorReady(true)
     })
     // Need to have an empty dependency array for this to work correctly
@@ -200,13 +207,14 @@ const MonacoDiffEditor = ({
     if (editorReady && providerRef.current) {
       const editorTheme =
         theme.palette.type === 'dark' ? VsCodeDarkTheme : VsCodeLightTheme
+
       providerRef.current.changeTheme(editorTheme)
       providerRef.current.injectCSS()
     }
   }
 
-  const options = {
-    renderSideBySide: false,
+  const options: editor.IDiffEditorConstructionOptions = {
+    // renderSideBySide: false,
   }
 
   return (
@@ -219,8 +227,8 @@ const MonacoDiffEditor = ({
         language="robot"
         original={original}
         modified={modified}
-        theme={theme.palette.type}
-        editorDidMount={handleEditorDidMount}
+        theme={theme.palette.type === 'dark' ? 'vs-dark' : 'vs-light'}
+        onMount={handleEditorDidMount}
         options={options}
       />
       {

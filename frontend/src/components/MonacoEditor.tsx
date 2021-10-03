@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import Editor from '@monaco-editor/react'
-import { monaco } from '@monaco-editor/react'
+import { loader } from '@monaco-editor/react'
 import { useMutation, useQuery } from '@apollo/client'
 import { IS_GH_CONNECTED, ME, REPO_STATE } from '../graphql/queries'
 import { PULL_REPO, SAVE_CHANGES } from '../graphql/mutations'
@@ -23,13 +23,13 @@ import { initMonaco } from '../utils/monacoInitializer'
 import { SimpleLanguageInfoProvider } from '../utils/providers'
 import VsCodeDarkTheme from '../styles/editor-themes/vs-dark-plus-theme'
 import VsCodeLightTheme from '../styles/editor-themes/vs-light-plus-theme'
-import { Console } from 'console'
+import { editor } from 'monaco-editor'
 
 interface Props {
   content: string | undefined
   filename: string | undefined
   commitMessage: string | undefined
-  setMergeConflictState: (active: boolean) => void 
+  setMergeConflictState: (active: boolean) => void
 }
 
 interface Getter {
@@ -82,7 +82,12 @@ const stylesInUse = makeStyles(() =>
   })
 )
 
-const MonacoEditor = ({ setMergeConflictState, content, filename, commitMessage }: Props) => {
+const MonacoEditor = ({
+  setMergeConflictState,
+  content,
+  filename,
+  commitMessage,
+}: Props) => {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [waitingToSave, setWaitingToSave] = useState(false)
   const [editorReady, setEditorReady] = useState(false)
@@ -116,10 +121,10 @@ const MonacoEditor = ({ setMergeConflictState, content, filename, commitMessage 
 
   const theme = useTheme()
 
-  const valueGetter = useRef<Getter | null>(null)
+  const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
 
-  const handleEditorDidMount = (_valueGetter: Getter) => {
-    valueGetter.current = _valueGetter
+  const handleEditorDidMount = (editor: editor.IStandaloneCodeEditor) => {
+    editorRef.current = editor
   }
 
   const handleDialogClose = () => {
@@ -131,7 +136,7 @@ const MonacoEditor = ({ setMergeConflictState, content, filename, commitMessage 
     newBranch: string,
     newCommitMessage: string
   ) => {
-    if (valueGetter.current) {
+    if (editorRef.current) {
       const branchName = createNewBranch ? newBranch : currentBranch
       try {
         setWaitingToSave(true)
@@ -139,7 +144,7 @@ const MonacoEditor = ({ setMergeConflictState, content, filename, commitMessage 
           variables: {
             file: {
               name: filename,
-              content: valueGetter.current(),
+              content: editorRef.current.getValue(),
             },
             branch: branchName,
             commitMessage: newCommitMessage,
@@ -177,7 +182,7 @@ const MonacoEditor = ({ setMergeConflictState, content, filename, commitMessage 
   }
 
   useEffect(() => {
-    monaco.init().then((monaco) => {
+    loader.init().then((monaco) => {
       providerRef.current = initMonaco(monaco, theme.palette.type)
       setEditorReady(true)
     })
@@ -202,9 +207,9 @@ const MonacoEditor = ({ setMergeConflictState, content, filename, commitMessage 
       <Editor
         height="78vh"
         language="robot"
-        theme={theme.palette.type}
+        theme={theme.palette.type === 'dark' ? 'vs-dark' : 'vs-light'}
         value={content}
-        editorDidMount={handleEditorDidMount}
+        onMount={handleEditorDidMount}
       />
       {
         // Updating the theme here so we override things set by <Editor>
