@@ -56,7 +56,6 @@ export const saveChanges = async (
   context: AppContext
 ): Promise<void> => {
   const { file, branch, commitMessage } = saveArgs
-  //const usedService = 'github' // !!! hard coded !!!
   const usedService = getServiceFromFilePath(file)
   const currentService = context.currentUser
     .services?.find(s => s.serviceName === usedService)
@@ -65,9 +64,8 @@ export const saveChanges = async (
   const gitUsername = currentService?.username || amandusUser.username
   const email = currentService?.email || amandusUser.email
 
-  //const remoteToken = context[`${usedService}Token`] as ServiceTokenType
-  const remoteToken = getServiceTokenFromAppContext({service: usedService, appContext: context})
-  console.log('token: ', remoteToken)
+  const remoteToken = getServiceTokenFromAppContext({ service: usedService, appContext: context })
+
   const repositoryName = getRepositoryFromFilePath(file)
   const repoLocation =
     getRepoLocationFromRepoName(
@@ -94,9 +92,17 @@ export const saveChanges = async (
   await addChanges(gitObject, [realFilename])
   await commitAddedChanges(gitObject, gitUsername, email, validCommitMessage)
 
+  console.log('token: ', remoteToken)
   if (remoteToken) {
     await doAutoMerge(gitObject, sanitizedBranchName, oldBranch)
-    await pushWithToken(gitObject, gitUsername, remoteToken, sanitizedBranchName)
+    await pushWithToken(
+      gitObject,
+      gitUsername,
+      remoteToken,
+      sanitizedBranchName,
+      usedService,
+      repositoryName
+    )
   }
 }
 

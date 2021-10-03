@@ -1,5 +1,6 @@
 import simpleGit, { BranchSummary, GitError, SimpleGit } from 'simple-git'
 import { v4 as uuidv4 } from 'uuid'
+import { ServiceName } from '../types/service'
 
 export const gitRemoveRemote = async (
   git: SimpleGit,
@@ -53,11 +54,25 @@ export const gitAddRemote = async (
   git: SimpleGit,
   remoteId: string,
   username: string,
-  token: string
+  token: string,
+  service: ServiceName,
+  repositoryName: string
 ): Promise<void> => {
+  const serviceUrl = (service: ServiceName): string => {
+    switch (service) {
+      case 'github':
+        return 'github.com'
+      case 'gitlab':
+        return 'gitlab.com'
+      case 'bitbucket':
+        return 'bitbucket.org'
+    }
+  }
+  // could not get gitlab to work
+  // if (service==='gitlab') username = 'oauth2' .....this is not working either
   await git.addRemote(
     remoteId,
-    `https://${username}:${token}@github.com/Ohtu-project-Eficode/robot-test-files`
+    `https://${username}:${token}@${serviceUrl(service)}/${repositoryName}`
   )
 }
 
@@ -106,11 +121,25 @@ export const pushWithToken = async (
   git: SimpleGit,
   username: string,
   token: string,
-  branchName: string
+  branchName: string,
+  service: ServiceName,
+repositoryName: string
 ): Promise<void> => {
   const remoteUuid = uuidv4()
-  await gitAddRemote(git, remoteUuid, username, token)
-  await git.push(remoteUuid, branchName)
+  await gitAddRemote(
+    git,
+    remoteUuid,
+    username,
+    token,
+    service,
+    repositoryName
+  )
+  try {
+    await git.push(remoteUuid, branchName)
+  } catch (e) {
+    console.log(e)
+  }
+
   await gitRemoveRemote(git, remoteUuid)
 }
 
