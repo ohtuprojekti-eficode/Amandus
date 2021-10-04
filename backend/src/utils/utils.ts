@@ -97,7 +97,7 @@ export const parseBitbucketRepositories = (response: any): Repo[] => {
       name: repo.name,
       full_name: repo.full_name,
       clone_url: clone_url.href,
-      html_url: repo.html_url,
+      html_url: repo.links.html.href,
       service: 'bitbucket'
     }
     return repoObject
