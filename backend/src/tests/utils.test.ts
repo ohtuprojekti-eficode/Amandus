@@ -10,7 +10,7 @@ describe('Test getRepositoryFromFilePath', () => {
   it('returns correct repo from file', () => {
     const file = {
       name:
-        'ohtuprojekti-eficode/robot-test-files/backend/src/tests/testfile.txt',
+        'testuser/github/ohtuprojekti-eficode/robot-test-files/backend/src/tests/testfile.txt',
       content: 'test content',
     }
     const repoPath = getRepositoryFromFilePath(file)
@@ -23,10 +23,11 @@ describe('Test getFileNameFromFilePath', () => {
   it('returns correct filename from file', () => {
     const file = {
       name:
-        'ohtuprojekti-eficode/robot-test-files/backend/src/tests/testfile.txt',
+        'testuser/github/ohtuprojekti-eficode/robot-test-files/backend/src/tests/testfile.txt',
       content: 'test content',
     }
     const repositoryName = 'ohtuprojekti-eficode/robot-test-files'
+
     const filename = getFileNameFromFilePath(file, repositoryName)
 
     expect(filename).toBe('backend/src/tests/testfile.txt')
@@ -66,9 +67,9 @@ describe('Test makeCommitMessage', () => {
 describe('Test getRepoLocationFromUrlString', () => {
   it('correct backend repository folder path is returned', () => {
     const urlString = 'https://github.com/ohtuprojekti-eficode/robot-test-files'
-    const repoLocation = getRepoLocationFromUrlString(urlString)
+    const repoLocation = getRepoLocationFromUrlString(urlString, 'testuser')
     const expectedLocation =
-      './repositories/ohtuprojekti-eficode/robot-test-files'
+      './repositories/testuser/github/ohtuprojekti-eficode/robot-test-files'
     expect(repoLocation).toBe(expectedLocation)
   })
 })
@@ -76,9 +77,9 @@ describe('Test getRepoLocationFromUrlString', () => {
 describe('Test getRepoLocationFromRepoName', () => {
   it('correct backend repository folder path is returned', () => {
     const reponame = 'ohtuprojekti-eficode/robot-test-files'
-    const repoLocation = getRepoLocationFromRepoName(reponame)
+    const repoLocation = getRepoLocationFromRepoName(reponame, 'testuser', 'github')
     const expectedLocation =
-      './repositories/ohtuprojekti-eficode/robot-test-files'
+      './repositories/testuser/github/ohtuprojekti-eficode/robot-test-files'
     expect(repoLocation).toBe(expectedLocation)
   })
 })

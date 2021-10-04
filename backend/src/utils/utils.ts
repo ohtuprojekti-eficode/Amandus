@@ -34,8 +34,12 @@ export const getRepositoryFromFilePath = (file: File): string => {
 export const getServiceFromFilePath = (file: File): ServiceName => {
   return file.name.split('/')[1] as ServiceName
 }
-export const getFileNameFromFilePath = (file: File): string => {
-  return file.name.replace(/^.*[\\/]/, '')
+
+export const getFileNameFromFilePath = (
+  file: File,
+  repositoryName: string
+): string => {
+  return file.name.split(`${repositoryName}/`)[1] || file.name
 }
 
 interface ServiceProps {

@@ -73,7 +73,8 @@ export const saveChanges = async (
       amandusUser.username,
       usedService
     )
-  const realFilename = getFileNameFromFilePath(file)
+
+  const realFilename = getFileNameFromFilePath(file, repositoryName)
   const sanitizedBranchName = sanitizeBranchName(branch)
   const validCommitMessage = makeCommitMessage(
     commitMessage,
@@ -82,6 +83,7 @@ export const saveChanges = async (
   )
 
   const oldBranch = await getCurrentBranchName(repoLocation)
+
   const gitObject = getGitObject(repoLocation)
 
   await validateBranchName(sanitizedBranchName)
@@ -92,7 +94,6 @@ export const saveChanges = async (
   await addChanges(gitObject, [realFilename])
   await commitAddedChanges(gitObject, gitUsername, email, validCommitMessage)
 
-  console.log('token: ', remoteToken)
   if (remoteToken) {
     await doAutoMerge(gitObject, sanitizedBranchName, oldBranch)
     await pushWithToken(
