@@ -81,6 +81,7 @@ export const GET_REPO_LIST = gql`
       name
       full_name
       clone_url
+      html_url
       service
     }
   }

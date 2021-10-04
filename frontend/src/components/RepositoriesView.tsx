@@ -3,6 +3,21 @@ import { GET_REPO_LIST } from '../graphql/queries'
 import { useQuery } from '@apollo/client'
 import { Repo } from '../types'
 
+interface RepoProps {
+  repo: Repo
+}
+
+const RepoLine = ({repo}: RepoProps) => {
+
+  return (
+    <div>
+      <li >
+          {repo.name} <a href={repo.html_url}>link</a> 
+      </li>
+    </div>
+  )
+}
+
 const RepositoriesView = () => {
 
   const getRepoList= useQuery(GET_REPO_LIST)
@@ -29,10 +44,8 @@ const RepositoriesView = () => {
       </h3>
       <ul>
         {gitHubRepos.map(
-          (repo: Repo, i:number) => 
-          <li key={i}>
-            {repo.name}
-          </li>
+          (repo: Repo) => 
+          <RepoLine key={repo.id} repo={repo}/>
         )}
       </ul>
       <h3>
@@ -40,10 +53,8 @@ const RepositoriesView = () => {
       </h3>
       <ul>
         {bitbucketRepos.map(
-          (repo: Repo, i:number) =>
-          <li key={i}>
-            {repo.name}
-          </li>
+          (repo: Repo) =>
+          <RepoLine key={repo.id} repo={repo} />
         )}
       </ul>
       <h3>
@@ -51,10 +62,8 @@ const RepositoriesView = () => {
       </h3>
       <ul>
         {gitLabRepos.map(
-          (repo: Repo, i:number) => 
-          <li key={i}>
-            {repo.name}
-          </li>
+          (repo: Repo) => 
+          <RepoLine key={repo.id} repo={repo} />
         )}
       </ul>
     </div> 

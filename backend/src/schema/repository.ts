@@ -46,6 +46,7 @@ const typeDef = `
       name: String!
       full_name: String!
       clone_url: String!
+      html_url: String!
       service: String!
     }
 `
