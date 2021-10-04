@@ -107,8 +107,17 @@ export const parseBitbucketRepositories = (response) => {
 export const parseGitlabRepositories =(response) => {
   console.log('PARSING GITLAB REPOSITORIES...')
   console.log(`gitlab json response: ${response}`)
+  const repolist = response.map((repo: Repo) => {
+    let repoObject: Repo = {
+      id: repo.id,
+      name: repo.name,
+      full_name: repo.path_with_namespace,
+      clone_url: repo.http_url_to_repo,
+      html_url: repo.web_url,
+      service: 'gitlab',
+    }
+    return repoObject
+  })
 
-  let repoObject: Repo = {}
-
-  return repoObject
+  return repolist
 }
