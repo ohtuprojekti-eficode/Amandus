@@ -35,11 +35,18 @@ const useStyles = makeStyles(() =>
   })
 )
 
-const BranchSelector = () => {
+interface Props {
+  currentUrl: string
+}
+
+const BranchSelector = ({currentUrl}: Props) => {
   const classes = useStyles()
   const [anchorElement, setAnchorElement] = useState<null | HTMLElement>(null)
 
-  const branchState = useQuery<RepoStateQueryResult>(REPO_STATE)
+  const branchState = useQuery<RepoStateQueryResult>(REPO_STATE, {
+    variables: { repoUrl: currentUrl }
+  })
+
   const selectedBranch = branchState.data?.repoState.currentBranch || ''
   const branches = branchState.data?.repoState.branches || ['']
   const repoUrl = branchState.data?.repoState.url || ''
@@ -47,7 +54,10 @@ const BranchSelector = () => {
   const [switchBranch, { loading: mutationLoading }] = useMutation(
     SWITCH_BRANCH,
     {
-      refetchQueries: [{ query: REPO_STATE }],
+      refetchQueries: [{ 
+        query: REPO_STATE,
+        variables: {repoUrl} 
+      }],
     }
   )
 

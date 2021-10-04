@@ -1,9 +1,9 @@
 import { gql } from '@apollo/client'
 
 export const REPO_STATE = gql`
-  query getRepoState($repo_url: String!) {
+  query getRepoState($repoUrl: String!) {
     repoState: getRepoState(
-      url: $repo_url
+      url: $repoUrl
     ) {
       currentBranch
       files {
@@ -36,8 +36,8 @@ export const IS_GL_CONNECTED = gql`
 `
 
 export const CLONE_REPO = gql`
-  query cloneRepo($clone_url: String!) {
-    cloneRepository(url: $clone_url)
+  query cloneRepo($cloneUrl: String!) {
+    cloneRepository(url: $cloneUrl)
   }
 `
 

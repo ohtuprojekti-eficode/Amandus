@@ -8,28 +8,28 @@ import { REPO_STATE, CLONE_REPO } from '../graphql/queries'
 import { createStyles, makeStyles } from '@material-ui/core/styles'
 
 interface LocationState {
-  clone_url: string
+  cloneUrl: string
 }
 
 const EditView = () => {
   const location = useLocation<LocationState>()
   const classes = useStyles()
 
-  const { clone_url } = location.state
+  const { cloneUrl } = location.state
 
-  console.log('cloonatan urli: ', clone_url)
   const [
     repoStateQuery,
     { data: repoStateData },
   ] = useLazyQuery<RepoStateQueryResult>(REPO_STATE, 
     {
-      variables: { clone_url }
+      variables: { repoUrl: cloneUrl }
     })
   const cloneRepoQuery = useQuery(CLONE_REPO, {
-    variables: {clone_url},
-    onCompleted: () => repoStateQuery(),
+    variables: {cloneUrl},
+    onCompleted: () => 
+    repoStateQuery(),
+    
   })
-
   if (cloneRepoQuery.error){
     console.log(`Clone error: ${cloneRepoQuery.error}`)
   }
@@ -42,8 +42,7 @@ const EditView = () => {
   // if (repoStateError) return <div>Error fetching repo state...</div>
 
   const files = repoStateData ? repoStateData.repoState.files : []
-  console.log('got these files: ', files)
-  console.log('got this repoStateData: ', repoStateData)
+
   const filename = location.search.slice(3)
   const content = files.find((e) => e.name === filename)?.content
   const commitMessage = repoStateData ? repoStateData.repoState.commitMessage : ''
@@ -51,7 +50,7 @@ const EditView = () => {
   return (
     <div className={classes.root}>
       <div className={classes.sidebar}>
-        <Sidebar files={files} />
+        <Sidebar files={files} currentUrl={cloneUrl}/>
       </div>
       <div className={classes.editor}>
         <MonacoEditor content={content} filename={filename} commitMessage={commitMessage}/>
