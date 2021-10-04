@@ -1,6 +1,7 @@
 export interface Repo {
-    id: String
-    name: String
-    full_name: String
-    clone_url: String
+    id: string
+    name: string
+    full_name: string
+    clone_url: string
+    service: string
 }

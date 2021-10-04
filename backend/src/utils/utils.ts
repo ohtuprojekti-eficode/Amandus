@@ -4,6 +4,8 @@ import { promisify } from 'util'
 import { writeFileSync } from 'fs'
 import { File } from '../types/file'
 import { sanitizeCommitMessage } from './sanitize'
+import { AppContext } from '../types/user'
+import { Repo } from '../types/repo'
 
 const execProm = promisify(exec)
 
@@ -57,4 +59,56 @@ export const getRepoLocationFromUrlString = (urlString: string): string => {
 export const getRepoLocationFromRepoName = (repositoryName: string): string => {
   const repoLocation = `./repositories/${repositoryName}`
   return repoLocation
+}
+
+export const getServiceTokenFromContext = (serviceName: string, context: AppContext): string | undefined => {
+    switch(serviceName){
+      case 'github': return context.githubToken;
+      case 'bitbucket': return context.bitbucketToken;
+      case 'gitlab': return context.gitlabToken;
+      default: return undefined;
+    }
+}
+
+export const parseGithubRepositories = (response): Repo => {
+  const repolist = response.map((repo: Repo) => {
+    let repoObject: Repo = {
+      id: repo.id,
+      name: repo.name,
+      full_name: repo.full_name,
+      clone_url: repo.clone_url,
+      service: 'github'
+    }
+    return (
+      repoObject
+      )}
+    )
+
+  return repolist
+}
+
+export const parseBitbucketRepositories = (response) => {
+  const repolist = response.values.map(repo => {
+    const clone_url = repo.links.clone.find(url => url.name === 'https')
+
+    let repoObject: Repo = {
+      id: repo.uuid,
+      name: repo.name,
+      full_name: repo.full_name,
+      clone_url: clone_url.href,
+      service: 'bitbucket'
+    }
+    return repoObject
+  })
+
+  return repolist
+}
+
+export const parseGitlabRepositories =(response) => {
+  console.log('PARSING GITLAB REPOSITORIES...')
+  console.log(`gitlab json response: ${response}`)
+
+  let repoObject: Repo = {}
+
+  return repoObject
 }

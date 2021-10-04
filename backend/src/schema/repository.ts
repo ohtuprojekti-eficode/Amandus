@@ -16,8 +16,14 @@ import { AppContext } from '../types/user'
 import { BranchSwitchArgs, SaveArgs } from '../types/params'
 import { RepoState } from '../types/repoState'
 import { getRepoLocationFromUrlString } from '../utils/utils'
-import { getRepoList } from '../services/gitHub'
+import { getRepoList } from '../services/commonServices'
 import { Repo } from '../types/repo'
+import {
+  getServiceTokenFromContext,
+  parseGithubRepositories,
+  parseBitbucketRepositories,
+  parseGitlabRepositories
+} from '../utils/utils'
 
 const typeDef = `
     type File {
@@ -40,6 +46,7 @@ const typeDef = `
       name: String!
       full_name: String!
       clone_url: String!
+      service: String!
     }
 `
 
@@ -93,37 +100,104 @@ const resolvers = {
       const branches = await getLocalBranches(repoLocation)
       return { currentBranch, files, branches, url: args.url, commitMessage }
     },
+    //   getRepoListFromService: async (
+    //     _root: unknown,
+    //     _args: unknown,
+    //     context: AppContext
+    //   ): Promise<string> => {
+    //     if (!context.currentUser) {
+    //       throw new ForbiddenError('You have to login')
+    //     }
+    //     if (context.githubToken && context.currentUser.services) {
+
+    //       const service = context.currentUser.services.find(s => s.serviceName === 'github')
+    //       const list = service && await getRepoList(service, context.githubToken)
+
+    //       const repolist = list.map((repo: Repo) => {
+    //         let repoObject: Repo = {
+    //           id: repo.id,
+    //           name: repo.name,
+    //           full_name: repo.full_name,
+    //           clone_url: repo.clone_url
+    //         }
+    //         return (
+    //           repoObject
+    //           )}
+    //         )
+
+    //       return repolist
+    //     }
+    //     return 'list'
+    //   },
+    // },
+
     getRepoListFromService: async (
       _root: unknown,
       _args: unknown,
       context: AppContext
-    ): Promise<String> => {
+    ): Promise<any> => {
+      console.log('HELLO FROM BACKEND')
       if (!context.currentUser) {
+        console.log('USER NOT LOGGED IN!!')
         throw new ForbiddenError('You have to login')
       }
-      if (context.githubToken && context.currentUser.services) {
-        
-        const service = context.currentUser.services.find(s => s.serviceName === 'github')
-        const list = service && await getRepoList(service, context.githubToken)
-        
-        const repolist = list.map((repo: Repo) => {
-          let repoObject: Repo = {
-            id: repo.id,
-            name: repo.name,
-            full_name: repo.full_name,
-            clone_url: repo.clone_url
-          }
-          return (
-            repoObject
-            )}
-          )
 
-        return repolist
+      if (!context.currentUser.services) {
+        console.log('USER IS NOT CONNECTED TO ANY SERVICE!!')
+        throw new Error('User is not connected to any service')
       }
-      return 'list'
+
+      const repolist = await Promise.all(context.currentUser.services.map(
+        async (service) => {
+          console.log('GETTING TOKEN FROM CONTEXT')
+          const token = getServiceTokenFromContext(service.serviceName, context)
+
+          if (!token) {
+            console.log('TOKEN NOT FOUND')
+            throw new Error(`${service.serviceName} token is missing`)
+          }
+          console.log(`TOKEN RECEIVED: ${token}`)
+
+          console.log(`ATTEMPTING TO FETCH ${service.serviceName} REPO DATA`)
+          const response = await getRepoList(service, token)
+
+          if (!response) {
+            console.log(`FAILED TO FETCH ${service.serviceName} REPO DATA`)
+            throw new Error(`Failed to fetch repo data from ${service.serviceName}`)
+          }
+
+          console.log('GOT RESPONSE:')
+          console.log(response)
+
+          let repolist = []
+          if (service.serviceName === 'github') {
+            console.log('PARSING GH REPOSITORIES...')
+            repolist = parseGithubRepositories(response)
+            console.log('PARSED!')
+          } else if (service.serviceName === 'bitbucket') {
+            console.log('PARSING BB REPOSITORIES...')
+            repolist = parseBitbucketRepositories(response)
+            console.log('PARSED!')
+          } else if (service.serviceName === 'gitlab') {
+            console.log('Gitlab repository listing not yet implemented...')
+            repolist = parseGitlabRepositories(response)
+          }
+
+          console.log(`RETURNING REPOLIST`)
+          console.log(repolist)
+
+          return repolist
+        }
+      ))
+
+      const repos = repolist.flat()
+
+      console.log(repos)
+      return repos
+
     },
   },
-    
+
   Mutation: {
     saveChanges: async (
       _root: unknown,
