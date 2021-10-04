@@ -2,7 +2,7 @@ import React from 'react'
 import { GET_REPO_LIST } from '../graphql/queries'
 import { useQuery } from '@apollo/client'
 import { Repo } from '../types'
-import {Box, Button, List, ListItem} from '@material-ui/core'
+import {Box, List, ListItem} from '@material-ui/core'
 import ListItemText from '@material-ui/core/ListItemText'
 import { Link } from 'react-router-dom'
 
@@ -18,11 +18,12 @@ const RepoLine = ({repo}: RepoProps) => {
       <ListItemText>{repo.name}</ListItemText> 
 
       </ListItem>
-        <Button component={Link} to="/edit">Edit</Button>
+        <Link to={{ pathname: '/edit', state: { clone_url: repo.clone_url}}} > edit in amandus </Link>
       
     </ListItem>
   )
 }
+      //  <Button component={Link} to="/edit">Edit</Button>
 
 const RepositoriesView = () => {
 

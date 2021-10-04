@@ -7,15 +7,26 @@ import { RepoStateQueryResult } from '../types'
 import { REPO_STATE, CLONE_REPO } from '../graphql/queries'
 import { createStyles, makeStyles } from '@material-ui/core/styles'
 
+interface LocationState {
+  clone_url: string
+}
+
 const EditView = () => {
-  const location = useLocation()
+  const location = useLocation<LocationState>()
   const classes = useStyles()
 
+  const { clone_url } = location.state
+
+  console.log('cloonatan urli: ', clone_url)
   const [
     repoStateQuery,
     { data: repoStateData },
-  ] = useLazyQuery<RepoStateQueryResult>(REPO_STATE)
+  ] = useLazyQuery<RepoStateQueryResult>(REPO_STATE, 
+    {
+      variables: { clone_url }
+    })
   const cloneRepoQuery = useQuery(CLONE_REPO, {
+    variables: {clone_url},
     onCompleted: () => repoStateQuery(),
   })
 
@@ -31,6 +42,8 @@ const EditView = () => {
   // if (repoStateError) return <div>Error fetching repo state...</div>
 
   const files = repoStateData ? repoStateData.repoState.files : []
+  console.log('got these files: ', files)
+  console.log('got this repoStateData: ', repoStateData)
   const filename = location.search.slice(3)
   const content = files.find((e) => e.name === filename)?.content
   const commitMessage = repoStateData ? repoStateData.repoState.commitMessage : ''

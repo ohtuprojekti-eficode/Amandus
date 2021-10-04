@@ -1,9 +1,9 @@
 import { gql } from '@apollo/client'
 
 export const REPO_STATE = gql`
-  query {
+  query getRepoState($repo_url: String!) {
     repoState: getRepoState(
-      url: "https://github.com/Ohtu-project-Eficode/robot-test-files"
+      url: $repo_url
     ) {
       currentBranch
       files {
@@ -36,10 +36,8 @@ export const IS_GL_CONNECTED = gql`
 `
 
 export const CLONE_REPO = gql`
-  query {
-    cloneRepo: cloneRepository(
-      url: "https://github.com/Ohtu-project-Eficode/robot-test-files"
-    )
+  query cloneRepo($clone_url: String!) {
+    cloneRepository(url: $clone_url)
   }
 `
 
