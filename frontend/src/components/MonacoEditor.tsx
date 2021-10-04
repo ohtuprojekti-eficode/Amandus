@@ -159,10 +159,9 @@ const MonacoEditor = ({
         ) {
           setDialogError({
             title: `Merge conflict on branch ${branchName}`,
-            message: 'Cannot push to selected branch. Create a new one.',
+            message:
+              'Cannot push to selected branch. Create a new one or resolve the conflicts.',
           })
-
-          onMergeError()
         }
       } finally {
         setWaitingToSave(false)
@@ -221,6 +220,7 @@ const MonacoEditor = ({
         open={dialogOpen}
         handleClose={handleDialogClose}
         handleSubmit={handleDialogSubmit}
+        onResolve={onMergeError}
         currentBranch={currentBranch}
         error={dialogError}
         waitingToSave={waitingToSave}
