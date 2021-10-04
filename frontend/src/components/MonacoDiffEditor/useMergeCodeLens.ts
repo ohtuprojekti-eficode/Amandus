@@ -1,169 +1,27 @@
-import { createStyles, makeStyles } from '@material-ui/core'
 import { Monaco } from '@monaco-editor/react'
 import {
   CancellationToken,
   // eslint-disable-next-line
-  editor, // eslint incorrectly sees editor as unused (only used as a type)
+  editor,
   IDisposable,
   languages,
 } from 'monaco-editor'
 import React, { useEffect, useRef, useState } from 'react'
+import {
+  findConflictBlocks,
+  selectBothChanges,
+  selectCurrentChanges,
+  selectIncomingChanges,
+} from './helpers'
+import { ChangeCommands, ConflictBlock, HandleStatus } from './types'
+import useHighlights from './useHighlights'
 
-interface ChangeCommands {
-  selectCurrentChanges: string
-  selectIncomingChanges: string
-  selectBothChanges: string
-  cancel: string
-}
-
-interface ConflictBlock {
-  currentStart: number // row with <<<<<<
-  middle: number // row with ======
-  incomingEnd: number // row with >>>>>>
-  handled: null | 'current-changes' | 'incoming-changes' | 'both-changes'
-}
-
-const findConflictBlocks = (content: string): ConflictBlock[] => {
-  const blocks: ConflictBlock[] = []
-
-  const lines = content.split('\n')
-
-  let block: ConflictBlock
-
-  lines.forEach((line, index) => {
-    if (line.startsWith('<<<<<<<')) {
-      block = {
-        currentStart: index + 1, // +1 since monaco starts counting from one
-        middle: -1,
-        incomingEnd: -1,
-        handled: null,
-      }
-    } else if (line.startsWith('=======')) {
-      block.middle = index + 1
-    } else if (line.startsWith('>>>>>>>')) {
-      block.incomingEnd = index + 1
-
-      blocks.push(block)
-    }
-  })
-
-  return blocks
-}
-
-const stylesInUse = makeStyles(() =>
-  createStyles({
-    incomingHighLight: {
-      backgroundColor: 'pink',
-      opacity: 0.2,
-    },
-    currentHighLight: {
-      backgroundColor: 'lightblue',
-      opacity: 0.2,
-    },
-  })
-)
-
-const useHighlight = () => {
-  const classes = stylesInUse()
-
-  const decorationRef = useRef<string[][]>([])
-
-  const updateHighlights = React.useCallback(
-    (
-      editor: editor.IStandaloneDiffEditor,
-      monaco: Monaco,
-      conflictBlocks: ConflictBlock[]
-    ) => {
-      conflictBlocks.forEach((block, index) => {
-        const oldDecorations = decorationRef.current[index]
-
-        if (!oldDecorations?.length && !block.handled) {
-          // set merge conflict decorations if not set
-          const decos = editor.getOriginalEditor().deltaDecorations(
-            [],
-            [
-              {
-                range: new monaco.Range(block.currentStart, 0, block.middle, 0),
-                options: {
-                  isWholeLine: true,
-                  className: classes.currentHighLight,
-                },
-              },
-              {
-                range: new monaco.Range(block.middle, 0, block.incomingEnd, 0),
-                options: {
-                  isWholeLine: true,
-                  className: classes.incomingHighLight,
-                },
-              },
-            ]
-          )
-
-          decorationRef.current[index] = decos
-        }
-
-        if (block.handled) {
-          // remove decorations from handled blocks
-          const decos = editor
-            .getOriginalEditor()
-            .deltaDecorations(oldDecorations, [])
-
-          decorationRef.current[index] = decos
-        }
-      })
-    },
-    [classes.currentHighLight, classes.incomingHighLight]
-  )
-
-  return updateHighlights
-}
-
-const selectCurrentChanges = (content: string, block: ConflictBlock) => {
-  const lines = content.split('\n')
-
-  // start splicing from end of the array to avoid problems with indices
-  // we need -1 since monaco starts counting from 1
-
-  lines.splice(block.middle - 1, block.incomingEnd - block.middle + 1)
-
-  lines.splice(block.currentStart - 1, 1)
-
-  return lines.join('\n')
-}
-
-const selectIncomingChanges = (content: string, block: ConflictBlock) => {
-  const lines = content.split('\n')
-
-  // start splicing from end of the array to avoid problems with indices
-  // we need -1 since monaco starts counting from 1
-
-  lines.splice(block.incomingEnd - 1, 1)
-
-  lines.splice(block.currentStart - 1, block.middle - block.currentStart + 1)
-  return lines.join('\n')
-}
-
-const selectBothChanges = (content: string, block: ConflictBlock) => {
-  const lines = content.split('\n')
-
-  // start splicing from end of the array to avoid problems with indices
-  // we need -1 since monaco starts counting from 1
-
-  lines.splice(block.incomingEnd - 1, 1)
-
-  lines.splice(block.middle - 1, 1)
-
-  lines.splice(block.currentStart - 1, 1)
-
-  return lines.join('\n')
-}
-
-const useMergeCodeLens = (original: string) => {
+const useMergeCodeLens = (original: string, language = 'robot') => {
   const [modifiedContent, setModifiedContent] = useState(original)
   const [conflictBlocks, setInitialBlocks] = useState(() =>
     findConflictBlocks(original)
   )
-  const updateHighlights = useHighlight()
+  const updateHighlights = useHighlights()
   const codeLensHandle = useRef<IDisposable | null>(null)
   const [monaco, setMonaco] = useState<Monaco | null>(null)
   const [editor, setEditor] = useState<editor.IStandaloneDiffEditor | null>(
@@ -171,14 +29,15 @@ const useMergeCodeLens = (original: string) => {
   )
 
   useEffect(() => {
-    // reverse the blocks to avoid trouble with indices when slicing
+    // handles updating the right side of the editor
 
+    // reverse the blocks to avoid trouble with indices when slicing
     const reversedBlocks = conflictBlocks.slice().reverse() // reversing mutates, so slice first
 
     let content = original
 
     reversedBlocks.forEach((block) => {
-      switch (block.handled) {
+      switch (block.handleStatus) {
         case 'current-changes':
           content = selectCurrentChanges(content, block)
 
@@ -198,24 +57,24 @@ const useMergeCodeLens = (original: string) => {
   }, [conflictBlocks, original])
 
   useEffect(() => {
+    // handles updating the codelens commands and buttons, as well as highlighting
     if (monaco && editor) {
+      // get rid of old codelenses
       codeLensHandle.current && codeLensHandle.current.dispose()
 
       updateHighlights(editor, monaco, conflictBlocks)
 
-      const getHandler = (
-        status: null | 'current-changes' | 'incoming-changes' | 'both-changes',
-        index: number
-      ) => {
+      const getHandler = (status: HandleStatus, index: number) => {
         return () => {
           setInitialBlocks((blocks) => {
             return blocks.map((block, i) =>
-              i === index ? { ...block, handled: status } : block
+              i === index ? { ...block, handleStatus: status } : block
             )
           })
         }
       }
 
+      // commands triggered by the codelens buttons
       const commands: ChangeCommands[] = conflictBlocks.map((block, index) => {
         return {
           selectCurrentChanges: editor.addCommand(
@@ -235,14 +94,14 @@ const useMergeCodeLens = (original: string) => {
       })
 
       codeLensHandle.current = monaco.languages.registerCodeLensProvider(
-        'robot',
+        language, // needs to match the language passed to the DiffEditor -component for the codelens to show up
         {
           provideCodeLenses: function (
             model: editor.ITextModel,
             _token: CancellationToken
           ) {
             if (model.id === '$model2') {
-              // this hides the codelens in the right section of the diff editor
+              // hides the codelens in the right section of the diff editor
               return
             }
 
@@ -253,7 +112,9 @@ const useMergeCodeLens = (original: string) => {
                   currentBlock: ConflictBlock,
                   index: number
                 ) => {
-                  return currentBlock.handled
+                  // if the block's conflict has been handled, return cancel -button
+                  // otherwise return action buttons
+                  return currentBlock.handleStatus
                     ? [
                         ...allLenses,
                         {
@@ -320,7 +181,7 @@ const useMergeCodeLens = (original: string) => {
         }
       )
     }
-  }, [conflictBlocks, monaco, editor, updateHighlights])
+  }, [conflictBlocks, monaco, editor, updateHighlights, language])
 
   const setupCodeLens = React.useCallback(
     (editorInstance: editor.IStandaloneDiffEditor, monacoInstance: Monaco) => {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import MonacoEditor from './MonacoEditor'
-import MonacoDiffEditor from './MonacoDiffEditor'
+import MonacoDiffEditor from './MonacoDiffEditor/'
 import Sidebar from './Sidebar'
 import { useLocation } from 'react-router-dom'
 import { useLazyQuery, useQuery } from '@apollo/client'

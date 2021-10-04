@@ -10,19 +10,19 @@ import { GitHub } from '@material-ui/icons'
 import { DiffEditor, loader, Monaco } from '@monaco-editor/react'
 import { editor } from 'monaco-editor'
 import React, { useEffect, useRef, useState } from 'react'
-import { SAVE_CHANGES, SAVE_MERGE } from '../graphql/mutations'
-import { IS_GH_CONNECTED, ME, REPO_STATE } from '../graphql/queries'
-import VsCodeDarkTheme from '../styles/editor-themes/vs-dark-plus-theme'
-import VsCodeLightTheme from '../styles/editor-themes/vs-light-plus-theme'
+import { SAVE_CHANGES, SAVE_MERGE } from '../../graphql/mutations'
+import { IS_GH_CONNECTED, ME, REPO_STATE } from '../../graphql/queries'
+import VsCodeDarkTheme from '../../styles/editor-themes/vs-dark-plus-theme'
+import VsCodeLightTheme from '../../styles/editor-themes/vs-light-plus-theme'
 import {
   IsGithubConnectedResult,
   MeQueryResult,
   RepoStateQueryResult,
-} from '../types'
-import { initMonaco } from '../utils/monacoInitializer'
-import { SimpleLanguageInfoProvider } from '../utils/providers'
-import AuthenticateDialog from './AuthenticateDialog'
-import SaveDialog from './SaveDialog'
+} from '../../types'
+import { initMonaco } from '../../utils/monacoInitializer'
+import { SimpleLanguageInfoProvider } from '../../utils/providers'
+import AuthenticateDialog from '../AuthenticateDialog'
+import SaveDialog from '../SaveDialog'
 import useMergeCodeLens from './useMergeCodeLens'
 
 interface Props {
