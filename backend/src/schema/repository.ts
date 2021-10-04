@@ -66,17 +66,6 @@ const resolvers = {
       // when context.currentuser exists
       if (!existsSync(repoLocation)) {
         await cloneRepository(args.url)
-      } else {
-        try {
-          await pullNewestChanges(repoLocation)
-        } catch (error) {
-          // In case of merge conflict
-          if (error.message === 'Merge conflict') {
-            throw new ApolloError('Merge conflict detected')
-          } else {
-            throw new ApolloError(error.message)
-          }
-        }
       }
       // Pulling now if the repo is cloned from before
 
@@ -137,15 +126,12 @@ const resolvers = {
             repolist = parseGitlabRepositories(response)
           }
 
-          console.log(repolist)
-
           return repolist
         }
       ))
 
       const repos = repolist.flat()
 
-      console.log(repos)
       return repos
 
     },

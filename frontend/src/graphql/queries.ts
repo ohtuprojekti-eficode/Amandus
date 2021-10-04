@@ -36,8 +36,10 @@ export const IS_GL_CONNECTED = gql`
 `
 
 export const CLONE_REPO = gql`
-  query cloneRepo($url: String!) {
-    cloneRepository(url: $url)
+  query {
+    cloneRepo: cloneRepository(
+      url: "https://github.com/Ohtu-project-Eficode/robot-test-files"
+    )
   }
 `
 

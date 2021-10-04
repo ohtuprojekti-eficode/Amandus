@@ -10,13 +10,8 @@ import { Link } from 'react-router-dom'
 interface RepoProps {
   repo: Repo
 }
-const editClickHandler = (repo: Repo) => {
-    console.log('want to edit')
-  }
+
 const RepoLine = ({repo}: RepoProps) => {
-
-  
-
   return (
     <ListItem key={repo.id} component="div" >
       <ListItem button component="a" href={repo.html_url}> 
