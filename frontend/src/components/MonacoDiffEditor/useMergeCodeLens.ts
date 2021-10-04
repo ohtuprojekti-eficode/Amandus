@@ -197,7 +197,15 @@ const useMergeCodeLens = (original: string, language = 'robot') => {
     []
   )
 
-  return { setupCodeLens, modifiedContent }
+  const cleanup = React.useCallback(() => {
+    codeLensHandle.current?.dispose()
+  }, [])
+
+  useEffect(() => {
+    return () => cleanup()
+  }, [cleanup])
+
+  return { setupCodeLens, modifiedContent, cleanup }
 }
 
 export default useMergeCodeLens

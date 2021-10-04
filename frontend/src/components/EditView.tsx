@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import MonacoEditor from './MonacoEditor'
 import MonacoDiffEditor from './MonacoDiffEditor/'
 import Sidebar from './Sidebar'
@@ -7,12 +7,11 @@ import { useLazyQuery, useQuery } from '@apollo/client'
 import { RepoStateQueryResult } from '../types'
 import { REPO_STATE, CLONE_REPO } from '../graphql/queries'
 import { createStyles, makeStyles } from '@material-ui/core/styles'
+import useMergeConflictDetector from './MonacoDiffEditor/useMergeConflictDetector'
 
 const EditView = () => {
   const location = useLocation()
   const classes = useStyles()
-  const [hasRefetched, setHasRefetched] = useState(false)
-  const [mergeConflictExists, setMergeConflictExists] = useState(false)
 
   const [repoStateQuery, { data: repoStateData }] =
     useLazyQuery<RepoStateQueryResult>(REPO_STATE, {
@@ -23,17 +22,6 @@ const EditView = () => {
     onCompleted: () => repoStateQuery(),
   })
 
-  if (cloneRepoQuery.error) {
-    console.log(`Clone error: ${cloneRepoQuery.error}`)
-  }
-
-  useEffect(() => {
-    if (!hasRefetched && mergeConflictExists) {
-      repoStateQuery()
-      setHasRefetched(true)
-    }
-  }, [hasRefetched, mergeConflictExists, repoStateQuery])
-
   const files = repoStateData ? repoStateData.repoState.files : []
   const filename = location.search.slice(3)
   const content = files.find((e) => e.name === filename)?.content
@@ -41,22 +29,7 @@ const EditView = () => {
     ? repoStateData.repoState.commitMessage
     : ''
 
-  useEffect(() => {
-    if (!mergeConflictExists && content) {
-      const lines = content?.split('\n')
-
-      console.log('here', lines)
-
-      if (
-        // maybe a suboptimal way to check for merge conflicts
-        lines.find((line) => line.startsWith('<<<<<<<')) &&
-        lines.find((line) => line.startsWith('=======')) &&
-        lines.find((line) => line.startsWith('>>>>>>>'))
-      ) {
-        setMergeConflictExists(true)
-      }
-    }
-  }, [content, mergeConflictExists])
+  const mergeConflictExists = useMergeConflictDetector(content)
 
   if (cloneRepoQuery.loading) return <div>Cloning repo...</div>
   if (cloneRepoQuery.error) return <div>Error cloning repo...</div>
@@ -66,18 +39,18 @@ const EditView = () => {
   // if (repoStateError) return <div>Error fetching repo state...</div>
 
   const renderEditor = () => {
+    if (!content) {
+      return null
+    }
+
     if (mergeConflictExists) {
       return (
         <div className={classes.editor}>
-          {content && (
-            <MonacoDiffEditor
-              setMergeConflictState={setMergeConflictExists}
-              original={content}
-              modified={content}
-              filename={filename}
-              commitMessage={commitMessage}
-            />
-          )}
+          <MonacoDiffEditor
+            original={content}
+            filename={filename}
+            commitMessage={commitMessage}
+          />
         </div>
       )
     }
@@ -85,10 +58,10 @@ const EditView = () => {
     return (
       <div className={classes.editor}>
         <MonacoEditor
-          setMergeConflictState={setMergeConflictExists}
           content={content}
           filename={filename}
           commitMessage={commitMessage}
+          onMergeError={repoStateQuery}
         />
       </div>
     )

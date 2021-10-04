@@ -29,7 +29,7 @@ interface Props {
   content: string | undefined
   filename: string | undefined
   commitMessage: string | undefined
-  setMergeConflictState: (active: boolean) => void
+  onMergeError: () => void
 }
 
 interface Getter {
@@ -83,7 +83,7 @@ const stylesInUse = makeStyles(() =>
 )
 
 const MonacoEditor = ({
-  setMergeConflictState,
+  onMergeError,
   content,
   filename,
   commitMessage,
@@ -157,11 +157,12 @@ const MonacoEditor = ({
           error instanceof Error &&
           error.message === 'Merge conflict detected'
         ) {
-          setMergeConflictState(true)
           setDialogError({
             title: `Merge conflict on branch ${branchName}`,
             message: 'Cannot push to selected branch. Create a new one.',
           })
+
+          onMergeError()
         }
       } finally {
         setWaitingToSave(false)

@@ -10,7 +10,7 @@ import { GitHub } from '@material-ui/icons'
 import { DiffEditor, loader, Monaco } from '@monaco-editor/react'
 import { editor } from 'monaco-editor'
 import React, { useEffect, useRef, useState } from 'react'
-import { SAVE_CHANGES, SAVE_MERGE } from '../../graphql/mutations'
+import { SAVE_MERGE } from '../../graphql/mutations'
 import { IS_GH_CONNECTED, ME, REPO_STATE } from '../../graphql/queries'
 import VsCodeDarkTheme from '../../styles/editor-themes/vs-dark-plus-theme'
 import VsCodeLightTheme from '../../styles/editor-themes/vs-light-plus-theme'
@@ -22,15 +22,14 @@ import {
 import { initMonaco } from '../../utils/monacoInitializer'
 import { SimpleLanguageInfoProvider } from '../../utils/providers'
 import AuthenticateDialog from '../AuthenticateDialog'
-import SaveDialog from '../SaveDialog'
+import MergeDialog from '../MergeDialog'
 import useMergeCodeLens from './useMergeCodeLens'
+import useMergeConflictDetector from './useMergeConflictDetector'
 
 interface Props {
   original: string
-  modified: string
   filename: string | undefined
   commitMessage: string | undefined
-  setMergeConflictState: (active: boolean) => void
 }
 
 interface DialogError {
@@ -79,15 +78,9 @@ const stylesInUse = makeStyles(() =>
   })
 )
 
-const MonacoDiffEditor = ({
-  setMergeConflictState,
-  original,
-  modified,
-  filename,
-  commitMessage,
-}: Props) => {
+const MonacoDiffEditor = ({ original, filename, commitMessage }: Props) => {
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [waitingToSave, setWaitingToSave] = useState(false)
+  const [waitingToMerge, setWaitingToMerge] = useState(false)
   const [editorReady, setEditorReady] = useState(false)
   const providerRef = useRef<SimpleLanguageInfoProvider>()
   const branchState = useQuery<RepoStateQueryResult>(REPO_STATE)
@@ -98,7 +91,9 @@ const MonacoDiffEditor = ({
     undefined
   )
 
-  const { setupCodeLens, modifiedContent } = useMergeCodeLens(original)
+  const { setupCodeLens, modifiedContent, cleanup } = useMergeCodeLens(original)
+
+  const mergeConflictExists = useMergeConflictDetector(modifiedContent)
 
   const classes = stylesInUse()
 
@@ -108,16 +103,13 @@ const MonacoDiffEditor = ({
     data: user,
   } = useQuery<MeQueryResult>(ME)
 
-  const [saveChanges, { loading: mutationSaveLoading }] = useMutation(
-    SAVE_CHANGES,
+  const [saveMergeEdit, { loading: mutationMergeLoading }] = useMutation(
+    SAVE_MERGE,
     {
+      onCompleted: cleanup,
       refetchQueries: [{ query: REPO_STATE }],
     }
   )
-
-  const [saveMergeEdit] = useMutation(SAVE_MERGE, {
-    refetchQueries: [{ query: REPO_STATE }],
-  })
 
   const theme = useTheme()
 
@@ -136,64 +128,40 @@ const MonacoDiffEditor = ({
     setDialogOpen(false)
   }
 
-  const handleDialogSubmit = async (
-    createNewBranch: boolean,
-    newBranch: string,
-    newCommitMessage: string
-  ) => {
-    if (editorRef.current) {
-      const branchName = createNewBranch ? newBranch : currentBranch
-      try {
-        setWaitingToSave(true)
-        await saveChanges({
-          variables: {
-            file: {
-              name: filename,
-              content: editorRef.current.getModifiedEditor().getValue(),
-            },
-            branch: branchName,
-            commitMessage: newCommitMessage,
-          },
-        })
-        setDialogOpen(false)
-        setDialogError(undefined)
-      } catch (error) {
-        // @ts-ignore
-        if (error.message === 'Merge conflict detected') {
-          setDialogError({
-            title: `Merge conflict on branch ${branchName}`,
-            message: 'Cannot push to selected branch. Create a new one.',
-          })
-        }
-      } finally {
-        setWaitingToSave(false)
-      }
-    }
-  }
-
-  const handleSaveButton = () => {
-    setDialogOpen(true)
-  }
-
-  const handleMerge = async () => {
+  const handleDialogSubmit = async (newCommitMessage: string) => {
     if (editorRef.current) {
       try {
+        setWaitingToMerge(true)
         await saveMergeEdit({
           variables: {
             file: {
               name: filename,
               content: editorRef.current.getModifiedEditor().getValue(),
             },
-            commitMessage: 'merge test',
+            commitMessage: newCommitMessage,
           },
         })
-
-        setMergeConflictState(false)
+        setDialogOpen(false)
+        setDialogError(undefined)
       } catch (error) {
-        // @ts-ignore
-        console.log(error.message)
+        const dialogError = {
+          title: `An error occurred while merging`,
+          message: '',
+        }
+
+        if (error instanceof Error) {
+          dialogError.message = `More info: ${error.message}`
+        }
+
+        setDialogError(dialogError)
+      } finally {
+        setWaitingToMerge(false)
       }
     }
+  }
+
+  const handleSaveButton = () => {
+    setDialogOpen(true)
   }
 
   useEffect(() => {
@@ -239,13 +207,13 @@ const MonacoDiffEditor = ({
         updateTheme()
       }
       <AuthenticateDialog open={!user || !user.me} />
-      <SaveDialog
+      <MergeDialog
         open={dialogOpen}
         handleClose={handleDialogClose}
         handleSubmit={handleDialogSubmit}
         currentBranch={currentBranch}
         error={dialogError}
-        waitingToSave={waitingToSave}
+        waitingToMerge={waitingToMerge}
       />
 
       <div className={classes.saveGroup}>
@@ -256,15 +224,13 @@ const MonacoDiffEditor = ({
             disabled={
               userQueryLoading ||
               !!userQueryError ||
-              mutationSaveLoading ||
+              mutationMergeLoading ||
               !user?.me ||
-              branchState.loading
+              branchState.loading ||
+              mergeConflictExists
             }
             onClick={handleSaveButton}
           >
-            Save
-          </Button>
-          <Button color="primary" variant="contained" onClick={handleMerge}>
             Merge
           </Button>
           {GHConnectedQuery && (
