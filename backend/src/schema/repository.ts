@@ -135,7 +135,7 @@ const resolvers = {
       _root: unknown,
       _args: unknown,
       context: AppContext
-    ): Promise<any> => {
+    ): Promise<Repo[]> => {
       console.log('HELLO FROM BACKEND')
       if (!context.currentUser) {
         console.log('USER NOT LOGGED IN!!')
@@ -169,7 +169,7 @@ const resolvers = {
           console.log('GOT RESPONSE:')
           console.log(response)
 
-          let repolist = []
+          let repolist: Repo[] = []
           if (service.serviceName === 'github') {
             console.log('PARSING GH REPOSITORIES...')
             repolist = parseGithubRepositories(response)

@@ -70,7 +70,7 @@ export const getServiceTokenFromContext = (serviceName: string, context: AppCont
     }
 }
 
-export const parseGithubRepositories = (response): Repo => {
+export const parseGithubRepositories = (response: any): Repo[] => {
   const repolist = response.map((repo: Repo) => {
     const repoObject: Repo = {
       id: repo.id,
@@ -88,16 +88,16 @@ export const parseGithubRepositories = (response): Repo => {
   return repolist
 }
 
-export const parseBitbucketRepositories = (response) => {
-  const repolist = response.values.map(repo => {
-    const clone_url = repo.links.clone.find(url => url.name === 'https')
+export const parseBitbucketRepositories = (response: any): Repo[] => {
+  const repolist = response.values.map((repo: any) => {
+    const clone_url = repo.links.clone.find((url: { name: string }) => url.name === 'https')
 
     let repoObject: Repo = {
       id: repo.uuid,
       name: repo.name,
       full_name: repo.full_name,
       clone_url: clone_url.href,
-      html_url: 'urli tänne!',
+      html_url: repo.html_url,
       service: 'bitbucket'
     }
     return repoObject
@@ -106,10 +106,10 @@ export const parseBitbucketRepositories = (response) => {
   return repolist
 }
 
-export const parseGitlabRepositories =(response) => {
+export const parseGitlabRepositories = (response: any): Repo[] => {
   console.log('PARSING GITLAB REPOSITORIES...')
   console.log(`gitlab json response: ${response}`)
-  const repolist = response.map((repo: Repo) => {
+  const repolist = response.map((repo: any) => {
     let repoObject: Repo = {
       id: repo.id,
       name: repo.name,
