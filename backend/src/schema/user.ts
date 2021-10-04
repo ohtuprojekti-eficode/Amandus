@@ -222,8 +222,8 @@ const resolvers = {
         serviceName: 'gitlab',
         username: gitLabUser.username,
         email: gitLabUser.email,
-        reposurl:
-          'https://gitlab.com/api/v4/users/' + gitLabUser.id + '/projects',
+        reposurl: 'https://gitlab.com/api/v4/projects?simple=true&min_access_level=30'
+          //'https://gitlab.com/api/v4/users/' + gitLabUser.id + '/projects',
       }
 
       const tokens = createTokens(context.currentUser)

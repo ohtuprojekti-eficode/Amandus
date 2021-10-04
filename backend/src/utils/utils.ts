@@ -4,8 +4,11 @@ import { promisify } from 'util'
 import { writeFileSync } from 'fs'
 import { File } from '../types/file'
 import { sanitizeCommitMessage } from './sanitize'
+
 import { ServiceName, ServiceTokenType } from '../types/service'
 import { AppContext } from '../types/user'
+
+import { Repo, GitHubRepoListResponse, BitbucketRepoListResponse, GitLabRepoListResponse } from '../types/repo'
 
 const execProm = promisify(exec)
 
@@ -93,4 +96,68 @@ const getServiceNameFromUrlString = (urlString: string): ServiceName | undefined
   if (urlString.includes('gitlab')) return 'gitlab'
   if (urlString.includes('bitbucket')) return 'bitbucket'
   return undefined
+}
+
+export const getServiceTokenFromContext = (serviceName: string, context: AppContext): string | undefined => {
+  switch (serviceName) {
+    case 'github': return context.githubToken;
+    case 'bitbucket': return context.bitbucketToken;
+    case 'gitlab': return context.gitlabToken;
+    default: return undefined;
+  }
+}
+
+export const parseGithubRepositories = (response: GitHubRepoListResponse): Repo[] => {
+  const repolist = response.map((repo: Repo) => {
+
+    const repoObject: Repo = {
+      id: repo.id,
+      name: repo.name,
+      full_name: repo.full_name,
+      clone_url: repo.clone_url,
+      html_url: repo.html_url,
+      service: 'github'
+    }
+
+    return repoObject
+  }
+  )
+
+  return repolist
+}
+
+export const parseBitbucketRepositories = (response: BitbucketRepoListResponse): Repo[] => {
+  const repolist = response.values.map((repo: any) => {
+    const clone_url = repo.links.clone.find((url: { name: string }) => url.name === 'https')
+
+    const repoObject: Repo = {
+      id: repo.uuid,
+      name: repo.name,
+      full_name: repo.full_name,
+      clone_url: clone_url.href,
+      html_url: repo.links.html.href,
+      service: 'bitbucket'
+    }
+    return repoObject
+  })
+
+  return repolist
+}
+
+export const parseGitlabRepositories = (response: GitLabRepoListResponse): Repo[] => {
+  const repolist = response.map((repo: any) => {
+
+    const repoObject: Repo = {
+      id: repo.id,
+      name: repo.name,
+      full_name: repo.path_with_namespace,
+      clone_url: repo.http_url_to_repo,
+      html_url: repo.web_url,
+      service: 'gitlab',
+    }
+
+    return repoObject
+  })
+
+  return repolist
 }

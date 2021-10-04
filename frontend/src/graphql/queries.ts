@@ -76,3 +76,15 @@ export const ME = gql`
     }
   }
 `
+export const GET_REPO_LIST = gql`
+  query {
+    getRepoListFromService {
+      id
+      name
+      full_name
+      clone_url
+      html_url
+      service
+    }
+  }
+`
