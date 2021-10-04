@@ -72,11 +72,12 @@ export const getServiceTokenFromContext = (serviceName: string, context: AppCont
 
 export const parseGithubRepositories = (response): Repo => {
   const repolist = response.map((repo: Repo) => {
-    let repoObject: Repo = {
+    const repoObject: Repo = {
       id: repo.id,
       name: repo.name,
       full_name: repo.full_name,
       clone_url: repo.clone_url,
+      html_url: repo.html_url,
       service: 'github'
     }
     return (
@@ -96,6 +97,7 @@ export const parseBitbucketRepositories = (response) => {
       name: repo.name,
       full_name: repo.full_name,
       clone_url: clone_url.href,
+      html_url: 'urli tänne!',
       service: 'bitbucket'
     }
     return repoObject

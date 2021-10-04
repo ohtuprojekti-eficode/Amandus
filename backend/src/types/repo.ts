@@ -3,5 +3,6 @@ export interface Repo {
     name: string
     full_name: string
     clone_url: string
+    html_url: string
     service: string
 }
