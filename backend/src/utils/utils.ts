@@ -5,7 +5,7 @@ import { writeFileSync } from 'fs'
 import { File } from '../types/file'
 import { sanitizeCommitMessage } from './sanitize'
 import { AppContext } from '../types/user'
-import { Repo } from '../types/repo'
+import { Repo, GitHubRepoListResponse, BitbucketRepoListResponse, GitLabRepoListResponse } from '../types/repo'
 
 const execProm = promisify(exec)
 
@@ -62,16 +62,17 @@ export const getRepoLocationFromRepoName = (repositoryName: string): string => {
 }
 
 export const getServiceTokenFromContext = (serviceName: string, context: AppContext): string | undefined => {
-    switch(serviceName){
-      case 'github': return context.githubToken;
-      case 'bitbucket': return context.bitbucketToken;
-      case 'gitlab': return context.gitlabToken;
-      default: return undefined;
-    }
+  switch (serviceName) {
+    case 'github': return context.githubToken;
+    case 'bitbucket': return context.bitbucketToken;
+    case 'gitlab': return context.gitlabToken;
+    default: return undefined;
+  }
 }
 
-export const parseGithubRepositories = (response: any): Repo[] => {
+export const parseGithubRepositories = (response: GitHubRepoListResponse): Repo[] => {
   const repolist = response.map((repo: Repo) => {
+
     const repoObject: Repo = {
       id: repo.id,
       name: repo.name,
@@ -80,19 +81,19 @@ export const parseGithubRepositories = (response: any): Repo[] => {
       html_url: repo.html_url,
       service: 'github'
     }
-    return (
-      repoObject
-      )}
-    )
+
+    return repoObject
+  }
+  )
 
   return repolist
 }
 
-export const parseBitbucketRepositories = (response: any): Repo[] => {
+export const parseBitbucketRepositories = (response: BitbucketRepoListResponse): Repo[] => {
   const repolist = response.values.map((repo: any) => {
     const clone_url = repo.links.clone.find((url: { name: string }) => url.name === 'https')
 
-    let repoObject: Repo = {
+    const repoObject: Repo = {
       id: repo.uuid,
       name: repo.name,
       full_name: repo.full_name,
@@ -106,11 +107,10 @@ export const parseBitbucketRepositories = (response: any): Repo[] => {
   return repolist
 }
 
-export const parseGitlabRepositories = (response: any): Repo[] => {
-  console.log('PARSING GITLAB REPOSITORIES...')
-  console.log(`gitlab json response: ${response}`)
+export const parseGitlabRepositories = (response: GitLabRepoListResponse): Repo[] => {
   const repolist = response.map((repo: any) => {
-    let repoObject: Repo = {
+
+    const repoObject: Repo = {
       id: repo.id,
       name: repo.name,
       full_name: repo.path_with_namespace,
@@ -118,6 +118,7 @@ export const parseGitlabRepositories = (response: any): Repo[] => {
       html_url: repo.web_url,
       service: 'gitlab',
     }
+
     return repoObject
   })
 

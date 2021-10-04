@@ -136,15 +136,12 @@ const resolvers = {
             repolist = parseGitlabRepositories(response)
           }
 
-          console.log(repolist)
-
           return repolist
         }
       ))
 
       const repos = repolist.flat()
 
-      console.log(repos)
       return repos
 
     },
