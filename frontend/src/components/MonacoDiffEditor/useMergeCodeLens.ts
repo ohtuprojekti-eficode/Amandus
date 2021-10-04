@@ -93,6 +93,8 @@ const useMergeCodeLens = (original: string, language = 'robot') => {
         }
       })
 
+      const modifiedModelId = editor.getModel()?.modified.id
+
       codeLensHandle.current = monaco.languages.registerCodeLensProvider(
         language, // needs to match the language passed to the DiffEditor -component for the codelens to show up
         {
@@ -100,7 +102,7 @@ const useMergeCodeLens = (original: string, language = 'robot') => {
             model: editor.ITextModel,
             _token: CancellationToken
           ) {
-            if (model.id === '$model2') {
+            if (model.id === modifiedModelId) {
               // hides the codelens in the right section of the diff editor
               return
             }
