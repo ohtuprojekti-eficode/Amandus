@@ -12,7 +12,7 @@ const EditView = () => {
   const location = useLocation()
   const classes = useStyles()
   const [hasRefetched, setHasRefetched] = useState(false)
-  const [mergeConflictExists, setMergeConflictExists] = useState(true)
+  const [mergeConflictExists, setMergeConflictExists] = useState(false)
 
   const [repoStateQuery, { data: repoStateData }] =
     useLazyQuery<RepoStateQueryResult>(REPO_STATE, {
@@ -34,19 +34,36 @@ const EditView = () => {
     }
   }, [hasRefetched, mergeConflictExists, repoStateQuery])
 
-  if (cloneRepoQuery.loading) return <div>Cloning repo...</div>
-  if (cloneRepoQuery.error) return <div>Error cloning repo...</div>
-
-  // TODO: "can't perform react state update on unmounted component "
-  // if (repoStateLoading) return <div>Fetching repo state...</div>
-  // if (repoStateError) return <div>Error fetching repo state...</div>
-
   const files = repoStateData ? repoStateData.repoState.files : []
   const filename = location.search.slice(3)
   const content = files.find((e) => e.name === filename)?.content
   const commitMessage = repoStateData
     ? repoStateData.repoState.commitMessage
     : ''
+
+  useEffect(() => {
+    if (!mergeConflictExists && content) {
+      const lines = content?.split('\n')
+
+      console.log('here', lines)
+
+      if (
+        // maybe a suboptimal way to check for merge conflicts
+        lines.find((line) => line.startsWith('<<<<<<<')) &&
+        lines.find((line) => line.startsWith('=======')) &&
+        lines.find((line) => line.startsWith('>>>>>>>'))
+      ) {
+        setMergeConflictExists(true)
+      }
+    }
+  }, [content, mergeConflictExists])
+
+  if (cloneRepoQuery.loading) return <div>Cloning repo...</div>
+  if (cloneRepoQuery.error) return <div>Error cloning repo...</div>
+
+  // TODO: "can't perform react state update on unmounted component "
+  // if (repoStateLoading) return <div>Fetching repo state...</div>
+  // if (repoStateError) return <div>Error fetching repo state...</div>
 
   const renderEditor = () => {
     if (mergeConflictExists) {

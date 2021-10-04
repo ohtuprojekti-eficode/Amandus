@@ -187,6 +187,8 @@ const MonacoDiffEditor = ({
             commitMessage: 'merge test',
           },
         })
+
+        setMergeConflictState(false)
       } catch (error) {
         // @ts-ignore
         console.log(error.message)
