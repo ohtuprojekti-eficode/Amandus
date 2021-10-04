@@ -114,7 +114,7 @@ const resolvers = {
         throw new Error('GitLab client id or callback url not set')
       }
 
-      return `https://gitlab.com/oauth/authorize?client_id=${clientID}&redirect_uri=${cbUrl}&response_type=code&state=${state}&scope=read_user+read_repository+write_repository`
+      return `https://gitlab.com/oauth/authorize?client_id=${clientID}&redirect_uri=${cbUrl}&response_type=code&state=${state}&scope=read_user+read_repository+write_repository+api`
     },
 
     currentToken: (

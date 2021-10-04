@@ -68,13 +68,15 @@ export const gitAddRemote = async (
         return 'bitbucket.org'
     }
   }
-  // could not get gitlab to work
-  // if (service==='gitlab') username = 'oauth2' .....this is not working either
+
+  if (service === 'gitlab') username = 'oauth2'
+
   await git.addRemote(
     remoteId,
     `https://${username}:${token}@${serviceUrl(service)}/${repositoryName}`
   )
 }
+
 
 export const checkoutBranch = async (
   git: SimpleGit,
@@ -123,7 +125,7 @@ export const pushWithToken = async (
   token: string,
   branchName: string,
   service: ServiceName,
-repositoryName: string
+  repositoryName: string
 ): Promise<void> => {
   const remoteUuid = uuidv4()
   await gitAddRemote(
