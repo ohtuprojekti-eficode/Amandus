@@ -2,19 +2,30 @@ import React from 'react'
 import { GET_REPO_LIST } from '../graphql/queries'
 import { useQuery } from '@apollo/client'
 import { Repo } from '../types'
+import {Box, Button, List, ListItem} from '@material-ui/core'
+import ListItemText from '@material-ui/core/ListItemText'
+import { Link } from 'react-router-dom'
+
 
 interface RepoProps {
   repo: Repo
 }
-
+const editClickHandler = (repo: Repo) => {
+    console.log('want to edit')
+  }
 const RepoLine = ({repo}: RepoProps) => {
 
+  
+
   return (
-    <div>
-      <li >
-          {repo.name} <a href={repo.html_url}>link</a> 
-      </li>
-    </div>
+    <ListItem key={repo.id} component="div" >
+      <ListItem button component="a" href={repo.html_url}> 
+      <ListItemText>{repo.name}</ListItemText> 
+
+      </ListItem>
+        <Button component={Link} to="/edit">Edit</Button>
+      
+    </ListItem>
   )
 }
 
@@ -34,41 +45,36 @@ const RepositoriesView = () => {
   }
 
   const gitHubRepos = getRepoList.data.getRepoListFromService.filter((list: any) => list.service === 'github')
-  console.log(gitHubRepos)
+ // console.log(gitHubRepos)
   const bitbucketRepos = getRepoList.data.getRepoListFromService.filter((list: any) => list.service === 'bitbucket')
   const gitLabRepos = getRepoList.data.getRepoListFromService.filter((list: any) => list.service === 'gitlab')
 
   return (
-    <div>
+    <Box>
+      <List> 
       <h3>
         GitHub repos
       </h3>
-      <ul>
-        {gitHubRepos.map(
+      {gitHubRepos.map(
           (repo: Repo) => 
           <RepoLine key={repo.id} repo={repo}/>
         )}
-      </ul>
-      <h3>
+        <h3>
         Bitbucket repos
       </h3>
-      <ul>
         {bitbucketRepos.map(
           (repo: Repo) =>
           <RepoLine key={repo.id} repo={repo} />
         )}
-      </ul>
-      <h3>
+        <h3>
         GitLab repos
       </h3>
-      <ul>
         {gitLabRepos.map(
           (repo: Repo) => 
           <RepoLine key={repo.id} repo={repo} />
         )}
-      </ul>
-    </div> 
+      </List>
+    </Box>
   )
 }
-
 export default RepositoriesView
