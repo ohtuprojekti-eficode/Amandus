@@ -14,25 +14,16 @@ const EditView = () => {
   const [hasRefetched, setHasRefetched] = useState(false)
   const [mergeConflictExists, setMergeConflictExists] = useState(true)
 
-  /*
-  const [
-    repoStateQuery,
-    { data: repoStateData },
-  ] = useLazyQuery<RepoStateQueryResult>(REPO_STATE)
-  */
-  
-  
   const [repoStateQuery, { data: repoStateData }] =
     useLazyQuery<RepoStateQueryResult>(REPO_STATE, {
-      fetchPolicy: 'network-only'
-  })
+      fetchPolicy: 'network-only',
+    })
 
   const cloneRepoQuery = useQuery(CLONE_REPO, {
     onCompleted: () => repoStateQuery(),
   })
-  
 
-  if (cloneRepoQuery.error){
+  if (cloneRepoQuery.error) {
     console.log(`Clone error: ${cloneRepoQuery.error}`)
   }
 
@@ -41,7 +32,7 @@ const EditView = () => {
       repoStateQuery()
       setHasRefetched(true)
     }
-  }, [hasRefetched, mergeConflictExists])
+  }, [hasRefetched, mergeConflictExists, repoStateQuery])
 
   if (cloneRepoQuery.loading) return <div>Cloning repo...</div>
   if (cloneRepoQuery.error) return <div>Error cloning repo...</div>
@@ -53,32 +44,37 @@ const EditView = () => {
   const files = repoStateData ? repoStateData.repoState.files : []
   const filename = location.search.slice(3)
   const content = files.find((e) => e.name === filename)?.content
-  const commitMessage = repoStateData ? repoStateData.repoState.commitMessage : ''
+  const commitMessage = repoStateData
+    ? repoStateData.repoState.commitMessage
+    : ''
 
   const renderEditor = () => {
     if (mergeConflictExists) {
-        return (
-          <div className={classes.editor}>
-            <MonacoDiffEditor 
-            setMergeConflictState={setMergeConflictExists} 
-            original={content} 
-            modified={content} 
-            filename={filename} 
-            commitMessage={commitMessage}/>
-          </div>
-        )
-    } 
-    
+      return (
+        <div className={classes.editor}>
+          {content && (
+            <MonacoDiffEditor
+              setMergeConflictState={setMergeConflictExists}
+              original={content}
+              modified={content}
+              filename={filename}
+              commitMessage={commitMessage}
+            />
+          )}
+        </div>
+      )
+    }
+
     return (
       <div className={classes.editor}>
-        <MonacoEditor 
-        setMergeConflictState={setMergeConflictExists} 
-        content={content} 
-        filename={filename} 
-        commitMessage={commitMessage}/>
+        <MonacoEditor
+          setMergeConflictState={setMergeConflictExists}
+          content={content}
+          filename={filename}
+          commitMessage={commitMessage}
+        />
       </div>
     )
-    
   }
 
   return (

@@ -1,9 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { loader, DiffEditor, Monaco } from '@monaco-editor/react'
-import { editor } from 'monaco-editor'
 import { useMutation, useQuery } from '@apollo/client'
-import { IS_GH_CONNECTED, ME, REPO_STATE } from '../graphql/queries'
-import { SAVE_CHANGES, SAVE_MERGE } from '../graphql/mutations'
 import {
   Button,
   createStyles,
@@ -12,8 +7,13 @@ import {
   useTheme,
 } from '@material-ui/core'
 import { GitHub } from '@material-ui/icons'
-import SaveDialog from './SaveDialog'
-import AuthenticateDialog from './AuthenticateDialog'
+import { DiffEditor, loader, Monaco } from '@monaco-editor/react'
+import { editor } from 'monaco-editor'
+import React, { useEffect, useRef, useState } from 'react'
+import { SAVE_CHANGES, SAVE_MERGE } from '../graphql/mutations'
+import { IS_GH_CONNECTED, ME, REPO_STATE } from '../graphql/queries'
+import VsCodeDarkTheme from '../styles/editor-themes/vs-dark-plus-theme'
+import VsCodeLightTheme from '../styles/editor-themes/vs-light-plus-theme'
 import {
   IsGithubConnectedResult,
   MeQueryResult,
@@ -21,19 +21,16 @@ import {
 } from '../types'
 import { initMonaco } from '../utils/monacoInitializer'
 import { SimpleLanguageInfoProvider } from '../utils/providers'
-import VsCodeDarkTheme from '../styles/editor-themes/vs-dark-plus-theme'
-import VsCodeLightTheme from '../styles/editor-themes/vs-light-plus-theme'
+import AuthenticateDialog from './AuthenticateDialog'
+import SaveDialog from './SaveDialog'
+import useMergeCodeLens from './useMergeCodeLens'
 
 interface Props {
-  original: string | undefined
-  modified: string | undefined
+  original: string
+  modified: string
   filename: string | undefined
   commitMessage: string | undefined
   setMergeConflictState: (active: boolean) => void
-}
-
-interface Getter {
-  (): string
 }
 
 interface DialogError {
@@ -101,6 +98,8 @@ const MonacoDiffEditor = ({
     undefined
   )
 
+  const { setupCodeLens, modifiedContent } = useMergeCodeLens(original)
+
   const classes = stylesInUse()
 
   const {
@@ -129,6 +128,8 @@ const MonacoDiffEditor = ({
     monaco: Monaco
   ) => {
     editorRef.current = editor
+
+    setupCodeLens(editor, monaco)
   }
 
   const handleDialogClose = () => {
@@ -226,7 +227,7 @@ const MonacoDiffEditor = ({
         height="78vh"
         language="robot"
         original={original}
-        modified={modified}
+        modified={modifiedContent}
         theme={theme.palette.type === 'dark' ? 'vs-dark' : 'vs-light'}
         onMount={handleEditorDidMount}
         options={options}
