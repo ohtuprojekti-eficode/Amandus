@@ -109,11 +109,14 @@ const resolvers = {
         async (service) => {
           const token = getServiceTokenFromAppContext({service: service.serviceName as ServiceName, appContext: context})
 
-          if (!token) {
-            throw new Error(`${service.serviceName} token is missing`)
-          }
+
 
           let repolist: Repo[] = []
+
+          if (!token) {
+            return repolist
+          }
+
           if (service.serviceName === 'github') {
             const response = await getGitHubRepoList(service, token)
             repolist = parseGithubRepositories(response)
