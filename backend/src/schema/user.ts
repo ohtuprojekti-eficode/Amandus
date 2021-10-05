@@ -170,15 +170,15 @@ const resolvers = {
         throw new UserInputError('GitHub code not provided')
       }
 
-      const { access_token } = await requestGithubToken(args.code)
+      const response = await requestGithubToken(args.code)
 
-      if (!access_token) {
+      if (!response.access_token) {
         throw new UserInputError('Invalid or expired GitHub code')
       }
 
-      const gitHubUser = await requestGithubUserAccount(access_token)
+      const gitHubUser = await requestGithubUserAccount(response.access_token)
 
-      tokenService.setToken(context.currentUser.id, 'github', access_token)
+      tokenService.setToken(context.currentUser.id, 'github', response)
 
       const serviceUser = {
         serviceName: 'github',
@@ -208,15 +208,15 @@ const resolvers = {
         throw new UserInputError('GitLab code not provided')
       }
 
-      const { access_token } = await requestGitLabToken(args.code)
+      const response = await requestGitLabToken(args.code)
 
-      if (!access_token) {
+      if (!response.access_token) {
         throw new UserInputError('Invalid or expired GitLab code')
       }
 
-      const gitLabUser = await requestGitLabUserAccount(access_token)
+      const gitLabUser = await requestGitLabUserAccount(response.access_token)
 
-      tokenService.setToken(context.currentUser.id, 'gitlab', access_token)
+      tokenService.setToken(context.currentUser.id, 'gitlab', response)
 
       const serviceUser = {
         serviceName: 'gitlab',
@@ -247,16 +247,20 @@ const resolvers = {
         throw new UserInputError('Bitbucket code not provided')
       }
 
-      const { access_token } = await requestBitbucketToken(args.code)
+      const response = await requestBitbucketToken(args.code)
 
-      if (!access_token) {
+      if (!response.access_token) {
         throw new UserInputError('Invalid or expired Bitbucket code')
       }
 
-      const bitBucketUser = await requestBitbucketUserAccount(access_token)
-      const bitbucketUserEmail = await requestBitbucketUserEmail(access_token)
+      const bitBucketUser = await requestBitbucketUserAccount(
+        response.access_token
+      )
+      const bitbucketUserEmail = await requestBitbucketUserEmail(
+        response.access_token
+      )
 
-      tokenService.setToken(context.currentUser.id, 'bitbucket', access_token)
+      tokenService.setToken(context.currentUser.id, 'bitbucket', response)
 
       const email = bitbucketUserEmail.values.find(
         (email) => email.is_primary
@@ -335,16 +339,13 @@ const resolvers = {
     ): Promise<void> => {
       const username = args.username
       if (!username) {
-        throw new UserInputError(
-          'User not valid'
-        )
+        throw new UserInputError('User not valid')
       }
       await User.deleteUser(username)
 
-      
-    //  await user.deleteUser
-    }
-  }
+      //  await user.deleteUser
+    },
+  },
 }
 
 export default {
