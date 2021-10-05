@@ -111,11 +111,12 @@ export const getServiceTokenFromContext = (serviceName: string, context: AppCont
   }
 }
 
-export const parseGithubRepositories = (response: GitHubRepoListResponse): Repo[] => {
-  const repolist = response.map((repo: Repo) => {
+export const parseGithubRepositories = (response: GitHubRepoListResponse[]): Repo[] => {
+  const repolist = response.map((repo: GitHubRepoListResponse) => {
+    const repoId = `${repo.id}`
 
     const repoObject: Repo = {
-      id: repo.id,
+      id: repoId,
       name: repo.name,
       full_name: repo.full_name,
       clone_url: repo.clone_url,
@@ -131,8 +132,11 @@ export const parseGithubRepositories = (response: GitHubRepoListResponse): Repo[
 }
 
 export const parseBitbucketRepositories = (response: BitbucketRepoListResponse): Repo[] => {
-  const repolist = response.values.map((repo: any) => {
-    const clone_url = repo.links.clone.find((url: { name: string }) => url.name === 'https')
+  const repolist = response.values.map(repo => {
+    const clone_url = repo.links.clone.find(url => url.name === 'https')
+    if(!clone_url){
+      throw Error('No clone url found, cannot append repo to list')
+    }
 
     const repoObject: Repo = {
       id: repo.uuid,
@@ -148,11 +152,12 @@ export const parseBitbucketRepositories = (response: BitbucketRepoListResponse):
   return repolist
 }
 
-export const parseGitlabRepositories = (response: GitLabRepoListResponse): Repo[] => {
-  const repolist = response.map((repo: any) => {
+export const parseGitlabRepositories = (response: GitLabRepoListResponse[]): Repo[] => {
+  const repolist = response.map((repo: GitLabRepoListResponse) => {
+    const repoId = `${repo.id}`
 
     const repoObject: Repo = {
-      id: repo.id,
+      id: repoId,
       name: repo.name,
       full_name: repo.path_with_namespace,
       clone_url: repo.http_url_to_repo,

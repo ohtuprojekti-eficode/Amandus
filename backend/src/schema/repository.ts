@@ -16,7 +16,7 @@ import { AppContext } from '../types/user'
 import { BranchSwitchArgs, SaveArgs } from '../types/params'
 import { RepoState } from '../types/repoState'
 import { getRepoLocationFromUrlString, getServiceTokenFromAppContext } from '../utils/utils'
-import { getRepoList } from '../services/commonServices'
+import { getBitbucketRepoList, getGitHubRepoList, getGitLabRepoList } from '../services/commonServices'
 import { Repo } from '../types/repo'
 import {
   parseGithubRepositories,
@@ -112,18 +112,18 @@ const resolvers = {
           if (!token) {
             throw new Error(`${service.serviceName} token is missing`)
           }
-          const response = await getRepoList(service, token)
-
-          if (!response) {
-            throw new Error(`Failed to fetch repo data from ${service.serviceName}`)
-          }
 
           let repolist: Repo[] = []
           if (service.serviceName === 'github') {
+            const response = await getGitHubRepoList(service, token)
             repolist = parseGithubRepositories(response)
+
           } else if (service.serviceName === 'bitbucket') {
+            const response = await getBitbucketRepoList(service, token)
             repolist = parseBitbucketRepositories(response)
+
           } else if (service.serviceName === 'gitlab') {
+            const response = await getGitLabRepoList(service, token)
             repolist = parseGitlabRepositories(response)
           }
 

@@ -6,19 +6,50 @@ import {
 } from '../types/repo'
 import fetch from 'node-fetch'
 
-export const getRepoList = (
+export const getGitHubRepoList = (
   service: ServiceUserType,
   token: string
-  ): Promise<GitHubRepoListResponse | BitbucketRepoListResponse | GitLabRepoListResponse> => {
+): Promise<GitHubRepoListResponse[]> => {
 
-    const prefix = service.serviceName == 'github' ? 'token' : 'Bearer'
-    return fetch(`${service.reposurl}`, {
+  return fetch(`${service.reposurl}`, {
     headers: {
-      Authorization: `${prefix} ${token}`,
-      },
-    })
-    .then<GitHubRepoListResponse | BitbucketRepoListResponse | GitLabRepoListResponse>((res) => res.json())
-    .catch((error: Error) => {
-      throw new Error(error.message)
-    })
+      Authorization: `Bearer ${token}`
+    },
+  })
+  .then<GitHubRepoListResponse[]>((res) => res.json())
+  .catch((error: Error) => {
+    throw new Error(error.message)
+  })
+}
+
+export const getBitbucketRepoList = (
+  service: ServiceUserType,
+  token: string
+): Promise<BitbucketRepoListResponse> => {
+
+  return fetch(`${service.reposurl}`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    },
+  })
+  .then<BitbucketRepoListResponse>((res) => res.json())
+  .catch((error: Error) => {
+    throw new Error(error.message)
+  })
+}
+
+export const getGitLabRepoList = (
+  service: ServiceUserType,
+  token: string
+): Promise<GitLabRepoListResponse[]> => {
+
+  return fetch(`${service.reposurl}`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    },
+  })
+  .then<GitLabRepoListResponse[]>((res) => res.json())
+  .catch((error: Error) => {
+    throw new Error(error.message)
+  })
 }

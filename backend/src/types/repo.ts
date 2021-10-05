@@ -23,11 +23,10 @@ export interface BitbucketRepoListResponse {
             full_name: string,
             links: {
                 clone: [
-                    [
                         {
-                            href: string
+                            href: string,
+                            name: string
                         }
-                    ]
                 ],
                 html: {
                     href: string
