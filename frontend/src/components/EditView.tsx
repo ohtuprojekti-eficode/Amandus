@@ -14,33 +14,32 @@ interface LocationState {
 const EditView = () => {
   const location = useLocation<LocationState>()
   const classes = useStyles()
-  const [cloneUrl, setCloneUrl] = useState<string | undefined>(undefined)
-  
-  const [
-    repoStateQuery,
-    { data: repoStateData },
-  ] = useLazyQuery<RepoStateQueryResult>(REPO_STATE, 
+  const [cloneUrl, setCloneUrl] = useState<string | undefined>(undefined)
+
+  const [repoStateQuery, { data: repoStateData }]
+    = useLazyQuery<RepoStateQueryResult>(
+      REPO_STATE,
+      { variables: { repoUrl: cloneUrl } }
+    )
+
+  const cloneRepoQuery = useQuery(
+    CLONE_REPO,
     {
-      variables: { repoUrl: cloneUrl }
-    })
-  const cloneRepoQuery = useQuery(CLONE_REPO, {
-    variables: {cloneUrl},
-    onCompleted: () => 
-    repoStateQuery(),
-    
-  })
+      variables: { cloneUrl },
+      skip: !cloneUrl,
+      onCompleted: () => repoStateQuery()
+    }
+  )
 
-  if (!cloneUrl) {
-    if (!location.state) return <div>Select repository first</div>
-    setCloneUrl(location.state.cloneUrl)
-  }
+  if (!cloneUrl && !location.state?.cloneUrl) return <div>Please select repository first</div>
+  if (!cloneUrl) setCloneUrl(location.state.cloneUrl)
 
-  if (cloneRepoQuery.error){
+  if (cloneRepoQuery.error) {
     console.log(`Clone error: ${cloneRepoQuery.error}`)
+    return <div>Error cloning repo...</div>
   }
 
   if (cloneRepoQuery.loading) return <div>Cloning repo...</div>
-  if (cloneRepoQuery.error) return <div>Error cloning repo...</div>
 
   // TODO: "can't perform react state update on unmounted component "
   // if (repoStateLoading) return <div>Fetching repo state...</div>
@@ -55,10 +54,10 @@ const EditView = () => {
   return (
     <div className={classes.root}>
       <div className={classes.sidebar}>
-        <Sidebar files={files} currentUrl={cloneUrl || ''}/>
+        <Sidebar files={files} currentUrl={cloneUrl || ''} />
       </div>
       <div className={classes.editor}>
-        <MonacoEditor content={content} filename={filename} commitMessage={commitMessage}/>
+        <MonacoEditor content={content} filename={filename} commitMessage={commitMessage} />
       </div>
     </div>
   )
