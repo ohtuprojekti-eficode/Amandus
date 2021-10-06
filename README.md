@@ -33,7 +33,7 @@ Web application to edit Robot Framework files remotely
 
 [Summary](/documentation/summary.md)
 
-[Working hours](https://docs.google.com/spreadsheets/d/1YDC3QcxFgtNw_KvYTQlDE8rA0DA7rvMYv_ZlsHXdvww)
+[Working hours](https://docs.google.com/spreadsheets/d/1SvQakVd-oYI36uMq7UUxmJvU3OHCj44LfIajHgd81fw/edit#gid=0)
 
 ### Definition of done
 
