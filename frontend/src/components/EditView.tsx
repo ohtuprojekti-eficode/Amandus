@@ -57,7 +57,12 @@ const EditView = () => {
         <Sidebar files={files} currentUrl={cloneUrl} />
       </div>
       <div className={classes.editor}>
-        <MonacoEditor content={content} filename={filename} commitMessage={commitMessage} />
+        <MonacoEditor
+          content={content}
+          filename={filename}
+          commitMessage={commitMessage}
+          cloneUrl={cloneUrl}
+        />
       </div>
     </div>
   )
