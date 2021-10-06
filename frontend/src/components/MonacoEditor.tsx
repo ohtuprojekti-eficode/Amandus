@@ -1,9 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
-import Editor from '@monaco-editor/react'
-import { loader } from '@monaco-editor/react'
 import { useMutation, useQuery } from '@apollo/client'
-import { IS_GH_CONNECTED, ME, REPO_STATE } from '../graphql/queries'
-import { PULL_REPO, SAVE_CHANGES } from '../graphql/mutations'
 import {
   Button,
   createStyles,
@@ -12,8 +7,13 @@ import {
   useTheme,
 } from '@material-ui/core'
 import { GitHub } from '@material-ui/icons'
-import SaveDialog from './SaveDialog'
-import AuthenticateDialog from './AuthenticateDialog'
+import Editor, { loader } from '@monaco-editor/react'
+import { editor } from 'monaco-editor'
+import React, { useEffect, useRef, useState } from 'react'
+import { PULL_REPO, SAVE_CHANGES } from '../graphql/mutations'
+import { IS_GH_CONNECTED, ME, REPO_STATE } from '../graphql/queries'
+import VsCodeDarkTheme from '../styles/editor-themes/vs-dark-plus-theme'
+import VsCodeLightTheme from '../styles/editor-themes/vs-light-plus-theme'
 import {
   IsGithubConnectedResult,
   MeQueryResult,
@@ -21,9 +21,7 @@ import {
 } from '../types'
 import { initMonaco } from '../utils/monacoInitializer'
 import { SimpleLanguageInfoProvider } from '../utils/providers'
-import VsCodeDarkTheme from '../styles/editor-themes/vs-dark-plus-theme'
-import VsCodeLightTheme from '../styles/editor-themes/vs-light-plus-theme'
-import { editor } from 'monaco-editor'
+import SaveDialog from './SaveDialog'
 
 interface Props {
   content: string | undefined
@@ -215,7 +213,6 @@ const MonacoEditor = ({
         // Updating the theme here so we override things set by <Editor>
         updateTheme()
       }
-      <AuthenticateDialog open={!user || !user.me} />
       <SaveDialog
         open={dialogOpen}
         handleClose={handleDialogClose}

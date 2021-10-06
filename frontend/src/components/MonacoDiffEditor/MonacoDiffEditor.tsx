@@ -21,7 +21,6 @@ import {
 } from '../../types'
 import { initMonaco } from '../../utils/monacoInitializer'
 import { SimpleLanguageInfoProvider } from '../../utils/providers'
-import AuthenticateDialog from '../AuthenticateDialog'
 import MergeDialog from '../MergeDialog'
 import useMergeCodeLens from './useMergeCodeLens'
 import useMergeConflictDetector from './useMergeConflictDetector'
@@ -206,7 +205,6 @@ const MonacoDiffEditor = ({ original, filename, commitMessage }: Props) => {
         // Updating the theme here so we override things set by <Editor>
         updateTheme()
       }
-      <AuthenticateDialog open={!user || !user.me} />
       <MergeDialog
         open={dialogOpen}
         handleClose={handleDialogClose}

@@ -1,17 +1,20 @@
-import React from 'react'
-import MonacoEditor from './MonacoEditor'
-import MonacoDiffEditor from './MonacoDiffEditor/'
-import Sidebar from './Sidebar'
-import { useLocation } from 'react-router-dom'
 import { useLazyQuery, useQuery } from '@apollo/client'
-import { RepoStateQueryResult } from '../types'
-import { REPO_STATE, CLONE_REPO } from '../graphql/queries'
 import { createStyles, makeStyles } from '@material-ui/core/styles'
+import React from 'react'
+import { useLocation } from 'react-router-dom'
+import { CLONE_REPO, ME, REPO_STATE } from '../graphql/queries'
+import { MeQueryResult, RepoStateQueryResult } from '../types'
+import AuthenticateDialog from './AuthenticateDialog'
+import MonacoDiffEditor from './MonacoDiffEditor/'
 import useMergeConflictDetector from './MonacoDiffEditor/useMergeConflictDetector'
+import MonacoEditor from './MonacoEditor'
+import Sidebar from './Sidebar'
 
 const EditView = () => {
   const location = useLocation()
   const classes = useStyles()
+
+  const { data: user } = useQuery<MeQueryResult>(ME)
 
   const [repoStateQuery, { data: repoStateData }] =
     useLazyQuery<RepoStateQueryResult>(REPO_STATE, {
@@ -71,6 +74,7 @@ const EditView = () => {
     <div className={classes.root}>
       <div className={classes.sidebar}>
         <Sidebar files={files} />
+        <AuthenticateDialog open={!user || !user.me} />
       </div>
       <div className={classes.editor}>{renderEditor()}</div>
     </div>
