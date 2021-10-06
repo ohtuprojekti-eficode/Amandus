@@ -47,18 +47,18 @@ interface ServiceProps {
   appContext: AppContext
 }
 
-export const getServiceTokenFromAppContext = ({service, appContext}: ServiceProps): ServiceTokenType | undefined => {
+export const getServiceTokenFromAppContext = ({ service, appContext }: ServiceProps): ServiceTokenType | undefined => {
   let tokenToReturn: ServiceTokenType | undefined
-  switch(service) {
-    case 'gitlab' : 
-    tokenToReturn = appContext.gitlabToken as ServiceTokenType 
-    break
-    case 'bitbucket' :
-    tokenToReturn = appContext.bitbucketToken as ServiceTokenType
-    break
+  switch (service) {
+    case 'gitlab':
+      tokenToReturn = appContext.gitlabToken as ServiceTokenType
+      break
+    case 'bitbucket':
+      tokenToReturn = appContext.bitbucketToken as ServiceTokenType
+      break
     default: tokenToReturn = appContext.githubToken as ServiceTokenType
   }
-  return tokenToReturn 
+  return tokenToReturn
 }
 
 export const writeToFile = (file: File): void => {
@@ -81,7 +81,11 @@ export const getRepoLocationFromUrlString = (
 ): string => {
   const url = new URL(urlString)
   const service = getServiceNameFromUrlString(urlString) || 'other'
-  const repositoryName = url.pathname
+  const repositoryName =
+    url.pathname.endsWith('.git')
+      ? url.pathname.slice(0, -4)
+      : url.pathname
+
   const repoLocation = `./repositories/${username}/${service}${repositoryName}`
   return repoLocation
 }
@@ -134,7 +138,7 @@ export const parseGithubRepositories = (response: GitHubRepoListResponse[]): Rep
 export const parseBitbucketRepositories = (response: BitbucketRepoListResponse): Repo[] => {
   const repolist = response.values.map(repo => {
     const clone_url = repo.links.clone.find(url => url.name === 'https')
-    if(!clone_url){
+    if (!clone_url) {
       throw Error('No clone url found, cannot append repo to list')
     }
 

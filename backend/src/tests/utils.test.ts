@@ -72,6 +72,14 @@ describe('Test getRepoLocationFromUrlString', () => {
       './repositories/testuser/github/ohtuprojekti-eficode/robot-test-files'
     expect(repoLocation).toBe(expectedLocation)
   })
+
+  it('correct backend repository folder path is returned if given url includes .git', () => {
+    const urlString = 'https://github.com/ohtuprojekti-eficode/robot-test-files.git'
+    const repoLocation = getRepoLocationFromUrlString(urlString, 'testuser')
+    const expectedLocation =
+      './repositories/testuser/github/ohtuprojekti-eficode/robot-test-files'
+    expect(repoLocation).toBe(expectedLocation)
+  })
 })
 
 describe('Test getRepoLocationFromRepoName', () => {
