@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import MonacoEditor from './MonacoEditor'
 import Sidebar from './Sidebar'
 import { useLocation } from 'react-router-dom'
@@ -11,10 +11,13 @@ interface LocationState {
   cloneUrl: string
 }
 
-const EditView = () => {
+interface Props {
+  cloneUrl: string | undefined
+}
+
+const EditView = ({cloneUrl}: Props) => {
   const location = useLocation<LocationState>()
   const classes = useStyles()
-  const [cloneUrl, setCloneUrl] = useState<string | undefined>(undefined)
 
   const [repoStateQuery, { data: repoStateData }]
     = useLazyQuery<RepoStateQueryResult>(
@@ -32,7 +35,6 @@ const EditView = () => {
   )
 
   if (!cloneUrl && !location.state?.cloneUrl) return <div>Please select repository first</div>
-  if (!cloneUrl) setCloneUrl(location.state.cloneUrl)
 
   if (cloneRepoQuery.error) {
     console.log(`Clone error: ${cloneRepoQuery.error}`)
