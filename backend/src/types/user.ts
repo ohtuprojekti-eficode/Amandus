@@ -1,5 +1,13 @@
-import { Tokens } from "./tokens";
+import { Tokens } from './tokens'
 import { ServiceTokenType } from './service'
+
+export interface AccessTokenResponse {
+  access_token: string
+  refresh_token?: string
+  token_type?: string
+  expires_in?: number
+  created_at?: number
+}
 
 export interface GitHubAuthCode {
   code: string
@@ -26,13 +34,13 @@ export interface BitbucketAccessTokenResponse {
 }
 
 export interface BitbucketUserType {
-  username: string,
-  account_id: string,
+  username: string
+  account_id: string
   links: {
     repositories: {
       href: string
     }
-  },
+  }
   access_Token: string
 }
 
