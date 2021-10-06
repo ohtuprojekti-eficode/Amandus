@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import MonacoEditor from './MonacoEditor'
 import Sidebar from './Sidebar'
 import { useLocation } from 'react-router-dom'
@@ -14,9 +14,8 @@ interface LocationState {
 const EditView = () => {
   const location = useLocation<LocationState>()
   const classes = useStyles()
-
-  const { cloneUrl } = location.state
-
+  const [cloneUrl, setCloneUrl] = useState<string | undefined>(undefined)
+  
   const [
     repoStateQuery,
     { data: repoStateData },
@@ -30,6 +29,12 @@ const EditView = () => {
     repoStateQuery(),
     
   })
+
+  if (!cloneUrl) {
+    if (!location.state) return <div>Select repository first</div>
+    setCloneUrl(location.state.cloneUrl)
+  }
+
   if (cloneRepoQuery.error){
     console.log(`Clone error: ${cloneRepoQuery.error}`)
   }
@@ -50,7 +55,7 @@ const EditView = () => {
   return (
     <div className={classes.root}>
       <div className={classes.sidebar}>
-        <Sidebar files={files} currentUrl={cloneUrl}/>
+        <Sidebar files={files} currentUrl={cloneUrl || ''}/>
       </div>
       <div className={classes.editor}>
         <MonacoEditor content={content} filename={filename} commitMessage={commitMessage}/>
