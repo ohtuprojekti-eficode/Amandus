@@ -54,7 +54,7 @@ const EditView = () => {
   return (
     <div className={classes.root}>
       <div className={classes.sidebar}>
-        <Sidebar files={files} currentUrl={cloneUrl || ''} />
+        <Sidebar files={files} currentUrl={cloneUrl} />
       </div>
       <div className={classes.editor}>
         <MonacoEditor content={content} filename={filename} commitMessage={commitMessage} />

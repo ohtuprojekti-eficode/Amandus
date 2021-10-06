@@ -36,7 +36,7 @@ const useStyles = makeStyles(() =>
 )
 
 interface Props {
-  currentUrl: string
+  currentUrl: string | undefined
 }
 
 const BranchSelector = ({currentUrl}: Props) => {
@@ -82,7 +82,9 @@ const BranchSelector = ({currentUrl}: Props) => {
   const handleClose = () => {
     setAnchorElement(null)
   }
-
+  
+  if (!currentUrl) return null
+  
   return (
     <div>
       <List component="nav" className={classes.dropdown}>

@@ -6,7 +6,7 @@ import BranchSelector from './BranchSelector'
 
 interface Props {
   files: File[]
-  currentUrl: string
+  currentUrl: string | undefined
 }
 
 const Sidebar = ({ files, currentUrl }: Props) => {
