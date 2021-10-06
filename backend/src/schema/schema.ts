@@ -58,6 +58,10 @@ const Mutation = `
             branch: String!
             commitMessage: String
         ): String
+        saveMergeEdit(
+            file: FileInput! 
+            commitMessage: String
+        ): String
         connectGitService(
             service: AddServiceArgs!
         ): String

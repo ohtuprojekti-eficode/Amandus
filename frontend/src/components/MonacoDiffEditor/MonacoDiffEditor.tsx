@@ -7,31 +7,28 @@ import {
   useTheme,
 } from '@material-ui/core'
 import { GitHub } from '@material-ui/icons'
-import Editor, { loader } from '@monaco-editor/react'
+import { DiffEditor, loader, Monaco } from '@monaco-editor/react'
 import { editor } from 'monaco-editor'
 import React, { useEffect, useRef, useState } from 'react'
-import { PULL_REPO, SAVE_CHANGES } from '../graphql/mutations'
-import { IS_GH_CONNECTED, ME, REPO_STATE } from '../graphql/queries'
-import VsCodeDarkTheme from '../styles/editor-themes/vs-dark-plus-theme'
-import VsCodeLightTheme from '../styles/editor-themes/vs-light-plus-theme'
+import { SAVE_MERGE } from '../../graphql/mutations'
+import { IS_GH_CONNECTED, ME, REPO_STATE } from '../../graphql/queries'
+import VsCodeDarkTheme from '../../styles/editor-themes/vs-dark-plus-theme'
+import VsCodeLightTheme from '../../styles/editor-themes/vs-light-plus-theme'
 import {
   IsGithubConnectedResult,
   MeQueryResult,
   RepoStateQueryResult,
-} from '../types'
-import { initMonaco } from '../utils/monacoInitializer'
-import { SimpleLanguageInfoProvider } from '../utils/providers'
-import SaveDialog from './SaveDialog'
+} from '../../types'
+import { initMonaco } from '../../utils/monacoInitializer'
+import { SimpleLanguageInfoProvider } from '../../utils/providers'
+import MergeDialog from '../MergeDialog'
+import useMergeCodeLens from './useMergeCodeLens'
+import useMergeConflictDetector from './useMergeConflictDetector'
 
 interface Props {
-  content: string | undefined
+  original: string
   filename: string | undefined
   commitMessage: string | undefined
-  onMergeError: () => void
-}
-
-interface Getter {
-  (): string
 }
 
 interface DialogError {
@@ -80,14 +77,9 @@ const stylesInUse = makeStyles(() =>
   })
 )
 
-const MonacoEditor = ({
-  onMergeError,
-  content,
-  filename,
-  commitMessage,
-}: Props) => {
+const MonacoDiffEditor = ({ original, filename, commitMessage }: Props) => {
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [waitingToSave, setWaitingToSave] = useState(false)
+  const [waitingToMerge, setWaitingToMerge] = useState(false)
   const [editorReady, setEditorReady] = useState(false)
   const providerRef = useRef<SimpleLanguageInfoProvider>()
   const branchState = useQuery<RepoStateQueryResult>(REPO_STATE)
@@ -98,6 +90,10 @@ const MonacoEditor = ({
     undefined
   )
 
+  const { setupCodeLens, modifiedContent, cleanup } = useMergeCodeLens(original)
+
+  const mergeConflictExists = useMergeConflictDetector(modifiedContent)
+
   const classes = stylesInUse()
 
   const {
@@ -106,63 +102,59 @@ const MonacoEditor = ({
     data: user,
   } = useQuery<MeQueryResult>(ME)
 
-  const [saveChanges, { loading: mutationSaveLoading }] = useMutation(
-    SAVE_CHANGES,
+  const [saveMergeEdit, { loading: mutationMergeLoading }] = useMutation(
+    SAVE_MERGE,
     {
+      onCompleted: cleanup,
       refetchQueries: [{ query: REPO_STATE }],
     }
   )
 
-  const [pullRepo, { loading: pullLoading }] = useMutation(PULL_REPO, {
-    refetchQueries: [{ query: REPO_STATE }],
-  })
-
   const theme = useTheme()
 
-  const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
+  const editorRef = useRef<editor.IStandaloneDiffEditor | null>(null)
 
-  const handleEditorDidMount = (editor: editor.IStandaloneCodeEditor) => {
+  const handleEditorDidMount = (
+    editor: editor.IStandaloneDiffEditor,
+    monaco: Monaco
+  ) => {
     editorRef.current = editor
+
+    setupCodeLens(editor, monaco)
   }
 
   const handleDialogClose = () => {
     setDialogOpen(false)
   }
 
-  const handleDialogSubmit = async (
-    createNewBranch: boolean,
-    newBranch: string,
-    newCommitMessage: string
-  ) => {
+  const handleDialogSubmit = async (newCommitMessage: string) => {
     if (editorRef.current) {
-      const branchName = createNewBranch ? newBranch : currentBranch
       try {
-        setWaitingToSave(true)
-        await saveChanges({
+        setWaitingToMerge(true)
+        await saveMergeEdit({
           variables: {
             file: {
               name: filename,
-              content: editorRef.current.getValue(),
+              content: editorRef.current.getModifiedEditor().getValue(),
             },
-            branch: branchName,
             commitMessage: newCommitMessage,
           },
         })
         setDialogOpen(false)
         setDialogError(undefined)
       } catch (error) {
-        if (
-          error instanceof Error &&
-          error.message === 'Merge conflict detected'
-        ) {
-          setDialogError({
-            title: `Merge conflict on branch ${branchName}`,
-            message:
-              'Cannot push to selected branch. Create a new one or resolve the conflicts.',
-          })
+        const dialogError = {
+          title: `An error occurred while merging`,
+          message: '',
         }
+
+        if (error instanceof Error) {
+          dialogError.message = `More info: ${error.message}`
+        }
+
+        setDialogError(dialogError)
       } finally {
-        setWaitingToSave(false)
+        setWaitingToMerge(false)
       }
     }
   }
@@ -171,17 +163,10 @@ const MonacoEditor = ({
     setDialogOpen(true)
   }
 
-  const handlePull = async () => {
-    try {
-      await pullRepo()
-    } catch (error) {
-      console.error('error pulling')
-    }
-  }
-
   useEffect(() => {
-    loader.init().then((monaco) => {
+    loader.init().then((monaco: Monaco) => {
       providerRef.current = initMonaco(monaco, theme.palette.type)
+
       setEditorReady(true)
     })
     // Need to have an empty dependency array for this to work correctly
@@ -192,9 +177,14 @@ const MonacoEditor = ({
     if (editorReady && providerRef.current) {
       const editorTheme =
         theme.palette.type === 'dark' ? VsCodeDarkTheme : VsCodeLightTheme
+
       providerRef.current.changeTheme(editorTheme)
       providerRef.current.injectCSS()
     }
+  }
+
+  const options: editor.IDiffEditorConstructionOptions = {
+    // renderSideBySide: false,
   }
 
   return (
@@ -202,59 +192,44 @@ const MonacoEditor = ({
       <h2 className={classes.title}>
         {filename?.substring(filename.lastIndexOf('/') + 1)}
       </h2>
-      <Editor
+      <DiffEditor
         height="78vh"
         language="robot"
+        original={original}
+        modified={modifiedContent}
         theme={theme.palette.type === 'dark' ? 'vs-dark' : 'vs-light'}
-        value={content}
         onMount={handleEditorDidMount}
+        options={options}
       />
       {
         // Updating the theme here so we override things set by <Editor>
         updateTheme()
       }
-      <SaveDialog
+      <MergeDialog
         open={dialogOpen}
         handleClose={handleDialogClose}
         handleSubmit={handleDialogSubmit}
-        onResolve={onMergeError}
         currentBranch={currentBranch}
         error={dialogError}
-        waitingToSave={waitingToSave}
+        waitingToMerge={waitingToMerge}
       />
 
       <div className={classes.saveGroup}>
         <div className={classes.buttonAndStatus}>
           <Button
-            style={{ marginRight: 5 }}
-            color="secondary"
-            variant="contained"
-            onClick={handlePull}
-            disabled={
-              pullLoading ||
-              userQueryLoading ||
-              !!userQueryError ||
-              mutationSaveLoading ||
-              !user?.me ||
-              branchState.loading
-            }
-          >
-            Pull
-          </Button>
-          <Button
             color="primary"
             variant="contained"
             disabled={
-              pullLoading ||
               userQueryLoading ||
               !!userQueryError ||
-              mutationSaveLoading ||
+              mutationMergeLoading ||
               !user?.me ||
-              branchState.loading
+              branchState.loading ||
+              mergeConflictExists
             }
             onClick={handleSaveButton}
           >
-            Save
+            Merge
           </Button>
           {GHConnectedQuery && (
             <GHConnected
@@ -270,4 +245,4 @@ const MonacoEditor = ({
   )
 }
 
-export default MonacoEditor
+export default MonacoDiffEditor

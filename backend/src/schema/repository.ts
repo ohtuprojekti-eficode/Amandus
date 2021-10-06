@@ -4,6 +4,7 @@ import {
   getCurrentBranchName,
   getCurrentCommitMessage,
   saveChanges,
+  saveMerge,
   getLocalBranches,
   switchCurrentBranch,
   pullNewestChanges,
@@ -52,7 +53,8 @@ const resolvers = {
         await cloneRepository(args.url)
       } else {
         try {
-          await pullNewestChanges(repoLocation)
+          // for now this blocks operation
+          // await pullNewestChanges(repoLocation)
         } catch (error) {
           // In case of merge conflict
           if (error.message === 'Merge conflict') {
@@ -66,7 +68,6 @@ const resolvers = {
 
       return 'Cloned'
     },
-
     getRepoState: async (
       _root: unknown,
       args: { url: string },
@@ -108,6 +109,23 @@ const resolvers = {
       }
 
       return 'Saved'
+    },
+    saveMergeEdit: async (
+      _root: unknown,
+      saveArgs: SaveArgs,
+      context: AppContext
+    ): Promise<string> => {
+      if (!context.currentUser) {
+        throw new ForbiddenError('You have to login')
+      }
+
+      try {
+        await saveMerge(saveArgs, context.currentUser, context.githubToken)
+      } catch (error) {
+        throw new ApolloError(error.message)
+      }
+
+      return 'Merged successfully'
     },
     switchBranch: async (
       _root: unknown,
