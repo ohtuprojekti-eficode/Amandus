@@ -77,6 +77,7 @@ const EditView = ({cloneUrl}: Props) => {
             original={content}
             filename={filename}
             commitMessage={commitMessage}
+            cloneUrl={cloneUrl}
           />
         </div>
       )

@@ -29,6 +29,7 @@ interface Props {
   original: string
   filename: string | undefined
   commitMessage: string | undefined
+  cloneUrl: string | undefined
 }
 
 interface DialogError {
@@ -77,12 +78,18 @@ const stylesInUse = makeStyles(() =>
   })
 )
 
-const MonacoDiffEditor = ({ original, filename, commitMessage }: Props) => {
+const MonacoDiffEditor = ({ original, filename, commitMessage, cloneUrl }: Props) => {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [waitingToMerge, setWaitingToMerge] = useState(false)
   const [editorReady, setEditorReady] = useState(false)
   const providerRef = useRef<SimpleLanguageInfoProvider>()
-  const branchState = useQuery<RepoStateQueryResult>(REPO_STATE)
+  const branchState = useQuery<RepoStateQueryResult>(
+    REPO_STATE,
+    {
+      variables: { repoUrl: cloneUrl },
+      skip: !cloneUrl,
+    }
+  )
   const { data: GHConnectedQuery } =
     useQuery<IsGithubConnectedResult>(IS_GH_CONNECTED)
   const currentBranch = branchState.data?.repoState.currentBranch || ''
@@ -106,7 +113,9 @@ const MonacoDiffEditor = ({ original, filename, commitMessage }: Props) => {
     SAVE_MERGE,
     {
       onCompleted: cleanup,
-      refetchQueries: [{ query: REPO_STATE }],
+      refetchQueries: [{ 
+        query: REPO_STATE,
+        variables: { repoUrl: cloneUrl } }],
     }
   )
 

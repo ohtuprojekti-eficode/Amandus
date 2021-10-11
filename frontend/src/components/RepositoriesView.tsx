@@ -41,7 +41,6 @@ const RepositoriesView = () => {
   }
 
   const gitHubRepos = getRepoList.data.getRepoListFromService.filter((list: any) => list.service === 'github')
- // console.log(gitHubRepos)
   const bitbucketRepos = getRepoList.data.getRepoListFromService.filter((list: any) => list.service === 'bitbucket')
   const gitLabRepos = getRepoList.data.getRepoListFromService.filter((list: any) => list.service === 'gitlab')
 

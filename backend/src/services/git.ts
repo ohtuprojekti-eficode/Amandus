@@ -120,12 +120,14 @@ export const saveMerge = async (
   const email = currentService?.email || amandusUser.email
 
   const remoteToken = getServiceTokenFromAppContext({ service: usedService, appContext: context })
-
   const repositoryName = getRepositoryFromFilePath(file)
-  const repoLocation = getRepoLocationFromRepoName(repositoryName, gitUsername, usedService)
+  const repoLocation = getRepoLocationFromRepoName(
+    repositoryName,
+    amandusUser.username,
+    usedService
+  )
   const realFilename = getFileNameFromFilePath(file, repositoryName)
   const currentBranch = await getCurrentBranchName(repoLocation)
-
   const validCommitMessage = makeCommitMessage(
     commitMessage,
     gitUsername,
@@ -133,7 +135,6 @@ export const saveMerge = async (
   )
 
   const gitObject = getGitObject(repoLocation)
-
   writeToFile(file)
   await addChanges(gitObject, [realFilename])
   await commitAddedChanges(gitObject, gitUsername, email, validCommitMessage)
