@@ -28,6 +28,7 @@ interface Props {
   filename: string | undefined
   commitMessage: string | undefined
   onMergeError: () => void
+  cloneUrl: string | undefined
 }
 
 interface Getter {
@@ -85,12 +86,21 @@ const MonacoEditor = ({
   content,
   filename,
   commitMessage,
+  cloneUrl
 }: Props) => {
+
   const [dialogOpen, setDialogOpen] = useState(false)
   const [waitingToSave, setWaitingToSave] = useState(false)
   const [editorReady, setEditorReady] = useState(false)
   const providerRef = useRef<SimpleLanguageInfoProvider>()
-  const branchState = useQuery<RepoStateQueryResult>(REPO_STATE)
+  const branchState = useQuery<RepoStateQueryResult>(
+    REPO_STATE,
+    {
+      variables: { repoUrl: cloneUrl },
+      skip: !cloneUrl,
+    }
+  )
+
   const { data: GHConnectedQuery } =
     useQuery<IsGithubConnectedResult>(IS_GH_CONNECTED)
   const currentBranch = branchState.data?.repoState.currentBranch || ''
@@ -109,12 +119,18 @@ const MonacoEditor = ({
   const [saveChanges, { loading: mutationSaveLoading }] = useMutation(
     SAVE_CHANGES,
     {
-      refetchQueries: [{ query: REPO_STATE }],
+      refetchQueries: [{ 
+        query: REPO_STATE,
+        variables: { repoUrl: cloneUrl }
+       }],
     }
   )
 
   const [pullRepo, { loading: pullLoading }] = useMutation(PULL_REPO, {
-    refetchQueries: [{ query: REPO_STATE }],
+    refetchQueries: [{ 
+      query: REPO_STATE,
+      variables: { repoUrl: cloneUrl }
+     }],
   })
 
   const theme = useTheme()

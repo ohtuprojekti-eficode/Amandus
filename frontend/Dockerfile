@@ -5,7 +5,7 @@ RUN mkdir -p /usr/src/frontend/node_modules && \
 
 WORKDIR /usr/src/frontend
 
-USER node
+#USER node
 
 COPY --chown=node:node . .
 
