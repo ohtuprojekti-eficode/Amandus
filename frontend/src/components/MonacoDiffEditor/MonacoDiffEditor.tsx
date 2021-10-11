@@ -3,19 +3,19 @@ import {
   Button,
   createStyles,
   makeStyles,
-  Tooltip,
   useTheme,
 } from '@material-ui/core'
-import { GitHub } from '@material-ui/icons'
 import { DiffEditor, loader, Monaco } from '@monaco-editor/react'
 import { editor } from 'monaco-editor'
 import React, { useEffect, useRef, useState } from 'react'
 import { SAVE_MERGE } from '../../graphql/mutations'
-import { IS_GH_CONNECTED, ME, REPO_STATE } from '../../graphql/queries'
+import { IS_GH_CONNECTED, IS_GL_CONNECTED, IS_BB_CONNECTED, ME, REPO_STATE } from '../../graphql/queries'
 import VsCodeDarkTheme from '../../styles/editor-themes/vs-dark-plus-theme'
 import VsCodeLightTheme from '../../styles/editor-themes/vs-light-plus-theme'
 import {
   IsGithubConnectedResult,
+  IsGitLabConnectedResult,
+  IsBitbucketConnectedResult,
   MeQueryResult,
   RepoStateQueryResult,
 } from '../../types'
@@ -29,6 +29,7 @@ interface Props {
   original: string
   filename: string | undefined
   commitMessage: string | undefined
+  cloneUrl: string | undefined
 }
 
 interface DialogError {
@@ -36,13 +37,27 @@ interface DialogError {
   message: string
 }
 
-const GHConnected = ({ isGithubConnected }: { isGithubConnected: boolean }) => {
-  const githubConnected = () => {
-    return (
-      <Tooltip title="GitHub is connected. Saving will push to GitHub">
-        <GitHub />
-      </Tooltip>
-    )
+const ServiceConnected = ({ service }: { service: string }) => {
+  let connected = false
+  let serviceCapitalized = ''
+
+  const { data: GHConnectedQuery } = useQuery<IsGithubConnectedResult>(IS_GH_CONNECTED)
+  const { data: GLConnectedQuery } = useQuery<IsGitLabConnectedResult>(IS_GL_CONNECTED)
+  const { data: BBConnectedQuery } = useQuery<IsBitbucketConnectedResult>(IS_BB_CONNECTED)
+
+  if (service === 'github') {
+    connected = GHConnectedQuery ? GHConnectedQuery.isGithubConnected : false
+    serviceCapitalized = 'GitHub'
+  }
+
+  if (service === 'gitlab') {
+    connected = GLConnectedQuery ? GLConnectedQuery.isGitLabConnected : false
+    serviceCapitalized = 'GitLab'
+  }
+
+  if (service === 'bitbucket') {
+    connected = BBConnectedQuery ? BBConnectedQuery.isBitbucketConnected : false
+    serviceCapitalized = 'Bitbucket'
   }
 
   return (
@@ -51,9 +66,10 @@ const GHConnected = ({ isGithubConnected }: { isGithubConnected: boolean }) => {
         marginLeft: '1rem',
       }}
     >
-      {isGithubConnected ? githubConnected() : 'GitHub is not connected'}
+      {connected ? `${serviceCapitalized} is connected. Saving will push to ${serviceCapitalized}` : `${serviceCapitalized} is not connected.`}
     </span>
   )
+
 }
 
 const stylesInUse = makeStyles(() =>
@@ -77,18 +93,28 @@ const stylesInUse = makeStyles(() =>
   })
 )
 
-const MonacoDiffEditor = ({ original, filename, commitMessage }: Props) => {
+const MonacoDiffEditor = ({ original, filename, commitMessage, cloneUrl }: Props) => {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [waitingToMerge, setWaitingToMerge] = useState(false)
   const [editorReady, setEditorReady] = useState(false)
   const providerRef = useRef<SimpleLanguageInfoProvider>()
-  const branchState = useQuery<RepoStateQueryResult>(REPO_STATE)
-  const { data: GHConnectedQuery } =
-    useQuery<IsGithubConnectedResult>(IS_GH_CONNECTED)
+  const branchState = useQuery<RepoStateQueryResult>(
+    REPO_STATE,
+    {
+      variables: { repoUrl: cloneUrl },
+      skip: !cloneUrl,
+    }
+  )
+
   const currentBranch = branchState.data?.repoState.currentBranch || ''
   const [dialogError, setDialogError] = useState<DialogError | undefined>(
     undefined
   )
+
+  const currentService = branchState.data?.repoState.service
+  if (!currentService) {
+    throw new Error('no selected version control service')
+  }
 
   const { setupCodeLens, modifiedContent, cleanup } = useMergeCodeLens(original)
 
@@ -106,7 +132,10 @@ const MonacoDiffEditor = ({ original, filename, commitMessage }: Props) => {
     SAVE_MERGE,
     {
       onCompleted: cleanup,
-      refetchQueries: [{ query: REPO_STATE }],
+      refetchQueries: [{
+        query: REPO_STATE,
+        variables: { repoUrl: cloneUrl }
+      }],
     }
   )
 
@@ -231,11 +260,7 @@ const MonacoDiffEditor = ({ original, filename, commitMessage }: Props) => {
           >
             Merge
           </Button>
-          {GHConnectedQuery && (
-            <GHConnected
-              isGithubConnected={GHConnectedQuery.isGithubConnected}
-            />
-          )}
+          <ServiceConnected service={currentService} />
         </div>
         <div className={classes.commitMessage}>
           {user?.me && commitMessage && `Latest commit: ${commitMessage}`}

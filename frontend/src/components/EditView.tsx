@@ -10,21 +10,39 @@ import useMergeConflictDetector from './MonacoDiffEditor/useMergeConflictDetecto
 import MonacoEditor from './MonacoEditor'
 import Sidebar from './Sidebar'
 
-const EditView = () => {
-  const location = useLocation()
+interface LocationState {
+  cloneUrl: string
+}
+
+interface Props {
+  cloneUrl: string | undefined
+}
+
+const EditView = ({cloneUrl}: Props) => {
+  const location = useLocation<LocationState>()
   const classes = useStyles()
 
   const { data: user } = useQuery<MeQueryResult>(ME)
+  
+  const [repoStateQuery, { data: repoStateData }]
+    = useLazyQuery<RepoStateQueryResult>(
+      REPO_STATE,
+      { 
+        fetchPolicy: 'network-only',
+        variables: { repoUrl: cloneUrl } 
+      }
+    )
 
-  const [repoStateQuery, { data: repoStateData }] =
-    useLazyQuery<RepoStateQueryResult>(REPO_STATE, {
-      fetchPolicy: 'network-only',
-    })
+  const cloneRepoQuery = useQuery(
+    CLONE_REPO,
+    {
+      variables: { cloneUrl },
+      skip: !cloneUrl,
+      onCompleted: () => repoStateQuery()
+    }
+  )
 
-  const cloneRepoQuery = useQuery(CLONE_REPO, {
-    onCompleted: () => repoStateQuery(),
-  })
-
+  
   const files = repoStateData ? repoStateData.repoState.files : []
   const filename = location.search.slice(3)
   const content = files.find((e) => e.name === filename)?.content
@@ -33,18 +51,24 @@ const EditView = () => {
     : ''
 
   const mergeConflictExists = useMergeConflictDetector(content)
+  
+  if (cloneRepoQuery.error) {
+    console.log(`Clone error: ${cloneRepoQuery.error}`)
+    return <div>Error cloning repo...</div>
+  }
 
   if (cloneRepoQuery.loading) return <div>Cloning repo...</div>
-  if (cloneRepoQuery.error) return <div>Error cloning repo...</div>
 
   // TODO: "can't perform react state update on unmounted component "
   // if (repoStateLoading) return <div>Fetching repo state...</div>
   // if (repoStateError) return <div>Error fetching repo state...</div>
-
+  
   const renderEditor = () => {
     if (!content) {
       return null
     }
+    
+    if (!cloneUrl && !location.state?.cloneUrl) return <div>Please select repository first</div>
 
     if (mergeConflictExists) {
       return (
@@ -53,6 +77,7 @@ const EditView = () => {
             original={content}
             filename={filename}
             commitMessage={commitMessage}
+            cloneUrl={cloneUrl}
           />
         </div>
       )
@@ -65,6 +90,7 @@ const EditView = () => {
           filename={filename}
           commitMessage={commitMessage}
           onMergeError={repoStateQuery}
+          cloneUrl={cloneUrl}
         />
       </div>
     )
@@ -73,10 +99,11 @@ const EditView = () => {
   return (
     <div className={classes.root}>
       <div className={classes.sidebar}>
-        <Sidebar files={files} />
+        <Sidebar files={files} currentUrl={cloneUrl}/>
         <AuthenticateDialog open={!user || !user.me} />
       </div>
       <div className={classes.editor}>{renderEditor()}</div>
+        
     </div>
   )
 }
