@@ -6,10 +6,12 @@ import BranchSelector from './BranchSelector'
 
 interface Props {
   files: File[]
-  currentUrl: string | undefined
+  currentUrl: string | undefined
 }
 
 const Sidebar = ({ files, currentUrl }: Props) => {
+  if (!currentUrl) return null
+
   return (
     <Drawer variant="permanent" PaperProps={{ style: { width: '20%' } }}>
       <Toolbar />

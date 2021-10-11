@@ -52,8 +52,6 @@ const EditView = ({cloneUrl}: Props) => {
 
   const mergeConflictExists = useMergeConflictDetector(content)
   
-  if (!cloneUrl && !location.state?.cloneUrl) return <div>Please select repository first</div>
-
   if (cloneRepoQuery.error) {
     console.log(`Clone error: ${cloneRepoQuery.error}`)
     return <div>Error cloning repo...</div>
@@ -64,11 +62,13 @@ const EditView = ({cloneUrl}: Props) => {
   // TODO: "can't perform react state update on unmounted component "
   // if (repoStateLoading) return <div>Fetching repo state...</div>
   // if (repoStateError) return <div>Error fetching repo state...</div>
-
+  
   const renderEditor = () => {
     if (!content) {
       return null
     }
+    
+    if (!cloneUrl && !location.state?.cloneUrl) return <div>Please select repository first</div>
 
     if (mergeConflictExists) {
       return (
