@@ -47,6 +47,7 @@ export interface RepoStateQueryResult {
     branches: string[]
     url: string
     commitMessage: string
+    service: string|undefined
   }
 }
 

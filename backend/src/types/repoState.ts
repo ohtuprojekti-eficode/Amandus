@@ -6,4 +6,5 @@ export interface RepoState {
   branches: string[]
   url: string
   commitMessage: string
+  service: string
 }

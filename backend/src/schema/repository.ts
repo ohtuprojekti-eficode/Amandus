@@ -16,7 +16,7 @@ import { relative } from 'path'
 import { AppContext } from '../types/user'
 import { BranchSwitchArgs, SaveArgs } from '../types/params'
 import { RepoState } from '../types/repoState'
-import { getRepoLocationFromUrlString, getServiceTokenFromAppContext } from '../utils/utils'
+import { getRepoLocationFromUrlString, getServiceTokenFromAppContext, getServiceNameFromUrlString } from '../utils/utils'
 import { getBitbucketRepoList, getGitHubRepoList, getGitLabRepoList } from '../services/commonServices'
 import { Repo } from '../types/repo'
 import {
@@ -41,6 +41,7 @@ const typeDef = `
       branches: [String]!
       url: String!
       commitMessage: String!
+      service: String!
     }
     type Repo {
       id: String!
@@ -78,9 +79,18 @@ const resolvers = {
       args: { url: string },
       context: AppContext
     ): Promise<RepoState> => {
+      if(!args.url){
+        throw new Error('Repository url not provided')
+      }
+
+      const service = getServiceNameFromUrlString(args.url)
       const repoLocation = getRepoLocationFromUrlString(args.url, context.currentUser.username)
       const currentBranch = await getCurrentBranchName(repoLocation)
       const commitMessage = await getCurrentCommitMessage(repoLocation)
+
+      if(!service){
+        throw new Error('service missing!')
+      }
 
       const filePaths = await readRecursive(repoLocation, ['.git'])
       const files = filePaths.map((file) => ({
@@ -89,7 +99,7 @@ const resolvers = {
       }))
 
       const branches = await getLocalBranches(repoLocation)
-      return { currentBranch, files, branches, url: args.url, commitMessage }
+      return { currentBranch, files, branches, url: args.url, commitMessage, service }
     },
 
     getRepoListFromService: async (
