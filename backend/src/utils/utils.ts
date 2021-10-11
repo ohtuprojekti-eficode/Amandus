@@ -99,7 +99,7 @@ export const getRepoLocationFromRepoName = (
   return repoLocation
 }
 
-const getServiceNameFromUrlString = (urlString: string): ServiceName | undefined => {
+export const getServiceNameFromUrlString = (urlString: string): ServiceName | undefined => {
   if (urlString.includes('github')) return 'github'
   if (urlString.includes('gitlab')) return 'gitlab'
   if (urlString.includes('bitbucket')) return 'bitbucket'
