@@ -14,9 +14,7 @@ import {
 import {
   UserType,
   AppContext,
-  GitHubAuthCode,
-  BitbucketAuthCode,
-  GitLabAuthCode,
+  VCServiceAuthCode,
   ServiceAuthResponse,
 } from '../types/user'
 import {
@@ -143,7 +141,7 @@ const resolvers = {
 
       if (!validServices.includes(args.service.serviceName)) {
         throw new UserInputError(
-          `'Currently supported services are 'github', 'bitbucket' and 'gitlab'`
+          `'Currently supported services are 'github', 'bitbucket' and 'gitlab'.`
         )
       }
 
@@ -159,7 +157,7 @@ const resolvers = {
     },
     authorizeWithGithub: async (
       _root: unknown,
-      args: GitHubAuthCode,
+      args: VCServiceAuthCode,
       context: AppContext
     ): Promise<ServiceAuthResponse> => {
       if (!context.currentUser) {
@@ -197,7 +195,7 @@ const resolvers = {
 
     authorizeWithGitLab: async (
       _root: unknown,
-      args: GitLabAuthCode,
+      args: VCServiceAuthCode,
       context: AppContext
     ): Promise<ServiceAuthResponse> => {
       if (!context.currentUser) {
@@ -223,7 +221,6 @@ const resolvers = {
         username: gitLabUser.username,
         email: gitLabUser.email,
         reposurl: 'https://gitlab.com/api/v4/projects?simple=true&min_access_level=30'
-          //'https://gitlab.com/api/v4/users/' + gitLabUser.id + '/projects',
       }
 
       const tokens = createTokens(context.currentUser)
@@ -236,7 +233,7 @@ const resolvers = {
 
     authorizeWithBitbucket: async (
       _root: unknown,
-      args: BitbucketAuthCode,
+      args: VCServiceAuthCode,
       context: AppContext
     ): Promise<ServiceAuthResponse> => {
       if (!context.currentUser) {
@@ -340,9 +337,6 @@ const resolvers = {
         )
       }
       await User.deleteUser(username)
-
-      
-    //  await user.deleteUser
     }
   }
 }

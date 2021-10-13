@@ -34,9 +34,7 @@ exports.up = (pgm) => {
         service_user_id INTEGER REFERENCES SERVICE_USERS(id) ON DELETE CASCADE,
         web_url TEXT);`)
 
-  pgm.sql(`INSERT INTO SERVICES(name) VALUES('github');`)
-  pgm.sql(`INSERT INTO SERVICES(name) VALUES('bitbucket');`)
-  pgm.sql(`INSERT INTO SERVICES(name) VALUES('gitlab');`)
+  pgm.sql(`INSERT INTO SERVICES(name) VALUES('github'), ('bitbucket'), ('gitlab');`)
 }
 
 exports.down = (pgm) => {

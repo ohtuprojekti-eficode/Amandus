@@ -1,7 +1,7 @@
 import { Tokens } from "./tokens";
 import { ServiceTokenType } from './service'
 
-export interface GitHubAuthCode {
+export interface VCServiceAuthCode {
   code: string
 }
 
@@ -15,10 +15,6 @@ export interface GitHubUserType {
   email: string | null
   repos_url: string
   access_token: string
-}
-
-export interface BitbucketAuthCode {
-  code: string
 }
 
 export interface BitbucketAccessTokenResponse {
@@ -43,10 +39,6 @@ export interface BitbucketEmail {
       email: string
     }
   ]
-}
-
-export interface GitLabAuthCode {
-  code: string
 }
 
 export interface GitLabAccessTokenResponse {

@@ -19,8 +19,8 @@ export const validateBranchName = async (branchName: string): Promise<void> => {
 const runShellCommand = async (command: string): Promise<string> => {
   try {
     return (await execProm(command)).stdout
-  } catch (error) {
-    throw new Error(error.message)
+  } catch (e) {
+    throw new Error((e as Error).message)
   }
 }
 

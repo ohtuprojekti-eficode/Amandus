@@ -69,7 +69,7 @@ const resolvers = {
       if (!existsSync(repoLocation)) {
 
         await cloneRepository(args.url, context.currentUser.username)
-      
+
       }
 
       return 'Cloned'
@@ -79,7 +79,7 @@ const resolvers = {
       args: { url: string },
       context: AppContext
     ): Promise<RepoState> => {
-      if(!args.url){
+      if (!args.url) {
         throw new Error('Repository url not provided')
       }
 
@@ -88,8 +88,8 @@ const resolvers = {
       const currentBranch = await getCurrentBranchName(repoLocation)
       const commitMessage = await getCurrentCommitMessage(repoLocation)
 
-      if(!service){
-        throw new Error('service missing!')
+      if (!service) {
+        throw new Error('Unable to parse service name, or service is unsupported.')
       }
 
       const filePaths = await readRecursive(repoLocation, ['.git'])
@@ -117,30 +117,28 @@ const resolvers = {
 
       const repolist = await Promise.all(context.currentUser.services.map(
         async (service) => {
-          const token = getServiceTokenFromAppContext({service: service.serviceName as ServiceName, appContext: context})
+          const token = getServiceTokenFromAppContext({ service: service.serviceName as ServiceName, appContext: context })
 
-
-
-          let repolist: Repo[] = []
+          let serviceRepositories: Repo[] = []
 
           if (!token) {
-            return repolist
+            return serviceRepositories
           }
 
           if (service.serviceName === 'github') {
             const response = await getGitHubRepoList(service, token)
-            repolist = parseGithubRepositories(response)
+            serviceRepositories = parseGithubRepositories(response)
 
           } else if (service.serviceName === 'bitbucket') {
             const response = await getBitbucketRepoList(service, token)
-            repolist = parseBitbucketRepositories(response)
+            serviceRepositories = parseBitbucketRepositories(response)
 
           } else if (service.serviceName === 'gitlab') {
             const response = await getGitLabRepoList(service, token)
-            repolist = parseGitlabRepositories(response)
+            serviceRepositories = parseGitlabRepositories(response)
           }
 
-          return repolist
+          return serviceRepositories
         }
       ))
 
@@ -163,11 +161,11 @@ const resolvers = {
 
       try {
         await saveChanges(saveArgs, context)
-      } catch (error) {
-        if (error.message === 'Merge conflict') {
+      } catch (e) {
+        if ((e as Error).message === 'Merge conflict') {
           throw new ApolloError('Merge conflict detected')
         } else {
-          throw new ApolloError(error.message)
+          throw new ApolloError((e as Error).message)
         }
       }
 
@@ -184,8 +182,8 @@ const resolvers = {
 
       try {
         await saveMerge(saveArgs, context)
-      } catch (error) {
-        throw new ApolloError(error.message)
+      } catch (e) {
+        throw new ApolloError((e as Error).message)
       }
 
       return 'Merged successfully'
@@ -206,12 +204,11 @@ const resolvers = {
       const repoLocation = getRepoLocationFromUrlString(args.url, context.currentUser.username)
       try {
         await pullNewestChanges(repoLocation)
-      } catch (error) {
-        // In case of merge conflict
-        if (error.message === 'Merge conflict') {
+      } catch (e) {
+        if ((e as Error).message === 'Merge conflict') {
           throw new ApolloError('Merge conflict detected')
         } else {
-          throw new ApolloError(error.message)
+          throw new ApolloError((e as Error).message)
         }
       }
       return 'Pulled'

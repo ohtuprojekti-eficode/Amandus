@@ -5,10 +5,8 @@ export const validateUserArgs = ({
   username,
   password,
   email,
-}: RegisterUserInput) => {
-  var errorMessage = 'Registration succcessful!'
-  var validationFailed = false
-
+}: RegisterUserInput): {errorMessage: string, validationFailed: boolean} => {
+  
   // Username Validation
   if (username.length === 0 || password.length === 0 || email.length === 0) {
     return {
@@ -46,5 +44,5 @@ export const validateUserArgs = ({
     }
   }
 
-  return { errorMessage, validationFailed }
+  return { errorMessage: 'Registeration successfull!', validationFailed: false }
 }
