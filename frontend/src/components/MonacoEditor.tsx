@@ -208,7 +208,8 @@ const MonacoEditor = ({
 
   const handlePull = async () => {
     try {
-      await pullRepo()
+      await pullRepo({variables: {repoUrl: cloneUrl}}
+      )
     } catch (error) {
       console.error('error pulling')
     }
