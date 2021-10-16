@@ -45,12 +45,13 @@ const EditView = ({ cloneUrl }: Props) => {
 
   const files = repoStateData ? repoStateData.repoState.files : []
   const filename = location.search.slice(3)
-  const content = files.find((e) => e.name === filename)?.content
+  const file = files.find((e) => e.name === filename)
+  const fileContent = file?.content || ''
   const commitMessage = repoStateData
     ? repoStateData.repoState.commitMessage
     : ''
 
-  const mergeConflictExists = useMergeConflictDetector(content)
+  const mergeConflictExists = useMergeConflictDetector(fileContent)
 
   if (cloneRepoQuery.error) {
     console.log(`Clone error: ${cloneRepoQuery.error}`)
@@ -69,7 +70,7 @@ const EditView = ({ cloneUrl }: Props) => {
         ? null
         : <div>Please select repository first</div>
 
-    if (!content) {
+    if (!file) {
       return null
     }
 
@@ -77,7 +78,7 @@ const EditView = ({ cloneUrl }: Props) => {
       return (
         <div className={classes.editor}>
           <MonacoDiffEditor
-            original={content}
+            original={fileContent}
             filename={filename}
             commitMessage={commitMessage}
             cloneUrl={cloneUrl}
@@ -89,7 +90,7 @@ const EditView = ({ cloneUrl }: Props) => {
     return (
       <div className={classes.editor}>
         <MonacoEditor
-          content={content}
+          content={fileContent}
           filename={filename}
           commitMessage={commitMessage}
           onMergeError={repoStateQuery}
