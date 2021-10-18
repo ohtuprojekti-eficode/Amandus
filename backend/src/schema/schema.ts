@@ -14,10 +14,16 @@ const Query = `
         getRepoState(url: String): RepoState!
         cloneRepository(url: String!): String
         currentToken: String
+        getRepoListFromService: [Repo]
     },
 `
 
 const Mutation = `
+    enum ServiceName {
+        github
+        bitbucket
+        gitlab
+    }
     type Tokens {
         accessToken: String
         refreshToken: String

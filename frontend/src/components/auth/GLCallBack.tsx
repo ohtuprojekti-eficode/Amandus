@@ -44,7 +44,7 @@ const CallBack = () => {
           const refreshToken = response.data.authorizeWithGitLab.tokens.refreshToken
           localStorage.setItem('amandus-user-access-token', accessToken)
           localStorage.setItem('amandus-user-refresh-token', refreshToken)
-          history.push('/edit')
+          history.push('/connections')
         }
       } catch (error) {
         console.log(error)

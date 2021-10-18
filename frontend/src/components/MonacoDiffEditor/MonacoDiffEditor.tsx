@@ -1,59 +1,32 @@
-import { useMutation, useQuery } from '@apollo/client'
-import {
-  Button,
-  createStyles,
-  makeStyles,
-  Tooltip,
-  useTheme,
-} from '@material-ui/core'
-import { GitHub } from '@material-ui/icons'
+import { useMutation } from '@apollo/client'
+import { Button, createStyles, makeStyles, useTheme } from '@material-ui/core'
 import { DiffEditor, loader, Monaco } from '@monaco-editor/react'
 import { editor } from 'monaco-editor'
 import React, { useEffect, useRef, useState } from 'react'
 import { SAVE_MERGE } from '../../graphql/mutations'
-import { IS_GH_CONNECTED, ME, REPO_STATE } from '../../graphql/queries'
+import { REPO_STATE } from '../../graphql/queries'
+import useUser from '../../hooks/useUser'
 import VsCodeDarkTheme from '../../styles/editor-themes/vs-dark-plus-theme'
 import VsCodeLightTheme from '../../styles/editor-themes/vs-light-plus-theme'
-import {
-  IsGithubConnectedResult,
-  MeQueryResult,
-  RepoStateQueryResult,
-} from '../../types'
 import { initMonaco } from '../../utils/monacoInitializer'
 import { SimpleLanguageInfoProvider } from '../../utils/providers'
 import MergeDialog from '../MergeDialog'
+import ServiceConnected from '../ServiceConnected'
 import useMergeCodeLens from './useMergeCodeLens'
 import useMergeConflictDetector from './useMergeConflictDetector'
 
 interface Props {
   original: string
-  filename: string | undefined
-  commitMessage: string | undefined
+  filename: string
+  commitMessage: string
+  cloneUrl: string
+  currentBranch: string
+  currentService: string
 }
 
 interface DialogError {
   title: string
   message: string
-}
-
-const GHConnected = ({ isGithubConnected }: { isGithubConnected: boolean }) => {
-  const githubConnected = () => {
-    return (
-      <Tooltip title="GitHub is connected. Saving will push to GitHub">
-        <GitHub />
-      </Tooltip>
-    )
-  }
-
-  return (
-    <span
-      style={{
-        marginLeft: '1rem',
-      }}
-    >
-      {isGithubConnected ? githubConnected() : 'GitHub is not connected'}
-    </span>
-  )
 }
 
 const stylesInUse = makeStyles(() =>
@@ -77,15 +50,19 @@ const stylesInUse = makeStyles(() =>
   })
 )
 
-const MonacoDiffEditor = ({ original, filename, commitMessage }: Props) => {
+const MonacoDiffEditor = ({
+  original,
+  filename,
+  commitMessage,
+  cloneUrl,
+  currentBranch,
+  currentService,
+}: Props) => {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [waitingToMerge, setWaitingToMerge] = useState(false)
   const [editorReady, setEditorReady] = useState(false)
   const providerRef = useRef<SimpleLanguageInfoProvider>()
-  const branchState = useQuery<RepoStateQueryResult>(REPO_STATE)
-  const { data: GHConnectedQuery } =
-    useQuery<IsGithubConnectedResult>(IS_GH_CONNECTED)
-  const currentBranch = branchState.data?.repoState.currentBranch || ''
+
   const [dialogError, setDialogError] = useState<DialogError | undefined>(
     undefined
   )
@@ -96,17 +73,18 @@ const MonacoDiffEditor = ({ original, filename, commitMessage }: Props) => {
 
   const classes = stylesInUse()
 
-  const {
-    loading: userQueryLoading,
-    error: userQueryError,
-    data: user,
-  } = useQuery<MeQueryResult>(ME)
+  const { user, loading: userQueryLoading, error: userQueryError } = useUser()
 
   const [saveMergeEdit, { loading: mutationMergeLoading }] = useMutation(
     SAVE_MERGE,
     {
       onCompleted: cleanup,
-      refetchQueries: [{ query: REPO_STATE }],
+      refetchQueries: [
+        {
+          query: REPO_STATE,
+          variables: { repoUrl: cloneUrl },
+        },
+      ],
     }
   )
 
@@ -224,18 +202,13 @@ const MonacoDiffEditor = ({ original, filename, commitMessage }: Props) => {
               !!userQueryError ||
               mutationMergeLoading ||
               !user?.me ||
-              branchState.loading ||
               mergeConflictExists
             }
             onClick={handleSaveButton}
           >
             Merge
           </Button>
-          {GHConnectedQuery && (
-            <GHConnected
-              isGithubConnected={GHConnectedQuery.isGithubConnected}
-            />
-          )}
+          <ServiceConnected service={currentService} />
         </div>
         <div className={classes.commitMessage}>
           {user?.me && commitMessage && `Latest commit: ${commitMessage}`}

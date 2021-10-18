@@ -4,7 +4,7 @@
 
 import { gql } from 'apollo-server'
 import { createTestClient } from 'apollo-server-testing'
-import { createTestClient as createIntegrationTestClient } from 'apollo-server-integration-testing'
+import { createTestClient as createIntegrationTestClient, TestQuery } from 'apollo-server-integration-testing'
 import { appendFileSync, mkdirSync, rmdirSync } from 'fs'
 import { join } from 'path'
 import simpleGit from 'simple-git'
@@ -12,25 +12,10 @@ import { server } from '../index'
 import User from '../model/user'
 import { closePool } from '../db/connect'
 import { createTokens } from '../utils/tokens'
+import user from '../model/user'
+import { UserType } from '../types/user'
+import { Tokens } from '../types/tokens'
 
-const GET_REPO_STATE = gql`
-  query repoState($url: String!) {
-    getRepoState(url: $url) {
-      currentBranch
-      files {
-        name
-        content
-      }
-      branches
-      commitMessage
-    }
-  }
-`
-const SWITCH_BRANCH = gql`
-  mutation switchBranch($url: String!, $branch: String!) {
-    switchBranch(url: $url, branch: $branch)
-  }
-`
 
 const SAVE_CHANGES = gql`
   mutation saveChanges(
@@ -43,11 +28,38 @@ const SAVE_CHANGES = gql`
 `
 
 describe('getRepoState query', () => {
-  const repoPath = join('.', 'repositories', 'testRepo')
+  const repoPath = join(
+    '.',
+    'repositories',
+    'testuser',
+    'github',
+    'test'
+  )
+  let testUser: UserType
+  let tokens: Tokens
+  let query: TestQuery
 
   beforeEach(async () => {
     mkdirSync(repoPath, { recursive: true })
     await simpleGit(repoPath).init()
+    await user.deleteAll()
+    testUser = await User.registerUser({
+      username: 'testuser',
+      password: 'mypAssword?45',
+      email: 'test@test.fi',
+    })
+    tokens = createTokens(testUser)
+    const testClient = createIntegrationTestClient({
+      apolloServer: server,
+      extendMockRequest: {
+        headers: {
+          'x-access-token': tokens.accessToken,
+          'x-refresh-token': tokens.refreshToken,
+        },
+      },
+    })
+    query = testClient.query
+
   })
 
   afterEach(() => {
@@ -55,17 +67,15 @@ describe('getRepoState query', () => {
   })
 
   it('list of all branches is empty when no branches exist', async () => {
-    const { query } = createTestClient(server)
-
-    const res = await query({
-      query: GET_REPO_STATE,
-      variables: {
-        url: 'http://www.remote.org/testRepo',
-      },
-    })
-
-    const branches = res.data?.getRepoState.branches
-    expect(branches).toEqual([])
+    const GET_REPO_BRANCHES = gql`
+      query {
+        getRepoState(url: "https://github.com/test") {
+          branches
+        }
+      }
+    `
+    const queryResult = await query(GET_REPO_BRANCHES)
+    expect(queryResult).toEqual({ "data": { "getRepoState": { "branches": [] } } })
   })
 
   it('list of all branches contains correct branches', async () => {
@@ -82,31 +92,30 @@ describe('getRepoState query', () => {
       .commit('init commit')
       .branch(['secondBranch'])
 
-    const { query } = createTestClient(server)
-
-    const res = await query({
-      query: GET_REPO_STATE,
-      variables: {
-        url: 'http://www.remote.org/testRepo',
-      },
-    })
-
-    const branches = res.data?.getRepoState.branches
-    expect(branches).toEqual(['master', 'secondBranch'])
+    const GET_REPO_BRANCHES = gql`
+        query {
+          getRepoState(url: "https://github.com/test") {
+            branches
+          }
+        }
+      `
+    const queryResult = await query(GET_REPO_BRANCHES)
+    expect(queryResult).toEqual({ "data": { "getRepoState": { "branches": ["master", "secondBranch"] } } })
   })
 
   it('list of current files is empty when no files exist', async () => {
-    const { query } = createTestClient(server)
-
-    const res = await query({
-      query: GET_REPO_STATE,
-      variables: {
-        url: 'http://www.remote.org/testRepo',
-      },
-    })
-
-    const files = res.data?.getRepoState.files
-    expect(files).toEqual([])
+    const GET_REPO_FILES = gql`
+        query {
+          getRepoState(url: "https://github.com/test") {
+            files {
+              name
+              content
+            }
+          }
+        }
+      `
+    const queryResult = await query(GET_REPO_FILES)
+    expect(queryResult).toEqual({ "data": { "getRepoState": { "files": [] } } })
   })
 
   it('list of all files contains correct files', async () => {
@@ -123,36 +132,30 @@ describe('getRepoState query', () => {
       .commit('init commit')
       .branch(['secondBranch'])
 
-    const { query } = createTestClient(server)
-
-    const res = await query({
-      query: GET_REPO_STATE,
-      variables: {
-        url: 'http://www.remote.org/testRepo',
-      },
-    })
-
-    const files = res.data?.getRepoState.files
-    const fakeFile = {
-      name: `testRepo/file.txt`,
-      content: 'Commit and add file to create master branch',
-    }
-    const expectedFiles = [fakeFile]
-    expect(files).toEqual(expectedFiles)
+    const GET_REPO_FILES = gql`
+        query {
+          getRepoState(url: "https://github.com/test") {
+            files {
+              name
+              content
+            }
+          }
+        }
+      `
+    const queryResult = await query(GET_REPO_FILES)
+    expect(queryResult).toEqual({ "data": { "getRepoState": { "files": [{ "content": "Commit and add file to create master branch", "name": "testuser/github/test/file.txt" }] } } })
   })
 
   it('current branch name is empty when branch status is unknown', async () => {
-    const { query } = createTestClient(server)
-
-    const res = await query({
-      query: GET_REPO_STATE,
-      variables: {
-        url: 'http://www.remote.org/testRepo',
-      },
-    })
-
-    const currentBranch = res.data?.getRepoState.currentBranch
-    expect(currentBranch).toEqual('')
+    const GET_REPO_BRANCH = gql`
+        query {
+          getRepoState(url: "https://github.com/test") {
+            currentBranch
+          }
+        }
+      `
+    const queryResult = await query(GET_REPO_BRANCH)
+    expect(queryResult).toEqual({ "data": { "getRepoState": { "currentBranch": "" } } })
   })
 
   it('current branch name is correct', async () => {
@@ -169,31 +172,27 @@ describe('getRepoState query', () => {
       .commit('init commit')
       .branch(['secondBranch'])
 
-    const { query } = createTestClient(server)
-
-    const res = await query({
-      query: GET_REPO_STATE,
-      variables: {
-        url: 'http://www.remote.org/testRepo',
-      },
-    })
-
-    const currentBranch = res.data?.getRepoState.currentBranch
-    expect(currentBranch).toEqual('master')
+    const GET_REPO_BRANCH = gql`
+        query {
+          getRepoState(url: "https://github.com/test") {
+            currentBranch
+          }
+        }
+    `
+    const queryResult = await query(GET_REPO_BRANCH)
+    expect(queryResult).toEqual({ "data": { "getRepoState": { "currentBranch": "master" } } })
   })
 
   it('latest commit message is empty when status is unknown', async () => {
-    const { query } = createTestClient(server)
-
-    const res = await query({
-      query: GET_REPO_STATE,
-      variables: {
-        url: 'http://www.remote.org/testRepo',
-      },
-    })
-
-    const commitMessage = res.data?.getRepoState.commitMessage
-    expect(commitMessage).toEqual('')
+    const GET_COMMIT_MESSAGE = gql`
+      query {
+        getRepoState(url: "https://github.com/test") {
+          commitMessage
+        }
+      }
+    `
+    const queryResult = await query(GET_COMMIT_MESSAGE)
+    expect(queryResult).toEqual({ "data": { "getRepoState": { "commitMessage": "" } } })
   })
 
   it('latest commit message is correct', async () => {
@@ -208,18 +207,16 @@ describe('getRepoState query', () => {
       .addConfig('user.email', 'some@one.com')
       .add('.')
       .commit('new commit')
+    const GET_COMMIT_MESSAGE = gql`
+      query {
+        getRepoState(url: "https://github.com/test") {
+          commitMessage
+        }
+      }
+    `
 
-    const { query } = createTestClient(server)
-
-    const res = await query({
-      query: GET_REPO_STATE,
-      variables: {
-        url: 'http://www.remote.org/testRepo',
-      },
-    })
-
-    const commitMessage = res.data?.getRepoState.commitMessage
-    expect(commitMessage).toEqual('new commit')
+    const queryResult = await query(GET_COMMIT_MESSAGE)
+    expect(queryResult).toEqual({ "data": { "getRepoState": { "commitMessage": "new commit" } } })
   })
 
   it('too long commit message is cutted correctly', async () => {
@@ -235,22 +232,30 @@ describe('getRepoState query', () => {
       .add('.')
       .commit('a'.repeat(73))
 
-    const { query } = createTestClient(server)
+    const GET_COMMIT_MESSAGE = gql`
+      query {
+        getRepoState(url: "https://github.com/test") {
+          commitMessage
+        }
+      }
+    `
 
-    const res = await query({
-      query: GET_REPO_STATE,
-      variables: {
-        url: 'http://www.remote.org/testRepo',
-      },
-    })
-
-    const commitMessage = res.data?.getRepoState.commitMessage
-    expect(commitMessage).toEqual('a'.repeat(72).concat('...'))
+    const queryResult = await query(GET_COMMIT_MESSAGE)
+    expect(queryResult).toEqual({ "data": { "getRepoState": { "commitMessage": 'a'.repeat(72).concat('...') } } })
   })
 })
 
 describe('switchBranch mutation', () => {
-  const repoPath = join('.', 'repositories', 'testRepo')
+  const repoPath = join(
+    '.',
+    'repositories',
+    'testuser',
+    'github',
+    'test'
+  )
+  let testUser: UserType
+  let tokens: Tokens
+  let mutate: TestQuery
 
   beforeEach(async () => {
     mkdirSync(repoPath, { recursive: true })
@@ -260,6 +265,24 @@ describe('switchBranch mutation', () => {
       `${repoPath}/file.txt`,
       'Commit and add file to create master branch'
     )
+
+    await user.deleteAll()
+    testUser = await User.registerUser({
+      username: 'testuser',
+      password: 'mypAssword?45',
+      email: 'test@test.fi',
+    })
+    tokens = createTokens(testUser)
+    const testClient = createIntegrationTestClient({
+      apolloServer: server,
+      extendMockRequest: {
+        headers: {
+          'x-access-token': tokens.accessToken,
+          'x-refresh-token': tokens.refreshToken,
+        },
+      },
+    })
+    mutate = testClient.mutate
   })
 
   afterEach(() => {
@@ -275,15 +298,12 @@ describe('switchBranch mutation', () => {
       .commit('init commit')
       .branch(['secondBranch'])
 
-    const { mutate } = createTestClient(server)
-
-    await mutate({
-      mutation: SWITCH_BRANCH,
-      variables: {
-        url: 'http://www.remote.org/testRepo',
-        branch: 'secondBranch',
-      },
-    })
+    const SWITCH_BRANCH = gql`
+      mutation {
+        switchBranch(url: "https://github.com/test", branch: "secondBranch")
+      }
+    `
+    await mutate(SWITCH_BRANCH)
 
     const branches = await testRepo.branchLocal()
     expect(branches.current).toEqual('secondBranch')
@@ -298,18 +318,13 @@ describe('switchBranch mutation', () => {
       .commit('init commit')
       .branch(['secondBranch'])
 
-    const { mutate } = createTestClient(server)
+    const SWITCH_BRANCH = gql`
+      mutation {
+        switchBranch(url: "https://github.com/test", branch: "secondBranch")
+      }
+    `
 
-    const res = await mutate({
-      mutation: SWITCH_BRANCH,
-      variables: {
-        url: 'http://www.remote.org/testRepo',
-        branch: 'secondBranch',
-      },
-    })
-
-    const currentBranch = res.data?.switchBranch
-    expect(currentBranch).toEqual('secondBranch')
+    expect(await mutate(SWITCH_BRANCH)).toEqual({ "data": { "switchBranch": "secondBranch" } })
   })
 
   it('creates a new branch when switching to branch that does not exist', async () => {
@@ -321,22 +336,20 @@ describe('switchBranch mutation', () => {
       .commit('init commit')
       .branch(['secondBranch'])
 
-    const { mutate } = createTestClient(server)
+    const SWITCH_BRANCH = gql`
+      mutation {
+        switchBranch(url: "https://github.com/test", branch: "thirdBranch")
+      }
+    `
+    await mutate(SWITCH_BRANCH)
 
-    await mutate({
-      mutation: SWITCH_BRANCH,
-      variables: {
-        url: 'http://www.remote.org/testRepo',
-        branch: 'thirdBranch',
-      },
-    })
     const branches = await testRepo.branchLocal()
     expect(branches.current).toEqual('thirdBranch')
   })
 })
 
 describe('SaveChanges mutation', () => {
-  const repoPath = join('.', 'repositories', 'testuser', 'testRepo')
+  const repoPath = join('.', 'repositories', 'testuser', 'github', 'fakegithubuser', 'testRepo')
 
   beforeEach(async () => {
     await User.deleteAll()
@@ -368,11 +381,11 @@ describe('SaveChanges mutation', () => {
         }
       },
     })
-
+    
     const mutateResult = await mutate(SAVE_CHANGES, {
       variables: {
         file: {
-          name: `testuser/testRepo/file.txt`,
+          name: `testuser/github/fakegithubuser/testRepo/file.txt`,
           content: 'test content',
         },
         branch: 'master',
@@ -405,7 +418,7 @@ describe('SaveChanges mutation', () => {
       mutation: SAVE_CHANGES,
       variables: {
         file: {
-          name: `testuser/testRepo/file.txt`,
+          name: `testuser/github/fakegithubuser/testRepo/file.txt`,
           content: 'test content',
         },
         branch: 'master',
