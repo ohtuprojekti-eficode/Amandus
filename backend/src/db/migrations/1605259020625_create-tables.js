@@ -44,4 +44,5 @@ exports.down = (pgm) => {
   pgm.sql(`DROP TABLE SERVICE_USERS;`)
   pgm.sql(`DROP TABLE USERS;`)
   pgm.sql(`DROP TABLE SERVICES;`)
+  pgm.sql('DROP TYPE user_role;')
 }
