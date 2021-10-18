@@ -8,7 +8,7 @@
     "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.56",
     "@monaco-editor/react": "^4.3.1",
-    "@testing-library/jest-dom": "^4.2.4",
+    "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
     "@types/jest": "^26.0.13",
@@ -57,5 +57,10 @@
   "devDependencies": {
     "cypress": "^5.2.0",
     "uuid": "^8.3.1"
+  },
+  "jest": {
+    "transformIgnorePatterns": [
+      "node_modules/(?!@monaco-editor)/"
+    ]
   }
 }

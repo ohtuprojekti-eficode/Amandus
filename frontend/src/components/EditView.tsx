@@ -5,9 +5,7 @@ import { useLocation } from 'react-router-dom'
 import { CLONE_REPO, ME, REPO_STATE } from '../graphql/queries'
 import { MeQueryResult, RepoStateQueryResult } from '../types'
 import AuthenticateDialog from './AuthenticateDialog'
-import MonacoDiffEditor from './MonacoDiffEditor/'
-import useMergeConflictDetector from './MonacoDiffEditor/useMergeConflictDetector'
-import MonacoEditor from './MonacoEditor'
+import Editor from './Editor'
 import Sidebar from './Sidebar'
 
 interface LocationState {
@@ -24,34 +22,17 @@ const EditView = ({ cloneUrl }: Props) => {
 
   const { data: user } = useQuery<MeQueryResult>(ME)
 
-  const [repoStateQuery, { data: repoStateData }]
-    = useLazyQuery<RepoStateQueryResult>(
-      REPO_STATE,
-      {
-        fetchPolicy: 'network-only',
-        variables: { repoUrl: cloneUrl }
-      }
-    )
+  const [repoStateQuery, { data: repoStateData }] =
+    useLazyQuery<RepoStateQueryResult>(REPO_STATE, {
+      fetchPolicy: 'network-only',
+      variables: { repoUrl: cloneUrl },
+    })
 
-  const cloneRepoQuery = useQuery(
-    CLONE_REPO,
-    {
-      variables: { cloneUrl },
-      skip: !cloneUrl,
-      onCompleted: () => repoStateQuery()
-    }
-  )
-
-
-  const files = repoStateData ? repoStateData.repoState.files : []
-  const filename = location.search.slice(3)
-  const file = files.find((e) => e.name === filename)
-  const fileContent = file?.content || ''
-  const commitMessage = repoStateData
-    ? repoStateData.repoState.commitMessage
-    : ''
-
-  const mergeConflictExists = useMergeConflictDetector(fileContent)
+  const cloneRepoQuery = useQuery(CLONE_REPO, {
+    variables: { cloneUrl },
+    skip: !cloneUrl,
+    onCompleted: () => repoStateQuery(),
+  })
 
   if (cloneRepoQuery.error) {
     console.log(`Clone error: ${cloneRepoQuery.error}`)
@@ -65,49 +46,53 @@ const EditView = ({ cloneUrl }: Props) => {
   // if (repoStateError) return <div>Error fetching repo state...</div>
 
   const renderEditor = () => {
-    if (!cloneUrl && !location.state?.cloneUrl)
-      return (!user || !user.me)
-        ? null
-        : <div>Please select repository first</div>
+    const urlToClone = cloneUrl ?? location.state?.cloneUrl
 
-    if (!file) {
+    if (!urlToClone)
+      return !user || !user.me ? null : (
+        <div>Please select repository first</div>
+      )
+
+    if (!repoStateData?.repoState) {
       return null
     }
 
-    if (mergeConflictExists) {
-      return (
-        <div className={classes.editor}>
-          <MonacoDiffEditor
-            original={fileContent}
-            filename={filename}
-            commitMessage={commitMessage}
-            cloneUrl={cloneUrl}
-          />
-        </div>
-      )
+    const currentService = repoStateData.repoState.service
+    const files = repoStateData.repoState.files
+    const filename = location.search.slice(3)
+
+    const file = files.find((e) => e.name === filename)
+
+    if (!file || !currentService) {
+      return null
     }
+    const currentBranch = repoStateData.repoState.currentBranch
+    const fileContent = file.content
+    const commitMessage = repoStateData.repoState.commitMessage
 
     return (
-      <div className={classes.editor}>
-        <MonacoEditor
-          content={fileContent}
-          filename={filename}
-          commitMessage={commitMessage}
-          onMergeError={repoStateQuery}
-          cloneUrl={cloneUrl}
-        />
-      </div>
+      <Editor
+        fileContent={fileContent}
+        filename={filename}
+        commitMessage={commitMessage}
+        cloneUrl={urlToClone}
+        currentBranch={currentBranch}
+        currentService={currentService}
+        onMergeError={repoStateQuery}
+      />
     )
   }
 
   return (
     <div className={classes.root}>
       <div className={classes.sidebar}>
-        <Sidebar files={files} currentUrl={cloneUrl} />
+        <Sidebar
+          files={repoStateData?.repoState.files ?? []}
+          currentUrl={cloneUrl}
+        />
         <AuthenticateDialog open={!user || !user.me} />
       </div>
-      <div className={classes.editor}>{renderEditor()}</div>
-
+      {renderEditor()}
     </div>
   )
 }
