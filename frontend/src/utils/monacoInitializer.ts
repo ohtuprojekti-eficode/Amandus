@@ -35,8 +35,13 @@ export const initLanguageClient = (monaco: typeof import('monaco-editor')) => {
   // install Monaco language client services
   MonacoServices.install(monaco)
 
+  const LANGUAGE_SERVER_PORT = process.env.LANGUAGE_SERVER_PORT ?? 5555
+
   // create the web socket
-  const url = normalizeUrl('ws://localhost:5555/robotti')
+  const url = normalizeUrl(
+    `ws://${window.location.hostname}:${LANGUAGE_SERVER_PORT}/robot`
+  )
+
   const socketOptions = {
     maxReconnectionDelay: 10000,
     minReconnectionDelay: 1000,
