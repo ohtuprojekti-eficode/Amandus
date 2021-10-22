@@ -62,10 +62,5 @@
   "devDependencies": {
     "cypress": "^5.2.0",
     "uuid": "^8.3.1"
-  },
-  "jest": {
-    "transformIgnorePatterns": [
-      "node_modules/(?!@monaco-editor)/"
-    ]
   }
 }
