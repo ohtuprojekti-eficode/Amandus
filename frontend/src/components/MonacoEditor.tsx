@@ -9,7 +9,7 @@ import { REPO_STATE } from '../graphql/queries'
 import useUser from '../hooks/useUser'
 import VsCodeDarkTheme from '../styles/editor-themes/vs-dark-plus-theme'
 import VsCodeLightTheme from '../styles/editor-themes/vs-light-plus-theme'
-import { initMonaco } from '../utils/monacoInitializer'
+import { initMonaco, initLanguageClient } from '../utils/monacoInitializer'
 import { SimpleLanguageInfoProvider } from '../utils/providers'
 import SaveDialog from './SaveDialog'
 import ServiceConnected from './ServiceConnected'
@@ -158,6 +158,9 @@ const MonacoEditor = ({
   useEffect(() => {
     loader.init().then((monaco) => {
       providerRef.current = initMonaco(monaco, theme.palette.type)
+
+      initLanguageClient(monaco)
+
       setEditorReady(true)
     })
     // Need to have an empty dependency array for this to work correctly
