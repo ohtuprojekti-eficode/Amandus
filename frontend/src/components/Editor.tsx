@@ -1,8 +1,15 @@
-import { makeStyles, createStyles } from '@material-ui/core'
-import React from 'react'
+import { makeStyles, createStyles, useTheme } from '@material-ui/core'
+import { loader } from '@monaco-editor/react'
+import React, { useEffect } from 'react'
+import { initMonaco, initLanguageClient } from '../utils/monacoInitializer'
 import MonacoDiffEditor from './MonacoDiffEditor/'
 import useMergeConflictDetector from './MonacoDiffEditor/useMergeConflictDetector'
 import MonacoEditor from './MonacoEditor'
+
+import VsCodeDarkTheme from '../styles/editor-themes/vs-dark-plus-theme'
+import VsCodeLightTheme from '../styles/editor-themes/vs-light-plus-theme'
+
+import { SimpleLanguageInfoProvider } from '../utils/providers'
 
 interface EditorProps {
   fileContent: string
@@ -27,6 +34,30 @@ const Editor = ({
 
   const classes = useStyles()
 
+  const providerRef = React.useRef<SimpleLanguageInfoProvider | null>(null)
+
+  const theme = useTheme()
+
+  useEffect(() => {
+    loader.init().then((monaco) => {
+      providerRef.current = initMonaco(monaco, theme.palette.type)
+
+      initLanguageClient(monaco)
+    })
+    // Need to have an empty dependency array for this to work correctly
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const updateTheme = () => {
+    if (providerRef.current) {
+      const editorTheme =
+        theme.palette.type === 'dark' ? VsCodeDarkTheme : VsCodeLightTheme
+
+      providerRef.current.changeTheme(editorTheme)
+      providerRef.current.injectCSS()
+    }
+  }
+
   if (mergeConflictExists) {
     return (
       <div className={classes.editor}>
@@ -37,6 +68,7 @@ const Editor = ({
           currentBranch={currentBranch}
           currentService={currentService}
           cloneUrl={cloneUrl}
+          updateTheme={updateTheme}
         />
       </div>
     )
@@ -52,6 +84,7 @@ const Editor = ({
         cloneUrl={cloneUrl}
         currentBranch={currentBranch}
         currentService={currentService}
+        updateTheme={updateTheme}
       />
     </div>
   )

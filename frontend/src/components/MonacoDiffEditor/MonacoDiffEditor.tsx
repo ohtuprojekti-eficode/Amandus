@@ -1,15 +1,11 @@
 import { useMutation } from '@apollo/client'
 import { Button, createStyles, makeStyles, useTheme } from '@material-ui/core'
-import { DiffEditor, loader, Monaco } from '@monaco-editor/react'
+import { DiffEditor, Monaco } from '@monaco-editor/react'
 import { editor } from 'monaco-editor'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { SAVE_MERGE } from '../../graphql/mutations'
 import { REPO_STATE } from '../../graphql/queries'
 import useUser from '../../hooks/useUser'
-import VsCodeDarkTheme from '../../styles/editor-themes/vs-dark-plus-theme'
-import VsCodeLightTheme from '../../styles/editor-themes/vs-light-plus-theme'
-import { initMonaco } from '../../utils/monacoInitializer'
-import { SimpleLanguageInfoProvider } from '../../utils/providers'
 import MergeDialog from '../MergeDialog'
 import ServiceConnected from '../ServiceConnected'
 import useMergeCodeLens from './useMergeCodeLens'
@@ -22,6 +18,7 @@ interface Props {
   cloneUrl: string
   currentBranch: string
   currentService: string
+  updateTheme: () => void
 }
 
 interface DialogError {
@@ -57,11 +54,11 @@ const MonacoDiffEditor = ({
   cloneUrl,
   currentBranch,
   currentService,
+  updateTheme,
 }: Props) => {
   const [dialogOpen, setDialogOpen] = useState(false)
+
   const [waitingToMerge, setWaitingToMerge] = useState(false)
-  const [editorReady, setEditorReady] = useState(false)
-  const providerRef = useRef<SimpleLanguageInfoProvider>()
 
   const [dialogError, setDialogError] = useState<DialogError | undefined>(
     undefined
@@ -139,26 +136,6 @@ const MonacoDiffEditor = ({
 
   const handleSaveButton = () => {
     setDialogOpen(true)
-  }
-
-  useEffect(() => {
-    loader.init().then((monaco: Monaco) => {
-      providerRef.current = initMonaco(monaco, theme.palette.type)
-
-      setEditorReady(true)
-    })
-    // Need to have an empty dependency array for this to work correctly
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const updateTheme = () => {
-    if (editorReady && providerRef.current) {
-      const editorTheme =
-        theme.palette.type === 'dark' ? VsCodeDarkTheme : VsCodeLightTheme
-
-      providerRef.current.changeTheme(editorTheme)
-      providerRef.current.injectCSS()
-    }
   }
 
   const options: editor.IDiffEditorConstructionOptions = {

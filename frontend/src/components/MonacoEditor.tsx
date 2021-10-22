@@ -1,16 +1,12 @@
 import { useMutation } from '@apollo/client'
 import { Button, createStyles, makeStyles, useTheme } from '@material-ui/core'
 // import { GitHub } from '@material-ui/icons'
-import Editor, { loader } from '@monaco-editor/react'
+import Editor from '@monaco-editor/react'
 import { editor } from 'monaco-editor'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { PULL_REPO, SAVE_CHANGES } from '../graphql/mutations'
 import { REPO_STATE } from '../graphql/queries'
 import useUser from '../hooks/useUser'
-import VsCodeDarkTheme from '../styles/editor-themes/vs-dark-plus-theme'
-import VsCodeLightTheme from '../styles/editor-themes/vs-light-plus-theme'
-import { initMonaco } from '../utils/monacoInitializer'
-import { SimpleLanguageInfoProvider } from '../utils/providers'
 import SaveDialog from './SaveDialog'
 import ServiceConnected from './ServiceConnected'
 
@@ -22,6 +18,7 @@ interface Props {
   cloneUrl: string
   currentService: string
   currentBranch: string
+  updateTheme: () => void
 }
 
 interface DialogError {
@@ -58,11 +55,10 @@ const MonacoEditor = ({
   cloneUrl,
   currentBranch,
   currentService,
+  updateTheme,
 }: Props) => {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [waitingToSave, setWaitingToSave] = useState(false)
-  const [editorReady, setEditorReady] = useState(false)
-  const providerRef = useRef<SimpleLanguageInfoProvider>()
 
   const [dialogError, setDialogError] = useState<DialogError | undefined>(
     undefined
@@ -152,24 +148,6 @@ const MonacoEditor = ({
       await pullRepo({ variables: { repoUrl: cloneUrl } })
     } catch (error) {
       console.error('error pulling')
-    }
-  }
-
-  useEffect(() => {
-    loader.init().then((monaco) => {
-      providerRef.current = initMonaco(monaco, theme.palette.type)
-      setEditorReady(true)
-    })
-    // Need to have an empty dependency array for this to work correctly
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const updateTheme = () => {
-    if (editorReady && providerRef.current) {
-      const editorTheme =
-        theme.palette.type === 'dark' ? VsCodeDarkTheme : VsCodeLightTheme
-      providerRef.current.changeTheme(editorTheme)
-      providerRef.current.injectCSS()
     }
   }
 
