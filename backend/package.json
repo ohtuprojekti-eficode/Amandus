@@ -55,8 +55,7 @@
     "migrate-up-dev": "DATABASE_URL=postgres://ohtu_user:ohtupassword@localhost:5432/account_database node-pg-migrate -m ./src/db/migrations up",
     "migrate-down-dev": "DATABASE_URL=postgres://ohtu_user:ohtupassword@localhost:5432/account_database node-pg-migrate -m ./src/db/migrations down",
     "migrate-up-prod": "node-pg-migrate -m ./src/db/migrations up",
-    "migrate-down-prod": "node-pg-migrate -m ./src/db/migrations down",
-    "add-admin": "ts-node ./scripts/add_admin_user.ts"
+    "migrate-down-prod": "node-pg-migrate -m ./src/db/migrations down"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.2",
