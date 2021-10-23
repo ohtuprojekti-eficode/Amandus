@@ -18,6 +18,7 @@ import MyLoginForm from './components/MyLoginForm'
 import { MeQueryResult } from './types'
 import DeleteAccount from './components/DeleteAccount'
 import { useLocation } from 'react-router-dom'
+import AdminPage from './components/AdminPage'
 
 interface LocationState {
   cloneUrl: string
@@ -99,6 +100,12 @@ const App = () => {
           <Route exact path="/deleteAccount">
             <DeleteAccount 
              user = {user?.me}
+            />
+          </Route>
+          
+          <Route exact path="/adminpage">
+            <AdminPage
+              user = {user?.me}
             />
           </Route>
 

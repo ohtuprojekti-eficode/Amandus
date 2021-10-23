@@ -106,6 +106,15 @@ const Header = ({ user, logout, theme, toggleTheme }: Props) => {
               Delete Account
             </Link>
             )}
+            {user?.user_role === 'admin' ? (
+              <Link
+              component={RouterLink}
+              className={classes.linkBtnTransparent}
+              to="/adminpage"
+              >
+                Admin Page 
+              </Link>
+            ): ''}
           </div>
           <Switch
             checked={switchChecked}
