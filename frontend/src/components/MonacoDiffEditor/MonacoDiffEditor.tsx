@@ -1,75 +1,29 @@
-import { useMutation, useQuery } from '@apollo/client'
-import {
-  Button,
-  createStyles,
-  makeStyles,
-  useTheme,
-} from '@material-ui/core'
-import { DiffEditor, loader, Monaco } from '@monaco-editor/react'
+import { useMutation } from '@apollo/client'
+import { Button, createStyles, makeStyles, useTheme } from '@material-ui/core'
+import { DiffEditor, Monaco } from '@monaco-editor/react'
 import { editor } from 'monaco-editor'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { SAVE_MERGE } from '../../graphql/mutations'
-import { IS_GH_CONNECTED, IS_GL_CONNECTED, IS_BB_CONNECTED, ME, REPO_STATE } from '../../graphql/queries'
-import VsCodeDarkTheme from '../../styles/editor-themes/vs-dark-plus-theme'
-import VsCodeLightTheme from '../../styles/editor-themes/vs-light-plus-theme'
-import {
-  IsGithubConnectedResult,
-  IsGitLabConnectedResult,
-  IsBitbucketConnectedResult,
-  MeQueryResult,
-  RepoStateQueryResult,
-} from '../../types'
-import { initMonaco } from '../../utils/monacoInitializer'
-import { SimpleLanguageInfoProvider } from '../../utils/providers'
+import { REPO_STATE } from '../../graphql/queries'
+import useUser from '../../hooks/useUser'
 import MergeDialog from '../MergeDialog'
+import ServiceConnected from '../ServiceConnected'
 import useMergeCodeLens from './useMergeCodeLens'
 import useMergeConflictDetector from './useMergeConflictDetector'
 
 interface Props {
   original: string
-  filename: string | undefined
-  commitMessage: string | undefined
-  cloneUrl: string | undefined
+  filename: string
+  commitMessage: string
+  cloneUrl: string
+  currentBranch: string
+  currentService: string
+  updateTheme: () => void
 }
 
 interface DialogError {
   title: string
   message: string
-}
-
-const ServiceConnected = ({ service }: { service: string }) => {
-  let connected = false
-  let serviceCapitalized = ''
-
-  const { data: GHConnectedQuery } = useQuery<IsGithubConnectedResult>(IS_GH_CONNECTED)
-  const { data: GLConnectedQuery } = useQuery<IsGitLabConnectedResult>(IS_GL_CONNECTED)
-  const { data: BBConnectedQuery } = useQuery<IsBitbucketConnectedResult>(IS_BB_CONNECTED)
-
-  if (service === 'github') {
-    connected = GHConnectedQuery ? GHConnectedQuery.isGithubConnected : false
-    serviceCapitalized = 'GitHub'
-  }
-
-  if (service === 'gitlab') {
-    connected = GLConnectedQuery ? GLConnectedQuery.isGitLabConnected : false
-    serviceCapitalized = 'GitLab'
-  }
-
-  if (service === 'bitbucket') {
-    connected = BBConnectedQuery ? BBConnectedQuery.isBitbucketConnected : false
-    serviceCapitalized = 'Bitbucket'
-  }
-
-  return (
-    <span
-      style={{
-        marginLeft: '1rem',
-      }}
-    >
-      {connected ? `${serviceCapitalized} is connected. Saving will push to ${serviceCapitalized}` : `${serviceCapitalized} is not connected.`}
-    </span>
-  )
-
 }
 
 const stylesInUse = makeStyles(() =>
@@ -93,28 +47,22 @@ const stylesInUse = makeStyles(() =>
   })
 )
 
-const MonacoDiffEditor = ({ original, filename, commitMessage, cloneUrl }: Props) => {
+const MonacoDiffEditor = ({
+  original,
+  filename,
+  commitMessage,
+  cloneUrl,
+  currentBranch,
+  currentService,
+  updateTheme,
+}: Props) => {
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [waitingToMerge, setWaitingToMerge] = useState(false)
-  const [editorReady, setEditorReady] = useState(false)
-  const providerRef = useRef<SimpleLanguageInfoProvider>()
-  const branchState = useQuery<RepoStateQueryResult>(
-    REPO_STATE,
-    {
-      variables: { repoUrl: cloneUrl },
-      skip: !cloneUrl,
-    }
-  )
 
-  const currentBranch = branchState.data?.repoState.currentBranch || ''
+  const [waitingToMerge, setWaitingToMerge] = useState(false)
+
   const [dialogError, setDialogError] = useState<DialogError | undefined>(
     undefined
   )
-
-  const currentService = branchState.data?.repoState.service
-  if (!currentService) {
-    throw new Error('no selected version control service')
-  }
 
   const { setupCodeLens, modifiedContent, cleanup } = useMergeCodeLens(original)
 
@@ -122,20 +70,18 @@ const MonacoDiffEditor = ({ original, filename, commitMessage, cloneUrl }: Props
 
   const classes = stylesInUse()
 
-  const {
-    loading: userQueryLoading,
-    error: userQueryError,
-    data: user,
-  } = useQuery<MeQueryResult>(ME)
+  const { user, loading: userQueryLoading, error: userQueryError } = useUser()
 
   const [saveMergeEdit, { loading: mutationMergeLoading }] = useMutation(
     SAVE_MERGE,
     {
       onCompleted: cleanup,
-      refetchQueries: [{
-        query: REPO_STATE,
-        variables: { repoUrl: cloneUrl }
-      }],
+      refetchQueries: [
+        {
+          query: REPO_STATE,
+          variables: { repoUrl: cloneUrl },
+        },
+      ],
     }
   )
 
@@ -192,26 +138,6 @@ const MonacoDiffEditor = ({ original, filename, commitMessage, cloneUrl }: Props
     setDialogOpen(true)
   }
 
-  useEffect(() => {
-    loader.init().then((monaco: Monaco) => {
-      providerRef.current = initMonaco(monaco, theme.palette.type)
-
-      setEditorReady(true)
-    })
-    // Need to have an empty dependency array for this to work correctly
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const updateTheme = () => {
-    if (editorReady && providerRef.current) {
-      const editorTheme =
-        theme.palette.type === 'dark' ? VsCodeDarkTheme : VsCodeLightTheme
-
-      providerRef.current.changeTheme(editorTheme)
-      providerRef.current.injectCSS()
-    }
-  }
-
   const options: editor.IDiffEditorConstructionOptions = {
     // renderSideBySide: false,
   }
@@ -253,7 +179,6 @@ const MonacoDiffEditor = ({ original, filename, commitMessage, cloneUrl }: Props
               !!userQueryError ||
               mutationMergeLoading ||
               !user?.me ||
-              branchState.loading ||
               mergeConflictExists
             }
             onClick={handleSaveButton}

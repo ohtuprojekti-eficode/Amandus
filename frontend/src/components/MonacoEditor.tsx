@@ -1,79 +1,29 @@
-import { useMutation, useQuery } from '@apollo/client'
-import {
-  Button,
-  createStyles,
-  makeStyles,
-  useTheme,
-} from '@material-ui/core'
+import { useMutation } from '@apollo/client'
+import { Button, createStyles, makeStyles, useTheme } from '@material-ui/core'
 // import { GitHub } from '@material-ui/icons'
-import Editor, { loader } from '@monaco-editor/react'
+import Editor from '@monaco-editor/react'
 import { editor } from 'monaco-editor'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { PULL_REPO, SAVE_CHANGES } from '../graphql/mutations'
-import { IS_BB_CONNECTED, IS_GH_CONNECTED, IS_GL_CONNECTED, ME, REPO_STATE } from '../graphql/queries'
-import VsCodeDarkTheme from '../styles/editor-themes/vs-dark-plus-theme'
-import VsCodeLightTheme from '../styles/editor-themes/vs-light-plus-theme'
-import {
-  IsBitbucketConnectedResult,
-  IsGithubConnectedResult,
-  IsGitLabConnectedResult,
-  MeQueryResult,
-  RepoStateQueryResult,
-} from '../types'
-import { initMonaco } from '../utils/monacoInitializer'
-import { SimpleLanguageInfoProvider } from '../utils/providers'
+import { REPO_STATE } from '../graphql/queries'
+import useUser from '../hooks/useUser'
 import SaveDialog from './SaveDialog'
+import ServiceConnected from './ServiceConnected'
 
 interface Props {
-  content: string | undefined
-  filename: string | undefined
-  commitMessage: string | undefined
+  content: string
+  filename: string
+  commitMessage: string
   onMergeError: () => void
-  cloneUrl: string | undefined
-}
-
-interface Getter {
-  (): string
+  cloneUrl: string
+  currentService: string
+  currentBranch: string
+  updateTheme: () => void
 }
 
 interface DialogError {
   title: string
   message: string
-}
-
-const ServiceConnected = ({ service }: { service: string }) => {
-  let connected = false
-  let serviceCapitalized = ''
-
-  const { data: GHConnectedQuery } = useQuery<IsGithubConnectedResult>(IS_GH_CONNECTED)
-  const { data: GLConnectedQuery } = useQuery<IsGitLabConnectedResult>(IS_GL_CONNECTED)
-  const { data: BBConnectedQuery } = useQuery<IsBitbucketConnectedResult>(IS_BB_CONNECTED)
-
-  if (service === 'github') {
-    connected = GHConnectedQuery ? GHConnectedQuery.isGithubConnected : false
-    serviceCapitalized = 'GitHub'
-  }
-
-  if (service === 'gitlab') {
-    connected = GLConnectedQuery ? GLConnectedQuery.isGitLabConnected : false
-    serviceCapitalized = 'GitLab'
-  }
-
-  if (service === 'bitbucket') {
-    connected = BBConnectedQuery ? BBConnectedQuery.isBitbucketConnected : false
-    serviceCapitalized = 'Bitbucket'
-  }
-
-  return (
-    <span
-      style={{
-        marginLeft: '1rem',
-      }}
-    >
-      {connected ? `${serviceCapitalized} is connected. Saving will push to ${serviceCapitalized}` : `${serviceCapitalized} is not connected.`}
-    </span>
-  )
-
 }
 
 const stylesInUse = makeStyles(() =>
@@ -102,54 +52,41 @@ const MonacoEditor = ({
   content,
   filename,
   commitMessage,
-  cloneUrl
+  cloneUrl,
+  currentBranch,
+  currentService,
+  updateTheme,
 }: Props) => {
-
   const [dialogOpen, setDialogOpen] = useState(false)
   const [waitingToSave, setWaitingToSave] = useState(false)
-  const [editorReady, setEditorReady] = useState(false)
-  const providerRef = useRef<SimpleLanguageInfoProvider>()
-  const branchState = useQuery<RepoStateQueryResult>(
-    REPO_STATE,
-    {
-      variables: { repoUrl: cloneUrl },
-      skip: !cloneUrl,
-    }
-  )
 
-  const currentService = branchState.data?.repoState.service
-  if (!currentService) {
-    throw new Error('no selected version control service')
-  }
-
-  const currentBranch = branchState.data?.repoState.currentBranch || ''
   const [dialogError, setDialogError] = useState<DialogError | undefined>(
     undefined
   )
 
   const classes = stylesInUse()
 
-  const {
-    loading: userQueryLoading,
-    error: userQueryError,
-    data: user,
-  } = useQuery<MeQueryResult>(ME)
+  const { user, loading: userQueryLoading, error: userQueryError } = useUser()
 
   const [saveChanges, { loading: mutationSaveLoading }] = useMutation(
     SAVE_CHANGES,
     {
-      refetchQueries: [{
-        query: REPO_STATE,
-        variables: { repoUrl: cloneUrl }
-      }],
+      refetchQueries: [
+        {
+          query: REPO_STATE,
+          variables: { repoUrl: cloneUrl },
+        },
+      ],
     }
   )
 
   const [pullRepo, { loading: pullLoading }] = useMutation(PULL_REPO, {
-    refetchQueries: [{
-      query: REPO_STATE,
-      variables: { repoUrl: cloneUrl }
-    }],
+    refetchQueries: [
+      {
+        query: REPO_STATE,
+        variables: { repoUrl: cloneUrl },
+      },
+    ],
   })
 
   const theme = useTheme()
@@ -208,27 +145,9 @@ const MonacoEditor = ({
 
   const handlePull = async () => {
     try {
-      await pullRepo()
+      await pullRepo({ variables: { repoUrl: cloneUrl } })
     } catch (error) {
       console.error('error pulling')
-    }
-  }
-
-  useEffect(() => {
-    loader.init().then((monaco) => {
-      providerRef.current = initMonaco(monaco, theme.palette.type)
-      setEditorReady(true)
-    })
-    // Need to have an empty dependency array for this to work correctly
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const updateTheme = () => {
-    if (editorReady && providerRef.current) {
-      const editorTheme =
-        theme.palette.type === 'dark' ? VsCodeDarkTheme : VsCodeLightTheme
-      providerRef.current.changeTheme(editorTheme)
-      providerRef.current.injectCSS()
     }
   }
 
@@ -270,8 +189,7 @@ const MonacoEditor = ({
               userQueryLoading ||
               !!userQueryError ||
               mutationSaveLoading ||
-              !user?.me ||
-              branchState.loading
+              !user?.me
             }
           >
             Pull
@@ -284,8 +202,7 @@ const MonacoEditor = ({
               userQueryLoading ||
               !!userQueryError ||
               mutationSaveLoading ||
-              !user?.me ||
-              branchState.loading
+              !user?.me
             }
             onClick={handleSaveButton}
           >
