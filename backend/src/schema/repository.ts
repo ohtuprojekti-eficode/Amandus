@@ -16,14 +16,14 @@ import { relative } from 'path'
 import { AppContext } from '../types/user'
 import { BranchSwitchArgs, SaveArgs } from '../types/params'
 import { RepoState } from '../types/repoState'
-import { getRepoLocationFromUrlString, getServiceTokenFromAppContext, getServiceNameFromUrlString } from '../utils/utils'
-import { getBitbucketRepoList, getGitHubRepoList, getGitLabRepoList } from '../services/commonServices'
-import { Repo } from '../types/repo'
 import {
-  parseGithubRepositories,
-  parseBitbucketRepositories,
-  parseGitlabRepositories
+  getRepoLocationFromUrlString,
+  getServiceTokenFromAppContext,
+  getServiceNameFromUrlString,
+  parseServiceRepositories
 } from '../utils/utils'
+import { getRepoList } from '../services/commonServices'
+import { Repository } from '../types/repository'
 import { ServiceName } from '../types/service'
 
 const typeDef = `
@@ -106,7 +106,7 @@ const resolvers = {
       _root: unknown,
       _args: unknown,
       context: AppContext
-    ): Promise<Repo[]> => {
+    ): Promise<Repository[]> => {
       if (!context.currentUser) {
         throw new ForbiddenError('You have to login')
       }
@@ -115,36 +115,25 @@ const resolvers = {
         throw new Error('User is not connected to any service')
       }
 
-      const repolist = await Promise.all(context.currentUser.services.map(
+      const allRepositories = await Promise.all(context.currentUser.services.map(
         async (service) => {
-          const token = getServiceTokenFromAppContext({ service: service.serviceName as ServiceName, appContext: context })
-
-          let serviceRepositories: Repo[] = []
+          const token = getServiceTokenFromAppContext({
+            service: service.serviceName as ServiceName, appContext: context
+          })
 
           if (!token) {
-            return serviceRepositories
+            console.log(`Service token missing for service ${service.serviceName}`)
+            return []
           }
 
-          if (service.serviceName === 'github') {
-            const response = await getGitHubRepoList(service, token)
-            serviceRepositories = parseGithubRepositories(response)
-
-          } else if (service.serviceName === 'bitbucket') {
-            const response = await getBitbucketRepoList(service, token)
-            serviceRepositories = parseBitbucketRepositories(response)
-
-          } else if (service.serviceName === 'gitlab') {
-            const response = await getGitLabRepoList(service, token)
-            serviceRepositories = parseGitlabRepositories(response)
-          }
+          const response = await getRepoList(service, token)
+          const serviceRepositories: Repository[] = parseServiceRepositories(response, service.serviceName)
 
           return serviceRepositories
         }
       ))
 
-      const repos = repolist.flat()
-
-      return repos
+      return allRepositories.flat()
 
     },
   },

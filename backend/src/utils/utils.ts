@@ -8,7 +8,13 @@ import { sanitizeCommitMessage } from './sanitize'
 import { ServiceName, ServiceTokenType } from '../types/service'
 import { AppContext } from '../types/user'
 
-import { Repo, GitHubRepoListResponse, BitbucketRepoListResponse, GitLabRepoListResponse } from '../types/repo'
+import {
+  Repository,
+  GitHubRepository,
+  BitbucketRepositories,
+  GitLabRepository,
+  ServiceRepository
+} from '../types/repository'
 
 const execProm = promisify(exec)
 
@@ -115,11 +121,23 @@ export const getServiceTokenFromContext = (serviceName: string, context: AppCont
   }
 }
 
-export const parseGithubRepositories = (response: GitHubRepoListResponse[]): Repo[] => {
-  const repolist = response.map((repo: GitHubRepoListResponse) => {
+export const parseServiceRepositories = (response: ServiceRepository[] | ServiceRepository, service: string): Repository[] => {
+  if (service === 'github') {
+    return parseGithubRepositories(response as GitHubRepository[])
+  } else if (service === 'gitlab') {
+    return parseGitlabRepositories(response as GitLabRepository[])
+  } else if (service === 'bitbucket') {
+    return parseBitbucketRepositories(response as BitbucketRepositories)
+  }
+
+  return []
+}
+
+export const parseGithubRepositories = (response: GitHubRepository[]): Repository[] => {
+  const repolist = response.map((repo: GitHubRepository) => {
     const repoId = `${repo.id}`
 
-    const repoObject: Repo = {
+    const repoObject: Repository = {
       id: repoId,
       name: repo.name,
       full_name: repo.full_name,
@@ -135,14 +153,14 @@ export const parseGithubRepositories = (response: GitHubRepoListResponse[]): Rep
   return repolist
 }
 
-export const parseBitbucketRepositories = (response: BitbucketRepoListResponse): Repo[] => {
+export const parseBitbucketRepositories = (response: BitbucketRepositories): Repository[] => {
   const repolist = response.values.map(repo => {
     const clone_url = repo.links.clone.find(url => url.name === 'https')
     if (!clone_url) {
       throw Error('No clone url found, cannot append repo to list')
     }
 
-    const repoObject: Repo = {
+    const repoObject: Repository = {
       id: repo.uuid,
       name: repo.name,
       full_name: repo.full_name,
@@ -156,11 +174,11 @@ export const parseBitbucketRepositories = (response: BitbucketRepoListResponse):
   return repolist
 }
 
-export const parseGitlabRepositories = (response: GitLabRepoListResponse[]): Repo[] => {
-  const repolist = response.map((repo: GitLabRepoListResponse) => {
+export const parseGitlabRepositories = (response: GitLabRepository[]): Repository[] => {
+  const repolist = response.map((repo: GitLabRepository) => {
     const repoId = `${repo.id}`
 
-    const repoObject: Repo = {
+    const repoObject: Repository = {
       id: repoId,
       name: repo.name,
       full_name: repo.path_with_namespace,
