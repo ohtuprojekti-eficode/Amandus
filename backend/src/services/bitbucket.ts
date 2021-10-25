@@ -1,10 +1,10 @@
-import { BitbucketAccessTokenResponse, BitbucketUserType, BitbucketEmail } from '../types/user'
+import { AccessTokenResponse, BitbucketUserType, BitbucketEmail } from '../types/service'
 import fetch from 'node-fetch'
 import config from '../utils/config'
 
 export const requestBitbucketToken = (
   code: string
-): Promise<BitbucketAccessTokenResponse> => {
+): Promise<AccessTokenResponse> => {
   
   const credentials = {
     client_id: config.BITBUCKET_CLIENT_ID || '',
@@ -29,7 +29,7 @@ export const requestBitbucketToken = (
     },
     body: params
   })
-    .then<BitbucketAccessTokenResponse>((res) => res.json())
+    .then<AccessTokenResponse>((res) => res.json())
     .catch((error: Error) => {
       throw new Error(error.message)
     })

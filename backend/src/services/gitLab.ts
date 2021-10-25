@@ -1,10 +1,10 @@
-import { GitLabAccessTokenResponse, GitLabUserType } from '../types/user'
+import { GitLabUserType, AccessTokenResponse } from '../types/service'
 import fetch from 'node-fetch'
 import config from '../utils/config'
 
 export const requestGitLabToken = (
   code: string
-): Promise<GitLabAccessTokenResponse> => {
+): Promise<AccessTokenResponse> => {
   const credentials = {
     client_id: config.GITLAB_CLIENT_ID || '',
     client_secret: config.GITLAB_CLIENT_SECRET || '',
@@ -21,7 +21,7 @@ export const requestGitLabToken = (
     },
     body: JSON.stringify(credentials),
   })
-    .then<GitLabAccessTokenResponse>((res) => res.json())
+    .then<AccessTokenResponse>((res) => res.json())
     .catch((error: Error) => {
       throw new Error(error.message)
     })

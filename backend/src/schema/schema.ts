@@ -14,7 +14,7 @@ const Query = `
         getRepoState(url: String): RepoState!
         cloneRepository(url: String!): String
         currentToken: String
-        getRepoListFromService: [Repo]
+        getRepoListFromService: [Repository]
     },
 `
 

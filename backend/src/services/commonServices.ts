@@ -1,4 +1,4 @@
-import { ServiceUserType } from '../types/user'
+import { ServiceUserType } from '../types/service'
 import { ServiceRepository } from '../types/repository'
 import fetch from 'node-fetch'
 

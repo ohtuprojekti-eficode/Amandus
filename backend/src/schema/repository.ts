@@ -20,8 +20,8 @@ import {
   getRepoLocationFromUrlString,
   getServiceTokenFromAppContext,
   getServiceNameFromUrlString,
-  parseServiceRepositories
 } from '../utils/utils'
+import { parseServiceRepositories } from '../utils/parsers'
 import { getRepoList } from '../services/commonServices'
 import { Repository } from '../types/repository'
 import { ServiceName } from '../types/service'
@@ -43,7 +43,7 @@ const typeDef = `
       commitMessage: String!
       service: String!
     }
-    type Repo {
+    type Repository {
       id: String!
       name: String!
       full_name: String!

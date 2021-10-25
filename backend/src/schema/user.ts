@@ -14,9 +14,11 @@ import {
 import {
   UserType,
   AppContext,
-  VCServiceAuthCode,
-  ServiceAuthResponse,
 } from '../types/user'
+import {
+  AuthCode,
+  ServiceAuthResponse
+} from '../types/service'
 import {
   requestGithubToken,
   requestGithubUserAccount,
@@ -75,6 +77,13 @@ const resolvers = {
     ): boolean => {
       return !!context.gitlabToken
     },
+    isBitbucketConnected: (
+      _root: unknown,
+      _args: unknown,
+      context: AppContext
+    ): boolean => {
+      return !!context.bitbucketToken
+    },
     githubLoginUrl: (): string => {
       const cbUrl = config.GITHUB_CB_URL || ''
       const clientID = config.GITHUB_CLIENT_ID || ''
@@ -84,14 +93,6 @@ const resolvers = {
       }
 
       return `https://github.com/login/oauth/authorize?response_type=code&redirect_uri=${cbUrl}&client_id=${clientID}&scope=repo`
-    },
-
-    isBitbucketConnected: (
-      _root: unknown,
-      _args: unknown,
-      context: AppContext
-    ): boolean => {
-      return !!context.bitbucketToken
     },
     bitbucketLoginUrl: (): string => {
       const cbUrl = config.BITBUCKET_CB_URL || ''
@@ -114,7 +115,6 @@ const resolvers = {
 
       return `https://gitlab.com/oauth/authorize?client_id=${clientID}&redirect_uri=${cbUrl}&response_type=code&state=${state}&scope=read_user+read_repository+write_repository+api`
     },
-
     currentToken: (
       _root: unknown,
       _args: unknown,
@@ -157,7 +157,7 @@ const resolvers = {
     },
     authorizeWithGithub: async (
       _root: unknown,
-      args: VCServiceAuthCode,
+      args: AuthCode,
       context: AppContext
     ): Promise<ServiceAuthResponse> => {
       if (!context.currentUser) {
@@ -195,7 +195,7 @@ const resolvers = {
 
     authorizeWithGitLab: async (
       _root: unknown,
-      args: VCServiceAuthCode,
+      args: AuthCode,
       context: AppContext
     ): Promise<ServiceAuthResponse> => {
       if (!context.currentUser) {
@@ -233,7 +233,7 @@ const resolvers = {
 
     authorizeWithBitbucket: async (
       _root: unknown,
-      args: VCServiceAuthCode,
+      args: AuthCode,
       context: AppContext
     ): Promise<ServiceAuthResponse> => {
       if (!context.currentUser) {

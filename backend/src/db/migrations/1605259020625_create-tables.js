@@ -29,7 +29,7 @@ exports.up = (pgm) => {
         reposurl TEXT,
         UNIQUE(services_id, username));`)
 
-  pgm.sql(`CREATE TABLE REPO(
+  pgm.sql(`CREATE TABLE REPOSITORY(
         id serial PRIMARY KEY,
         service_user_id INTEGER REFERENCES SERVICE_USERS(id) ON DELETE CASCADE,
         web_url TEXT);`)
@@ -38,7 +38,7 @@ exports.up = (pgm) => {
 }
 
 exports.down = (pgm) => {
-  pgm.sql(`DROP TABLE REPO;`)
+  pgm.sql(`DROP TABLE REPOSITORY;`)
   pgm.sql(`DROP TABLE SERVICE_USERS;`)
   pgm.sql(`DROP TABLE USERS;`)
   pgm.sql(`DROP TABLE SERVICES;`)

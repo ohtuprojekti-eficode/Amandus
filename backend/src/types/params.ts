@@ -1,5 +1,5 @@
 import { File } from './file'
-import { ServiceUserType } from './user'
+import { ServiceUserType } from './service'
 
 export interface SaveArgs {
   file: File

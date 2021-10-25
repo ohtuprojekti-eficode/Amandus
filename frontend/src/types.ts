@@ -99,7 +99,7 @@ export interface UserType {
 
 export type ServiceName = 'github' | 'bitbucket' | 'gitlab'
 
-export interface Repo {
+export interface Repository {
   id: string
   name: string
   full_name: string
