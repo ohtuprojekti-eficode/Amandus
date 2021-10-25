@@ -34,5 +34,10 @@ services:
     ports:
       - '5432:5432'
 
+  language-server:
+    image: 'ohtuamandus/robot-language-server'
+    ports:
+      - '5555:5555'
+
 volumes:
   userdata-data:
