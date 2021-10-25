@@ -333,16 +333,17 @@ const resolvers = {
       args: UserType,
       _context: AppContext
     ): Promise<void> => {
-      const username = args.username
+      const {username } = args
+
       if (!username) {
         throw new UserInputError(
           'User not valid'
         )
       }
+      const user = await User.findUserByUsername(username)
+      user?.id && tokenService.deleteTokenByUserId(user.id)
       await User.deleteUser(username)
-
       
-    //  await user.deleteUser
     }
   }
 }
