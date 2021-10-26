@@ -53,21 +53,28 @@ export interface RepoStateQueryResult {
 
 export interface AuthorizeWithGHMutationResult {
   authorizeWithGithub: {
-    serviceUser: ServiceUserType & { __typename: string }
+    serviceUser: ServiceUser & { __typename: string }
     tokens: Tokens
   }
 }
 
 export interface AuthorizeWithBBMutationResult {
   authorizeWithBitbucket: {
-    serviceUser: ServiceUserType & { __typename: string}
+    serviceUser: ServiceUser & { __typename: string}
     tokens: Tokens
   }
 }
 
 export interface AuthorizeWithGLMutationResult {
   authorizeWithGitLab: {
-    serviceUser: ServiceUserType & { __typename: string }
+    serviceUser: ServiceUser & { __typename: string }
+    tokens: Tokens
+  }
+}
+
+export interface AuthorizeWithServiceMutationResult {
+  authorizeWithService: {
+    serviceUser: ServiceUser & { __typename: string}
     tokens: Tokens
   }
 }
@@ -83,7 +90,7 @@ export interface Error {
   message: string
 }
 
-export interface ServiceUserType {
+export interface ServiceUser {
   serviceName: string
   username: string
   email: string | null
@@ -94,7 +101,7 @@ export interface UserType {
   username: string
   user_role: string
   email: string
-  services?: ServiceUserType[]
+  services?: ServiceUser[]
 }
 
 export type ServiceName = 'github' | 'bitbucket' | 'gitlab'

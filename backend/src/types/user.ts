@@ -1,11 +1,11 @@
-import { ServiceTokenType, ServiceUserType } from './service'
+import { ServiceTokenType, ServiceUser } from './service'
 
 export interface UserType {
   id: number
   username: string
   user_role: string
   email: string
-  services?: ServiceUserType[]
+  services?: ServiceUser[]
 }
 
 export type ContextTokens = {

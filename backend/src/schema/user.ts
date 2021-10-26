@@ -16,27 +16,34 @@ import {
   AppContext,
 } from '../types/user'
 import {
+  ServiceAuthCode,
   AuthCode,
-  ServiceAuthResponse
+  ServiceAuthResponse,
+  // ServiceUserResponse,
+  // ServiceUser
 } from '../types/service'
 import {
   requestGithubToken,
   requestGithubUserAccount,
+  // requestGithubUser
 } from '../services/gitHub'
 import {
   requestBitbucketToken,
   requestBitbucketUserAccount,
   requestBitbucketUserEmail,
+  // requestBitbucketUser
 } from '../services/bitbucket'
 
 import {
   requestGitLabToken,
   requestGitLabUserAccount,
+  // requestGitLabUser
 } from '../services/gitLab'
 
 import { Tokens } from '../types/tokens'
 
 import tokenService from '../services/token'
+import { requestServiceUser } from '../services/commonServices'
 
 const typeDef = `
     type ServiceUser {
@@ -154,6 +161,28 @@ const resolvers = {
       })
 
       return 'success'
+    },
+    authorizeWithService: async (
+      _root: unknown,
+      args: ServiceAuthCode, //add service name to args
+      context: AppContext
+    ): Promise<ServiceAuthResponse> => {
+      const service = args.service
+      if (!context.currentUser) {
+        throw new ForbiddenError('You have to login')
+      }
+
+      if (!args.code) {
+        throw new UserInputError(`${service} code not provided`)
+      }
+
+      const serviceUserResponse = await requestServiceUser(service, args.code)
+
+      tokenService.setToken(context.currentUser.id, service, serviceUserResponse.access_token)
+      const serviceUser = serviceUserResponse.serviceUser
+      const tokens = createTokens(context.currentUser)
+
+      return { serviceUser, tokens }
     },
     authorizeWithGithub: async (
       _root: unknown,

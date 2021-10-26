@@ -1,5 +1,24 @@
 import { gql } from '@apollo/client'
 
+export const AUTHORIZE_WITH_SERVICE = gql`
+mutation authorizeWithService(
+  $code: String!
+  $service: String!) {
+  authorizeWithService(code: $code, service: $service) {
+    serviceUser {
+      serviceName
+      username
+      email
+      reposurl
+    }
+    tokens {
+      accessToken
+      refreshToken
+    }
+  }
+}
+`
+
 export const AUTHORIZE_WITH_GH = gql`
   mutation authorizeWithGithub($code: String!) {
     authorizeWithGithub(code: $code) {

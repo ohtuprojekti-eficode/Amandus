@@ -84,6 +84,10 @@ const Mutation = `
         authorizeWithGitLab(
             code: String!
         ): ServiceAuthResponse
+        authorizeWithService(
+            code: String!
+            service: String!
+        ): ServiceAuthResponse
         pullRepository(url: String!): String
         deleteUser(username: String!): String
     }

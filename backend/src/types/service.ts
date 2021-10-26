@@ -9,6 +9,11 @@ export interface Service {
   name: ServiceName
 }
 
+export interface ServiceAuthCode {
+  service: ServiceName
+  code: string
+}
+
 export interface AuthCode {
   code: string
 }
@@ -58,15 +63,20 @@ export interface BitbucketEmail {
   ]
 }
 
-export interface ServiceUserType {
+export interface ServiceUser {
   serviceName: string
   username: string
   email: string | null
   reposurl: string
 }
 
+export interface ServiceUserResponse {
+  serviceUser: ServiceUser,
+  access_token: string
+}
+
 export interface ServiceAuthResponse {
-  serviceUser: ServiceUserType
+  serviceUser: ServiceUser
   tokens: Tokens
 }
 
