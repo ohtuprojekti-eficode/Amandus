@@ -16,7 +16,7 @@ import { relative } from 'path'
 import { AppContext } from '../types/user'
 import { BranchSwitchArgs, SaveArgs } from '../types/params'
 import { RepoState } from '../types/repoState'
-import { getRepoLocationFromUrlString, getServiceTokenFromAppContext, getServiceNameFromUrlString } from '../utils/utils'
+import { getRepoLocationFromUrlString, getServiceTokenFromAppContext, getServiceNameFromUrlString, writeToFile } from '../utils/utils'
 import { getBitbucketRepoList, getGitHubRepoList, getGitLabRepoList } from '../services/commonServices'
 import { Repo } from '../types/repo'
 import {
@@ -25,6 +25,8 @@ import {
   parseGitlabRepositories
 } from '../utils/utils'
 import { ServiceName } from '../types/service'
+import { File } from '../types/file'
+
 
 const typeDef = `
     type File {
@@ -52,6 +54,7 @@ const typeDef = `
       service: String!
     }
 `
+
 
 const resolvers = {
   Query: {
@@ -216,6 +219,18 @@ const resolvers = {
       }
       return 'Pulled'
     },
+    localSave: async (
+      _root: unknown,
+      args: {file: File},
+      context: AppContext
+    ): Promise<string> => {
+      if (!context.currentUser) {
+        throw new ForbiddenError('You have to login')
+      }
+      writeToFile(args.file)
+
+      return 'saved locally'
+    }
   },
 }
 

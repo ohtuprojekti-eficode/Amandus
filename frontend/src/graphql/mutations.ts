@@ -110,3 +110,9 @@ export const DELETE_USER = gql`
     deleteUser(username: $username)
   }
 `
+
+export const SAVE_LOCALLY = gql`
+  mutation localSave($file: FileInput!) {
+    localSave(file: $file)
+  }
+`

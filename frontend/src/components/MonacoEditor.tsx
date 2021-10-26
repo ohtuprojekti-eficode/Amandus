@@ -4,7 +4,7 @@ import { Button, createStyles, makeStyles, useTheme } from '@material-ui/core'
 import Editor from '@monaco-editor/react'
 import { editor } from 'monaco-editor'
 import React, { useRef, useState } from 'react'
-import { PULL_REPO, SAVE_CHANGES } from '../graphql/mutations'
+import { PULL_REPO, SAVE_CHANGES, SAVE_LOCALLY } from '../graphql/mutations'
 import { REPO_STATE } from '../graphql/queries'
 import useUser from '../hooks/useUser'
 import SaveDialog from './SaveDialog'
@@ -89,6 +89,8 @@ const MonacoEditor = ({
     ],
   })
 
+  const [saveLocally] = useMutation(SAVE_LOCALLY)
+
   const theme = useTheme()
 
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
@@ -141,6 +143,18 @@ const MonacoEditor = ({
 
   const handleSaveButton = () => {
     setDialogOpen(true)
+  }
+
+  const handleLocalSave = () => {
+    editorRef.current &&
+    saveLocally({
+      variables: {
+        file: {
+          name: filename,
+          content: editorRef.current.getValue(),
+        }
+      }
+    })    
   }
 
   const handlePull = async () => {
@@ -209,6 +223,15 @@ const MonacoEditor = ({
             Save
           </Button>
           <ServiceConnected service={currentService} />
+          <Button
+            style={{ marginLeft: 25 }}
+            color="secondary"
+            size="small"
+            variant="text"
+            onClick={handleLocalSave}
+          >
+            Save locally
+          </Button>
         </div>
         <div className={classes.commitMessage}>
           {user?.me && commitMessage && `Latest commit: ${commitMessage}`}
