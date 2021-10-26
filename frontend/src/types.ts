@@ -51,26 +51,6 @@ export interface RepoStateQueryResult {
   }
 }
 
-export interface AuthorizeWithGHMutationResult {
-  authorizeWithGithub: {
-    serviceUser: ServiceUser & { __typename: string }
-    tokens: Tokens
-  }
-}
-
-export interface AuthorizeWithBBMutationResult {
-  authorizeWithBitbucket: {
-    serviceUser: ServiceUser & { __typename: string}
-    tokens: Tokens
-  }
-}
-
-export interface AuthorizeWithGLMutationResult {
-  authorizeWithGitLab: {
-    serviceUser: ServiceUser & { __typename: string }
-    tokens: Tokens
-  }
-}
 
 export interface AuthorizeWithServiceMutationResult {
   authorizeWithService: {

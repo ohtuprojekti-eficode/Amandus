@@ -17,34 +17,13 @@ import {
 } from '../types/user'
 import {
   ServiceAuthCode,
-  AuthCode,
   ServiceAuthResponse,
-  // ServiceUserResponse,
-  // ServiceUser
 } from '../types/service'
-import {
-  requestGithubToken,
-  requestGithubUserAccount,
-  // requestGithubUser
-} from '../services/gitHub'
-import {
-  requestBitbucketToken,
-  requestBitbucketUserAccount,
-  requestBitbucketUserEmail,
-  // requestBitbucketUser
-} from '../services/bitbucket'
-
-import {
-  requestGitLabToken,
-  requestGitLabUserAccount,
-  // requestGitLabUser
-} from '../services/gitLab'
 
 import { Tokens } from '../types/tokens'
 
 import tokenService from '../services/token'
 import { requestServiceUser } from '../services/commonServices'
-import token from '../services/token'
 
 const typeDef = `
     type ServiceUser {
@@ -165,7 +144,7 @@ const resolvers = {
     },
     authorizeWithService: async (
       _root: unknown,
-      args: ServiceAuthCode, //add service name to args
+      args: ServiceAuthCode,
       context: AppContext
     ): Promise<ServiceAuthResponse> => {
       const service = args.service
@@ -184,128 +163,6 @@ const resolvers = {
       const tokens = createTokens(context.currentUser)
 
       return { serviceUser, tokens }
-    },
-    authorizeWithGithub: async (
-      _root: unknown,
-      args: AuthCode,
-      context: AppContext
-    ): Promise<ServiceAuthResponse> => {
-      if (!context.currentUser) {
-        throw new ForbiddenError('You have to login')
-      }
-
-      if (!args.code) {
-        throw new UserInputError('GitHub code not provided')
-      }
-
-      const { access_token } = await requestGithubToken(args.code)
-
-      if (!access_token) {
-        throw new UserInputError('Invalid or expired GitHub code')
-      }
-
-      const gitHubUser = await requestGithubUserAccount(access_token)
-
-      tokenService.setToken(context.currentUser.id, 'github', access_token)
-
-      const serviceUser = {
-        serviceName: 'github',
-        username: gitHubUser.login,
-        email: gitHubUser.email,
-        reposurl: gitHubUser.repos_url,
-      }
-
-      const tokens = createTokens(context.currentUser)
-
-      return {
-        serviceUser,
-        tokens,
-      }
-    },
-
-    authorizeWithGitLab: async (
-      _root: unknown,
-      args: AuthCode,
-      context: AppContext
-    ): Promise<ServiceAuthResponse> => {
-      if (!context.currentUser) {
-        throw new ForbiddenError('You have to login')
-      }
-
-      if (!args.code) {
-        throw new UserInputError('GitLab code not provided')
-      }
-
-      const { access_token } = await requestGitLabToken(args.code)
-
-      if (!access_token) {
-        throw new UserInputError('Invalid or expired GitLab code')
-      }
-
-      const gitLabUser = await requestGitLabUserAccount(access_token)
-
-      tokenService.setToken(context.currentUser.id, 'gitlab', access_token)
-
-      const serviceUser = {
-        serviceName: 'gitlab',
-        username: gitLabUser.username,
-        email: gitLabUser.email,
-        reposurl: 'https://gitlab.com/api/v4/projects?simple=true&min_access_level=30'
-      }
-
-      const tokens = createTokens(context.currentUser)
-
-      return {
-        serviceUser,
-        tokens,
-      }
-    },
-
-    authorizeWithBitbucket: async (
-      _root: unknown,
-      args: AuthCode,
-      context: AppContext
-    ): Promise<ServiceAuthResponse> => {
-      if (!context.currentUser) {
-        throw new ForbiddenError('You have to login')
-      }
-
-      if (!args.code) {
-        throw new UserInputError('Bitbucket code not provided')
-      }
-
-      const { access_token } = await requestBitbucketToken(args.code)
-
-      if (!access_token) {
-        throw new UserInputError('Invalid or expired Bitbucket code')
-      }
-
-      const bitBucketUser = await requestBitbucketUserAccount(access_token)
-      const bitbucketUserEmail = await requestBitbucketUserEmail(access_token)
-
-      tokenService.setToken(context.currentUser.id, 'bitbucket', access_token)
-
-      const email = bitbucketUserEmail.values.find(
-        (email) => email.is_primary
-      )?.email
-
-      if (!email) {
-        throw new Error('Bitbucket email not found!')
-      }
-
-      const serviceUser = {
-        serviceName: 'bitbucket',
-        username: bitBucketUser.username,
-        email: email,
-        reposurl: bitBucketUser.links.repositories.href,
-      }
-
-      const tokens = createTokens(context.currentUser)
-
-      return {
-        serviceUser,
-        tokens,
-      }
     },
 
     logout: (

@@ -75,15 +75,6 @@ const Mutation = `
             url: String!
             branch: String!
         ): String
-        authorizeWithGithub(
-            code: String!
-        ): ServiceAuthResponse
-        authorizeWithBitbucket(
-            code: String!
-        ): ServiceAuthResponse
-        authorizeWithGitLab(
-            code: String!
-        ): ServiceAuthResponse
         authorizeWithService(
             code: String!
             service: String!
