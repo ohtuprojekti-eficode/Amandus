@@ -44,6 +44,7 @@ import { Tokens } from '../types/tokens'
 
 import tokenService from '../services/token'
 import { requestServiceUser } from '../services/commonServices'
+import token from '../services/token'
 
 const typeDef = `
     type ServiceUser {
@@ -359,13 +360,17 @@ const resolvers = {
       args: UserType,
       _context: AppContext
     ): Promise<void> => {
-      const username = args.username
+      const { username } = args
+
       if (!username) {
         throw new UserInputError(
           'User not valid'
         )
       }
+      const user = await User.findUserByUsername(username)
+      user?.id && tokenService.deleteTokenByUserId(user.id)
       await User.deleteUser(username)
+
     }
   }
 }
