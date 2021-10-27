@@ -68,14 +68,14 @@ const resolvers = {
       _args: unknown,
       context: AppContext
     ): boolean => {
-      return !!context.githubToken
+      return tokenService.isServiceConnected(context.currentUser.id, 'github')
     },
     isGitLabConnected: (
       _root: unknown,
       _args: unknown,
       context: AppContext
     ): boolean => {
-      return !!context.gitlabToken
+      return tokenService.isServiceConnected(context.currentUser.id, 'gitlab')
     },
     githubLoginUrl: (): string => {
       const cbUrl = config.GITHUB_CB_URL || ''
@@ -93,7 +93,10 @@ const resolvers = {
       _args: unknown,
       context: AppContext
     ): boolean => {
-      return !!context.bitbucketToken
+      return tokenService.isServiceConnected(
+        context.currentUser.id,
+        'bitbucket'
+      )
     },
     bitbucketLoginUrl: (): string => {
       const cbUrl = config.BITBUCKET_CB_URL || ''

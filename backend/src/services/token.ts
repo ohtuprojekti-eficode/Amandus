@@ -65,14 +65,11 @@ const getServiceDetails = (
   return null
 }
 
-export const isServiceConnected = (
-  userId: number,
-  service: ServiceName
-): boolean => {
+const isServiceConnected = (userId: number, service: ServiceName): boolean => {
   return getServiceDetails(userId, service) ? true : false
 }
 
-export const getAccessTokenByServiceAndId = async (
+const getAccessTokenByServiceAndId = async (
   userId: number,
   service: ServiceName
 ): Promise<string | null> => {
@@ -131,5 +128,7 @@ export default {
   getTokensForApolloContext,
   getServiceDetails,
   clearStorage,
+  getAccessTokenByServiceAndId,
+  isServiceConnected,
   deleteTokenByUserId,
 }
