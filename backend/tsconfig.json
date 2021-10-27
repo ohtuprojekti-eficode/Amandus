@@ -9,5 +9,6 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "esModuleInterop": true,
-  }
+  },
+  "exclude": ["scripts"]
 }

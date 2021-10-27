@@ -14,10 +14,16 @@ const Query = `
         getRepoState(url: String): RepoState!
         cloneRepository(url: String!): String
         currentToken: String
+        getRepoListFromService: [Repo]
     },
 `
 
 const Mutation = `
+    enum ServiceName {
+        github
+        bitbucket
+        gitlab
+    }
     type Tokens {
         accessToken: String
         refreshToken: String
@@ -56,6 +62,10 @@ const Mutation = `
         saveChanges(
             file: FileInput! 
             branch: String!
+            commitMessage: String
+        ): String
+        saveMergeEdit(
+            file: FileInput! 
             commitMessage: String
         ): String
         connectGitService(

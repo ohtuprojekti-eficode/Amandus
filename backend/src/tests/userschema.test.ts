@@ -79,14 +79,8 @@ describe('User schema register mutations', () => {
       },
     })
 
-    const expectedUser = await User.findUserByUsername('testuser2')
-    const expectedTokens = createTokens(expectedUser)
-
-    expect(mutationResult).toEqual({
-      data: {
-        register: expectedTokens,
-      },
-    })
+    expect(mutationResult).toHaveProperty('data.register.accessToken')
+    expect(mutationResult).toHaveProperty('data.register.refreshToken')
   })
 
   it('backend returns a token after user has successfully registered', async () => {

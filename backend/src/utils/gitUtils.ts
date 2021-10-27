@@ -1,5 +1,6 @@
 import simpleGit, { BranchSummary, GitError, SimpleGit } from 'simple-git'
 import { v4 as uuidv4 } from 'uuid'
+import { ServiceName } from '../types/service'
 
 export const gitRemoveRemote = async (
   git: SimpleGit,
@@ -53,13 +54,29 @@ export const gitAddRemote = async (
   git: SimpleGit,
   remoteId: string,
   username: string,
-  token: string
+  token: string,
+  service: ServiceName,
+  repositoryName: string
 ): Promise<void> => {
+  const serviceUrl = (service: ServiceName): string => {
+    switch (service) {
+      case 'github':
+        return 'github.com'
+      case 'gitlab':
+        return 'gitlab.com'
+      case 'bitbucket':
+        return 'bitbucket.org'
+    }
+  }
+
+  if (service === 'gitlab') username = 'oauth2'
+
   await git.addRemote(
     remoteId,
-    `https://${username}:${token}@github.com/Ohtu-project-Eficode/robot-test-files`
+    `https://${username}:${token}@${serviceUrl(service)}/${repositoryName}`
   )
 }
+
 
 export const checkoutBranch = async (
   git: SimpleGit,
@@ -75,8 +92,7 @@ export const checkoutBranch = async (
 
 export const doAutoMerge = async (
   git: SimpleGit,
-  branchName: string,
-  oldBranchName: string
+  branchName: string
 ): Promise<void> => {
   await git.fetch()
 
@@ -86,19 +102,12 @@ export const doAutoMerge = async (
   )
 
   if (remoteExists) {
-    try {
-      await git.merge([`origin/${branchName}`]).catch((error: GitError) => {
-        if (error.message.includes('CONFLICT')) {
-          throw new Error('Merge conflict')
-        }
-        throw new Error('Unexpected error')
-      })
-    } catch (e) {
-      await git.merge(['--abort'])
-      await git.reset(['--hard', 'HEAD~1'])
-      await git.checkout([oldBranchName])
-      throw e
-    }
+    await git.merge([`origin/${branchName}`]).catch((error: GitError) => {
+      if (error.message.includes('CONFLICT')) {
+        throw new Error('Merge conflict')
+      }
+      throw new Error('Unexpected error')
+    })
   }
 }
 
@@ -106,11 +115,25 @@ export const pushWithToken = async (
   git: SimpleGit,
   username: string,
   token: string,
-  branchName: string
+  branchName: string,
+  service: ServiceName,
+  repositoryName: string
 ): Promise<void> => {
   const remoteUuid = uuidv4()
-  await gitAddRemote(git, remoteUuid, username, token)
-  await git.push(remoteUuid, branchName)
+  await gitAddRemote(
+    git,
+    remoteUuid,
+    username,
+    token,
+    service,
+    repositoryName
+  )
+  try {
+    await git.push(remoteUuid, branchName)
+  } catch (e) {
+    console.log(e)
+  }
+
   await gitRemoveRemote(git, remoteUuid)
 }
 
@@ -120,9 +143,7 @@ export const getLocalBranchSummary = async (
   return await git.branchLocal()
 }
 
-export const getLastCommitMessage = async (
-  git: SimpleGit,
-): Promise<string> => {
+export const getLastCommitMessage = async (git: SimpleGit): Promise<string> => {
   try {
     const commitMessage = await git.raw(['show', '-s', '--format=%s'])
     if (commitMessage.length > 73) {

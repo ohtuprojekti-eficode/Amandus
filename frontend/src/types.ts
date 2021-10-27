@@ -47,6 +47,7 @@ export interface RepoStateQueryResult {
     branches: string[]
     url: string
     commitMessage: string
+    service: string|undefined
   }
 }
 
@@ -91,7 +92,17 @@ export interface ServiceUserType {
 
 export interface UserType {
   username: string
-  user_role: String
+  user_role: string
   email: string
   services?: ServiceUserType[]
+}
+
+export type ServiceName = 'github' | 'bitbucket' | 'gitlab'
+
+export interface Repo {
+  id: string
+  name: string
+  full_name: string
+  clone_url: string
+  html_url: string
 }

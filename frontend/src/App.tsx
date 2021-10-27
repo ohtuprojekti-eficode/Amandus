@@ -17,9 +17,18 @@ import Connections from './components/Connections'
 import MyLoginForm from './components/MyLoginForm'
 import { MeQueryResult } from './types'
 import DeleteAccount from './components/DeleteAccount'
+import { useLocation } from 'react-router-dom'
+
+interface LocationState {
+  cloneUrl: string
+}
 
 const App = () => {
   const { data: user } = useQuery<MeQueryResult>(ME)
+  const location = useLocation<LocationState>()
+  const [cloneUrl, setCloneUrl] = useState<string | undefined>(undefined)
+
+  if (location.state?.cloneUrl && location.state.cloneUrl !== cloneUrl) setCloneUrl(location.state.cloneUrl)
 
   const defaultTheme = 'light'
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
@@ -75,7 +84,8 @@ const App = () => {
           </Route>
           
           <Route path="/edit">
-            <EditView />
+            <EditView 
+            cloneUrl = {cloneUrl}/>
           </Route>
 
           <Route exact path="/repositories">

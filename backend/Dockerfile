@@ -6,7 +6,7 @@ RUN mkdir -p /usr/src/app/node_modules && \
 WORKDIR /usr/src/app
 RUN apk add git
 
-USER node
+#USER node
 
 COPY --chown=node:node . .
 

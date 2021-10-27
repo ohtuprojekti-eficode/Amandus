@@ -114,7 +114,7 @@ const resolvers = {
         throw new Error('GitLab client id or callback url not set')
       }
 
-      return `https://gitlab.com/oauth/authorize?client_id=${clientID}&redirect_uri=${cbUrl}&response_type=code&state=${state}&scope=read_user+read_repository+write_repository`
+      return `https://gitlab.com/oauth/authorize?client_id=${clientID}&redirect_uri=${cbUrl}&response_type=code&state=${state}&scope=read_user+read_repository+write_repository+api`
     },
 
     currentToken: (
@@ -223,7 +223,8 @@ const resolvers = {
         username: gitLabUser.username,
         email: gitLabUser.email,
         reposurl:
-          'https://gitlab.com/api/v4/users/' + gitLabUser.id + '/projects',
+          'https://gitlab.com/api/v4/projects?simple=true&min_access_level=30',
+        //'https://gitlab.com/api/v4/users/' + gitLabUser.id + '/projects',
       }
 
       const tokens = createTokens(context.currentUser)
@@ -337,13 +338,14 @@ const resolvers = {
       args: UserType,
       _context: AppContext
     ): Promise<void> => {
-      const username = args.username
+      const { username } = args
+
       if (!username) {
         throw new UserInputError('User not valid')
       }
+      const user = await User.findUserByUsername(username)
+      user?.id && tokenService.deleteTokenByUserId(user.id)
       await User.deleteUser(username)
-
-      //  await user.deleteUser
     },
   },
 }

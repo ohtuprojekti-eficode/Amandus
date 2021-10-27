@@ -61,6 +61,12 @@ export const SAVE_CHANGES = gql`
   }
 `
 
+export const SAVE_MERGE = gql`
+  mutation saveMergeEdit($file: FileInput!, $commitMessage: String) {
+    saveMergeEdit(file: $file, commitMessage: $commitMessage)
+  }
+`
+
 export const REGISTER = gql`
   mutation register($username: String!, $email: String!, $password: String!) {
     register(username: $username, email: $email, password: $password) {
@@ -92,9 +98,9 @@ export const SWITCH_BRANCH = gql`
 `
 
 export const PULL_REPO = gql`
-  mutation {
+  mutation pullRepository($repoUrl: String!){
     pullRepo: pullRepository(
-      url: "https://github.com/Ohtu-project-Eficode/robot-test-files"
+      url: $repoUrl
     )
   }
 `

@@ -89,9 +89,12 @@ const getAccessTokenByServiceAndId = async (
   return null
 }
 
-const getTokensForApolloContextById = async (
-  userId: number
-): Promise<ContextTokens> => {
+const deleteTokenByUserId = (userId: number): void => {
+  // this should probably not be used, if refactored as an independent service
+  tokenStorage.delete(userId)
+}
+
+const getTokensForApolloContextById = (userId: number): ContextTokens => {
   // this should NOT be used, if refactored as an independent service
   const tokenMap = getTokenMapById(userId)
 
@@ -150,4 +153,5 @@ export default {
   getAccessTokenByServiceAndId,
   isServiceConnected,
   clearStorage,
+  deleteTokenByUserId,
 }

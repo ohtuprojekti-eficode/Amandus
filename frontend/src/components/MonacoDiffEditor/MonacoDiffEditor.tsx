@@ -1,23 +1,23 @@
 import { useMutation } from '@apollo/client'
 import { Button, createStyles, makeStyles, useTheme } from '@material-ui/core'
-// import { GitHub } from '@material-ui/icons'
-import Editor from '@monaco-editor/react'
+import { DiffEditor, Monaco } from '@monaco-editor/react'
 import { editor } from 'monaco-editor'
 import React, { useRef, useState } from 'react'
-import { PULL_REPO, SAVE_CHANGES } from '../graphql/mutations'
-import { REPO_STATE } from '../graphql/queries'
-import useUser from '../hooks/useUser'
-import SaveDialog from './SaveDialog'
-import ServiceConnected from './ServiceConnected'
+import { SAVE_MERGE } from '../../graphql/mutations'
+import { REPO_STATE } from '../../graphql/queries'
+import useUser from '../../hooks/useUser'
+import MergeDialog from '../MergeDialog'
+import ServiceConnected from '../ServiceConnected'
+import useMergeCodeLens from './useMergeCodeLens'
+import useMergeConflictDetector from './useMergeConflictDetector'
 
 interface Props {
-  content: string
+  original: string
   filename: string
   commitMessage: string
-  onMergeError: () => void
   cloneUrl: string
-  currentService: string
   currentBranch: string
+  currentService: string
   updateTheme: () => void
 }
 
@@ -47,9 +47,8 @@ const stylesInUse = makeStyles(() =>
   })
 )
 
-const MonacoEditor = ({
-  onMergeError,
-  content,
+const MonacoDiffEditor = ({
+  original,
   filename,
   commitMessage,
   cloneUrl,
@@ -58,19 +57,25 @@ const MonacoEditor = ({
   updateTheme,
 }: Props) => {
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [waitingToSave, setWaitingToSave] = useState(false)
+
+  const [waitingToMerge, setWaitingToMerge] = useState(false)
 
   const [dialogError, setDialogError] = useState<DialogError | undefined>(
     undefined
   )
 
+  const { setupCodeLens, modifiedContent, cleanup } = useMergeCodeLens(original)
+
+  const mergeConflictExists = useMergeConflictDetector(modifiedContent)
+
   const classes = stylesInUse()
 
   const { user, loading: userQueryLoading, error: userQueryError } = useUser()
 
-  const [saveChanges, { loading: mutationSaveLoading }] = useMutation(
-    SAVE_CHANGES,
+  const [saveMergeEdit, { loading: mutationMergeLoading }] = useMutation(
+    SAVE_MERGE,
     {
+      onCompleted: cleanup,
       refetchQueries: [
         {
           query: REPO_STATE,
@@ -80,61 +85,51 @@ const MonacoEditor = ({
     }
   )
 
-  const [pullRepo, { loading: pullLoading }] = useMutation(PULL_REPO, {
-    refetchQueries: [
-      {
-        query: REPO_STATE,
-        variables: { repoUrl: cloneUrl },
-      },
-    ],
-  })
-
   const theme = useTheme()
 
-  const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
+  const editorRef = useRef<editor.IStandaloneDiffEditor | null>(null)
 
-  const handleEditorDidMount = (editor: editor.IStandaloneCodeEditor) => {
+  const handleEditorDidMount = (
+    editor: editor.IStandaloneDiffEditor,
+    monaco: Monaco
+  ) => {
     editorRef.current = editor
+
+    setupCodeLens(editor, monaco)
   }
 
   const handleDialogClose = () => {
     setDialogOpen(false)
   }
 
-  const handleDialogSubmit = async (
-    createNewBranch: boolean,
-    newBranch: string,
-    newCommitMessage: string
-  ) => {
+  const handleDialogSubmit = async (newCommitMessage: string) => {
     if (editorRef.current) {
-      const branchName = createNewBranch ? newBranch : currentBranch
       try {
-        setWaitingToSave(true)
-        await saveChanges({
+        setWaitingToMerge(true)
+        await saveMergeEdit({
           variables: {
             file: {
               name: filename,
-              content: editorRef.current.getValue(),
+              content: editorRef.current.getModifiedEditor().getValue(),
             },
-            branch: branchName,
             commitMessage: newCommitMessage,
           },
         })
         setDialogOpen(false)
         setDialogError(undefined)
       } catch (error) {
-        if (
-          error instanceof Error &&
-          error.message === 'Merge conflict detected'
-        ) {
-          setDialogError({
-            title: `Merge conflict on branch ${branchName}`,
-            message:
-              'Cannot push to selected branch. Create a new one or resolve the conflicts.',
-          })
+        const dialogError = {
+          title: `An error occurred while merging`,
+          message: '',
         }
+
+        if (error instanceof Error) {
+          dialogError.message = `More info: ${error.message}`
+        }
+
+        setDialogError(dialogError)
       } finally {
-        setWaitingToSave(false)
+        setWaitingToMerge(false)
       }
     }
   }
@@ -143,12 +138,8 @@ const MonacoEditor = ({
     setDialogOpen(true)
   }
 
-  const handlePull = async () => {
-    try {
-      await pullRepo({ variables: { repoUrl: cloneUrl } })
-    } catch (error) {
-      console.error('error pulling')
-    }
+  const options: editor.IDiffEditorConstructionOptions = {
+    // renderSideBySide: false,
   }
 
   return (
@@ -156,57 +147,43 @@ const MonacoEditor = ({
       <h2 className={classes.title}>
         {filename?.substring(filename.lastIndexOf('/') + 1)}
       </h2>
-      <Editor
+      <DiffEditor
         height="78vh"
         language="robot"
+        original={original}
+        modified={modifiedContent}
         theme={theme.palette.type === 'dark' ? 'vs-dark' : 'vs-light'}
-        value={content}
         onMount={handleEditorDidMount}
+        options={options}
       />
       {
         // Updating the theme here so we override things set by <Editor>
         updateTheme()
       }
-      <SaveDialog
+      <MergeDialog
         open={dialogOpen}
         handleClose={handleDialogClose}
         handleSubmit={handleDialogSubmit}
-        onResolve={onMergeError}
         currentBranch={currentBranch}
         error={dialogError}
-        waitingToSave={waitingToSave}
+        waitingToMerge={waitingToMerge}
       />
 
       <div className={classes.saveGroup}>
         <div className={classes.buttonAndStatus}>
           <Button
-            style={{ marginRight: 5 }}
-            color="secondary"
-            variant="contained"
-            onClick={handlePull}
-            disabled={
-              pullLoading ||
-              userQueryLoading ||
-              !!userQueryError ||
-              mutationSaveLoading ||
-              !user?.me
-            }
-          >
-            Pull
-          </Button>
-          <Button
             color="primary"
             variant="contained"
             disabled={
-              pullLoading ||
               userQueryLoading ||
               !!userQueryError ||
-              mutationSaveLoading ||
-              !user?.me
+              mutationMergeLoading ||
+              !user?.me ||
+              mergeConflictExists
             }
             onClick={handleSaveButton}
           >
-            Save
+            Merge
           </Button>
           <ServiceConnected service={currentService} />
         </div>
@@ -218,4 +195,4 @@ const MonacoEditor = ({
   )
 }
 
-export default MonacoEditor
+export default MonacoDiffEditor

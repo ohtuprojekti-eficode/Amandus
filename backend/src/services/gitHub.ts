@@ -1,4 +1,8 @@
-import { AccessTokenResponse, GitHubUserType } from '../types/user'
+import {
+  AccessTokenResponse,
+  GitHubUserType,
+  ServiceUserType,
+} from '../types/user'
 import fetch from 'node-fetch'
 import config from '../utils/config'
 
@@ -34,6 +38,21 @@ export const requestGithubUserAccount = (
     },
   })
     .then<GitHubUserType>((res) => res.json())
+    .catch((error: Error) => {
+      throw new Error(error.message)
+    })
+}
+
+export const getRepoList = (
+  service: ServiceUserType,
+  token: string
+): Promise<any> => {
+  return fetch(`${service.reposurl}`, {
+    headers: {
+      Authorization: `token ${token}`,
+    },
+  })
+    .then((res) => res.json())
     .catch((error: Error) => {
       throw new Error(error.message)
     })
