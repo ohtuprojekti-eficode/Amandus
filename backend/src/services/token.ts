@@ -65,11 +65,14 @@ const getServiceDetails = (
   return null
 }
 
-const isServiceConnected = (userId: number, service: ServiceName): boolean => {
+export const isServiceConnected = (
+  userId: number,
+  service: ServiceName
+): boolean => {
   return getServiceDetails(userId, service) ? true : false
 }
 
-const getAccessTokenByServiceAndId = async (
+export const getAccessTokenByServiceAndId = async (
   userId: number,
   service: ServiceName
 ): Promise<string | null> => {
@@ -77,10 +80,14 @@ const getAccessTokenByServiceAndId = async (
 
   if (data) {
     if (hasExpired(data)) {
-      const newData = await refreshToken(service, data.refresh_token)
-
-      setToken(userId, service, newData)
-      return newData.access_token
+      try {
+        const newData = await refreshToken(service, data.refresh_token)
+        setToken(userId, service, newData)
+        return newData.access_token
+      } catch (e) {
+        // remove token?
+        console.log(e)
+      }
     }
 
     return data.access_token
@@ -94,38 +101,11 @@ const deleteTokenByUserId = (userId: number): void => {
   tokenStorage.delete(userId)
 }
 
-const getTokensForApolloContextById = (userId: number): ContextTokens => {
-  // this should NOT be used, if refactored as an independent service
-  const tokenMap = getTokenMapById(userId)
-
-  const contextTokens: ContextTokens = {}
-
-  if (tokenMap) {
-    for (const [service, data] of tokenMap) {
-      if (hasExpired(data)) {
-        // this will result in multiple refresh fetches on same token
-        // because function is called multiple times on pageload and
-        // previous promise(s) is still pending
-        const newData = await refreshToken(service, data.refresh_token)
-
-        contextTokens[`${service}Token` as ServiceTokenType] =
-          newData.access_token
-
-        tokenMap.set(service, newData)
-      } else {
-        contextTokens[`${service}Token` as ServiceTokenType] = data.access_token
-      }
-    }
-  }
-
-  return contextTokens
-}
-
 const refreshToken = async (
   service: ServiceName,
   refreshToken: string
 ): Promise<AccessTokenResponse> => {
-  let details: AccessTokenResponse = {}
+  let details: AccessTokenResponse = { access_token: '' }
 
   switch (service) {
     case 'gitlab':
@@ -149,9 +129,7 @@ export default {
   getTokenMap,
   getTokenMapById,
   getTokensForApolloContext,
-  getTokensForApolloContextById,
-  getAccessTokenByServiceAndId,
-  isServiceConnected,
+  getServiceDetails,
   clearStorage,
   deleteTokenByUserId,
 }
