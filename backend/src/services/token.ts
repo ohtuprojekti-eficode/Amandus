@@ -1,5 +1,5 @@
-import { AccessTokenResponse, ContextTokens } from './../types/user'
-import { ServiceTokenType, ServiceName } from './../types/service'
+import { ContextTokens } from './../types/user'
+import { AccessTokenResponse, ServiceTokenType, ServiceName } from './../types/service'
 import { verify } from 'jsonwebtoken'
 import config from '../utils/config'
 import { formatData, hasExpired } from '../utils/tokens'
