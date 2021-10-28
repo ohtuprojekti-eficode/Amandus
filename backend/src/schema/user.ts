@@ -26,8 +26,13 @@ import tokenService from '../services/token'
 import { requestServiceUser } from '../services/commonServices'
 
 const typeDef = `
+    enum ServiceName {
+      github
+      bitbucket
+      gitlab
+    }
     type ServiceUser {
-      serviceName: String!
+      serviceName: ServiceName
       username: String!
       email: String
       reposurl: String!
@@ -167,7 +172,7 @@ const resolvers = {
 
       const serviceUserResponse = await requestServiceUser(service, args.code)
 
-      tokenService.setToken(context.currentUser.id, service, serviceUserResponse.access_token)
+      tokenService.setToken(context.currentUser.id, service, serviceUserResponse)
       const serviceUser = serviceUserResponse.serviceUser
       const tokens = createTokens(context.currentUser)
 

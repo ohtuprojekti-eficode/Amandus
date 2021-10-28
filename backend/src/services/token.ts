@@ -74,7 +74,7 @@ const getAccessTokenByServiceAndId = async (
   service: ServiceName
 ): Promise<string | null> => {
   const data = getServiceDetails(userId, service)
-
+  console.log(data)
   if (data) {
     if (hasExpired(data)) {
       try {

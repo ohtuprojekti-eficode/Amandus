@@ -64,7 +64,7 @@ export interface BitbucketEmail {
 }
 
 export interface ServiceUser {
-  serviceName: string
+  serviceName: ServiceName
   username: string
   email: string | null
   reposurl: string
