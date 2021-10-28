@@ -74,9 +74,8 @@ const getAccessTokenByServiceAndId = async (
   service: ServiceName
 ): Promise<string | null> => {
   const data = getServiceDetails(userId, service)
-  console.log(data)
   if (data) {
-    if (hasExpired(data)) {
+    if (hasExpired(data) && data.refresh_token) {
       try {
         const newData = await refreshToken(service, data.refresh_token)
         setToken(userId, service, newData)

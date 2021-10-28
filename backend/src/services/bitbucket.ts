@@ -1,4 +1,4 @@
-import { AccessTokenResponse, BitbucketUserType, BitbucketEmail, ServiceUserResponse } from '../types/service'
+import { AccessTokenResponse, BitbucketUserType, BitbucketEmail, ServiceUserResponse, ServiceUser } from '../types/service'
 import fetch from 'node-fetch'
 import config from '../utils/config'
 import { UserInputError } from 'apollo-server-errors'
@@ -99,13 +99,15 @@ export const refreshBitbucketToken = (
 export const requestBitbucketUser = async (
   code: string
 ): Promise<ServiceUserResponse> => {
-  const { access_token } = await requestBitbucketToken(code)
+  const response = await requestBitbucketToken(code)
+  const { access_token } = response
+
   if(!access_token){
     throw new UserInputError('Invalid or expired Bitbucket code')
   }
 
   const bitbucketUser = await requestBitbucketUserAccount(access_token)
-  const bitbucketUserEmail= await requestBitbucketUserEmail(access_token)
+  const bitbucketUserEmail = await requestBitbucketUserEmail(access_token)
 
   const email = bitbucketUserEmail.values.find(
     (email) => email.is_primary
@@ -115,12 +117,12 @@ export const requestBitbucketUser = async (
     throw new Error('Bitbucket email not found!')
   }
 
-  const serviceUser = {
+  const serviceUser : ServiceUser = {
     serviceName: 'bitbucket',
     username: bitbucketUser.username,
     email: email,
     reposurl: bitbucketUser.links.repositories.href
-  }
+  } 
 
-  return {serviceUser, access_token} //todo: incldue access token to response
+  return {serviceUser, ...response}
 }

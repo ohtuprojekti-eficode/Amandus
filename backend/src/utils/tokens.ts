@@ -1,6 +1,7 @@
 import { sign } from 'jsonwebtoken'
 import { Tokens } from '../types/tokens'
-import { AccessTokenResponse, UserType } from '../types/user'
+import { UserType } from '../types/user'
+import { AccessTokenResponse } from '../types/service'
 import config from './config'
 
 export const createTokens = (user: UserType | null): Tokens => {
