@@ -1,4 +1,4 @@
-export interface Repo {
+export interface Repository {
     id: string
     name: string
     full_name: string
@@ -7,7 +7,7 @@ export interface Repo {
     service: string
 }
 
-export interface GitHubRepoListResponse {
+export interface GitHubRepository {
     id: number,
     name: string,
     full_name: string,
@@ -15,7 +15,7 @@ export interface GitHubRepoListResponse {
     html_url: string,
 }
 
-export interface BitbucketRepoListResponse {
+export interface BitbucketRepositories {
     values: [
         {
             uuid: string,
@@ -36,10 +36,12 @@ export interface BitbucketRepoListResponse {
     ]
 }
 
-export interface GitLabRepoListResponse {
+export interface GitLabRepository {
     id: number,
     name: string,
     path_with_namespace: string,
     http_url_to_repo: string,
     web_url: string
 }
+
+export type ServiceRepository = GitHubRepository |BitbucketRepositories |GitLabRepository

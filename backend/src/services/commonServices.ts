@@ -1,55 +1,41 @@
-import { ServiceUserType } from '../types/user'
-import { 
-  GitHubRepoListResponse,
-  BitbucketRepoListResponse,
-  GitLabRepoListResponse,
-} from '../types/repo'
+import { ServiceUser, ServiceUserResponse } from '../types/service'
+import { ServiceRepository } from '../types/repository'
 import fetch from 'node-fetch'
+import { requestGithubUser } from './gitHub'
+import { requestBitbucketUser } from './bitbucket'
+import { requestGitLabUser } from './gitLab'
 
-export const getGitHubRepoList = (
-  service: ServiceUserType,
+export const getRepoList = (
+  service: ServiceUser,
   token: string
-): Promise<GitHubRepoListResponse[]> => {
-
+): Promise<ServiceRepository[] | ServiceRepository> => {
   return fetch(`${service.reposurl}`, {
     headers: {
       Authorization: `Bearer ${token}`
     },
   })
-  .then<GitHubRepoListResponse[]>((res) => res.json())
-  .catch((error: Error) => {
-    throw new Error(error.message)
-  })
+    .then<ServiceRepository[] | ServiceRepository>((res) => res.json())
+    .catch((error: Error) => {
+      throw new Error(error.message)
+    })
 }
 
-export const getBitbucketRepoList = (
-  service: ServiceUserType,
-  token: string
-): Promise<BitbucketRepoListResponse> => {
+export const requestServiceUser = async (
+  service: string,
+  code: string
+): Promise<ServiceUserResponse> => {
 
-  return fetch(`${service.reposurl}`, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    },
-  })
-  .then<BitbucketRepoListResponse>((res) => res.json())
-  .catch((error: Error) => {
-    throw new Error(error.message)
-  })
-}
+  if(service === 'github'){
+    return await requestGithubUser(code)
+  }
 
-export const getGitLabRepoList = (
-  service: ServiceUserType,
-  token: string
-): Promise<GitLabRepoListResponse[]> => {
+  if(service === 'bitbucket'){
+    return await requestBitbucketUser(code)
+  }
 
-  return fetch(`${service.reposurl}`, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    },
-  })
-  .then<GitLabRepoListResponse[]>((res) => res.json())
-  .catch((error: Error) => {
-    throw new Error(error.message)
-  })
+  if(service === 'gitlab'){
+    return await requestGitLabUser(code)
+  }
+
+  throw Error(`unable to fetch user of ${service}`)
 }
