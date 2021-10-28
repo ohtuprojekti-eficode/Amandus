@@ -8,7 +8,7 @@ import { sanitizeCommitMessage } from './sanitize'
 import { ServiceName, ServiceTokenType } from '../types/service'
 import { AppContext } from '../types/user'
 
-import { Repo, GitHubRepoListResponse, BitbucketRepoListResponse, GitLabRepoListResponse } from '../types/repo'
+
 
 const execProm = promisify(exec)
 
@@ -19,8 +19,8 @@ export const validateBranchName = async (branchName: string): Promise<void> => {
 const runShellCommand = async (command: string): Promise<string> => {
   try {
     return (await execProm(command)).stdout
-  } catch (error) {
-    throw new Error(error.message)
+  } catch (e) {
+    throw new Error((e as Error).message)
   }
 }
 
@@ -113,64 +113,4 @@ export const getServiceTokenFromContext = (serviceName: string, context: AppCont
     case 'gitlab': return context.gitlabToken;
     default: return undefined;
   }
-}
-
-export const parseGithubRepositories = (response: GitHubRepoListResponse[]): Repo[] => {
-  const repolist = response.map((repo: GitHubRepoListResponse) => {
-    const repoId = `${repo.id}`
-
-    const repoObject: Repo = {
-      id: repoId,
-      name: repo.name,
-      full_name: repo.full_name,
-      clone_url: repo.clone_url,
-      html_url: repo.html_url,
-      service: 'github'
-    }
-
-    return repoObject
-  }
-  )
-
-  return repolist
-}
-
-export const parseBitbucketRepositories = (response: BitbucketRepoListResponse): Repo[] => {
-  const repolist = response.values.map(repo => {
-    const clone_url = repo.links.clone.find(url => url.name === 'https')
-    if (!clone_url) {
-      throw Error('No clone url found, cannot append repo to list')
-    }
-
-    const repoObject: Repo = {
-      id: repo.uuid,
-      name: repo.name,
-      full_name: repo.full_name,
-      clone_url: clone_url.href,
-      html_url: repo.links.html.href,
-      service: 'bitbucket'
-    }
-    return repoObject
-  })
-
-  return repolist
-}
-
-export const parseGitlabRepositories = (response: GitLabRepoListResponse[]): Repo[] => {
-  const repolist = response.map((repo: GitLabRepoListResponse) => {
-    const repoId = `${repo.id}`
-
-    const repoObject: Repo = {
-      id: repoId,
-      name: repo.name,
-      full_name: repo.path_with_namespace,
-      clone_url: repo.http_url_to_repo,
-      html_url: repo.web_url,
-      service: 'gitlab',
-    }
-
-    return repoObject
-  })
-
-  return repolist
 }

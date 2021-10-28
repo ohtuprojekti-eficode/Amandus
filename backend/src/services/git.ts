@@ -24,7 +24,6 @@ import {
   updateBranchFromRemote,
   getLastCommitMessage,
 } from '../utils/gitUtils'
-// import { ServiceTokenType } from '../types/service'
 
 export const switchCurrentBranch = async (
   repoLocation: string,

@@ -1,10 +1,11 @@
-import { GitHubAccessTokenResponse, GitHubUserType, ServiceUserType } from '../types/user'
+import { AccessTokenResponse, GitHubUserType, ServiceUserResponse } from '../types/service'
 import fetch from 'node-fetch'
 import config from '../utils/config'
+import { UserInputError } from 'apollo-server-errors'
 
 export const requestGithubToken = (
   code: string
-): Promise<GitHubAccessTokenResponse> => {
+): Promise<AccessTokenResponse> => {
   const credentials = {
     client_id: config.GITHUB_CLIENT_ID || '',
     client_secret: config.GITHUB_CLIENT_SECRET || '',
@@ -19,7 +20,7 @@ export const requestGithubToken = (
     },
     body: JSON.stringify(credentials),
   })
-    .then<GitHubAccessTokenResponse>((res) => res.json())
+    .then<AccessTokenResponse>((res) => res.json())
     .catch((error: Error) => {
       throw new Error(error.message)
     })
@@ -39,17 +40,24 @@ export const requestGithubUserAccount = (
     })
 }
 
-export const getRepoList = (
-  service: ServiceUserType,
-  token: string
-  ): Promise<any> => {
-    return fetch(`${service.reposurl}`, {
-    headers: {
-      Authorization: `token ${token}`,
-      },
-    })
-    .then((res) => res.json())
-    .catch((error: Error) => {
-      throw new Error(error.message)
-    })
+export const requestGithubUser = async (
+  code: string
+): Promise<ServiceUserResponse> => {
+  const { access_token } = await requestGithubToken(code)
+
+  if (!access_token) {
+    throw new UserInputError('Invalid or expired GitHub code')
+  }
+
+  const gitHubUser = await requestGithubUserAccount(access_token)
+
+  const serviceUser = {
+    serviceName: 'github',
+    username: gitHubUser.login,
+    email: gitHubUser.email,
+    reposurl: gitHubUser.repos_url
+  }
+
+  return { serviceUser, access_token }
+
 }
