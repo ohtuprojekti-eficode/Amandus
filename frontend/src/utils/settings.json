@@ -1,0 +1,28 @@
+{
+    "misc": [
+        {
+            "name": "Autosave Interval",
+            "value": 1000 ,
+            "unit": "ms"
+        },
+        {
+            "name": "Autodelete Interval",
+            "value": 1000 
+        }
+    ],
+
+    "plugins": [
+        {
+            "name": "robot-language-server",
+            "active": true
+        },
+        {
+            "name": "c-language-server",
+            "active": true
+        },
+        {
+            "name": "cypress-language-server",
+            "active": true
+        }
+    ]
+}

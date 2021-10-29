@@ -18,7 +18,8 @@ import MyLoginForm from './components/MyLoginForm'
 import { MeQueryResult } from './types'
 import DeleteAccount from './components/DeleteAccount'
 import { useLocation } from 'react-router-dom'
-import AdminPage from './components/AdminPage'
+import SettingsPage from './components/SettingsPage'
+import SettingsProvider from './components/SettingsProvider'
 
 interface LocationState {
   cloneUrl: string
@@ -58,6 +59,7 @@ const App = () => {
 
   return (
     <div>
+      <SettingsProvider>
       <ThemeProvider theme={appliedTheme}>
         <CssBaseline />
         <Header
@@ -103,8 +105,8 @@ const App = () => {
             />
           </Route>
           
-          <Route exact path="/adminpage">
-            <AdminPage
+          <Route exact path="/settings">
+            <SettingsPage
               user = {user?.me}
             />
           </Route>
@@ -113,6 +115,7 @@ const App = () => {
           <Route exact path="/login" component={MyLoginForm} />
         </div>
       </ThemeProvider>
+      </SettingsProvider>
     </div>
   )
 }
