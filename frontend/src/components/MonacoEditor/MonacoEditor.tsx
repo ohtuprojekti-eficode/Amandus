@@ -1,15 +1,22 @@
 import { useMutation } from '@apollo/client'
-import { Button, createStyles, makeStyles, useTheme } from '@material-ui/core'
+import {
+  Button,
+  CircularProgress,
+  createStyles,
+  makeStyles,
+  useTheme,
+} from '@material-ui/core'
 // import { GitHub } from '@material-ui/icons'
 import Editor from '@monaco-editor/react'
 import { editor } from 'monaco-editor'
 import React, { useRef, useState } from 'react'
 import { SAVE_LOCALLY } from '../../graphql/mutations'
+import useSaveDialog from '../../hooks/useSaveDialog'
 import LatestCommit from '../LatestCommit'
 import SaveDialog from '../SaveDialog'
 import ServiceConnected from '../ServiceConnected'
 import useEditor from './useMonacoEditor'
-import useSaveDialog from '../../hooks/useSaveDialog'
+import useAutoSave from '../../hooks/useAutoSave'
 
 interface Props {
   content: string
@@ -61,6 +68,8 @@ const MonacoEditor = ({
   } = useSaveDialog()
 
   const classes = stylesInUse()
+
+  const [debouncedAutoSave, autosaving] = useAutoSave(filename)
 
   const { saveChanges, pullRepo, mutationSaveLoading, pullLoading } =
     useEditor(cloneUrl)
@@ -146,6 +155,7 @@ const MonacoEditor = ({
         theme={theme.palette.type === 'dark' ? 'vs-dark' : 'vs-light'}
         value={content}
         onMount={handleEditorDidMount}
+        onChange={debouncedAutoSave}
       />
       {
         // Updating the theme here so we override things set by <Editor>
@@ -192,6 +202,12 @@ const MonacoEditor = ({
           </Button>
         </div>
         <LatestCommit commitMessage={commitMessage} />
+        {autosaving && (
+          <div>
+            <CircularProgress size={10} />
+            <span> Saving...</span>
+          </div>
+        )}
       </div>
     </div>
   )
