@@ -1,3 +1,5 @@
+import { RepoStateQueryResult } from './../types'
+import { REPO_STATE } from './../graphql/queries'
 import { useMutation } from '@apollo/client/react/hooks/useMutation'
 import { useState } from 'react'
 import { useDebouncedCallback } from 'use-debounce'
@@ -5,7 +7,7 @@ import { SAVE_LOCALLY } from '../graphql/mutations'
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
-const useAutoSave = (filename: string) => {
+const useAutoSave = (filename: string, repoUrl: string) => {
   // need to fetch debounce interval from useSettings here once merged, e.g
   // const { interval } = useSettings()
 
@@ -27,6 +29,32 @@ const useAutoSave = (filename: string) => {
               name: filename,
               content,
             },
+          },
+          update: (cache) => {
+            const currentState = cache.readQuery<RepoStateQueryResult>({
+              query: REPO_STATE,
+              variables: {
+                repoUrl,
+              },
+            })
+
+            if (!currentState) {
+              return
+            }
+
+            cache.writeQuery({
+              query: REPO_STATE,
+              variables: { repoUrl },
+              data: {
+                ...currentState,
+                repoState: {
+                  ...currentState.repoState,
+                  files: currentState.repoState.files.map((file) =>
+                    file.name === filename ? { ...file, content } : file
+                  ),
+                },
+              },
+            })
           },
         })
       } catch (e) {

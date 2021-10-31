@@ -69,7 +69,7 @@ const MonacoEditor = ({
 
   const classes = stylesInUse()
 
-  const [debouncedAutoSave, autosaving] = useAutoSave(filename)
+  const [debouncedAutoSave, autosaving] = useAutoSave(filename, cloneUrl)
 
   const { saveChanges, pullRepo, mutationSaveLoading, pullLoading } =
     useEditor(cloneUrl)
