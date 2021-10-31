@@ -4,11 +4,12 @@ import { Button, createStyles, makeStyles, useTheme } from '@material-ui/core'
 import Editor from '@monaco-editor/react'
 import { editor } from 'monaco-editor'
 import React, { useRef, useState } from 'react'
-import { PULL_REPO, SAVE_CHANGES, SAVE_LOCALLY } from '../graphql/mutations'
-import { REPO_STATE } from '../graphql/queries'
-import useUser from '../hooks/useUser'
-import SaveDialog from './SaveDialog'
-import ServiceConnected from './ServiceConnected'
+import { SAVE_LOCALLY } from '../../graphql/mutations'
+import LatestCommit from '../LatestCommit'
+import SaveDialog from '../SaveDialog'
+import ServiceConnected from '../ServiceConnected'
+import useEditor from './useMonacoEditor'
+import useSaveDialog from '../../hooks/useSaveDialog'
 
 interface Props {
   content: string
@@ -21,11 +22,6 @@ interface Props {
   updateTheme: () => void
 }
 
-interface DialogError {
-  title: string
-  message: string
-}
-
 const stylesInUse = makeStyles(() =>
   createStyles({
     saveGroup: {
@@ -34,9 +30,6 @@ const stylesInUse = makeStyles(() =>
     buttonAndStatus: {
       display: 'flex',
       alignItems: 'center',
-    },
-    commitMessage: {
-      marginTop: 5,
     },
     title: {
       height: '1rem',
@@ -57,37 +50,20 @@ const MonacoEditor = ({
   currentService,
   updateTheme,
 }: Props) => {
-  const [dialogOpen, setDialogOpen] = useState(false)
   const [waitingToSave, setWaitingToSave] = useState(false)
 
-  const [dialogError, setDialogError] = useState<DialogError | undefined>(
-    undefined
-  )
+  const {
+    dialogOpen,
+    dialogError,
+    handleDialogClose,
+    setDialogError,
+    handleDialogOpen,
+  } = useSaveDialog()
 
   const classes = stylesInUse()
 
-  const { user, loading: userQueryLoading, error: userQueryError } = useUser()
-
-  const [saveChanges, { loading: mutationSaveLoading }] = useMutation(
-    SAVE_CHANGES,
-    {
-      refetchQueries: [
-        {
-          query: REPO_STATE,
-          variables: { repoUrl: cloneUrl },
-        },
-      ],
-    }
-  )
-
-  const [pullRepo, { loading: pullLoading }] = useMutation(PULL_REPO, {
-    refetchQueries: [
-      {
-        query: REPO_STATE,
-        variables: { repoUrl: cloneUrl },
-      },
-    ],
-  })
+  const { saveChanges, pullRepo, mutationSaveLoading, pullLoading } =
+    useEditor(cloneUrl)
 
   const [saveLocally] = useMutation(SAVE_LOCALLY)
 
@@ -97,10 +73,6 @@ const MonacoEditor = ({
 
   const handleEditorDidMount = (editor: editor.IStandaloneCodeEditor) => {
     editorRef.current = editor
-  }
-
-  const handleDialogClose = () => {
-    setDialogOpen(false)
   }
 
   const handleDialogSubmit = async (
@@ -122,7 +94,7 @@ const MonacoEditor = ({
             commitMessage: newCommitMessage,
           },
         })
-        setDialogOpen(false)
+        handleDialogClose()
         setDialogError(undefined)
       } catch (error) {
         if (
@@ -141,27 +113,25 @@ const MonacoEditor = ({
     }
   }
 
-  const handleSaveButton = () => {
-    setDialogOpen(true)
-  }
-
   const handleLocalSave = () => {
     editorRef.current &&
-    saveLocally({
-      variables: {
-        file: {
-          name: filename,
-          content: editorRef.current.getValue(),
-        }
-      }
-    })    
+      saveLocally({
+        variables: {
+          file: {
+            name: filename,
+            content: editorRef.current.getValue(),
+          },
+        },
+      })
   }
 
   const handlePull = async () => {
     try {
       await pullRepo({ variables: { repoUrl: cloneUrl } })
     } catch (error) {
-      console.error('error pulling')
+      if (error instanceof Error) {
+        console.error('error pulling', error.message)
+      }
     }
   }
 
@@ -198,27 +168,15 @@ const MonacoEditor = ({
             color="secondary"
             variant="contained"
             onClick={handlePull}
-            disabled={
-              pullLoading ||
-              userQueryLoading ||
-              !!userQueryError ||
-              mutationSaveLoading ||
-              !user?.me
-            }
+            disabled={pullLoading || mutationSaveLoading}
           >
             Pull
           </Button>
           <Button
             color="primary"
             variant="contained"
-            disabled={
-              pullLoading ||
-              userQueryLoading ||
-              !!userQueryError ||
-              mutationSaveLoading ||
-              !user?.me
-            }
-            onClick={handleSaveButton}
+            disabled={pullLoading || mutationSaveLoading}
+            onClick={handleDialogOpen}
           >
             Save
           </Button>
@@ -233,9 +191,7 @@ const MonacoEditor = ({
             Save locally
           </Button>
         </div>
-        <div className={classes.commitMessage}>
-          {user?.me && commitMessage && `Latest commit: ${commitMessage}`}
-        </div>
+        <LatestCommit commitMessage={commitMessage} />
       </div>
     </div>
   )

@@ -1,15 +1,13 @@
-import { useMutation } from '@apollo/client'
 import { Button, createStyles, makeStyles, useTheme } from '@material-ui/core'
 import { DiffEditor, Monaco } from '@monaco-editor/react'
 import { editor } from 'monaco-editor'
 import React, { useRef, useState } from 'react'
-import { SAVE_MERGE } from '../../graphql/mutations'
-import { REPO_STATE } from '../../graphql/queries'
 import useUser from '../../hooks/useUser'
+import LatestCommit from '../LatestCommit'
 import MergeDialog from '../MergeDialog'
 import ServiceConnected from '../ServiceConnected'
-import useMergeCodeLens from './useMergeCodeLens'
-import useMergeConflictDetector from './useMergeConflictDetector'
+import useDiffEditor from './useDiffEditor'
+import useSaveDialog from '../../hooks/useSaveDialog'
 
 interface Props {
   original: string
@@ -21,11 +19,6 @@ interface Props {
   updateTheme: () => void
 }
 
-interface DialogError {
-  title: string
-  message: string
-}
-
 const stylesInUse = makeStyles(() =>
   createStyles({
     saveGroup: {
@@ -34,9 +27,6 @@ const stylesInUse = makeStyles(() =>
     buttonAndStatus: {
       display: 'flex',
       alignItems: 'center',
-    },
-    commitMessage: {
-      marginTop: 5,
     },
     title: {
       height: '1rem',
@@ -56,34 +46,27 @@ const MonacoDiffEditor = ({
   currentService,
   updateTheme,
 }: Props) => {
-  const [dialogOpen, setDialogOpen] = useState(false)
+  const {
+    dialogOpen,
+    dialogError,
+    handleDialogClose,
+    setDialogError,
+    handleDialogOpen,
+  } = useSaveDialog()
 
   const [waitingToMerge, setWaitingToMerge] = useState(false)
-
-  const [dialogError, setDialogError] = useState<DialogError | undefined>(
-    undefined
-  )
-
-  const { setupCodeLens, modifiedContent, cleanup } = useMergeCodeLens(original)
-
-  const mergeConflictExists = useMergeConflictDetector(modifiedContent)
 
   const classes = stylesInUse()
 
   const { user, loading: userQueryLoading, error: userQueryError } = useUser()
 
-  const [saveMergeEdit, { loading: mutationMergeLoading }] = useMutation(
-    SAVE_MERGE,
-    {
-      onCompleted: cleanup,
-      refetchQueries: [
-        {
-          query: REPO_STATE,
-          variables: { repoUrl: cloneUrl },
-        },
-      ],
-    }
-  )
+  const {
+    setupCodeLens,
+    mergeConflictExists,
+    saveMergeEdit,
+    modifiedContent,
+    mutationMergeLoading,
+  } = useDiffEditor(original, cloneUrl)
 
   const theme = useTheme()
 
@@ -96,10 +79,6 @@ const MonacoDiffEditor = ({
     editorRef.current = editor
 
     setupCodeLens(editor, monaco)
-  }
-
-  const handleDialogClose = () => {
-    setDialogOpen(false)
   }
 
   const handleDialogSubmit = async (newCommitMessage: string) => {
@@ -115,7 +94,7 @@ const MonacoDiffEditor = ({
             commitMessage: newCommitMessage,
           },
         })
-        setDialogOpen(false)
+        handleDialogClose()
         setDialogError(undefined)
       } catch (error) {
         const dialogError = {
@@ -132,10 +111,6 @@ const MonacoDiffEditor = ({
         setWaitingToMerge(false)
       }
     }
-  }
-
-  const handleSaveButton = () => {
-    setDialogOpen(true)
   }
 
   const options: editor.IDiffEditorConstructionOptions = {
@@ -181,14 +156,12 @@ const MonacoDiffEditor = ({
               !user?.me ||
               mergeConflictExists
             }
-            onClick={handleSaveButton}
+            onClick={handleDialogOpen}
           >
             Merge
           </Button>
           <ServiceConnected service={currentService} />
-        </div>
-        <div className={classes.commitMessage}>
-          {user?.me && commitMessage && `Latest commit: ${commitMessage}`}
+          <LatestCommit commitMessage={commitMessage} />
         </div>
       </div>
     </div>
