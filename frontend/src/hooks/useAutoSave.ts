@@ -47,6 +47,18 @@ const useAutoSave = (
     [filename, debouncedAutoSave]
   )
 
+  React.useEffect(() => {
+    // saves when user closes the tab / browser
+
+    const handler = () => save(contentRef.current, filename, repoUrl)
+
+    window.addEventListener('beforeunload', handler)
+
+    return () => {
+      window.removeEventListener('beforeunload', handler)
+    }
+  }, [save, filename, repoUrl])
+
   const onEditorContentChange = (value: string | undefined) => {
     if (value) {
       // trigger the debounced autosave and update the ref
