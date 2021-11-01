@@ -1,4 +1,9 @@
-import { AccessTokenResponse, GitHubUserType, ServiceUser, ServiceUserResponse } from '../types/service'
+import {
+  AccessTokenResponse,
+  GitHubUserType,
+  ServiceUser,
+  ServiceUserResponse,
+} from '../types/service'
 import fetch from 'node-fetch'
 import config from '../utils/config'
 import { UserInputError } from 'apollo-server-errors'
@@ -56,9 +61,8 @@ export const requestGithubUser = async (
     serviceName: 'github',
     username: gitHubUser.login,
     email: gitHubUser.email,
-    reposurl: gitHubUser.repos_url
+    reposurl: gitHubUser.repos_url,
   }
 
-  return { serviceUser, ...response }
-
+  return { serviceUser, response }
 }

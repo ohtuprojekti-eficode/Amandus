@@ -1,4 +1,9 @@
-import { GitLabUserType, AccessTokenResponse, ServiceUserResponse, ServiceUser } from '../types/service'
+import {
+  GitLabUserType,
+  AccessTokenResponse,
+  ServiceUserResponse,
+  ServiceUser,
+} from '../types/service'
 import fetch from 'node-fetch'
 import config from '../utils/config'
 import { UserInputError } from 'apollo-server-errors'
@@ -83,8 +88,9 @@ export const requestGitLabUser = async (
     serviceName: 'gitlab',
     username: gitLabUser.username,
     email: gitLabUser.email,
-    reposurl: 'https://gitlab.com/api/v4/projects?simple=true&min_access_level=30'
+    reposurl:
+      'https://gitlab.com/api/v4/projects?simple=true&min_access_level=30',
   }
 
-  return { serviceUser, ...response }
+  return { serviceUser, response }
 }

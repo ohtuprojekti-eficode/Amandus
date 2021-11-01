@@ -11,14 +11,8 @@ import {
   LoginUserInput,
   AddServiceArgs,
 } from '../types/params'
-import {
-  UserType,
-  AppContext,
-} from '../types/user'
-import {
-  ServiceAuthCode,
-  ServiceAuthResponse,
-} from '../types/service'
+import { UserType, AppContext } from '../types/user'
+import { ServiceAuthCode, ServiceAuthResponse } from '../types/service'
 
 import { Tokens } from '../types/tokens'
 
@@ -60,20 +54,14 @@ const resolvers = {
       _args: unknown,
       context: AppContext
     ): boolean => {
-      return tokenService.isServiceConnected(
-        context.currentUser.id,
-        'github'
-      )
+      return tokenService.isServiceConnected(context.currentUser.id, 'github')
     },
     isGitLabConnected: (
       _root: unknown,
       _args: unknown,
       context: AppContext
     ): boolean => {
-      return tokenService.isServiceConnected(
-        context.currentUser.id,
-        'gitlab'
-      )
+      return tokenService.isServiceConnected(context.currentUser.id, 'gitlab')
     },
     isBitbucketConnected: (
       _root: unknown,
@@ -172,7 +160,13 @@ const resolvers = {
 
       const serviceUserResponse = await requestServiceUser(service, args.code)
 
-      tokenService.setToken(context.currentUser.id, service, serviceUserResponse)
+      console.log(serviceUserResponse)
+
+      tokenService.setToken(
+        context.currentUser.id,
+        service,
+        serviceUserResponse.response
+      )
       const serviceUser = serviceUserResponse.serviceUser
       const tokens = createTokens(context.currentUser)
 
