@@ -1,6 +1,6 @@
 import { makeStyles, createStyles } from '@material-ui/styles'
 import React from 'react'
-import useUser from '../hooks/useUser'
+import useUser from '../../hooks/useUser'
 
 const stylesInUse = makeStyles(() =>
   createStyles({

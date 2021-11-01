@@ -1,6 +1,6 @@
 import React from 'react'
 
-import Editor from './Editor'
+import Editor from './editView/Editor'
 
 import { MockedProvider } from '@apollo/client/testing'
 
@@ -9,7 +9,7 @@ import { render, cleanup } from '@testing-library/react'
 // these bypass errors with mockedprovider component running out of mocks.
 // better definitely exist, for example giving the mocked responses by hand
 jest.mock('../hooks/useUser', () => () => ({ user: 'test', loading: false }))
-jest.mock('./ServiceConnected', () => () => <div />)
+jest.mock('./editView/ServiceConnected', () => () => <div />)
 
 const unConflictedContent =
   'just\n' + 'normal\n' + 'unconflicted\n' + 'content\n'
