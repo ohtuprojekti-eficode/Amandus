@@ -16,14 +16,15 @@ import { relative } from 'path'
 import { AppContext } from '../types/user'
 import { BranchSwitchArgs, SaveArgs } from '../types/params'
 import { RepoState } from '../types/repoState'
-import { getRepoLocationFromUrlString, getServiceTokenFromAppContext, getServiceNameFromUrlString, writeToFile } from '../utils/utils'
-import { getBitbucketRepoList, getGitHubRepoList, getGitLabRepoList } from '../services/commonServices'
-import { Repo } from '../types/repo'
 import {
-  parseGithubRepositories,
-  parseBitbucketRepositories,
-  parseGitlabRepositories
+  getRepoLocationFromUrlString,
+  getServiceTokenFromAppContext,
+  getServiceNameFromUrlString,
+  writeToFile
 } from '../utils/utils'
+import { parseServiceRepositories } from '../utils/parsers'
+import { getRepoList } from '../services/commonServices'
+import { Repository } from '../types/repository'
 import { ServiceName } from '../types/service'
 import { File } from '../types/file'
 
@@ -45,7 +46,7 @@ const typeDef = `
       commitMessage: String!
       service: String!
     }
-    type Repo {
+    type Repository {
       id: String!
       name: String!
       full_name: String!
@@ -72,7 +73,7 @@ const resolvers = {
       if (!existsSync(repoLocation)) {
 
         await cloneRepository(args.url, context.currentUser.username)
-      
+
       }
 
       return 'Cloned'
@@ -82,7 +83,7 @@ const resolvers = {
       args: { url: string },
       context: AppContext
     ): Promise<RepoState> => {
-      if(!args.url){
+      if (!args.url) {
         throw new Error('Repository url not provided')
       }
 
@@ -91,8 +92,8 @@ const resolvers = {
       const currentBranch = await getCurrentBranchName(repoLocation)
       const commitMessage = await getCurrentCommitMessage(repoLocation)
 
-      if(!service){
-        throw new Error('service missing!')
+      if (!service) {
+        throw new Error('Unable to parse service name, or service is unsupported.')
       }
 
       const filePaths = await readRecursive(repoLocation, ['.git'])
@@ -109,7 +110,7 @@ const resolvers = {
       _root: unknown,
       _args: unknown,
       context: AppContext
-    ): Promise<Repo[]> => {
+    ): Promise<Repository[]> => {
       if (!context.currentUser) {
         throw new ForbiddenError('You have to login')
       }
@@ -118,38 +119,25 @@ const resolvers = {
         throw new Error('User is not connected to any service')
       }
 
-      const repolist = await Promise.all(context.currentUser.services.map(
+      const allRepositories = await Promise.all(context.currentUser.services.map(
         async (service) => {
-          const token = getServiceTokenFromAppContext({service: service.serviceName as ServiceName, appContext: context})
-
-
-
-          let repolist: Repo[] = []
+          const token = getServiceTokenFromAppContext({
+            service: service.serviceName as ServiceName, appContext: context
+          })
 
           if (!token) {
-            return repolist
+            console.log(`Service token missing for service ${service.serviceName}`)
+            return []
           }
 
-          if (service.serviceName === 'github') {
-            const response = await getGitHubRepoList(service, token)
-            repolist = parseGithubRepositories(response)
+          const response = await getRepoList(service, token)
+          const serviceRepositories: Repository[] = parseServiceRepositories(response, service.serviceName)
 
-          } else if (service.serviceName === 'bitbucket') {
-            const response = await getBitbucketRepoList(service, token)
-            repolist = parseBitbucketRepositories(response)
-
-          } else if (service.serviceName === 'gitlab') {
-            const response = await getGitLabRepoList(service, token)
-            repolist = parseGitlabRepositories(response)
-          }
-
-          return repolist
+          return serviceRepositories
         }
       ))
 
-      const repos = repolist.flat()
-
-      return repos
+      return allRepositories.flat()
 
     },
   },
@@ -166,11 +154,11 @@ const resolvers = {
 
       try {
         await saveChanges(saveArgs, context)
-      } catch (error) {
-        if (error.message === 'Merge conflict') {
+      } catch (e) {
+        if ((e as Error).message === 'Merge conflict') {
           throw new ApolloError('Merge conflict detected')
         } else {
-          throw new ApolloError(error.message)
+          throw new ApolloError((e as Error).message)
         }
       }
 
@@ -187,8 +175,8 @@ const resolvers = {
 
       try {
         await saveMerge(saveArgs, context)
-      } catch (error) {
-        throw new ApolloError(error.message)
+      } catch (e) {
+        throw new ApolloError((e as Error).message)
       }
 
       return 'Merged successfully'
@@ -209,12 +197,11 @@ const resolvers = {
       const repoLocation = getRepoLocationFromUrlString(args.url, context.currentUser.username)
       try {
         await pullNewestChanges(repoLocation)
-      } catch (error) {
-        // In case of merge conflict
-        if (error.message === 'Merge conflict') {
+      } catch (e) {
+        if ((e as Error).message === 'Merge conflict') {
           throw new ApolloError('Merge conflict detected')
         } else {
-          throw new ApolloError(error.message)
+          throw new ApolloError((e as Error).message)
         }
       }
       return 'Pulled'

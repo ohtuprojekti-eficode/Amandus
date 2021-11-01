@@ -14,7 +14,7 @@ const Query = `
         getRepoState(url: String): RepoState!
         cloneRepository(url: String!): String
         currentToken: String
-        getRepoListFromService: [Repo]
+        getRepoListFromService: [Repository]
     },
 `
 
@@ -75,14 +75,9 @@ const Mutation = `
             url: String!
             branch: String!
         ): String
-        authorizeWithGithub(
+        authorizeWithService(
             code: String!
-        ): ServiceAuthResponse
-        authorizeWithBitbucket(
-            code: String!
-        ): ServiceAuthResponse
-        authorizeWithGitLab(
-            code: String!
+            service: String!
         ): ServiceAuthResponse
         pullRepository(url: String!): String
         deleteUser(username: String!): String

@@ -1,5 +1,5 @@
 import { File } from './file'
-import { ServiceUserType } from './user'
+import { ServiceUser } from './service'
 
 export interface SaveArgs {
   file: File
@@ -32,5 +32,5 @@ export interface LoginUserInput {
 }
 
 export interface AddServiceArgs {
-  service: ServiceUserType
+  service: ServiceUser
 }
