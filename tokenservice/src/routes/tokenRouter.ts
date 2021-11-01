@@ -9,8 +9,8 @@ const router = express.Router()
 router.post('/', (req, res) => {
   try {
     const { amandusToken, serviceName, serviceToken }: RequestParams = toValidRequest(req)
-    const addedToken = tokenService.setToken(amandusToken, serviceName, serviceToken)
-    res.json(addedToken)
+    tokenService.setToken(amandusToken, serviceName, serviceToken)
+    res.status(200).send()
   } catch (e) {
     res.status(400).send((e as Error).message)
   }
