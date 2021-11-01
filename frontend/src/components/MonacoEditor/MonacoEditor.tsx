@@ -69,7 +69,7 @@ const MonacoEditor = ({
 
   const classes = stylesInUse()
 
-  const [debouncedAutoSave, autosaving] = useAutoSave(filename, cloneUrl)
+  const [onEditorChange, autosaving] = useAutoSave(content, filename, cloneUrl)
 
   const { saveChanges, pullRepo, mutationSaveLoading, pullLoading } =
     useEditor(cloneUrl)
@@ -155,7 +155,7 @@ const MonacoEditor = ({
         theme={theme.palette.type === 'dark' ? 'vs-dark' : 'vs-light'}
         value={content}
         onMount={handleEditorDidMount}
-        onChange={debouncedAutoSave}
+        onChange={onEditorChange}
       />
       {
         // Updating the theme here so we override things set by <Editor>

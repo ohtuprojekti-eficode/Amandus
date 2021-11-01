@@ -1,81 +1,61 @@
-import { RepoStateQueryResult } from './../types'
-import { REPO_STATE } from './../graphql/queries'
-import { useMutation } from '@apollo/client/react/hooks/useMutation'
-import { useState } from 'react'
+import React from 'react'
 import { useDebouncedCallback } from 'use-debounce'
-import { SAVE_LOCALLY } from '../graphql/mutations'
+import useSave from './useSave'
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
-
-const useAutoSave = (filename: string, repoUrl: string) => {
-  // need to fetch debounce interval from useSettings here once merged, e.g
-  // const { interval } = useSettings()
-
-  const [saveLocally] = useMutation(SAVE_LOCALLY)
-  const [saving, setSaving] = useState(false)
+/**
+ * Autosaves changes when
+ *
+ * 1) not moving the cursor for the set interval
+ * 2) changing the file that is being edited
+ * 3) closing the tab or browser
+ *
+ * @param cacheContent content found in Apollo cache (not the editor!)
+ * @param filename name of the file being edited
+ * @param repoUrl repository url in backend
+ * @returns tuple with a change handler function to pass to the editor and a boolean whether a save is ongoing
+ */
+const useAutoSave = (
+  cacheContent: string,
+  filename: string,
+  repoUrl: string
+) => {
+  const [save, saving] = useSave()
 
   const interval = 1000
 
-  const callback = async (content: string | undefined) => {
-    if (content) {
-      setSaving(true)
+  const debouncedAutoSave = useDebouncedCallback(save, interval)
 
-      const startedSavingAt = Date.now()
+  // this keeps track of the current content in the editor
+  const contentRef = React.useRef(cacheContent)
 
-      try {
-        await saveLocally({
-          variables: {
-            file: {
-              name: filename,
-              content,
-            },
-          },
-          update: (cache) => {
-            const currentState = cache.readQuery<RepoStateQueryResult>({
-              query: REPO_STATE,
-              variables: {
-                repoUrl,
-              },
-            })
+  React.useEffect(() => {
+    // this is necessary to update the ref when changing the edited file
+    contentRef.current = cacheContent
 
-            if (!currentState) {
-              return
-            }
-
-            cache.writeQuery({
-              query: REPO_STATE,
-              variables: { repoUrl },
-              data: {
-                ...currentState,
-                repoState: {
-                  ...currentState.repoState,
-                  files: currentState.repoState.files.map((file) =>
-                    file.name === filename ? { ...file, content } : file
-                  ),
-                },
-              },
-            })
-          },
-        })
-      } catch (e) {
-        console.error('Error autosaving:', e)
-      } finally {
-        const timeElapsed = Date.now() - startedSavingAt
-
-        // Delay setting "saving" to false slightly.
-        // Without this the component indicating an ongoing save
-        // just flashes very quickly on screen.
-        // This makes it appear for at least 600 milliseconds
-        await sleep(600 - timeElapsed)
-
-        setSaving(false)
+    return () => {
+      // here we save when changing the edited file (if the content of the cache differs from the ref)
+      if (cacheContent !== contentRef.current) {
+        save(contentRef.current, filename, repoUrl)
       }
+    }
+  }, [filename, cacheContent, repoUrl, save])
+
+  React.useEffect(
+    // Cancels autosave when user changes the file that is being edited.
+    // Without this the new file can get overwritten with the old file's content
+    () => () => debouncedAutoSave.cancel(),
+    [filename, debouncedAutoSave]
+  )
+
+  const onEditorContentChange = (value: string | undefined) => {
+    if (value) {
+      // trigger the debounced autosave and update the ref
+      debouncedAutoSave(value, filename, repoUrl)
+      contentRef.current = value
     }
   }
 
-  const debouncedAutoSave = useDebouncedCallback(callback, interval)
-
-  return [debouncedAutoSave, saving] as const
+  return [onEditorContentChange, saving] as const
 }
 
 export default useAutoSave
