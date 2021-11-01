@@ -1,4 +1,3 @@
-import { useMutation } from '@apollo/client'
 import {
   Button,
   CircularProgress,
@@ -10,7 +9,6 @@ import {
 import Editor from '@monaco-editor/react'
 import { editor } from 'monaco-editor'
 import React, { useRef, useState } from 'react'
-import { SAVE_LOCALLY } from '../../graphql/mutations'
 import useSaveDialog from '../../hooks/useSaveDialog'
 import LatestCommit from '../LatestCommit'
 import SaveDialog from '../SaveDialog'
@@ -74,8 +72,6 @@ const MonacoEditor = ({
   const { saveChanges, pullRepo, mutationSaveLoading, pullLoading } =
     useEditor(cloneUrl)
 
-  const [saveLocally] = useMutation(SAVE_LOCALLY)
-
   const theme = useTheme()
 
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
@@ -120,18 +116,6 @@ const MonacoEditor = ({
         setWaitingToSave(false)
       }
     }
-  }
-
-  const handleLocalSave = () => {
-    editorRef.current &&
-      saveLocally({
-        variables: {
-          file: {
-            name: filename,
-            content: editorRef.current.getValue(),
-          },
-        },
-      })
   }
 
   const handlePull = async () => {
@@ -191,15 +175,6 @@ const MonacoEditor = ({
             Save
           </Button>
           <ServiceConnected service={currentService} />
-          <Button
-            style={{ marginLeft: 25 }}
-            color="secondary"
-            size="small"
-            variant="text"
-            onClick={handleLocalSave}
-          >
-            Save locally
-          </Button>
         </div>
         <LatestCommit commitMessage={commitMessage} />
         {autosaving && (
