@@ -1,5 +1,4 @@
-import { ContextTokens } from './../types/user'
-import { AccessTokenResponse, ServiceTokenType, ServiceName } from './../types/service'
+import { AccessTokenResponse, ServiceName } from './../types/service'
 import { verify } from 'jsonwebtoken'
 import config from '../utils/config'
 import { formatData, hasExpired } from '../utils/tokens'
@@ -23,26 +22,20 @@ const setToken = (
   tokenStorage.set(userId, tokenMap)
 }
 
+const removeToken = (userId: number, service: ServiceName): void => {
+  const tokenMap = getTokenMapById(userId)
+
+  if (tokenMap) {
+    tokenMap.delete(service)
+  }
+}
+
 const getTokenMap = (amandusToken: string): TokenMap | null => {
   // if refactored as an idependent service, this version should be used.
   // for now it is ok to allow fetching with user id
   const decodedToken = <UserJWT>verify(amandusToken, config.JWT_SECRET)
 
   return tokenStorage.get(decodedToken.id) ?? null
-}
-
-const getTokensForApolloContext = (amandusToken: string): ContextTokens => {
-  const tokenMap = getTokenMap(amandusToken)
-
-  const contextTokens: ContextTokens = {}
-
-  if (tokenMap) {
-    for (const [service, data] of tokenMap) {
-      contextTokens[`${service}Token` as ServiceTokenType] = data.access_token
-    }
-  }
-
-  return contextTokens
 }
 
 const getTokenMapById = (userId: number): TokenMap | null => {
@@ -81,8 +74,9 @@ const getAccessTokenByServiceAndId = async (
         setToken(userId, service, newData)
         return newData.access_token
       } catch (e) {
-        // remove token?
         console.log(e)
+        removeToken(userId, service)
+        return null
       }
     }
 
@@ -122,9 +116,9 @@ const clearStorage = (): void => {
 
 export default {
   setToken,
+  removeToken,
   getTokenMap,
   getTokenMapById,
-  getTokensForApolloContext,
   getServiceDetails,
   clearStorage,
   getAccessTokenByServiceAndId,
