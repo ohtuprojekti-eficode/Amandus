@@ -1,6 +1,6 @@
 import { useMutation } from '@apollo/client'
-import { SAVE_MERGE } from '../../graphql/mutations'
-import { REPO_STATE } from '../../graphql/queries'
+import { SAVE_MERGE } from '../../../graphql/mutations'
+import { REPO_STATE } from '../../../graphql/queries'
 import useMergeCodeLens from './useMergeCodeLens'
 import useMergeConflictDetector from './useMergeConflictDetector'
 

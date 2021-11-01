@@ -9,12 +9,12 @@ import {
 import Editor from '@monaco-editor/react'
 import { editor } from 'monaco-editor'
 import React, { useRef, useState } from 'react'
-import useSaveDialog from '../../hooks/useSaveDialog'
+import useSaveDialog from '../../../hooks/useSaveDialog'
 import LatestCommit from '../LatestCommit'
 import SaveDialog from '../SaveDialog'
 import ServiceConnected from '../ServiceConnected'
 import useEditor from './useMonacoEditor'
-import useAutoSave from '../../hooks/useAutoSave'
+import useAutoSave from '../../../hooks/useAutoSave'
 
 interface Props {
   content: string

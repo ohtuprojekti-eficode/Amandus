@@ -1,6 +1,6 @@
 import { useMutation } from '@apollo/client'
-import { PULL_REPO, SAVE_CHANGES } from '../../graphql/mutations'
-import { REPO_STATE } from '../../graphql/queries'
+import { PULL_REPO, SAVE_CHANGES } from '../../../graphql/mutations'
+import { REPO_STATE } from '../../../graphql/queries'
 
 const useEditor = (cloneUrl: string) => {
   const [saveChanges, { loading: mutationSaveLoading }] = useMutation(

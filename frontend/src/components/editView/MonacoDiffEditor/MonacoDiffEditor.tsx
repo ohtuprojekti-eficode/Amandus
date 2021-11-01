@@ -2,12 +2,12 @@ import { Button, createStyles, makeStyles, useTheme } from '@material-ui/core'
 import { DiffEditor, Monaco } from '@monaco-editor/react'
 import { editor } from 'monaco-editor'
 import React, { useRef, useState } from 'react'
-import useUser from '../../hooks/useUser'
+import useUser from '../../../hooks/useUser'
 import LatestCommit from '../LatestCommit'
 import MergeDialog from '../MergeDialog'
 import ServiceConnected from '../ServiceConnected'
 import useDiffEditor from './useDiffEditor'
-import useSaveDialog from '../../hooks/useSaveDialog'
+import useSaveDialog from '../../../hooks/useSaveDialog'
 
 interface Props {
   original: string
