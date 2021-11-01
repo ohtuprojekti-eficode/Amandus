@@ -1,37 +1,34 @@
-import tokens from '../../data/tokens'
-import { IdTokenPair } from '../types'
+import { verify } from 'jsonwebtoken'
+import { UserJWT } from '../types'
+import { ServiceName } from '../types'
+import config from '../utils/config'
 
-const getTokens = (): IdTokenPair[] => {
-  return tokens
+type TokenMap = Map<ServiceName, string>
+
+const tokenStorage = new Map<number, TokenMap>()
+
+const setToken = (
+  amandusToken: string,
+  service: ServiceName,
+  token: string
+): void => {
+
+  const decodedToken = <UserJWT>verify(amandusToken, config.JWT_SECRET)
+  const tokenMap: TokenMap =
+    tokenStorage.get(decodedToken.id) ?? new Map<ServiceName, string>()
+
+  tokenMap.set(service, token)
+
+  tokenStorage.set(decodedToken.id, tokenMap)
 }
 
-const findById = (id: number): string | undefined => {
-  const token = tokens.find(t => t.id === id)?.token
-
-  return token
+const getTokenMap = (amandusToken: string): TokenMap | null => {
+  const decodedToken = <UserJWT>verify(amandusToken, config.JWT_SECRET)
+  return tokenStorage.get(decodedToken.id) ?? null
 }
 
-const addToken = (
-  { id, token }: IdTokenPair
-): IdTokenPair => {
-
-  const newToken = {
-    id: id,
-    token: token
-  }
-
-  tokens.push(newToken)
-  return newToken
-}
-
-const removeToken = (id: number) => {
-  console.log(`removing token ${id}`)
-  return null
-}
 
 export default {
-  getTokens,
-  addToken,
-  findById,
-  removeToken
+  setToken,
+  getTokenMap
 }
