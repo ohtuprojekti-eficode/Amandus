@@ -1,6 +1,7 @@
 import { makeExecutableSchema } from 'graphql-tools'
 import repository from './repository'
 import user from './user'
+import settings from './settings'
 
 const Query = `
     type Query {
@@ -15,6 +16,7 @@ const Query = `
         cloneRepository(url: String!): String
         currentToken: String
         getRepoListFromService: [Repo]
+        getSettings: Settings! 
     },
 `
 
@@ -90,8 +92,8 @@ const Mutation = `
 `
 
 const rootSchema = makeExecutableSchema({
-  typeDefs: [Query, Mutation, user.typeDef, repository.typeDef],
-  resolvers: [user.resolvers, repository.resolvers],
+  typeDefs: [Query, Mutation, user.typeDef, repository.typeDef, settings.typeDef],
+  resolvers: [user.resolvers, repository.resolvers, settings.resolvers],
 })
 
 export default rootSchema

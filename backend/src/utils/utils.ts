@@ -9,9 +9,15 @@ import { ServiceName, ServiceTokenType } from '../types/service'
 import { AppContext } from '../types/user'
 
 import { Repo, GitHubRepoListResponse, BitbucketRepoListResponse, GitLabRepoListResponse } from '../types/repo'
+import { SettingsObject } from '../types/settings'
 
 const execProm = promisify(exec)
-
+/*
+export const getSettings = async (): Promise<SettingsObject> => {
+  const settings = await getSettings() 
+  return settings 
+}
+*/
 export const validateBranchName = async (branchName: string): Promise<void> => {
   await runShellCommand(`git check-ref-format --branch ${branchName}`)
 }

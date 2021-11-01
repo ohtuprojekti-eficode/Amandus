@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-import { Switch, TextField } from '@material-ui/core'
+import { Switch, TextField, Button } from '@material-ui/core'
 import { UserType } from '../types'
 import useSettings from '../hooks/useSettings'
 
@@ -8,44 +8,19 @@ interface Props {
   user: UserType | undefined
 }
 
-interface pluginListObject { 
+interface pluginObject { 
   name: string; 
   active: boolean; 
 }
 
-interface settingsListObject { 
+interface settingsObject { 
   name: string; 
   value: boolean | number; 
   unit: string | undefined; 
 }
 
-const SettingsListObject = ({ name, value, unit }: settingsListObject ) => {
-  
-  const [fieldValue, setFieldValue] = useState(value)
-  
-  const handleFieldValueChange= () => {
-    setFieldValue(value)
-  }
-  
-  return (
-    <div>
-      <b>{name}</b>
-      <TextField
-        id={name + "-toggle"}
-        name={name + "-toggle"}
-        type="number"
-        color="primary"
-        onChange={handleFieldValueChange}
-        defaultValue={fieldValue}
-        inputProps={{ 'aria-label': 'primary checkbox' }}
-      />
-      {unit}
-    </div>
-  )
-}
 
-
-const PluginListObject = ({ name, active }: pluginListObject ) => {
+const PluginObject = ({ name, active }: pluginObject ) => {
 
   const [switchChecked, setSwitchChecked] = useState(active)
 
@@ -69,31 +44,54 @@ const PluginListObject = ({ name, active }: pluginListObject ) => {
   )
 }
 
-
-const PluginList = () => {
+const SettingsObject = ({ name, value, unit }: settingsObject ) => {
   
-  const settings = useSettings().data
-
+  const [fieldValue, setFieldValue] = useState(value)
+  
+  const handleFieldValueChange = () => {
+    setFieldValue(value)
+  }
+  
   return (
     <div>
-      {settings.plugins.map(p => 
-        <PluginListObject key={p.name} name={p.name} active={p.active} /> 
-      )}
+      <b>{name}</b>
+      <TextField
+        id={name + "-toggle"}
+        name={name + "-toggle"}
+        type="number"
+        color="primary"
+        onChange={handleFieldValueChange}
+        defaultValue={fieldValue}
+        inputProps={{ 'aria-label': 'primary checkbox' }}
+      />
+      {unit}
     </div>
-  ) 
+  )
 }
 
-const SettingsList = () => {
+// @ts-ignore
+const SettingsList = ({ settings }) => {
   
-  const settings = useSettings().data
-
   return (
     <div>
-      <table>
-        {settings.misc.map(m => 
-          <SettingsListObject key={m.name} name={m.name} value={m.value} unit={m.unit} /> 
+
+      {settings.misc.map((m: settingsObject) => 
+        <SettingsObject 
+          key={m.name} 
+          name={m.name} 
+          value={m.value} 
+          unit={m.unit} 
+        /> 
        )}
-      </table>
+
+      {settings.plugins.map((p: pluginObject) => 
+        <PluginObject 
+          key={p.name} 
+          name={p.name} 
+          active={p.active} 
+        /> 
+      )}
+
     </div>
   )
 }
@@ -111,17 +109,32 @@ const SettingsPage = ({ user }: Props) => {
   }
 */
 
+  const handleSave = () => {
+    console.log('aaa')
+//  const [saveSettings] = useMutation(SAVE_SETTINGS)
+  }
+
+
+  const settings = useSettings()
+  console.log('spage, settings', settings)
+
+
   return (
     <div >
       <h1> Admins only. </h1>
 
-      <h2> Misc Settings </h2>
-      <SettingsList /> 
+      <SettingsList settings={settings}/> 
       
-      <h2> Plugins </h2>
-      <PluginList />
-
-
+      <Button 
+        id="save-settings-button"
+        name="save-settings-button"
+        variant="contained" 
+        onClick={handleSave}
+        color="primary"
+        >
+          Save settings
+      </Button>
+      
       </div>
   )
 }

@@ -1,13 +1,21 @@
+import content from './utils/settings.json'
+
+export const DEFAULT_SETTINGS2 = {
+  content 
+}
+
+export const DEFAULT_SETTINGS = 
 {
     "misc": [
         {
             "name": "Autosave Interval",
-            "value": 1000 ,
+            "value": 1000,
             "unit": "ms"
         },
         {
             "name": "Autodelete Interval",
-            "value": 1000 
+            "value": 1000,
+            "unit": "ms"
         }
     ],
 

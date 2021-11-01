@@ -87,3 +87,19 @@ export const GET_REPO_LIST = gql`
     }
   }
 `
+
+export const DEFAULT_SETTINGS = gql`
+  query {
+    getSettings {
+      misc {
+        name, 
+        value, 
+        unit
+      }
+      plugins {
+        name,
+        active
+      }
+    }
+  }
+`

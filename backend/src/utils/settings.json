@@ -2,12 +2,13 @@
     "misc": [
         {
             "name": "Autosave Interval",
-            "value": 1000 ,
+            "value": 1000,
             "unit": "ms"
         },
         {
             "name": "Autodelete Interval",
-            "value": 1000 
+            "value": 1000,
+            "unit": "ms"
         }
     ],
 
