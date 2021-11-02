@@ -88,7 +88,7 @@ export const GET_REPO_LIST = gql`
   }
 `
 
-export const DEFAULT_SETTINGS = gql`
+export const GET_SETTINGS = gql`
   query {
     getSettings {
       misc {

@@ -1,26 +1,48 @@
 import React, { useState } from 'react'
 
-import { Switch, TextField, Button } from '@material-ui/core'
-import { UserType } from '../types'
+import { 
+  Switch, 
+  TextField, 
+  Button } from '@material-ui/core'
+
+import { 
+  SettingsObject, 
+  MiscSettingObject, 
+  PluginSettingObject,
+  UserType } from '../types'
+
 import useSettings from '../hooks/useSettings'
 
 interface Props {
   user: UserType | undefined
 }
 
-interface pluginObject { 
-  name: string; 
-  active: boolean; 
+const MiscObject = ({ name, value, unit }: MiscSettingObject) => {
+  
+  const [fieldValue, setFieldValue] = useState(value)
+  
+  const handleFieldValueChange = () => {
+    setFieldValue(value)
+  }
+  
+  return (
+    <div>
+      <b>{name}</b>
+      <TextField
+        id={name + "-toggle"}
+        name={name + "-toggle"}
+        type="number"
+        color="primary"
+        onChange={handleFieldValueChange}
+        defaultValue={fieldValue}
+        inputProps={{ 'aria-label': 'primary checkbox' }}
+        />
+      {unit}
+    </div>
+  )
 }
 
-interface settingsObject { 
-  name: string; 
-  value: boolean | number; 
-  unit: string | undefined; 
-}
-
-
-const PluginObject = ({ name, active }: pluginObject ) => {
+const PluginObject = ({ name, active }: PluginSettingObject) => {
 
   const [switchChecked, setSwitchChecked] = useState(active)
 
@@ -44,39 +66,26 @@ const PluginObject = ({ name, active }: pluginObject ) => {
   )
 }
 
-const SettingsObject = ({ name, value, unit }: settingsObject ) => {
-  
-  const [fieldValue, setFieldValue] = useState(value)
-  
-  const handleFieldValueChange = () => {
-    setFieldValue(value)
-  }
-  
-  return (
-    <div>
-      <b>{name}</b>
-      <TextField
-        id={name + "-toggle"}
-        name={name + "-toggle"}
-        type="number"
-        color="primary"
-        onChange={handleFieldValueChange}
-        defaultValue={fieldValue}
-        inputProps={{ 'aria-label': 'primary checkbox' }}
-      />
-      {unit}
-    </div>
-  )
-}
+/* A deconstructured version of SettingsList props. All this to avoid the word 'settings' twice and importing the settingsobject interface. May be useful if more setting types emerge. 
+const SettingsList = ({ 
+  settings: { 
+    misc,
+    plugins
+  } }: { 
+    settings: { 
+      misc: MiscSettingObject[],
+      plugins: PluginSettingObject[] 
+    }
+}) => { 
+*/
 
-// @ts-ignore
-const SettingsList = ({ settings }) => {
-  
+const SettingsList = ({settings}: SettingsObject ) => { 
+
   return (
     <div>
 
-      {settings.misc.map((m: settingsObject) => 
-        <SettingsObject 
+      {settings.misc.map((m: MiscSettingObject) => 
+        <MiscObject 
           key={m.name} 
           name={m.name} 
           value={m.value} 
@@ -84,7 +93,7 @@ const SettingsList = ({ settings }) => {
         /> 
        )}
 
-      {settings.plugins.map((p: pluginObject) => 
+      {settings.plugins.map((p: PluginSettingObject) => 
         <PluginObject 
           key={p.name} 
           name={p.name} 
@@ -109,21 +118,18 @@ const SettingsPage = ({ user }: Props) => {
   }
 */
 
-  const handleSave = () => {
-    console.log('aaa')
-//  const [saveSettings] = useMutation(SAVE_SETTINGS)
-  }
-
-
   const settings = useSettings()
-  console.log('spage, settings', settings)
+  
+  const handleSave = () => {
+    //  const [saveSettings] = useMutation(SAVE_SETTINGS)
+  }
 
 
   return (
     <div >
       <h1> Admins only. </h1>
 
-      <SettingsList settings={settings}/> 
+      <SettingsList settings={settings} /> 
       
       <Button 
         id="save-settings-button"

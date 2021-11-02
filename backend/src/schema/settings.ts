@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 //import { ForbiddenError, ApolloError, gql } from 'apollo-server'
-import { DEFAULT_SETTINGS } from '../constants'
+import { SETTINGS } from '../constants'
 import { SettingsObject } from '../types/settings'
 
 const typeDef = `
@@ -24,8 +24,7 @@ const resolvers = {
     getSettings: (
       _root: unknown,
     ): SettingsObject => {
-      const settings: SettingsObject = DEFAULT_SETTINGS
-      return settings 
+      return <SettingsObject> SETTINGS.content
     },
   },
 

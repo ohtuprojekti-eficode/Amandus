@@ -1,13 +1,4 @@
-//import { DEFAULT_SETTINGS } from './constants'
-
-import { useQuery } from '@apollo/client'
+import { DEFAULT_SETTINGS } from './constants'
 import React from 'react'
-import { DEFAULT_SETTINGS } from './graphql/queries'
 
-export const SettingsContext = () => {
-
-    const {data: settings} = useQuery(DEFAULT_SETTINGS)
-    return (
-        React.createContext(settings)
-    )
-} 
+export const SettingsContext = React.createContext(DEFAULT_SETTINGS)

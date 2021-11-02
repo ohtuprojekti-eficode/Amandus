@@ -35,13 +35,11 @@ export interface MeQueryResult {
   me: UserType
 }
 
-export interface SettingsQueryResult {
-  response: SettingsObject 
-}
-
 export interface SettingsObject {
-  misc: MiscSettingObject[];
-  plugins: PluginSettingObject[];
+  settings: {
+    misc: MiscSettingObject[];
+    plugins: PluginSettingObject[];
+  }
 }
 
 export interface MiscSettingObject {
