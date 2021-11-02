@@ -31,24 +31,6 @@ describe('token service (credential store)', () => {
 
       expect(tokenMap?.get('github')?.access_token).toBe('ghtoken')
     })
-
-    it('should return tokens formatted for apollo context with getTokensForApolloContext', () => {
-      const token1 = { access_token: 'ghtoken' }
-      const token2 = { access_token: 'gitlabtoken' }
-      const token3 = { access_token: 'bitbuckettoken' }
-
-      tokenService.setToken(1, 'github', token1)
-      tokenService.setToken(1, 'gitlab', token2)
-      tokenService.setToken(1, 'bitbucket', token3)
-
-      const contextTokens = tokenService.getTokensForApolloContextById(1)
-
-      expect(contextTokens).toEqual({
-        githubToken: 'ghtoken',
-        gitlabToken: 'gitlabtoken',
-        bitbucketToken: 'bitbuckettoken',
-      })
-    })
   })
 
   describe('with amandus token', () => {
@@ -71,7 +53,7 @@ describe('token service (credential store)', () => {
 
       expect(tokenMap?.get('github')?.access_token).toBe('ghtoken')
     })
-
+    /*
     it('should return tokens formatted for apollo context with getTokensForApolloContext', () => {
       const token1 = { access_token: 'ghtoken' }
       const token2 = { access_token: 'gitlabtoken' }
@@ -89,5 +71,6 @@ describe('token service (credential store)', () => {
         bitbucketToken: 'bitbuckettoken',
       })
     })
+    */
   })
 })

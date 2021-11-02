@@ -16,7 +16,7 @@ describe('Bitbucket API', () => {
 
   it('requestBitbucketUser returns correct access_token, username, reposurl and email from mock', async () => {
     const bitbucketUser = await requestBitbucketUser('123code321')
-    expect(bitbucketUser.access_token).toBe('immatokenlol')
+    expect(bitbucketUser.response.access_token).toBe('immatokenlol')
     expect(bitbucketUser.serviceUser.username).toBe('elvis')
     expect(bitbucketUser.serviceUser.reposurl).toBe('https://api.bitbucket.org/2.0/repositories/elvis')
     expect(bitbucketUser.serviceUser.email).toBe('elvis@detroit.us')
@@ -30,7 +30,7 @@ describe('Gitlab API', () => {
 
   it('requestGitlabUser returns correct access_token, username and email from mock', async () => {
     const gitlabUser = await requestGitLabUser('123code321')
-    expect(gitlabUser.access_token).toBe('immatokenlol')
+    expect(gitlabUser.response.access_token).toBe('immatokenlol')
     expect(gitlabUser.serviceUser.username).toBe('elvis')
     expect(gitlabUser.serviceUser.email).toBe('elvis@detroit.us')
   })
@@ -48,7 +48,7 @@ describe('Github API', () => {
 
   it('requestGithubUser returns correct access_token, username, reposurl and email from mock', async () => {
     const githubUser = await requestGithubUser('123code321')
-    expect(githubUser.access_token).toBe('immatokenlol')
+    expect(githubUser.response.access_token).toBe('immatokenlol')
     expect(githubUser.serviceUser.username).toBe('elvis')
     expect(githubUser.serviceUser.email).toBe('elvis@detroit.us')
     expect(githubUser.serviceUser.reposurl).toBe('https://api.github.com/elvis/repos')

@@ -33,12 +33,6 @@ const ME = gql`
   }
 `
 
-const GH_TOKEN = gql`
-  query {
-    currentToken
-  }
-`
-
 const IS_GH_CONNECTED = gql`
   query {
     isGithubConnected
@@ -542,74 +536,6 @@ describe('Context currentuser query', () => {
           email: adminUserToSave.email,
           services: null,
         },
-      },
-    })
-  })
-})
-
-describe('Context githubToken query', () => {
-  beforeEach(async () => {
-    await User.deleteAll()
-  })
-
-  it('no token is returned when set', async () => {
-    const userToSave = {
-      username: 'testuser',
-      password: 'mypAssword?45',
-      email: 'test@test.fi',
-    }
-
-    const user = await User.registerUser(userToSave)
-
-    const tokens = createTokens(user)
-
-    const { query } = createIntegrationTestClient({
-      apolloServer: server,
-      extendMockRequest: {
-        headers: {
-          'x-access-token': tokens.accessToken,
-          'x-refresh-token': tokens.refreshToken,
-        },
-      },
-    })
-
-    const queryResult = await query(GH_TOKEN)
-
-    expect(queryResult).toEqual({
-      data: {
-        currentToken: null,
-      },
-    })
-  })
-
-  it('correct token is returned when set', async () => {
-    const userToSave = {
-      username: 'testuser',
-      password: 'mypAssword?45',
-      email: 'test@test.fi',
-    }
-
-    const user = await User.registerUser(userToSave)
-
-    tokenService.setToken(user.id, 'github', { access_token: 'githubtoken123' })
-
-    const tokens = createTokens(user)
-
-    const { query } = createIntegrationTestClient({
-      apolloServer: server,
-      extendMockRequest: {
-        headers: {
-          'x-access-token': tokens.accessToken,
-          'x-refresh-token': tokens.refreshToken,
-        },
-      },
-    })
-
-    const queryResult = await query(GH_TOKEN)
-
-    expect(queryResult).toEqual({
-      data: {
-        currentToken: 'githubtoken123',
       },
     })
   })
