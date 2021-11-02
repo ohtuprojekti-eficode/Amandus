@@ -1,4 +1,4 @@
-export type ServiceName = 'github' | 'bitbucket' | 'gitlab' 
+export type ServiceName = 'github' | 'bitbucket' | 'gitlab'
 
 export interface UserJWT {
   id: number
@@ -8,8 +8,21 @@ export interface UserJWT {
   gitlabToken?: string
 }
 
-export interface RequestParams {
+export interface PostRequestParams {
   amandusToken: string
   serviceName: ServiceName
-  serviceToken: string
+  serviceToken: AccessTokenResponse
+}
+
+export interface GetRequestParams {
+  amandusToken: string
+  serviceName: ServiceName
+}
+
+export interface AccessTokenResponse {
+  access_token: string
+  token_type?: string
+  refresh_token?: string
+  expires_in?: number
+  created_at?: number
 }
