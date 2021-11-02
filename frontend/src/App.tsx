@@ -3,11 +3,7 @@ import { Route } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
 import { ME } from './graphql/queries'
 import Home from './components/Home'
-<<<<<<< HEAD
 import EditView from './components/editView/EditView'
-=======
-import EditView from './components/EditView/EditView'
->>>>>>> 608e904b4201ffa475c77b673ffe13d36e17a477
 import Header from './components/Header'
 import RegisterForm from './components/RegisterForm'
 import { CssBaseline, Toolbar } from '@material-ui/core'
