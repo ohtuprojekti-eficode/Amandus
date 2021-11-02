@@ -15,8 +15,7 @@ import SaveDialog from '../SaveDialog'
 import ServiceConnected from '../ServiceConnected'
 import useEditor from './useMonacoEditor'
 import useAutoSave from '../../../hooks/useAutoSave'
-import { useMutation } from '@apollo/client'
-import { COMMIT_CHANGES } from '../../../graphql/mutations'
+import PullDialog from '../PullDialog'
 
 interface Props {
   content: string
@@ -67,11 +66,13 @@ const MonacoEditor = ({
     handleDialogOpen,
   } = useSaveDialog()
 
+  const pullProps = useSaveDialog()
+
   const classes = stylesInUse()
 
   const [onEditorChange, autosaving] = useAutoSave(content, filename, cloneUrl)
 
-  const { saveChanges, pullRepo, mutationSaveLoading, pullLoading } =
+  const { saveChanges, pullRepo, mutationSaveLoading, pullLoading, commitChanges } =
     useEditor(cloneUrl)
 
   const theme = useTheme()
@@ -127,22 +128,22 @@ const MonacoEditor = ({
       if (error instanceof Error &&
         error.message.includes('Please commit your changes or stash them before you merge')
         ) {
-        //TODO handle error, suggest commit
-        console.error('error pulling', error.message)
+          pullProps.setDialogError({
+            title: 'Error Pulling',
+            message: error.message
+          })
+        pullProps.handleDialogOpen()
       }
-      console.error('error pulling', error.message)
-
     }
   }
 
-  const [commitChanges] = useMutation(COMMIT_CHANGES) 
-
   const handleCommit = async () => {
-    commitChanges({
+    await commitChanges({
       variables: {
         url:  cloneUrl 
       }
     })
+    pullProps.handleDialogClose()
   }
 
   return (
@@ -171,7 +172,12 @@ const MonacoEditor = ({
         error={dialogError}
         waitingToSave={waitingToSave}
       />
-
+      <PullDialog 
+        open={pullProps.dialogOpen}
+        handleClose={pullProps.handleDialogClose}
+        handleSubmit={handleCommit}
+        error={pullProps.dialogError}
+      />
       <div className={classes.saveGroup}>
         <div className={classes.buttonAndStatus}>
           <Button
