@@ -16,7 +16,10 @@ const nodeFetchMock =
       case 'https://github.com/login/oauth/access_token':
       case 'https://gitlab.com/oauth/token':
       case 'https://bitbucket.org/site/oauth2/access_token':
-        return toFetchResponse({ access_token: "immatokenlol" })
+        return toFetchResponse({
+          access_token: "immatokenlol",
+          refresh_token: "immarefreshtokenlol"
+        })
 
       case 'https://api.github.com/user':
         return toFetchResponse(

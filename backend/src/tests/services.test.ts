@@ -14,9 +14,10 @@ describe('Bitbucket API', () => {
     jest.clearAllMocks()
   })
 
-  it('requestBitbucketUser returns correct access_token, username, reposurl and email from mock', async () => {
+  it('requestBitbucketUser returns correct access_token, refresh_token, username, reposurl and email from mock', async () => {
     const bitbucketUser = await requestBitbucketUser('123code321')
     expect(bitbucketUser.response.access_token).toBe('immatokenlol')
+    expect(bitbucketUser.response.refresh_token).toBe('immarefreshtokenlol')
     expect(bitbucketUser.serviceUser.username).toBe('elvis')
     expect(bitbucketUser.serviceUser.reposurl).toBe('https://api.bitbucket.org/2.0/repositories/elvis')
     expect(bitbucketUser.serviceUser.email).toBe('elvis@detroit.us')
@@ -28,9 +29,10 @@ describe('Gitlab API', () => {
     jest.clearAllMocks()
   })
 
-  it('requestGitlabUser returns correct access_token, username and email from mock', async () => {
+  it('requestGitlabUser returns correct access_token, refresh_token username and email from mock', async () => {
     const gitlabUser = await requestGitLabUser('123code321')
     expect(gitlabUser.response.access_token).toBe('immatokenlol')
+    expect(gitlabUser.response.refresh_token).toBe('immarefreshtokenlol')
     expect(gitlabUser.serviceUser.username).toBe('elvis')
     expect(gitlabUser.serviceUser.email).toBe('elvis@detroit.us')
   })
