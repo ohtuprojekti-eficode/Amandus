@@ -24,3 +24,5 @@ export interface AccessTokenResponse {
   expires_in?: number
   created_at?: number
 }
+
+export type TokenMap = Map<ServiceName, AccessTokenResponse>
