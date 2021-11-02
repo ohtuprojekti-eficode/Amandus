@@ -1,12 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-
 import { requestBitbucketUser } from "../services/bitbucket"
 import { requestGithubUser } from "../services/gitHub"
 import { requestGitLabUser } from "../services/gitLab"
 
-// import fetch from 'node-fetch'
+// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 jest.mock('node-fetch', () => require('./mocks/fetch'))
 
 describe('Bitbucket API', () => {
