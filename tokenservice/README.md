@@ -12,7 +12,7 @@ Requirements: Yarn
 
 ## Request formats  
 
-All requests require a body with following json data:
+All requests require a body with corresponding json data:
 
 ```
 POST /api/tokens/{user_id}                   // Post new access token for user {user_id} 
