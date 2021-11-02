@@ -169,10 +169,21 @@ const refreshBitbucketToken = (
     })
 }
 
+const removeUser = (
+  amandusToken: string
+): void => {
+  const decodedToken = <UserJWT>verify(amandusToken, config.JWT_SECRET)
+  const result = tokenStorage.delete(decodedToken.id)
+
+  if (!result) {
+    throw new Error(`User removal unsuccessful: user not found`)
+  }
+}
 
 
 export default {
   setToken,
   getAccessToken,
-  removeToken
+  removeToken,
+  removeUser
 }

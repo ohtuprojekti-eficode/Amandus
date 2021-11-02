@@ -8,12 +8,12 @@ export interface UserJWT {
   gitlabToken?: string
 }
 
-export interface RequestParams {
+export interface RequestContent {
   amandusToken: string
   serviceName: ServiceName
 }
 
-export interface PostRequestParams extends RequestParams {
+export interface PostRequestContent extends RequestContent {
   serviceToken: AccessTokenResponse
 }
 
