@@ -6,9 +6,10 @@ import { toValidPostRequest, toValidRequest, toAmandusToken } from '../utils/val
 const router = express.Router()
 
 router.post('/:id', (req, res) => {
+  const id = Number(req.params.id)
+  const { amandusToken, serviceName, serviceToken }: PostRequestContent = toValidPostRequest(req)
+
   try {
-    const id = Number(req.params.id)
-    const { amandusToken, serviceName, serviceToken }: PostRequestContent = toValidPostRequest(req)
     tokenService.setToken(amandusToken, serviceName, serviceToken, id)
     res.status(200).send('new token set')
   } catch (e) {
@@ -42,6 +43,7 @@ router.delete('/:id/:service', (req, res) => {
 
 router.delete('/:id', (req, res) => {
   const id = Number(req.params.id)
+
   try {
     const amandusToken: string = toAmandusToken(req)
     tokenService.removeUser(amandusToken, id)

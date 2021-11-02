@@ -6,13 +6,13 @@ const PORT = process.env.PORT || 3002
 
 const JWT_SECRET = process.env.JWT_SECRET || 'changeme'
 
-const GITLAB_CLIENT_ID = 'glcid'
-const GITLAB_CLIENT_SECRET = 'glcsec'
-const GITLAB_CB_URL = 'gl_cb_url'
+const GITLAB_CLIENT_ID = process.env.GL_CLIENT_ID
+const GITLAB_CLIENT_SECRET = process.env.GL_CLIENT_SECRET
+const GITLAB_CB_URL = process.env.GL_CB_URL || 'http://localhost:3000/auth/gitlab/callback'
 
-const BITBUCKET_CLIENT_ID = 'bbcid'
-const BITBUCKET_CLIENT_SECRET = 'bbcsec'
-const BITBUCKET_CB_URL = 'bb_cb_url'
+const BITBUCKET_CLIENT_ID = process.env.BB_CLIENT_ID
+const BITBUCKET_CLIENT_SECRET = process.env.BB_CLIENT_SECRET
+const BITBUCKET_CB_URL = process.env.BB_CB_URL || 'http://localhost:3000/auth/bitbucket/callback'
 
 export default {
   PORT,

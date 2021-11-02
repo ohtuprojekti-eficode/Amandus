@@ -1,8 +1,13 @@
 import { verify } from 'jsonwebtoken'
-import { UserJWT } from '../types'
-import { ServiceName, AccessTokenResponse, TokenMap } from '../types'
 import { hasExpired, refreshToken } from '../utils/token'
 import config from '../utils/config'
+
+import {
+  UserJWT,
+  ServiceName,
+  AccessTokenResponse,
+  TokenMap
+} from '../types'
 
 const tokenStorage = new Map<number, TokenMap>()
 
