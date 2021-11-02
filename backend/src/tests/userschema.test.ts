@@ -366,17 +366,17 @@ describe('User schema add git service mutations', () => {
       serviceName: 'bitbucket',
       username: 'bitbucket_username',
       email: 'user@bitbucketmail.com',
-      reposurl: 'bitbucket.com/user/repos'
+      reposurl: 'bitbucket.com/user/repos',
     }
 
     const mutationResult = await mutate(ADD_SERVICE, {
-      variables: { service: serviceArgs }
+      variables: { service: serviceArgs },
     })
 
     expect(mutationResult).toEqual({
       data: {
-        connectGitService: 'success'
-      }
+        connectGitService: 'success',
+      },
     })
   })
 })
@@ -484,7 +484,7 @@ describe('Context currentuser query', () => {
       username: 'testuser',
       password: 'mypAssword?45',
       email: 'test@test.fi',
-    } 
+    }
     const user = await User.registerUser(adminUserToSave)
     const tokens = createTokens(user)
 
@@ -517,7 +517,7 @@ describe('Context currentuser query', () => {
       username: 'testuser',
       password: 'mypAssword?45',
       email: 'test@test.fi',
-    } 
+    }
     const user = await User.registerAdmin(adminUserToSave)
     const tokens = createTokens(user)
 
@@ -591,7 +591,7 @@ describe('Context githubToken query', () => {
 
     const user = await User.registerUser(userToSave)
 
-    tokenService.setToken(user.id, 'github', 'githubtoken123')
+    tokenService.setToken(user.id, 'github', { access_token: 'githubtoken123' })
 
     const tokens = createTokens(user)
 
@@ -629,7 +629,7 @@ describe('isGithubConnected', () => {
 
     const user = await User.registerUser(userToSave)
     const frontendJWTs = createTokens(user)
-    tokenService.setToken(user.id, 'github', uuid())
+    tokenService.setToken(user.id, 'github', { access_token: uuid() })
 
     const { query } = createIntegrationTestClient({
       apolloServer: server,

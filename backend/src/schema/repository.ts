@@ -18,13 +18,13 @@ import { BranchSwitchArgs, SaveArgs } from '../types/params'
 import { RepoState } from '../types/repoState'
 import {
   getRepoLocationFromUrlString,
-  getServiceTokenFromAppContext,
   getServiceNameFromUrlString,
 } from '../utils/utils'
 import { parseServiceRepositories } from '../utils/parsers'
 import { getRepoList } from '../services/commonServices'
+import tokenService from '../services/token'
+
 import { Repository } from '../types/repository'
-import { ServiceName } from '../types/service'
 
 const typeDef = `
     type File {
@@ -117,10 +117,11 @@ const resolvers = {
 
       const allRepositories = await Promise.all(context.currentUser.services.map(
         async (service) => {
-          const token = getServiceTokenFromAppContext({
-            service: service.serviceName as ServiceName, appContext: context
-          })
-
+          const token = await tokenService.getAccessTokenByServiceAndId(
+            context.currentUser.id,
+            service.serviceName
+          )
+          
           if (!token) {
             console.log(`Service token missing for service ${service.serviceName}`)
             return []

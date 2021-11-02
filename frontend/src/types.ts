@@ -71,7 +71,7 @@ export interface Error {
 }
 
 export interface ServiceUser {
-  serviceName: string
+  serviceName: ServiceName
   username: string
   email: string | null
   reposurl: string

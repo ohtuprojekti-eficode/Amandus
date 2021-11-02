@@ -11,14 +11,8 @@ import {
   LoginUserInput,
   AddServiceArgs,
 } from '../types/params'
-import {
-  UserType,
-  AppContext,
-} from '../types/user'
-import {
-  ServiceAuthCode,
-  ServiceAuthResponse,
-} from '../types/service'
+import { UserType, AppContext } from '../types/user'
+import { ServiceAuthCode, ServiceAuthResponse } from '../types/service'
 
 import { Tokens } from '../types/tokens'
 
@@ -26,8 +20,13 @@ import tokenService from '../services/token'
 import { requestServiceUser } from '../services/commonServices'
 
 const typeDef = `
+    enum ServiceName {
+      github
+      bitbucket
+      gitlab
+    }
     type ServiceUser {
-      serviceName: String!
+      serviceName: ServiceName
       username: String!
       email: String
       reposurl: String!
@@ -55,21 +54,24 @@ const resolvers = {
       _args: unknown,
       context: AppContext
     ): boolean => {
-      return !!context.githubToken
+      return tokenService.isServiceConnected(context.currentUser.id, 'github')
     },
     isGitLabConnected: (
       _root: unknown,
       _args: unknown,
       context: AppContext
     ): boolean => {
-      return !!context.gitlabToken
+      return tokenService.isServiceConnected(context.currentUser.id, 'gitlab')
     },
     isBitbucketConnected: (
       _root: unknown,
       _args: unknown,
       context: AppContext
     ): boolean => {
-      return !!context.bitbucketToken
+      return tokenService.isServiceConnected(
+        context.currentUser.id,
+        'bitbucket'
+      )
     },
     githubLoginUrl: (): string => {
       const cbUrl = config.GITHUB_CB_URL || ''
@@ -158,7 +160,13 @@ const resolvers = {
 
       const serviceUserResponse = await requestServiceUser(service, args.code)
 
-      tokenService.setToken(context.currentUser.id, service, serviceUserResponse.access_token)
+      console.log(serviceUserResponse)
+
+      tokenService.setToken(
+        context.currentUser.id,
+        service,
+        serviceUserResponse.response
+      )
       const serviceUser = serviceUserResponse.serviceUser
       const tokens = createTokens(context.currentUser)
 
@@ -220,16 +228,13 @@ const resolvers = {
       const { username } = args
 
       if (!username) {
-        throw new UserInputError(
-          'User not valid'
-        )
+        throw new UserInputError('User not valid')
       }
       const user = await User.findUserByUsername(username)
       user?.id && tokenService.deleteTokenByUserId(user.id)
       await User.deleteUser(username)
-
-    }
-  }
+    },
+  },
 }
 
 export default {
