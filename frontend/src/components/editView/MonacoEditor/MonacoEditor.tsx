@@ -11,11 +11,11 @@ import { editor } from 'monaco-editor'
 import React, { useRef, useState } from 'react'
 import useSaveDialog from '../../../hooks/useSaveDialog'
 import LatestCommit from '../LatestCommit'
-import SaveDialog from '../SaveDialog'
+import SaveDialog from '../saveDialogs/SaveDialog'
 import ServiceConnected from '../ServiceConnected'
 import useEditor from './useMonacoEditor'
 import useAutoSave from '../../../hooks/useAutoSave'
-import PullDialog from '../PullDialog'
+import PullDialog from '../saveDialogs/PullDialog'
 
 interface Props {
   content: string
@@ -137,12 +137,14 @@ const MonacoEditor = ({
     }
   }
 
-  const handleCommit = async () => {
+  const handleCommit = async (commitMessage: string) => {
     await commitChanges({
       variables: {
-        url:  cloneUrl 
+        url:  cloneUrl,
+        commitMessage: commitMessage
       }
     })
+    await handlePull()
     pullProps.handleDialogClose()
   }
 
@@ -198,15 +200,6 @@ const MonacoEditor = ({
             Save
           </Button>
           <ServiceConnected service={currentService} />
-          <Button
-            style={{ marginLeft: 25 }}
-            color="secondary"
-            size="small"
-            variant="text"
-            onClick={handleCommit}
-          >
-            Commit
-          </Button>
         </div>
         <LatestCommit commitMessage={commitMessage} />
         {autosaving && (

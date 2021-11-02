@@ -86,7 +86,7 @@ export const SAVE_LOCALLY = gql`
 `
 
 export const COMMIT_CHANGES = gql`
-  mutation commitLocalChanges($url: String!) {
-    commitLocalChanges(url: $url) 
+  mutation commitLocalChanges($url: String!, $commitMessage: String) {
+    commitLocalChanges(url: $url, commitMessage: $commitMessage) 
   }
 `

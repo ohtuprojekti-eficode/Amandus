@@ -90,6 +90,7 @@ const Mutation = `
         ): String
         commitLocalChanges(
             url: String!
+            commitMessage: String
         ): String
     }
 `

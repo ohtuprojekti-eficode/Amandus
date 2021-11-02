@@ -15,7 +15,7 @@ import readRecursive from 'recursive-readdir'
 import { ForbiddenError, ApolloError } from 'apollo-server'
 import { relative } from 'path'
 import { AppContext } from '../types/user'
-import { BranchSwitchArgs, SaveArgs } from '../types/params'
+import { BranchSwitchArgs, CommitArgs, SaveArgs } from '../types/params'
 import { RepoState } from '../types/repoState'
 import {
   getRepoLocationFromUrlString,
@@ -221,13 +221,13 @@ const resolvers = {
     },
     commitLocalChanges: async (
       _root: unknown,
-      args: { url: string },
+      args: CommitArgs,
       context: AppContext
     ): Promise<string> => {
       const repoLocation = getRepoLocationFromUrlString(args.url, context.currentUser.username)
-      
+      console.log('urli ', args.url)
       try {
-        await addAndCommitLocal(repoLocation, context)
+        await addAndCommitLocal(repoLocation, args.commitMessage, context)
       } catch (e) {
         throw new ApolloError((e as Error).message)
       }
