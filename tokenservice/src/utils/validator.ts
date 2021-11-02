@@ -2,7 +2,7 @@
 import { Request } from 'express'
 import {
   PostRequestParams,
-  GetRequestParams,
+  RequestParams,
   ServiceName,
   AccessTokenResponse
 } from '../types'
@@ -73,13 +73,13 @@ const toValidPostRequest = (
   return validRequest
 }
 
-const toValidGetRequest = (
+const toValidRequest = (
   req: Request
-): GetRequestParams => {
+): RequestParams => {
 
   const body = req.body as RequestBody
 
-  const validRequest: GetRequestParams = {
+  const validRequest: RequestParams = {
     amandusToken: parseAmandusToken(body.amandusToken),
     serviceName: parseServiceName(body.serviceName)
   }
@@ -89,5 +89,5 @@ const toValidGetRequest = (
 
 export {
   toValidPostRequest,
-  toValidGetRequest
+  toValidRequest
 }

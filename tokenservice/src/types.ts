@@ -8,15 +8,13 @@ export interface UserJWT {
   gitlabToken?: string
 }
 
-export interface PostRequestParams {
+export interface RequestParams {
   amandusToken: string
   serviceName: ServiceName
-  serviceToken: AccessTokenResponse
 }
 
-export interface GetRequestParams {
-  amandusToken: string
-  serviceName: ServiceName
+export interface PostRequestParams extends RequestParams {
+  serviceToken: AccessTokenResponse
 }
 
 export interface AccessTokenResponse {

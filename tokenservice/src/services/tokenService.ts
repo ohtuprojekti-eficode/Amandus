@@ -70,9 +70,12 @@ const removeToken = (
 ): void => {
   const tokenMap = getTokenMap(amandusToken)
 
-  if (tokenMap) {
-    tokenMap.delete(service)
+  const result = tokenMap?.delete(service)
+
+  if (!result) {
+    throw new Error('removal unsuccessful: token or service not found')
   }
+
 }
 
 const refreshToken = async (
@@ -170,5 +173,6 @@ const refreshBitbucketToken = (
 
 export default {
   setToken,
-  getAccessToken
+  getAccessToken,
+  removeToken
 }
