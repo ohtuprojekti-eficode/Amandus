@@ -15,6 +15,8 @@ import SaveDialog from '../SaveDialog'
 import ServiceConnected from '../ServiceConnected'
 import useEditor from './useMonacoEditor'
 import useAutoSave from '../../../hooks/useAutoSave'
+import { useMutation } from '@apollo/client'
+import { COMMIT_CHANGES } from '../../../graphql/mutations'
 
 interface Props {
   content: string
@@ -122,10 +124,25 @@ const MonacoEditor = ({
     try {
       await pullRepo({ variables: { repoUrl: cloneUrl } })
     } catch (error) {
-      if (error instanceof Error) {
+      if (error instanceof Error &&
+        error.message.includes('Please commit your changes or stash them before you merge')
+        ) {
+        //TODO handle error, suggest commit
         console.error('error pulling', error.message)
       }
+      console.error('error pulling', error.message)
+
     }
+  }
+
+  const [commitChanges] = useMutation(COMMIT_CHANGES) 
+
+  const handleCommit = async () => {
+    commitChanges({
+      variables: {
+        url:  cloneUrl 
+      }
+    })
   }
 
   return (
@@ -175,6 +192,15 @@ const MonacoEditor = ({
             Save
           </Button>
           <ServiceConnected service={currentService} />
+          <Button
+            style={{ marginLeft: 25 }}
+            color="secondary"
+            size="small"
+            variant="text"
+            onClick={handleCommit}
+          >
+            Commit
+          </Button>
         </div>
         <LatestCommit commitMessage={commitMessage} />
         {autosaving && (

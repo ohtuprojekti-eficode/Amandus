@@ -23,6 +23,7 @@ import {
   cloneRepositoryToSpecificFolder,
   updateBranchFromRemote,
   getLastCommitMessage,
+  gitStatus,
 } from '../utils/gitUtils'
 
 export const switchCurrentBranch = async (
@@ -173,3 +174,22 @@ export const getCurrentCommitMessage = async (
   const commitMessage = await getLastCommitMessage(gitObject)
   return commitMessage
 }
+
+export const addAndCommitLocal = async (
+  repoLocation: string,
+  context: AppContext
+): Promise<void> => {
+  const amandusUser = context.currentUser
+  const gitUsername = amandusUser.username
+  const email = amandusUser.email
+
+  const gitObject = getGitObject(repoLocation)
+  const statusResult = await gitStatus(gitObject)
+
+  const modifiedFiles: string[] = statusResult.modified
+  await addChanges(gitObject, modifiedFiles)
+
+  await commitAddedChanges(gitObject, gitUsername, email, 'modified files')
+}
+
+

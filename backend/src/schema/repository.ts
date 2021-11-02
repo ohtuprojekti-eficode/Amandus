@@ -8,6 +8,7 @@ import {
   getLocalBranches,
   switchCurrentBranch,
   pullNewestChanges,
+  addAndCommitLocal,
 } from '../services/git'
 import { existsSync, readFileSync } from 'fs'
 import readRecursive from 'recursive-readdir'
@@ -217,8 +218,22 @@ const resolvers = {
       writeToFile(args.file)
 
       return 'saved locally'
+    },
+    commitLocalChanges: async (
+      _root: unknown,
+      args: { url: string },
+      context: AppContext
+    ): Promise<string> => {
+      const repoLocation = getRepoLocationFromUrlString(args.url, context.currentUser.username)
+      
+      try {
+        await addAndCommitLocal(repoLocation, context)
+      } catch (e) {
+        throw new ApolloError((e as Error).message)
+      }
+      return 'committed'
     }
-  },
+  }
 }
 
 export default {
