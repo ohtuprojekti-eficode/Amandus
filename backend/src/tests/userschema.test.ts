@@ -33,12 +33,6 @@ const ME = gql`
   }
 `
 
-const GH_TOKEN = gql`
-  query {
-    currentToken
-  }
-`
-
 const IS_GH_CONNECTED = gql`
   query {
     isGithubConnected
@@ -366,17 +360,17 @@ describe('User schema add git service mutations', () => {
       serviceName: 'bitbucket',
       username: 'bitbucket_username',
       email: 'user@bitbucketmail.com',
-      reposurl: 'bitbucket.com/user/repos'
+      reposurl: 'bitbucket.com/user/repos',
     }
 
     const mutationResult = await mutate(ADD_SERVICE, {
-      variables: { service: serviceArgs }
+      variables: { service: serviceArgs },
     })
 
     expect(mutationResult).toEqual({
       data: {
-        connectGitService: 'success'
-      }
+        connectGitService: 'success',
+      },
     })
   })
 })
@@ -484,7 +478,7 @@ describe('Context currentuser query', () => {
       username: 'testuser',
       password: 'mypAssword?45',
       email: 'test@test.fi',
-    } 
+    }
     const user = await User.registerUser(adminUserToSave)
     const tokens = createTokens(user)
 
@@ -517,7 +511,7 @@ describe('Context currentuser query', () => {
       username: 'testuser',
       password: 'mypAssword?45',
       email: 'test@test.fi',
-    } 
+    }
     const user = await User.registerAdmin(adminUserToSave)
     const tokens = createTokens(user)
 
@@ -547,74 +541,6 @@ describe('Context currentuser query', () => {
   })
 })
 
-describe('Context githubToken query', () => {
-  beforeEach(async () => {
-    await User.deleteAll()
-  })
-
-  it('no token is returned when set', async () => {
-    const userToSave = {
-      username: 'testuser',
-      password: 'mypAssword?45',
-      email: 'test@test.fi',
-    }
-
-    const user = await User.registerUser(userToSave)
-
-    const tokens = createTokens(user)
-
-    const { query } = createIntegrationTestClient({
-      apolloServer: server,
-      extendMockRequest: {
-        headers: {
-          'x-access-token': tokens.accessToken,
-          'x-refresh-token': tokens.refreshToken,
-        },
-      },
-    })
-
-    const queryResult = await query(GH_TOKEN)
-
-    expect(queryResult).toEqual({
-      data: {
-        currentToken: null,
-      },
-    })
-  })
-
-  it('correct token is returned when set', async () => {
-    const userToSave = {
-      username: 'testuser',
-      password: 'mypAssword?45',
-      email: 'test@test.fi',
-    }
-
-    const user = await User.registerUser(userToSave)
-
-    tokenService.setToken(user.id, 'github', 'githubtoken123')
-
-    const tokens = createTokens(user)
-
-    const { query } = createIntegrationTestClient({
-      apolloServer: server,
-      extendMockRequest: {
-        headers: {
-          'x-access-token': tokens.accessToken,
-          'x-refresh-token': tokens.refreshToken,
-        },
-      },
-    })
-
-    const queryResult = await query(GH_TOKEN)
-
-    expect(queryResult).toEqual({
-      data: {
-        currentToken: 'githubtoken123',
-      },
-    })
-  })
-})
-
 describe('isGithubConnected', () => {
   beforeEach(async () => {
     await User.deleteAll()
@@ -629,7 +555,7 @@ describe('isGithubConnected', () => {
 
     const user = await User.registerUser(userToSave)
     const frontendJWTs = createTokens(user)
-    tokenService.setToken(user.id, 'github', uuid())
+    tokenService.setToken(user.id, 'github', { access_token: uuid() })
 
     const { query } = createIntegrationTestClient({
       apolloServer: server,

@@ -1,4 +1,4 @@
-import { Tokens } from "./tokens";
+import { Tokens } from './tokens'
 
 export type ServiceName = 'github' | 'bitbucket' | 'gitlab'
 
@@ -44,13 +44,13 @@ export interface GitLabUserType {
 }
 
 export interface BitbucketUserType {
-  username: string,
-  account_id: string,
+  username: string
+  account_id: string
   links: {
     repositories: {
       href: string
     }
-  },
+  }
   access_Token: string
 }
 
@@ -64,19 +64,18 @@ export interface BitbucketEmail {
 }
 
 export interface ServiceUser {
-  serviceName: string
+  serviceName: ServiceName
   username: string
   email: string | null
   reposurl: string
 }
 
 export interface ServiceUserResponse {
-  serviceUser: ServiceUser,
-  access_token: string
+  serviceUser: ServiceUser
+  response: AccessTokenResponse
 }
 
 export interface ServiceAuthResponse {
   serviceUser: ServiceUser
   tokens: Tokens
 }
-

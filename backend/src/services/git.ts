@@ -10,7 +10,6 @@ import {
   writeToFile,
   getRepoLocationFromRepoName,
   getServiceFromFilePath,
-  getServiceTokenFromAppContext,
 } from '../utils/utils'
 import {
   doAutoMerge,
@@ -24,6 +23,7 @@ import {
   updateBranchFromRemote,
   getLastCommitMessage,
 } from '../utils/gitUtils'
+import tokenService from '../services/token'
 
 export const switchCurrentBranch = async (
   repoLocation: string,
@@ -45,7 +45,10 @@ export const pullNewestChanges = async (
   await updateBranchFromRemote(gitObject, currentBranch)
 }
 
-export const cloneRepository = async (url: string, username: string): Promise<void> => {
+export const cloneRepository = async (
+  url: string,
+  username: string
+): Promise<void> => {
   const repoLocation = getRepoLocationFromUrlString(url, username)
   await cloneRepositoryToSpecificFolder(url, repoLocation)
 }
@@ -56,22 +59,25 @@ export const saveChanges = async (
 ): Promise<void> => {
   const { file, branch, commitMessage } = saveArgs
   const usedService = getServiceFromFilePath(file)
-  const currentService = context.currentUser
-    .services?.find(s => s.serviceName === usedService)
+  const currentService = context.currentUser.services?.find(
+    (s) => s.serviceName === usedService
+  )
 
   const amandusUser = context.currentUser
   const gitUsername = currentService?.username || amandusUser.username
   const email = currentService?.email || amandusUser.email
 
-  const remoteToken = getServiceTokenFromAppContext({ service: usedService, appContext: context })
+  const remoteToken = await tokenService.getAccessTokenByServiceAndId(
+    amandusUser.id,
+    usedService
+  )
 
   const repositoryName = getRepositoryFromFilePath(file)
-  const repoLocation =
-    getRepoLocationFromRepoName(
-      repositoryName,
-      amandusUser.username,
-      usedService
-    )
+  const repoLocation = getRepoLocationFromRepoName(
+    repositoryName,
+    amandusUser.username,
+    usedService
+  )
 
   const realFilename = getFileNameFromFilePath(file, repositoryName)
   const sanitizedBranchName = sanitizeBranchName(branch)
@@ -111,14 +117,18 @@ export const saveMerge = async (
 ): Promise<void> => {
   const { file, commitMessage } = saveArgs
   const usedService = getServiceFromFilePath(file)
-  const currentService = context.currentUser
-    .services?.find(s => s.serviceName === usedService)
+  const currentService = context.currentUser.services?.find(
+    (s) => s.serviceName === usedService
+  )
 
   const amandusUser = context.currentUser
   const gitUsername = currentService?.username || amandusUser.username
   const email = currentService?.email || amandusUser.email
 
-  const remoteToken = getServiceTokenFromAppContext({ service: usedService, appContext: context })
+  const remoteToken = await tokenService.getAccessTokenByServiceAndId(
+    amandusUser.id,
+    usedService
+  )
   const repositoryName = getRepositoryFromFilePath(file)
   const repoLocation = getRepoLocationFromRepoName(
     repositoryName,
