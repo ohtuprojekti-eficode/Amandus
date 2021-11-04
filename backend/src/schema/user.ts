@@ -158,9 +158,7 @@ const resolvers = {
         throw new UserInputError(`${service} code not provided`)
       }
 
-      const serviceUserResponse = await requestServiceUser(service, args.code)
-
-      console.log(serviceUserResponse)
+      const serviceUserResponse = await requestServiceUser(service, args.code)    
 
       tokenService.setToken(
         context.currentUser.id,
