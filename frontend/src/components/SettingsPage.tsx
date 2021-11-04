@@ -1,4 +1,6 @@
 import React, { useState } from 'react'
+import { useMutation } from '@apollo/client'
+import { SAVE_SETTINGS } from '../graphql/mutations'
 
 import { 
   Switch, 
@@ -6,7 +8,6 @@ import {
   Button } from '@material-ui/core'
 
 import { 
-  SettingsObject, 
   MiscSettingObject, 
   PluginSettingObject,
   UserType } from '../types'
@@ -17,90 +18,58 @@ interface Props {
   user: UserType | undefined
 }
 
-const MiscObject = ({ name, value, unit }: MiscSettingObject) => {
+
+
+// @ts-ignore
+const MiscObject = (props) => {
   
-  const [fieldValue, setFieldValue] = useState(value)
-  
-  const handleFieldValueChange = () => {
-    setFieldValue(value)
+  const [fieldValue, setFieldValue] = useState(props.value)
+ // @ts-ignore 
+  const handleFieldValueChange = (incomingValue) => {
+// @ts-ignore
+    props.makeafuss({ "name": props.name, "value": parseInt(incomingValue) })
+    setFieldValue(incomingValue)
   }
   
   return (
     <div>
-      <b>{name}</b>
+      <b>{props.name}</b>
       <TextField
-        id={name + "-toggle"}
-        name={name + "-toggle"}
+        id={props.name + "-toggle"}
+        name={props.name + "-toggle"}
         type="number"
         color="primary"
-        onChange={handleFieldValueChange}
+        onChange={({ target }) => handleFieldValueChange(target.value)}
         defaultValue={fieldValue}
         inputProps={{ 'aria-label': 'primary checkbox' }}
         />
-      {unit}
+      {props.unit}
     </div>
   )
 }
 
-const PluginObject = ({ name, active }: PluginSettingObject) => {
+// @ts-ignore
+const PluginObject = (props) => {
 
-  const [switchChecked, setSwitchChecked] = useState(active)
+  const [switchChecked, setSwitchChecked] = useState(props.active)
 
   const handleSwitchToggle = () => {
     setSwitchChecked(!switchChecked)
+    props.makeafuss({ "name": props.name, "value": !switchChecked })
   }
   
   return (
     <div>
-      <b>{name}</b>
+      <b>{props.name}</b>
       <Switch
-        id={name + "-toggle"}
-        name={name + "-toggle"}
+        id={props.name + "-toggle"}
+        name={props.name + "-toggle"}
         checked={switchChecked}
         onChange={handleSwitchToggle}
         color="primary"
         inputProps={{ 'aria-label': 'primary checkbox' }}
       />
       {switchChecked ? 'on' : 'off'}
-    </div>
-  )
-}
-
-/* A deconstructured version of SettingsList props. All this to avoid the word 'settings' twice and importing the settingsobject interface. May be useful if more setting types emerge. 
-const SettingsList = ({ 
-  settings: { 
-    misc,
-    plugins
-  } }: { 
-    settings: { 
-      misc: MiscSettingObject[],
-      plugins: PluginSettingObject[] 
-    }
-}) => { 
-*/
-
-const SettingsList = ({settings}: SettingsObject ) => { 
-
-  return (
-    <div>
-
-      {settings.misc.map((m: MiscSettingObject) => 
-        <MiscObject 
-          key={m.name} 
-          name={m.name} 
-          value={m.value} 
-          unit={m.unit} 
-        /> 
-       )}
-
-      {settings.plugins.map((p: PluginSettingObject) => 
-        <PluginObject 
-          key={p.name} 
-          name={p.name} 
-          active={p.active} 
-        /> 
-      )}
-
     </div>
   )
 }
@@ -118,28 +87,77 @@ const SettingsPage = ({ user }: Props) => {
   }
 */
 
-  const settings = useSettings()
+  const [settings, setSettings] = useState(useSettings())
   
-  const handleSave = () => {
-    //  const [saveSettings] = useMutation(SAVE_SETTINGS)
+  const [saveSettings] = useMutation(SAVE_SETTINGS)
+ 
+  // @ts-ignore
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+
+//    saveSettings({ variables: settings })
   }
 
+// @ts-ignore
+  const handleCallback = ({ name, value }: { name: string, value: number | boolean }) => {
+    switch (typeof value) {
+      
+      case "boolean":
+        const altPlugins = settings.plugins.map(p =>
+          p.name === name ? {...p, active: value} : p
+        )
+        setSettings({...settings, plugins: altPlugins})
+        break;
+      
+      case "number":
+        const altMisc = settings.misc.map(m =>
+          m.name === name ? {...m, value: value} : m
+        )
+        setSettings({...settings, misc: altMisc})
+        break;
 
-  return (
+    }
+  }
+
+  
+    return (
     <div >
       <h1> Admins only. </h1>
 
-      <SettingsList settings={settings} /> 
+      <form onSubmit={handleSubmit}>
+
+      {settings.misc.map((m: MiscSettingObject) => 
+      // @ts-ignore
+        <MiscObject 
+          key={m.name} 
+          name={m.name} 
+          value={m.value} 
+          unit={m.unit} 
+          makeafuss={handleCallback}
+        /> 
+       )}
+
+      {settings.plugins.map((p: PluginSettingObject) => 
+      // @ts-ignore
+        <PluginObject 
+          key={p.name} 
+          name={p.name} 
+          active={p.active} 
+          makeafuss={handleCallback}
+        /> 
+      )}
       
       <Button 
+        type="submit"
         id="save-settings-button"
         name="save-settings-button"
         variant="contained" 
-        onClick={handleSave}
         color="primary"
         >
           Save settings
       </Button>
+      
+      </form>
       
       </div>
   )
