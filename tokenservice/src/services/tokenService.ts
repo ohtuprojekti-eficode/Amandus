@@ -19,7 +19,7 @@ const setToken = (
 ): void => {
   const decodedToken = <UserJWT>verify(amandusToken, config.JWT_SECRET)
   if (id !== decodedToken.id) {
-    throw new Error(`token and id mismatch`)
+    throw new Error('token and id mismatch')
   }
 
   const tokenMap: TokenMap =
