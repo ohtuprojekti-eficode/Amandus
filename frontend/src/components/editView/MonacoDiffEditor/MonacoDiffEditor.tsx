@@ -58,8 +58,6 @@ const MonacoDiffEditor = ({
 
   const classes = stylesInUse()
 
-  const { user, loading: userQueryLoading, error: userQueryError } = useUser()
-
   const {
     setupCodeLens,
     mergeConflictExists,
@@ -149,13 +147,7 @@ const MonacoDiffEditor = ({
           <Button
             color="primary"
             variant="contained"
-            disabled={
-              userQueryLoading ||
-              !!userQueryError ||
-              mutationMergeLoading ||
-              !user?.me ||
-              mergeConflictExists
-            }
+            disabled={mutationMergeLoading || mergeConflictExists}
             onClick={handleDialogOpen}
           >
             Merge
