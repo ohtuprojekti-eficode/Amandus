@@ -26,3 +26,23 @@ export interface AccessTokenResponse {
 }
 
 export type TokenMap = Map<ServiceName, AccessTokenResponse>
+
+export interface UserType {
+  id: number
+  username: string
+  user_role: string
+  email: string
+  services?: ServiceUser[]
+}
+
+export interface ServiceUser {
+  serviceName: ServiceName
+  username: string
+  email: string | null
+  reposurl: string
+}
+
+export interface Tokens {
+  accessToken: string
+  refreshToken: string
+}

@@ -111,9 +111,15 @@ const getTokenMap = (amandusToken: string, id: number): TokenMap | null => {
   return tokenStorage.get(decodedToken.id) ?? null
 }
 
+const clearStorage = (): void => {
+  tokenStorage.clear()
+}
+
 export default {
   setToken,
   getAccessToken,
   removeToken,
-  removeUser
+  removeUser,
+  clearStorage,
+  getTokenMap
 }
