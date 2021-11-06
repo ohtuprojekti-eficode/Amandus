@@ -13,6 +13,7 @@ import {
   UserType } from '../types'
 
 import useSettings from '../hooks/useSettings'
+import { GET_SETTINGS } from '../graphql/queries'
 
 interface Props {
   user: UserType | undefined
@@ -89,13 +90,23 @@ const SettingsPage = ({ user }: Props) => {
 
   const [settings, setSettings] = useState(useSettings())
   
-  const [saveSettings] = useMutation(SAVE_SETTINGS)
+  const [saveSettings] = useMutation(SAVE_SETTINGS, {
+    refetchQueries: [ { query: GET_SETTINGS }]
+  })
  
   // @ts-ignore
   const handleSubmit = async (event) => {
     event.preventDefault()
 
-//    saveSettings({ variables: settings })
+    try {
+      await saveSettings ({
+        variables: { input: JSON.stringify(settings) }
+      })
+    }
+    catch (e) {
+      console.log(e)
+    }
+
   }
 
 // @ts-ignore

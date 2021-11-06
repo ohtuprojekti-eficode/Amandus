@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-//import { ForbiddenError, ApolloError, gql } from 'apollo-server'
+import { ApolloError } from 'apollo-server'
 import { SETTINGS } from '../constants'
 import { SettingsObject } from '../types/settings'
+import { writeFileSync } from 'fs'
 
 const typeDef = `
     type Settings {
@@ -28,32 +29,22 @@ const resolvers = {
     },
   },
 
-  /*
+  
   Mutation: {
-    saveChanges: async (
+    saveSettings: (
       _root: unknown,
-      saveArgs: SaveArgs,
-      context: AppContext
-    ): Promise<string> => {
-      if (!context.currentUser) {
-        throw new ForbiddenError('You have to login')
-      }
-
+      input: string 
+    ): string => {
       try {
-        await saveChanges(saveArgs, context)
+        writeFileSync('src/utils/settings.json', JSON.stringify( { input }, null, 2) )
       } catch (error) {
-        if (error.message === 'Merge conflict') {
-          throw new ApolloError('Merge conflict detected')
-        } else {
-          throw new ApolloError(error.message)
-        }
-      }
-
-      return 'Saved'
+          throw new ApolloError('Could not save settings')
+      } 
+        return 'Saved!' 
+      },
     },
-  },
-  */
-}
+  }
+  
 
 export default {
   resolvers,

@@ -1,5 +1,5 @@
-import content from './utils/settings.json'
+import content from './utils/settings copy.json'
 
 export const SETTINGS = {
-  content
+  content  
 }

@@ -110,3 +110,9 @@ export const DELETE_USER = gql`
     deleteUser(username: $username)
   }
 `
+
+export const SAVE_SETTINGS = gql`
+  mutation saveSettings($input: String!) {
+    saveSettings(input: $input)
+  }
+`
