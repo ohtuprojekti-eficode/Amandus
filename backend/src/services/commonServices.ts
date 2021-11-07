@@ -28,9 +28,8 @@ export const getRepoList = (
 }
 export const requestServiceUser = async (
   service: string,
-  code: string,
-  fetch: typeof nodeFetch
-): Promise<ServiceUserResponse> => {
+  code: string
+  ): Promise<ServiceUserResponse> => {
 
   if(service === 'github'){
     return await requestGithubUser(code, fetch)
