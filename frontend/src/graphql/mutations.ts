@@ -112,7 +112,7 @@ export const DELETE_USER = gql`
 `
 
 export const SAVE_SETTINGS = gql`
-  mutation saveSettings($input: String!) {
-    saveSettings(input: $input)
+  mutation saveSettings($settings: Sinput!) {
+    saveSettings(settings: $settings)
   }
 `

@@ -28,7 +28,7 @@ const MiscObject = (props) => {
  // @ts-ignore 
   const handleFieldValueChange = (incomingValue) => {
 // @ts-ignore
-    props.makeafuss({ "name": props.name, "value": parseInt(incomingValue) })
+    props.parentCallback({ "name": props.name, "value": parseInt(incomingValue) })
     setFieldValue(incomingValue)
   }
   
@@ -56,7 +56,7 @@ const PluginObject = (props) => {
 
   const handleSwitchToggle = () => {
     setSwitchChecked(!switchChecked)
-    props.makeafuss({ "name": props.name, "value": !switchChecked })
+    props.parentCallback({ "name": props.name, "value": !switchChecked })
   }
   
   return (
@@ -98,9 +98,11 @@ const SettingsPage = ({ user }: Props) => {
   const handleSubmit = async (event) => {
     event.preventDefault()
 
+    const stringSettings = JSON.stringify(settings)
+
     try {
       await saveSettings ({
-        variables: { input: JSON.stringify(settings) }
+        variables: { settings: settings }
       })
     }
     catch (e) {
@@ -144,7 +146,7 @@ const SettingsPage = ({ user }: Props) => {
           name={m.name} 
           value={m.value} 
           unit={m.unit} 
-          makeafuss={handleCallback}
+          parentCallback={handleCallback}
         /> 
        )}
 
@@ -154,7 +156,7 @@ const SettingsPage = ({ user }: Props) => {
           key={p.name} 
           name={p.name} 
           active={p.active} 
-          makeafuss={handleCallback}
+          parentCallback={handleCallback}
         /> 
       )}
       

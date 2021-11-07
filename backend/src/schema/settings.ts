@@ -6,8 +6,12 @@ import { writeFileSync } from 'fs'
 
 const typeDef = `
     type Settings {
-        misc: [MiscSetting]
-        plugins: [PluginSetting]
+      misc: [MiscSetting]
+      plugins: [PluginSetting]
+    }
+    input Sinput {
+      misc: [Minput]
+      plugins: [Pinput]
     }
     type MiscSetting {
       name: String!
@@ -18,9 +22,23 @@ const typeDef = `
       name: String!
       active: Boolean!
     }
+    input Minput {
+      name: String!
+      value: Int!
+      unit: String!
+    }
+    input Pinput {
+      name: String!
+      active: Boolean!
+    }
 `
 
 const resolvers = {
+  Settings: {
+    misc: (root: SettingsObject) => root.misc,
+    plugins: (root: SettingsObject) => root.plugins
+  },
+
   Query: {
     getSettings: (
       _root: unknown,
@@ -33,10 +51,11 @@ const resolvers = {
   Mutation: {
     saveSettings: (
       _root: unknown,
-      input: string 
+      settings: SettingsObject 
     ): string => {
-      try {
-        writeFileSync('src/utils/settings.json', JSON.stringify( { input }, null, 2) )
+
+      try {   
+        writeFileSync('src/utils/settings.json', JSON.stringify(settings, null, 2))
       } catch (error) {
           throw new ApolloError('Could not save settings')
       } 

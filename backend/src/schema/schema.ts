@@ -88,7 +88,7 @@ const Mutation = `
         ): ServiceAuthResponse
         pullRepository(url: String!): String
         deleteUser(username: String!): String
-        saveSettings(input: String!): String
+        saveSettings(settings: Sinput!): String
     }
 `
 
