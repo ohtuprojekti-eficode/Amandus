@@ -21,7 +21,7 @@ const GITLAB_CB_URL =
   process.env.GL_CB_URL || 'http://localhost:3000/auth/gitlab/callback'
 
 const DATABASE_URL =
-  process.env.NODE_ENV == 'test'
+  process.env.NODE_ENV == 'test' || process.env.NODE_ENV == 'e2etest'
     ? process.env.DATABASE_URL_TEST
     : process.env.DATABASE_URL
 
