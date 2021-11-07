@@ -7,16 +7,12 @@ import {
 } from '../types/service'
 
 import { default as nodeFetch } from 'node-fetch'
-import nodeFetchMock from '../tests/mocks/fetch'
-const fetch = ['test', 'e2etest'].includes(process.env.NODE_ENV ?? '')
-  ? nodeFetchMock
-  : nodeFetch
-
 import config from '../utils/config'
 import { UserInputError } from 'apollo-server-errors'
 
 export const requestBitbucketToken = (
-  code: string
+  code: string,
+  fetch: typeof nodeFetch
 ): Promise<AccessTokenResponse> => {
   const credentials = {
     client_id: config.BITBUCKET_CLIENT_ID || '',
@@ -48,7 +44,8 @@ export const requestBitbucketToken = (
 }
 
 export const requestBitbucketUserAccount = (
-  token: string
+  token: string,
+  fetch: typeof nodeFetch
 ): Promise<BitbucketUserType> => {
   return fetch('https://api.bitbucket.org/2.0/user', {
     headers: {
@@ -62,7 +59,8 @@ export const requestBitbucketUserAccount = (
 }
 
 export const requestBitbucketUserEmail = (
-  token: string
+  token: string,
+  fetch: typeof nodeFetch
 ): Promise<BitbucketEmail> => {
   return fetch('https://api.bitbucket.org/2.0/user/emails', {
     headers: {
@@ -76,7 +74,8 @@ export const requestBitbucketUserEmail = (
 }
 
 export const refreshBitbucketToken = (
-  refreshToken: string
+  refreshToken: string,
+  fetch: typeof nodeFetch
 ): Promise<AccessTokenResponse> => {
   const credentials = {
     client_id: config.BITBUCKET_CLIENT_ID || '',
@@ -108,17 +107,18 @@ export const refreshBitbucketToken = (
 }
 
 export const requestBitbucketUser = async (
-  code: string
+  code: string,
+  fetch: typeof nodeFetch
 ): Promise<ServiceUserResponse> => {
-  const response = await requestBitbucketToken(code)
+  const response = await requestBitbucketToken(code, fetch)
   const { access_token } = response
 
   if (!access_token) {
     throw new UserInputError('Invalid or expired Bitbucket code')
   }
 
-  const bitbucketUser = await requestBitbucketUserAccount(access_token)
-  const bitbucketUserEmail = await requestBitbucketUserEmail(access_token)
+  const bitbucketUser = await requestBitbucketUserAccount(access_token, fetch)
+  const bitbucketUserEmail = await requestBitbucketUserEmail(access_token, fetch)
 
   const email = bitbucketUserEmail.values.find(
     (email) => email.is_primary
