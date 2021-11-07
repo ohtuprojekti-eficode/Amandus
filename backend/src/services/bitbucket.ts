@@ -5,7 +5,13 @@ import {
   ServiceUserResponse,
   ServiceUser,
 } from '../types/service'
-import fetch from 'node-fetch'
+
+import { default as nodeFetch } from 'node-fetch'
+import nodeFetchMock from '../tests/mocks/fetch'
+const fetch = ['test', 'e2etest'].includes(process.env.NODE_ENV ?? '')
+  ? nodeFetchMock
+  : nodeFetch
+
 import config from '../utils/config'
 import { UserInputError } from 'apollo-server-errors'
 

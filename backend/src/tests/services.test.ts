@@ -2,14 +2,7 @@ import { requestBitbucketUser } from "../services/bitbucket"
 import { requestGithubUser } from "../services/gitHub"
 import { requestGitLabUser } from "../services/gitLab"
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-return
-jest.mock('node-fetch', () => require('./mocks/fetch'))
-
 describe('Bitbucket API', () => {
-  beforeEach(() => {
-    jest.clearAllMocks()
-  })
-
   it('requestBitbucketUser returns correct access_token, refresh_token, username, reposurl and email from mock', async () => {
     const bitbucketUser = await requestBitbucketUser('123code321')
     expect(bitbucketUser.response.access_token).toBe('immatokenlol')
@@ -21,10 +14,6 @@ describe('Bitbucket API', () => {
 })
 
 describe('Gitlab API', () => {
-  beforeEach(() => {
-    jest.clearAllMocks()
-  })
-
   it('requestGitlabUser returns correct access_token, refresh_token username and email from mock', async () => {
     const gitlabUser = await requestGitLabUser('123code321')
     expect(gitlabUser.response.access_token).toBe('immatokenlol')
@@ -40,10 +29,6 @@ describe('Gitlab API', () => {
 })
 
 describe('Github API', () => {
-  beforeEach(() => {
-    jest.clearAllMocks()
-  })
-
   it('requestGithubUser returns correct access_token, username, reposurl and email from mock', async () => {
     const githubUser = await requestGithubUser('123code321')
     expect(githubUser.response.access_token).toBe('immatokenlol')

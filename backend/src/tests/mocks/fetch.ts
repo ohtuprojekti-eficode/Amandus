@@ -1,14 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-
-import { RequestInfo, RequestInit } from 'node-fetch'
-const { Response } = jest.requireActual('node-fetch')
+import { RequestInfo, RequestInit, Response } from 'node-fetch'
 
 const toFetchResponse = (object: Record<string, unknown>) =>
   Promise.resolve(new Response(JSON.stringify(object)))
 
-const nodeFetchMock =
-  jest.fn().mockImplementation((url: RequestInfo, init?: RequestInit | undefined) => {
+const nodeFetchMock = (url: RequestInfo, init?: RequestInit | undefined): Promise<Response> => {
     void init
 
     switch (url) {
@@ -62,9 +57,7 @@ const nodeFetchMock =
 
       default:
         throw new Error(`Url "${url.toString()}"" is not defined in mocked node_fetch`)
-
     }
+  }
 
-  })
-
-module.exports = nodeFetchMock
+export default nodeFetchMock
