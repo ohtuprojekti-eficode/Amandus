@@ -1,5 +1,5 @@
 import { verify } from 'jsonwebtoken'
-import { hasExpired, refreshToken } from '../utils/token'
+import { hasExpired, refreshToken, formatData } from '../utils/token'
 import config from '../utils/config'
 
 import {
@@ -25,7 +25,7 @@ const setToken = (
   const tokenMap: TokenMap =
     tokenStorage.get(decodedToken.id) ?? new Map<ServiceName, AccessTokenResponse>()
 
-  tokenMap.set(service, token)
+  tokenMap.set(service, formatData(token))
 
   tokenStorage.set(decodedToken.id, tokenMap)
 }
@@ -121,5 +121,6 @@ export default {
   removeToken,
   removeUser,
   clearStorage,
-  getTokenMap
+  getTokenMap,
+  getServiceDetails
 }

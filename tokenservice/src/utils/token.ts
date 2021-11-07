@@ -118,3 +118,12 @@ export const createTokens = (user: UserType | null): Tokens => {
   )
   return { accessToken, refreshToken }
 }
+
+export const formatData = (data: AccessTokenResponse): AccessTokenResponse => {
+  if (data.created_at || data.expires_in) {
+    data.created_at = data.created_at || Math.floor(+new Date() / 1000)
+    data.expires_in = data.expires_in || 7200
+  }
+
+  return data
+}
