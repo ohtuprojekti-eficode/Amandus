@@ -35,15 +35,15 @@ const typeDef = `
 
 const resolvers = {
   Settings: {
-    misc: (root: SettingsObject) => root.misc,
-    plugins: (root: SettingsObject) => root.plugins
+    misc: (root: SettingsObject) => root.settings.misc,
+    plugins: (root: SettingsObject) => root.settings.plugins
   },
 
   Query: {
     getSettings: (
       _root: unknown,
     ): SettingsObject => {
-      return <SettingsObject> SETTINGS.content
+      return <SettingsObject> SETTINGS
     },
   },
 
@@ -53,9 +53,10 @@ const resolvers = {
       _root: unknown,
       settings: SettingsObject 
     ): string => {
+      console.log('be', settings)
 
       try {   
-        writeFileSync('src/utils/settings.json', JSON.stringify(settings, null, 2))
+        writeFileSync('src/utils/settings.json', JSON.stringify(settings, null, 4))
       } catch (error) {
           throw new ApolloError('Could not save settings')
       } 

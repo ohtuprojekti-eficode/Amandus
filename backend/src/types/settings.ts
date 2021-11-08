@@ -1,6 +1,8 @@
 export interface SettingsObject {
-  misc: MiscSettingObject[];
-  plugins: PluginSettingObject[];
+  settings: {
+    misc: MiscSettingObject[];
+    plugins: PluginSettingObject[];
+  }
 }
 
 export interface MiscSettingObject {

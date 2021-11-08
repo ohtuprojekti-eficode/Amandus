@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useMutation } from '@apollo/client'
 import { SAVE_SETTINGS } from '../graphql/mutations'
+import { GET_SETTINGS } from '../graphql/queries'
 
 import { 
   Switch, 
@@ -13,7 +14,6 @@ import {
   UserType } from '../types'
 
 import useSettings from '../hooks/useSettings'
-import { GET_SETTINGS } from '../graphql/queries'
 
 interface Props {
   user: UserType | undefined
@@ -23,9 +23,14 @@ interface Props {
 
 // @ts-ignore
 const MiscObject = (props) => {
-  
+
   const [fieldValue, setFieldValue] = useState(props.value)
- // @ts-ignore 
+
+  useEffect(() => {
+   setFieldValue(props.value) 
+  }, [props.value])
+
+  // @ts-ignore 
   const handleFieldValueChange = (incomingValue) => {
 // @ts-ignore
     props.parentCallback({ "name": props.name, "value": parseInt(incomingValue) })
@@ -38,10 +43,10 @@ const MiscObject = (props) => {
       <TextField
         id={props.name + "-toggle"}
         name={props.name + "-toggle"}
+        value={fieldValue}
         type="number"
         color="primary"
         onChange={({ target }) => handleFieldValueChange(target.value)}
-        defaultValue={fieldValue}
         inputProps={{ 'aria-label': 'primary checkbox' }}
         />
       {props.unit}
@@ -53,7 +58,7 @@ const MiscObject = (props) => {
 const PluginObject = (props) => {
 
   const [switchChecked, setSwitchChecked] = useState(props.active)
-
+  
   const handleSwitchToggle = () => {
     setSwitchChecked(!switchChecked)
     props.parentCallback({ "name": props.name, "value": !switchChecked })
@@ -87,23 +92,30 @@ const SettingsPage = ({ user }: Props) => {
     )
   }
 */
+  const [saved, setSaved] = useState(false)
 
-  const [settings, setSettings] = useState(useSettings())
+
+  const {settings: nestedSettings, setSettings} = useSettings()
+  const settings = nestedSettings?.settings
   
   const [saveSettings] = useMutation(SAVE_SETTINGS, {
-    refetchQueries: [ { query: GET_SETTINGS }]
   })
  
   // @ts-ignore
   const handleSubmit = async (event) => {
     event.preventDefault()
 
-    const stringSettings = JSON.stringify(settings)
-
     try {
-      await saveSettings ({
-        variables: { settings: settings }
-      })
+      const vars = { variables: { settings: settings }}
+      console.log('vars', vars)
+      await saveSettings (
+        { variables: { settings: settings }, update: (cache) => { 
+           const currentContent = cache.readQuery({ query: GET_SETTINGS})
+           const updatedContent = { getSettings: settings }
+           cache.writeQuery({query: GET_SETTINGS, data: updatedContent})
+        }}
+      )
+      setSaved(true)
     }
     catch (e) {
       console.log(e)
@@ -119,25 +131,31 @@ const SettingsPage = ({ user }: Props) => {
         const altPlugins = settings.plugins.map(p =>
           p.name === name ? {...p, active: value} : p
         )
-        setSettings({...settings, plugins: altPlugins})
+        setSettings({ settings: {...settings, plugins: altPlugins}})
         break;
       
       case "number":
         const altMisc = settings.misc.map(m =>
           m.name === name ? {...m, value: value} : m
         )
-        setSettings({...settings, misc: altMisc})
+        setSettings({ settings: {...settings, misc: altMisc}})
         break;
 
     }
   }
 
+  if (!settings) {
+    return (
+      <div>
+        loading...
+      </div>
+    )
+  }
+
   
     return (
-    <div >
+    <div>
       <h1> Admins only. </h1>
-
-      <form onSubmit={handleSubmit}>
 
       {settings.misc.map((m: MiscSettingObject) => 
       // @ts-ignore
@@ -161,7 +179,7 @@ const SettingsPage = ({ user }: Props) => {
       )}
       
       <Button 
-        type="submit"
+        onClick={handleSubmit}
         id="save-settings-button"
         name="save-settings-button"
         variant="contained" 
@@ -169,8 +187,9 @@ const SettingsPage = ({ user }: Props) => {
         >
           Save settings
       </Button>
+
+      {saved ? 'Saved successfully.': ''}
       
-      </form>
       
       </div>
   )

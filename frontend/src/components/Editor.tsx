@@ -5,11 +5,13 @@ import { initMonaco, initLanguageClient } from '../utils/monacoInitializer'
 import MonacoDiffEditor from './MonacoDiffEditor/'
 import useMergeConflictDetector from './MonacoDiffEditor/useMergeConflictDetector'
 import MonacoEditor from './MonacoEditor'
+import useSettings from '../hooks/useSettings'
 
 import VsCodeDarkTheme from '../styles/editor-themes/vs-dark-plus-theme'
 import VsCodeLightTheme from '../styles/editor-themes/vs-light-plus-theme'
 
 import { SimpleLanguageInfoProvider } from '../utils/providers'
+
 
 interface EditorProps {
   fileContent: string
@@ -32,6 +34,8 @@ const Editor = ({
 }: EditorProps) => {
   const mergeConflictExists = useMergeConflictDetector(fileContent)
 
+  const { settings } = useSettings()
+
   const classes = useStyles()
 
   const providerRef = React.useRef<SimpleLanguageInfoProvider | null>(null)
@@ -42,11 +46,13 @@ const Editor = ({
     loader.init().then((monaco) => {
       providerRef.current = initMonaco(monaco, theme.palette.type)
 
-      initLanguageClient(monaco)
+      if (settings.settings.plugins.find(p => p.name === "robot-language-server" && p.active)) {
+        initLanguageClient(monaco)
+      }
     })
     // Need to have an empty dependency array for this to work correctly
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [settings])
 
   const updateTheme = () => {
     if (providerRef.current) {
