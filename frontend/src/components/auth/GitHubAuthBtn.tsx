@@ -23,6 +23,7 @@ const GitHubAuthBtn = ({ connected }: AuthBtnProps) => {
   return (
     <div>
       <Button
+        id="githubAuthButton"
         variant="contained"
         color="primary"
         startIcon={<GitHubIcon />}

@@ -40,6 +40,7 @@ const GitLabAuthBtn = ({ connected }: AuthBtnProps) => {
   return (
     <div>
       <Button
+        id="gitlabAuthButton"
         startIcon={gitLabIcon}
         variant="contained"
         color="primary"

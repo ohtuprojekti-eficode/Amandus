@@ -41,6 +41,7 @@ const BitbucketAuthBtn = ({ connected }: AuthBtnProps) => {
   return (
     <div>
       <Button
+        id="bitbucketAuthButton"
         startIcon={bitbucketIcon}
         variant="contained"
         color="primary"
