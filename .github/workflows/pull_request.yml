@@ -58,8 +58,8 @@ jobs:
         run: |
           cp -r frontend/build backend/build/frontBuild
           cd backend
-          yarn migrate-up-prod 
-          yarn run start &
+          yarn migrate-up-prod
+          NODE_ENV=e2etest node ./build/index.js &
         env:
           NODE_ENV: e2etest
           DATABASE_URL_TEST: postgres://test:test@localhost:${{ job.services.postgres.ports[5432] }}/test
