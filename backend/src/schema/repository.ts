@@ -21,14 +21,13 @@ import {
   getRepoLocationFromUrlString,
   getServiceTokenFromAppContext,
   getServiceNameFromUrlString,
-  writeToFile
+  writeToFile,
 } from '../utils/utils'
 import { parseServiceRepositories } from '../utils/parsers'
 import { getRepoList } from '../services/commonServices'
 import { Repository } from '../types/repository'
 import { ServiceName } from '../types/service'
 import { File } from '../types/file'
-
 
 const typeDef = `
     type File {
@@ -57,7 +56,6 @@ const typeDef = `
     }
 `
 
-
 const resolvers = {
   Query: {
     cloneRepository: async (
@@ -65,16 +63,17 @@ const resolvers = {
       args: { url: string },
       context: AppContext
     ): Promise<string> => {
-      const repoLocation = getRepoLocationFromUrlString(args.url, context.currentUser.username)
+      const repoLocation = getRepoLocationFromUrlString(
+        args.url,
+        context.currentUser.username
+      )
       // TODO: Would be ideal that user's configs are set when repo
       // is first cloned instead of doing it in commit operation
       // (because automerges also require username and email)
       // requires user specific repos & clone only possible
       // when context.currentuser exists
       if (!existsSync(repoLocation)) {
-
         await cloneRepository(args.url, context.currentUser.username)
-
       }
 
       return 'Cloned'
@@ -89,12 +88,17 @@ const resolvers = {
       }
 
       const service = getServiceNameFromUrlString(args.url)
-      const repoLocation = getRepoLocationFromUrlString(args.url, context.currentUser.username)
+      const repoLocation = getRepoLocationFromUrlString(
+        args.url,
+        context.currentUser.username
+      )
       const currentBranch = await getCurrentBranchName(repoLocation)
       const commitMessage = await getCurrentCommitMessage(repoLocation)
 
       if (!service) {
-        throw new Error('Unable to parse service name, or service is unsupported.')
+        throw new Error(
+          'Unable to parse service name, or service is unsupported.'
+        )
       }
 
       const filePaths = await readRecursive(repoLocation, ['.git'])
@@ -104,7 +108,14 @@ const resolvers = {
       }))
 
       const branches = await getLocalBranches(repoLocation)
-      return { currentBranch, files, branches, url: args.url, commitMessage, service }
+      return {
+        currentBranch,
+        files,
+        branches,
+        url: args.url,
+        commitMessage,
+        service,
+      }
     },
 
     getRepoListFromService: async (
@@ -120,26 +131,31 @@ const resolvers = {
         throw new Error('User is not connected to any service')
       }
 
-      const allRepositories = await Promise.all(context.currentUser.services.map(
-        async (service) => {
+      const allRepositories = await Promise.all(
+        context.currentUser.services.map(async (service) => {
           const token = getServiceTokenFromAppContext({
-            service: service.serviceName as ServiceName, appContext: context
+            service: service.serviceName as ServiceName,
+            appContext: context,
           })
 
           if (!token) {
-            console.log(`Service token missing for service ${service.serviceName}`)
+            console.log(
+              `Service token missing for service ${service.serviceName}`
+            )
             return []
           }
 
           const response = await getRepoList(service, token)
-          const serviceRepositories: Repository[] = parseServiceRepositories(response, service.serviceName)
+          const serviceRepositories: Repository[] = parseServiceRepositories(
+            response,
+            service.serviceName
+          )
 
           return serviceRepositories
-        }
-      ))
+        })
+      )
 
       return allRepositories.flat()
-
     },
   },
 
@@ -187,7 +203,10 @@ const resolvers = {
       branchSwitchArgs: BranchSwitchArgs,
       context: AppContext
     ): Promise<string> => {
-      const repoLocation = getRepoLocationFromUrlString(branchSwitchArgs.url, context.currentUser.username)
+      const repoLocation = getRepoLocationFromUrlString(
+        branchSwitchArgs.url,
+        context.currentUser.username
+      )
       return await switchCurrentBranch(repoLocation, branchSwitchArgs.branch)
     },
     pullRepository: async (
@@ -195,7 +214,10 @@ const resolvers = {
       args: { url: string },
       context: AppContext
     ): Promise<string> => {
-      const repoLocation = getRepoLocationFromUrlString(args.url, context.currentUser.username)
+      const repoLocation = getRepoLocationFromUrlString(
+        args.url,
+        context.currentUser.username
+      )
       try {
         await pullNewestChanges(repoLocation)
       } catch (e) {
@@ -207,11 +229,11 @@ const resolvers = {
       }
       return 'Pulled'
     },
-    localSave: async (
+    localSave: (
       _root: unknown,
-      args: {file: File},
+      args: { file: File },
       context: AppContext
-    ): Promise<string> => {
+    ): string => {
       if (!context.currentUser) {
         throw new ForbiddenError('You have to login')
       }
@@ -224,16 +246,18 @@ const resolvers = {
       args: CommitArgs,
       context: AppContext
     ): Promise<string> => {
-      const repoLocation = getRepoLocationFromUrlString(args.url, context.currentUser.username)
-      console.log('urli ', args.url)
+      const repoLocation = getRepoLocationFromUrlString(
+        args.url,
+        context.currentUser.username
+      )
       try {
         await addAndCommitLocal(repoLocation, args.commitMessage, context)
       } catch (e) {
         throw new ApolloError((e as Error).message)
       }
       return 'committed'
-    }
-  }
+    },
+  },
 }
 
 export default {

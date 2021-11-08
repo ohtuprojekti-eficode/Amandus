@@ -9,13 +9,13 @@ import {
 import Editor from '@monaco-editor/react'
 import { editor } from 'monaco-editor'
 import React, { useRef, useState } from 'react'
+import useAutoSave from '../../../hooks/useAutoSave'
 import useSaveDialog from '../../../hooks/useSaveDialog'
 import LatestCommit from '../LatestCommit'
+import PullDialog from '../saveDialogs/PullDialog'
 import SaveDialog from '../saveDialogs/SaveDialog'
 import ServiceConnected from '../ServiceConnected'
 import useEditor from './useMonacoEditor'
-import useAutoSave from '../../../hooks/useAutoSave'
-import PullDialog from '../saveDialogs/PullDialog'
 
 interface Props {
   content: string
@@ -70,16 +70,22 @@ const MonacoEditor = ({
 
   const classes = stylesInUse()
 
-  const [onEditorChange, autosaving] = useAutoSave(content, filename, cloneUrl)
+  const [onEditorChange, autosaving] = useAutoSave(filename, cloneUrl)
 
-  const { saveChanges, pullRepo, mutationSaveLoading, pullLoading, commitChanges } =
-    useEditor(cloneUrl)
+  const {
+    saveChanges,
+    pullRepo,
+    mutationSaveLoading,
+    pullLoading,
+    commitChanges,
+  } = useEditor(cloneUrl)
 
   const theme = useTheme()
 
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
 
   const handleEditorDidMount = (editor: editor.IStandaloneCodeEditor) => {
+    console.log('mounted')
     editorRef.current = editor
   }
 
@@ -125,13 +131,16 @@ const MonacoEditor = ({
     try {
       await pullRepo({ variables: { repoUrl: cloneUrl } })
     } catch (error) {
-      if (error instanceof Error &&
-        error.message.includes('Please commit your changes or stash them before you merge')
-        ) {
-          pullProps.setDialogError({
-            title: 'Error Pulling',
-            message: error.message
-          })
+      if (
+        error instanceof Error &&
+        error.message.includes(
+          'Please commit your changes or stash them before you merge'
+        )
+      ) {
+        pullProps.setDialogError({
+          title: 'Error Pulling',
+          message: error.message,
+        })
         pullProps.handleDialogOpen()
       }
     }
@@ -140,9 +149,9 @@ const MonacoEditor = ({
   const handleCommit = async (commitMessage: string) => {
     await commitChanges({
       variables: {
-        url:  cloneUrl,
-        commitMessage: commitMessage
-      }
+        url: cloneUrl,
+        commitMessage: commitMessage,
+      },
     })
     await handlePull()
     pullProps.handleDialogClose()
@@ -174,7 +183,7 @@ const MonacoEditor = ({
         error={dialogError}
         waitingToSave={waitingToSave}
       />
-      <PullDialog 
+      <PullDialog
         open={pullProps.dialogOpen}
         handleClose={pullProps.handleDialogClose}
         handleSubmit={handleCommit}
