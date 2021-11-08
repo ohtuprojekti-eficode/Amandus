@@ -187,8 +187,9 @@ const SettingsPage = ({ user }: Props) => {
         >
           Save settings
       </Button>
-
-      {saved ? 'Saved successfully.': ''}
+      <p>
+        {saved ? 'Saved successfully. If you switched the state of a language plugin, please refresh the page.': ''}
+      </p> 
       
       
       </div>
