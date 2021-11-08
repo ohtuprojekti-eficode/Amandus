@@ -22,9 +22,10 @@ import {
 } from '../utils/utils'
 import { parseServiceRepositories } from '../utils/parsers'
 import { getRepoList } from '../services/commonServices'
-import tokenService from '../services/token'
-
+// import tokenService from '../services/token'
+import fetch from 'node-fetch'
 import { Repository } from '../types/repository'
+// import { AccessTokenResponse } from '../types/service'
 
 const typeDef = `
     type File {
@@ -83,6 +84,10 @@ const resolvers = {
         throw new Error('Repository url not provided')
       }
 
+      console.log('HELLO FROM BACKEND')
+      console.log('HERE IS CURRENT APPCONTEXT:')
+      console.log(context)
+
       const service = getServiceNameFromUrlString(args.url)
       const repoLocation = getRepoLocationFromUrlString(args.url, context.currentUser.username)
       const currentBranch = await getCurrentBranchName(repoLocation)
@@ -117,11 +122,23 @@ const resolvers = {
 
       const allRepositories = await Promise.all(context.currentUser.services.map(
         async (service) => {
-          const token = await tokenService.getAccessTokenByServiceAndId(
-            context.currentUser.id,
-            service.serviceName
-          )
-          
+
+          const tokenResponse = await fetch(`http://localhost:3002/api/tokens/${context.currentUser.id}/${service.serviceName}`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${context.accessToken}` }
+          })
+
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          const token = await tokenResponse.json()
+
+          console.log('HELLO FROM BACKEND')
+          console.log('ATTEMPTED TO FETCH SERVICE TOKEN:')
+          console.log(token.access_token)
+          // const token = await tokenService.getAccessTokenByServiceAndId(
+          //   context.currentUser.id,
+          //   service.serviceName
+          // )
+
           if (!token) {
             console.log(`Service token missing for service ${service.serviceName}`)
             return []

@@ -27,7 +27,7 @@ const corsOptions = {
 const server = new ApolloServer({
   schema,
   context: async ({ req, res }) => {
-    const accessToken: any = req && req.headers['x-access-token']
+    const accessToken: any = req.headers['x-access-token']
     const refreshToken: any = req && req.headers['x-refresh-token']
 
     if (!accessToken || !refreshToken) return
@@ -40,7 +40,10 @@ const server = new ApolloServer({
       const currentUser = await User.getUserById(decodedAccessToken.id)
       if (!currentUser) return
 
-      return { currentUser }
+      const stringifiedAccessToken = accessToken as string
+      const stringifiedRefreshToken = refreshToken as string
+
+      return { currentUser, stringifiedAccessToken, stringifiedRefreshToken }
     } catch (e) {
       if (e instanceof jwt.TokenExpiredError) {
         // trying to access with expired access token...
@@ -66,7 +69,10 @@ const server = new ApolloServer({
             'x-refresh-token': newTokens.refreshToken,
           })
 
-          return { currentUser }
+          const newAccessToken = newTokens.accessToken
+          const newRefreshToken = newTokens.refreshToken
+
+          return { currentUser, newAccessToken, newRefreshToken }
         } catch (e) {
           // client is accessing with expired access token and refresh token...
           if (e instanceof jwt.TokenExpiredError) return
