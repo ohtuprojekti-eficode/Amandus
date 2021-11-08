@@ -8,12 +8,23 @@ export interface UserJWT {
   gitlabToken?: string
 }
 
-export interface RequestContent {
-  amandusToken: string
+export interface GetRequestContent {
+  id: number
   serviceName: ServiceName
+  amandusToken: string
 }
 
-export interface PostRequestContent extends RequestContent {
+export interface DeleteRequestContent {
+  id: number
+  serviceName?: ServiceName
+  amandusToken: string
+}
+
+export interface PostRequestContent extends GetRequestContent {
+  serviceToken: AccessTokenResponse
+}
+
+export type RequestBody = {
   serviceToken: AccessTokenResponse
 }
 

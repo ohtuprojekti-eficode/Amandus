@@ -12,39 +12,27 @@ Requirements: Yarn
 
 ## Request formats  
 
-All requests require a body with corresponding json data:
+All request require Amandus token in authorization header. Post request requires service token in body as json.
 
 ```
-POST /api/tokens/{user_id}                   // Post new access token for user {user_id} 
+POST /api/tokens/{user_id}/{service_name}    // Post new access token for user {user_id} 
+Authorization: Bearer {amandusToken}
 
 {
-  amandusToken: {amandusToken},
-  serviceName: {serviceName},
   serviceToken: {serviceToken} 
 }
 
 
 GET /api/tokens/{user_id}/{service_name}     // Get access token for service {service_name} of user {user_id} 
-
-{
-  amandusToken: {amandusToken},
-  serviceName: {serviceName},
-}
+Authorization: Bearer {amandusToken}
 
 
 DELETE /api/tokens/{user_id}/{service_name}  // Delete access token for service {service_name} of user {user_id}
-
-{
-  amandusToken: {amandusToken},
-  serviceName: {serviceName},
-}
+Authorization: Bearer {amandusToken}
 
 
 DELETE /api/tokens/{user_id}                 // Delete all data related to user {user_id}
-
-{
-  amandusToken: {amandusToken},
-}
+Authorization: Bearer {amandusToken}
 ```
 
 

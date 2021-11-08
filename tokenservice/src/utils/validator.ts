@@ -2,9 +2,10 @@
 import { Request } from 'express'
 import {
   PostRequestContent,
-  RequestContent,
   ServiceName,
-  AccessTokenResponse
+  AccessTokenResponse,
+  GetRequestContent,
+  DeleteRequestContent
 } from '../types'
 
 const isString = (text: unknown): text is string => {
@@ -28,12 +29,12 @@ const isAccessTokenResponse = (token: unknown): token is AccessTokenResponse => 
   return true
 }
 
-const parseAmandusToken = (token: unknown): string => {
-  if (!token || !isString(token)) {
+const parseAmandusToken = (authHeader: unknown): string => {
+  if (!authHeader || !isString(authHeader) || !authHeader.startsWith('Bearer ')) {
     throw new Error('Incorrect or missing amandus token')
   }
 
-  return token
+  return authHeader.substring(7, authHeader.length)
 }
 
 const parseServiceToken = (token: unknown): AccessTokenResponse => {
@@ -53,50 +54,54 @@ const parseServiceName = (name: unknown): ServiceName => {
 }
 
 type RequestBody = {
-  amandusToken: string,
-  serviceName?: ServiceName,
-  serviceToken?: AccessTokenResponse
+  serviceToken: AccessTokenResponse
 }
 
-const toValidPostRequest = (
+const parsePostRequest = (
   req: Request
 ): PostRequestContent => {
-
   const body = req.body as RequestBody
 
-  const validRequest: PostRequestContent = {
-    amandusToken: parseAmandusToken(body.amandusToken),
-    serviceName: parseServiceName(body.serviceName),
+  const postRequestContent: PostRequestContent = {
+    id: Number(req.params.id),
+    serviceName: parseServiceName(req.params.service),
+    amandusToken: parseAmandusToken(req.headers.authorization),
     serviceToken: parseServiceToken(body.serviceToken)
   }
 
-  return validRequest
+  return postRequestContent
 }
 
-const toValidRequest = (
+const parseGetRequest = (
   req: Request
-): RequestContent => {
+): GetRequestContent => {
 
-  const body = req.body as RequestBody
-
-  const validRequest: RequestContent = {
-    amandusToken: parseAmandusToken(body.amandusToken),
-    serviceName: parseServiceName(body.serviceName)
+  const getRequestContent: GetRequestContent = {
+    id: Number(req.params.id),
+    serviceName: parseServiceName(req.params.service),
+    amandusToken: parseAmandusToken(req.headers.authorization)
   }
 
-  return validRequest
+  return getRequestContent
 }
 
-const toAmandusToken = (
+const parseDeleteRequest = (
   req: Request
-): string => {
-  const body = req.body as RequestBody
-  const amandusToken: string = parseAmandusToken(body.amandusToken)
-  return amandusToken
+): DeleteRequestContent => {
+
+  const serviceName = req.params.service
+
+  const deleteRequestContent: DeleteRequestContent = {
+    id: Number(req.params.id),
+    serviceName: serviceName ? parseServiceName(serviceName) : undefined,
+    amandusToken: parseAmandusToken(req.headers.authorization)
+  }
+
+  return deleteRequestContent
 }
 
 export {
-  toValidPostRequest,
-  toValidRequest,
-  toAmandusToken
+  parsePostRequest,
+  parseGetRequest,
+  parseDeleteRequest
 }

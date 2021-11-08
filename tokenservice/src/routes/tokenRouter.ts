@@ -1,13 +1,11 @@
 import express from 'express'
 import tokenService from '../services/tokenService'
-import { RequestContent, PostRequestContent } from '../types'
-import { toValidPostRequest, toValidRequest, toAmandusToken } from '../utils/validator'
+import { parseDeleteRequest, parseGetRequest, parsePostRequest } from '../utils/validator'
 
 const router = express.Router()
 
-router.post('/:id', (req, res) => {
-  const id = Number(req.params.id)
-  const { amandusToken, serviceName, serviceToken }: PostRequestContent = toValidPostRequest(req)
+router.post('/:id/:service', (req, res) => {
+  const { id, serviceName, amandusToken, serviceToken } = parsePostRequest(req)
 
   try {
     tokenService.setToken(amandusToken, serviceName, serviceToken, id)
@@ -18,8 +16,7 @@ router.post('/:id', (req, res) => {
 })
 
 router.get('/:id/:service', (req, res) => {
-  const id = Number(req.params.id)
-  const { amandusToken, serviceName }: RequestContent = toValidRequest(req)
+  const { id, serviceName, amandusToken } = parseGetRequest(req)
 
   tokenService.getAccessToken(amandusToken, serviceName, id)
     .then(token => {
@@ -30,8 +27,10 @@ router.get('/:id/:service', (req, res) => {
 })
 
 router.delete('/:id/:service', (req, res) => {
-  const id = Number(req.params.id)
-  const { amandusToken, serviceName }: RequestContent = toValidRequest(req)
+  const { id, serviceName, amandusToken } = parseDeleteRequest(req)
+  if (!serviceName) {
+    throw new Error('service name missing')
+  }
 
   try {
     tokenService.removeToken(amandusToken, serviceName, id)
@@ -42,10 +41,9 @@ router.delete('/:id/:service', (req, res) => {
 })
 
 router.delete('/:id', (req, res) => {
-  const id = Number(req.params.id)
+  const { id, amandusToken } = parseDeleteRequest(req)
 
   try {
-    const amandusToken: string = toAmandusToken(req)
     tokenService.removeUser(amandusToken, id)
     res.status(200).send('user data succesfully removed')
   } catch (e) {
