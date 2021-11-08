@@ -28,7 +28,6 @@ describe('When visiting the repositories page, as a user', () => {
 
   it('I can see all of my repos after connecting with every service', () => {
     cy.visit(Cypress.env('HOST') + '/auth/github/callback?code=asdasdasd')
-
     cy.visit(Cypress.env('HOST') + '/auth/bitbucket/callback?code=asdasdasd')
     cy.visit(Cypress.env('HOST') + '/auth/gitlab/callback?code=asdasdasd')
     cy.visit(Cypress.env('HOST') + '/repositories')
