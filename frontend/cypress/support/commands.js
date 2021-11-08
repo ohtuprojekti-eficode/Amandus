@@ -46,6 +46,8 @@ Cypress.Commands.add('createUserAndLogin', (username, email, password) => {
     localStorage.setItem('amandus-user-access-token', res.body.data.register.accessToken)
     localStorage.setItem('amandus-user-refresh-token', res.body.data.register.accessToken)
   })
+  
+  cy.wait(2000)
 })
 
 Cypress.Commands.add('deleteUser', (username) => {
@@ -61,4 +63,6 @@ Cypress.Commands.add('deleteUser', (username) => {
   }).then((res) => {
     cy.log(res);
   })
+  localStorage.clear()
+  cy.wait(2000)
 })
