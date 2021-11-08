@@ -75,7 +75,7 @@ export const requestBitbucketUserEmail = (
 
 export const refreshBitbucketToken = (
   refreshToken: string,
-  fetch: typeof nodeFetch
+  fetch: typeof nodeFetch = nodeFetch
 ): Promise<AccessTokenResponse> => {
   const credentials = {
     client_id: config.BITBUCKET_CLIENT_ID || '',

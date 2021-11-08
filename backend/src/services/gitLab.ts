@@ -52,7 +52,7 @@ export const requestGitLabUserAccount = (
 
 export const refreshGitLabToken = (
   refreshToken: string,
-  fetch: typeof nodeFetch
+  fetch: typeof nodeFetch = nodeFetch
 ): Promise<AccessTokenResponse> => {
   const credentials = {
     client_id: config.GITLAB_CLIENT_ID || '',
