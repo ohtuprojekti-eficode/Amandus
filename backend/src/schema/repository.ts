@@ -27,7 +27,6 @@ import { getRepoList } from '../services/commonServices'
 import tokenService from '../services/token'
 
 import { Repository } from '../types/repository'
-import { ServiceName } from '../types/service'
 import { File } from '../types/file'
 
 const typeDef = `

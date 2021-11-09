@@ -13,7 +13,7 @@ describe('Test getRepositoryFromFilePath', () => {
         'testuser/github/ohtuprojekti-eficode/robot-test-files/backend/src/tests/testfile.txt',
       content: 'test content',
     }
-    const repoPath = getRepositoryFromFilePath(file)
+    const repoPath = getRepositoryFromFilePath(file.name)
 
     expect(repoPath).toBe('ohtuprojekti-eficode/robot-test-files')
   })
@@ -28,7 +28,7 @@ describe('Test getFileNameFromFilePath', () => {
     }
     const repositoryName = 'ohtuprojekti-eficode/robot-test-files'
 
-    const filename = getFileNameFromFilePath(file, repositoryName)
+    const filename = getFileNameFromFilePath(file.name, repositoryName)
 
     expect(filename).toBe('backend/src/tests/testfile.txt')
   })
@@ -43,7 +43,7 @@ describe('Test makeCommitMessage', () => {
     const returnedCommitMessage = makeCommitMessage(
       originalCommitMessage,
       username,
-      realFilename
+      [realFilename]
     )
     expect(returnedCommitMessage).toBe(originalCommitMessage)
   })
@@ -58,7 +58,7 @@ describe('Test makeCommitMessage', () => {
     const returnedCommitMessage = makeCommitMessage(
       originalCommitMessage,
       username,
-      realFilename
+      [realFilename]
     )
     expect(returnedCommitMessage).toBe(expectedCommitMessage)
   })
