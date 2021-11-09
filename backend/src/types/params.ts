@@ -34,3 +34,8 @@ export interface LoginUserInput {
 export interface AddServiceArgs {
   service: ServiceUser
 }
+
+export interface CommitArgs {
+  url: string
+  commitMessage: string
+}

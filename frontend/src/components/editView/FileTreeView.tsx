@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 import { ChevronRight, ExpandMore } from '@material-ui/icons'
 import { TreeItem, TreeView } from '@material-ui/lab'
-import { File, FileTree } from '../types'
+import { File, FileTree } from '../../types'
 import { makeStyles } from '@material-ui/core/styles'
-import { parseToFileTree } from '../utils/files'
+import { parseToFileTree } from '../../utils/files'
 
 interface PropsType {
   files: File[]

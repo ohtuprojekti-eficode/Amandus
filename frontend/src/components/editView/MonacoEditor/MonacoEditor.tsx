@@ -1,14 +1,21 @@
-import { useMutation } from '@apollo/client'
-import { Button, createStyles, makeStyles, useTheme } from '@material-ui/core'
+import {
+  Button,
+  CircularProgress,
+  createStyles,
+  makeStyles,
+  useTheme,
+} from '@material-ui/core'
 // import { GitHub } from '@material-ui/icons'
 import Editor from '@monaco-editor/react'
 import { editor } from 'monaco-editor'
 import React, { useRef, useState } from 'react'
-import { PULL_REPO, SAVE_CHANGES } from '../graphql/mutations'
-import { REPO_STATE } from '../graphql/queries'
-import useUser from '../hooks/useUser'
-import SaveDialog from './SaveDialog'
-import ServiceConnected from './ServiceConnected'
+import useAutoSave from '../../../hooks/useAutoSave'
+import useSaveDialog from '../../../hooks/useSaveDialog'
+import LatestCommit from '../LatestCommit'
+import PullDialog from '../saveDialogs/PullDialog'
+import SaveDialog from '../saveDialogs/SaveDialog'
+import ServiceConnected from '../ServiceConnected'
+import useEditor from './useMonacoEditor'
 
 interface Props {
   content: string
@@ -21,11 +28,6 @@ interface Props {
   updateTheme: () => void
 }
 
-interface DialogError {
-  title: string
-  message: string
-}
-
 const stylesInUse = makeStyles(() =>
   createStyles({
     saveGroup: {
@@ -34,9 +36,6 @@ const stylesInUse = makeStyles(() =>
     buttonAndStatus: {
       display: 'flex',
       alignItems: 'center',
-    },
-    commitMessage: {
-      marginTop: 5,
     },
     title: {
       height: '1rem',
@@ -57,48 +56,37 @@ const MonacoEditor = ({
   currentService,
   updateTheme,
 }: Props) => {
-  const [dialogOpen, setDialogOpen] = useState(false)
   const [waitingToSave, setWaitingToSave] = useState(false)
 
-  const [dialogError, setDialogError] = useState<DialogError | undefined>(
-    undefined
-  )
+  const {
+    dialogOpen,
+    dialogError,
+    handleDialogClose,
+    setDialogError,
+    handleDialogOpen,
+  } = useSaveDialog()
+
+  const pullProps = useSaveDialog()
 
   const classes = stylesInUse()
 
-  const { user, loading: userQueryLoading, error: userQueryError } = useUser()
+  const [onEditorChange, autosaving] = useAutoSave(filename, cloneUrl)
 
-  const [saveChanges, { loading: mutationSaveLoading }] = useMutation(
-    SAVE_CHANGES,
-    {
-      refetchQueries: [
-        {
-          query: REPO_STATE,
-          variables: { repoUrl: cloneUrl },
-        },
-      ],
-    }
-  )
-
-  const [pullRepo, { loading: pullLoading }] = useMutation(PULL_REPO, {
-    refetchQueries: [
-      {
-        query: REPO_STATE,
-        variables: { repoUrl: cloneUrl },
-      },
-    ],
-  })
+  const {
+    saveChanges,
+    pullRepo,
+    mutationSaveLoading,
+    pullLoading,
+    commitChanges,
+  } = useEditor(cloneUrl)
 
   const theme = useTheme()
 
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
 
   const handleEditorDidMount = (editor: editor.IStandaloneCodeEditor) => {
+    console.log('mounted')
     editorRef.current = editor
-  }
-
-  const handleDialogClose = () => {
-    setDialogOpen(false)
   }
 
   const handleDialogSubmit = async (
@@ -120,7 +108,7 @@ const MonacoEditor = ({
             commitMessage: newCommitMessage,
           },
         })
-        setDialogOpen(false)
+        handleDialogClose()
         setDialogError(undefined)
       } catch (error) {
         if (
@@ -139,16 +127,34 @@ const MonacoEditor = ({
     }
   }
 
-  const handleSaveButton = () => {
-    setDialogOpen(true)
-  }
-
   const handlePull = async () => {
     try {
       await pullRepo({ variables: { repoUrl: cloneUrl } })
     } catch (error) {
-      console.error('error pulling')
+      if (
+        error instanceof Error &&
+        error.message.includes(
+          'Please commit your changes or stash them before you merge'
+        )
+      ) {
+        pullProps.setDialogError({
+          title: 'Error Pulling',
+          message: error.message,
+        })
+        pullProps.handleDialogOpen()
+      }
     }
+  }
+
+  const handleCommit = async (commitMessage: string) => {
+    await commitChanges({
+      variables: {
+        url: cloneUrl,
+        commitMessage: commitMessage,
+      },
+    })
+    await handlePull()
+    pullProps.handleDialogClose()
   }
 
   return (
@@ -162,6 +168,7 @@ const MonacoEditor = ({
         theme={theme.palette.type === 'dark' ? 'vs-dark' : 'vs-light'}
         value={content}
         onMount={handleEditorDidMount}
+        onChange={onEditorChange}
       />
       {
         // Updating the theme here so we override things set by <Editor>
@@ -176,7 +183,12 @@ const MonacoEditor = ({
         error={dialogError}
         waitingToSave={waitingToSave}
       />
-
+      <PullDialog
+        open={pullProps.dialogOpen}
+        handleClose={pullProps.handleDialogClose}
+        handleSubmit={handleCommit}
+        error={pullProps.dialogError}
+      />
       <div className={classes.saveGroup}>
         <div className={classes.buttonAndStatus}>
           <Button
@@ -184,35 +196,27 @@ const MonacoEditor = ({
             color="secondary"
             variant="contained"
             onClick={handlePull}
-            disabled={
-              pullLoading ||
-              userQueryLoading ||
-              !!userQueryError ||
-              mutationSaveLoading ||
-              !user?.me
-            }
+            disabled={pullLoading || mutationSaveLoading}
           >
             Pull
           </Button>
           <Button
             color="primary"
             variant="contained"
-            disabled={
-              pullLoading ||
-              userQueryLoading ||
-              !!userQueryError ||
-              mutationSaveLoading ||
-              !user?.me
-            }
-            onClick={handleSaveButton}
+            disabled={pullLoading || mutationSaveLoading}
+            onClick={handleDialogOpen}
           >
             Save
           </Button>
           <ServiceConnected service={currentService} />
         </div>
-        <div className={classes.commitMessage}>
-          {user?.me && commitMessage && `Latest commit: ${commitMessage}`}
-        </div>
+        <LatestCommit commitMessage={commitMessage} />
+        {autosaving && (
+          <div>
+            <CircularProgress size={10} />
+            <span> Saving...</span>
+          </div>
+        )}
       </div>
     </div>
   )

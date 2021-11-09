@@ -1,4 +1,4 @@
-import simpleGit, { BranchSummary, GitError, SimpleGit } from 'simple-git'
+import simpleGit, { BranchSummary, GitError, SimpleGit, StatusResult } from 'simple-git'
 import { v4 as uuidv4 } from 'uuid'
 import { ServiceName } from '../types/service'
 
@@ -186,4 +186,12 @@ export const setUpstreamForBranch = async (
 
 export const pullToCurrentBranch = async (git: SimpleGit): Promise<void> => {
   await git.pull()
+}
+
+export const gitStatus = async (
+  git: SimpleGit,
+  _options?: string[]
+): Promise<StatusResult> => {
+  const statusResult = await git.status()
+  return statusResult
 }

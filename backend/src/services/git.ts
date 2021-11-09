@@ -22,6 +22,7 @@ import {
   cloneRepositoryToSpecificFolder,
   updateBranchFromRemote,
   getLastCommitMessage,
+  gitStatus,
 } from '../utils/gitUtils'
 import tokenService from '../services/token'
 
@@ -58,10 +59,9 @@ export const saveChanges = async (
   context: AppContext
 ): Promise<void> => {
   const { file, branch, commitMessage } = saveArgs
-  const usedService = getServiceFromFilePath(file)
-  const currentService = context.currentUser.services?.find(
-    (s) => s.serviceName === usedService
-  )
+  const usedService = getServiceFromFilePath(file.name)
+  const currentService = context.currentUser
+    .services?.find(s => s.serviceName === usedService)
 
   const amandusUser = context.currentUser
   const gitUsername = currentService?.username || amandusUser.username
@@ -72,19 +72,20 @@ export const saveChanges = async (
     usedService
   )
 
-  const repositoryName = getRepositoryFromFilePath(file)
-  const repoLocation = getRepoLocationFromRepoName(
-    repositoryName,
-    amandusUser.username,
-    usedService
-  )
+  const repositoryName = getRepositoryFromFilePath(file.name)
+  const repoLocation =
+    getRepoLocationFromRepoName(
+      repositoryName,
+      amandusUser.username,
+      usedService
+    )
 
-  const realFilename = getFileNameFromFilePath(file, repositoryName)
+  const realFilename = getFileNameFromFilePath(file.name, repositoryName)
   const sanitizedBranchName = sanitizeBranchName(branch)
   const validCommitMessage = makeCommitMessage(
     commitMessage,
     gitUsername,
-    realFilename
+    [realFilename]
   )
 
   const gitObject = getGitObject(repoLocation)
@@ -116,10 +117,9 @@ export const saveMerge = async (
   context: AppContext
 ): Promise<void> => {
   const { file, commitMessage } = saveArgs
-  const usedService = getServiceFromFilePath(file)
-  const currentService = context.currentUser.services?.find(
-    (s) => s.serviceName === usedService
-  )
+  const usedService = getServiceFromFilePath(file.name)
+  const currentService = context.currentUser
+    .services?.find(s => s.serviceName === usedService)
 
   const amandusUser = context.currentUser
   const gitUsername = currentService?.username || amandusUser.username
@@ -129,18 +129,18 @@ export const saveMerge = async (
     amandusUser.id,
     usedService
   )
-  const repositoryName = getRepositoryFromFilePath(file)
+  const repositoryName = getRepositoryFromFilePath(file.name)
   const repoLocation = getRepoLocationFromRepoName(
     repositoryName,
     amandusUser.username,
     usedService
   )
-  const realFilename = getFileNameFromFilePath(file, repositoryName)
+  const realFilename = getFileNameFromFilePath(file.name, repositoryName)
   const currentBranch = await getCurrentBranchName(repoLocation)
   const validCommitMessage = makeCommitMessage(
     commitMessage,
     gitUsername,
-    realFilename
+    [realFilename]
   )
 
   const gitObject = getGitObject(repoLocation)
@@ -183,3 +183,29 @@ export const getCurrentCommitMessage = async (
   const commitMessage = await getLastCommitMessage(gitObject)
   return commitMessage
 }
+
+export const addAndCommitLocal = async (
+  repoLocation: string,
+  commitMessage: string,
+  context: AppContext
+): Promise<void> => {
+
+  const amandusUser = context.currentUser
+  const gitUsername = amandusUser.username
+  const email = amandusUser.email
+
+  const gitObject = getGitObject(repoLocation)
+  const statusResult = await gitStatus(gitObject)
+  const modifiedFiles: string[] = statusResult.modified
+  console.log('modeified files: ', modifiedFiles)
+  await addChanges(gitObject, modifiedFiles)
+
+  const validCommitMessage = makeCommitMessage(
+    commitMessage,
+    gitUsername,
+    modifiedFiles
+  )
+  await commitAddedChanges(gitObject, gitUsername, email, validCommitMessage)
+}
+
+

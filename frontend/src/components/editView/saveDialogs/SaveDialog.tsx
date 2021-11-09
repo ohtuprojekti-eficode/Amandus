@@ -19,6 +19,7 @@ import {
   TextField,
 } from '@material-ui/core'
 import { Alert, AlertTitle } from '@material-ui/lab'
+//import BranchSelector from './BranchSelector'
 
 interface Error {
   title: string
@@ -168,6 +169,7 @@ const SaveDialog = ({
       )}
 
       {(!error || showBranchSelector) && BranchSelector()}
+      
       <DialogActions>
         <Button variant="outlined" onClick={handleClose}>
           Cancel
