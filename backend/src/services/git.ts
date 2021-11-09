@@ -10,7 +10,6 @@ import {
   writeToFile,
   getRepoLocationFromRepoName,
   getServiceFromFilePath,
-  getServiceTokenFromAppContext,
 } from '../utils/utils'
 import {
   doAutoMerge,
@@ -25,6 +24,7 @@ import {
   getLastCommitMessage,
   gitStatus,
 } from '../utils/gitUtils'
+import tokenService from '../services/token'
 
 export const switchCurrentBranch = async (
   repoLocation: string,
@@ -46,7 +46,10 @@ export const pullNewestChanges = async (
   await updateBranchFromRemote(gitObject, currentBranch)
 }
 
-export const cloneRepository = async (url: string, username: string): Promise<void> => {
+export const cloneRepository = async (
+  url: string,
+  username: string
+): Promise<void> => {
   const repoLocation = getRepoLocationFromUrlString(url, username)
   await cloneRepositoryToSpecificFolder(url, repoLocation)
 }
@@ -64,7 +67,10 @@ export const saveChanges = async (
   const gitUsername = currentService?.username || amandusUser.username
   const email = currentService?.email || amandusUser.email
 
-  const remoteToken = getServiceTokenFromAppContext({ service: usedService, appContext: context })
+  const remoteToken = await tokenService.getAccessTokenByServiceAndId(
+    amandusUser.id,
+    usedService
+  )
 
   const repositoryName = getRepositoryFromFilePath(file.name)
   const repoLocation =
@@ -119,7 +125,10 @@ export const saveMerge = async (
   const gitUsername = currentService?.username || amandusUser.username
   const email = currentService?.email || amandusUser.email
 
-  const remoteToken = getServiceTokenFromAppContext({ service: usedService, appContext: context })
+  const remoteToken = await tokenService.getAccessTokenByServiceAndId(
+    amandusUser.id,
+    usedService
+  )
   const repositoryName = getRepositoryFromFilePath(file.name)
   const repoLocation = getRepoLocationFromRepoName(
     repositoryName,

@@ -19,12 +19,13 @@ import { BranchSwitchArgs, CommitArgs, SaveArgs } from '../types/params'
 import { RepoState } from '../types/repoState'
 import {
   getRepoLocationFromUrlString,
-  getServiceTokenFromAppContext,
   getServiceNameFromUrlString,
   writeToFile,
 } from '../utils/utils'
 import { parseServiceRepositories } from '../utils/parsers'
 import { getRepoList } from '../services/commonServices'
+import tokenService from '../services/token'
+
 import { Repository } from '../types/repository'
 import { ServiceName } from '../types/service'
 import { File } from '../types/file'
@@ -131,13 +132,13 @@ const resolvers = {
         throw new Error('User is not connected to any service')
       }
 
-      const allRepositories = await Promise.all(
-        context.currentUser.services.map(async (service) => {
-          const token = getServiceTokenFromAppContext({
-            service: service.serviceName as ServiceName,
-            appContext: context,
-          })
-
+      const allRepositories = await Promise.all(context.currentUser.services.map(
+        async (service) => {
+          const token = await tokenService.getAccessTokenByServiceAndId(
+            context.currentUser.id,
+            service.serviceName
+          )
+          
           if (!token) {
             console.log(
               `Service token missing for service ${service.serviceName}`

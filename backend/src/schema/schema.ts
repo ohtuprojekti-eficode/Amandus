@@ -19,11 +19,6 @@ const Query = `
 `
 
 const Mutation = `
-    enum ServiceName {
-        github
-        bitbucket
-        gitlab
-    }
     type Tokens {
         accessToken: String
         refreshToken: String
