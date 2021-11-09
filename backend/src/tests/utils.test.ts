@@ -53,7 +53,7 @@ describe('Test makeCommitMessage', () => {
     const username = 'testuser'
     const realFilename = 'backend/src/folder/file.txt'
 
-    const expectedCommitMessage = `User ${username} modified file ${realFilename}`
+    const expectedCommitMessage = `User ${username} modified file(s) ${realFilename}`
 
     const returnedCommitMessage = makeCommitMessage(
       originalCommitMessage,
