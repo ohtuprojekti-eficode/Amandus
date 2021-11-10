@@ -59,6 +59,10 @@ const PluginObject = (props) => {
 
   const [switchChecked, setSwitchChecked] = useState(props.active)
   
+  useEffect(() => {
+   setSwitchChecked(props.active) 
+  }, [props.active])
+  
   const handleSwitchToggle = () => {
     setSwitchChecked(!switchChecked)
     props.parentCallback({ "name": props.name, "value": !switchChecked })
@@ -115,11 +119,15 @@ const SettingsPage = ({ user }: Props) => {
            cache.writeQuery({query: GET_SETTINGS, data: updatedContent})
         }}
       )
-      setSaved(true)
     }
     catch (e) {
       console.log(e)
     }
+    
+    setSaved(true)
+    setTimeout(() => {
+      window.location.reload()
+    }, 700)
 
   }
 
@@ -188,7 +196,7 @@ const SettingsPage = ({ user }: Props) => {
           Save settings
       </Button>
       <p>
-        {saved ? 'Saved successfully. If you switched the state of a language plugin, please refresh the page.': ''}
+        {saved ? 'Saved successfully. Refreshing page...': ''}
       </p> 
       
       
