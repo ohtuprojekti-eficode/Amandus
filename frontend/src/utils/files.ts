@@ -10,9 +10,10 @@ export const parseToFileTree = (files: File[], rootOffset: number = 2) => {
     path: rootName,
     type: 'root',
     children: [],
+    status: null,
   }
   files.forEach((file) => {
-    addToFileTree(root, file.name, rootOffset)
+    addToFileTree(root, file.name, rootOffset, file.status)
   })
   return root
 }
@@ -20,7 +21,8 @@ export const parseToFileTree = (files: File[], rootOffset: number = 2) => {
 export const addToFileTree = (
   root: FileTree,
   path: string,
-  rootOffset: number = 2
+  rootOffset: number = 2,
+  status: string | null
 ) => {
   const sections = path.split('/')
   const maxDepth = sections.length
@@ -36,6 +38,7 @@ export const addToFileTree = (
         path: sections.slice(0, i + 1).join('/'),
         type: i === maxDepth - 1 ? 'file' : 'folder',
         children: [],
+        status: status,
       }
       parent.children = parent.children.concat(newNode).sort(comparator)
       parent = newNode
@@ -49,4 +52,3 @@ const comparator = (a: FileTree, b: FileTree) => {
   }
   return a.name.localeCompare(b.name)
 }
-
