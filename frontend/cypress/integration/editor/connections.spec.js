@@ -27,8 +27,4 @@ describe('When visiting the connections page, as a user', () => {
     cy.get('#gitlabAuthButton').should('be.disabled')
     cy.get('#bitbucketAuthButton').should('be.disabled')
   })
-
-  afterEach(() => {
-    cy.deleteUser('testuser')
-  })
 })

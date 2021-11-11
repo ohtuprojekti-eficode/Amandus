@@ -38,8 +38,4 @@ describe('When visiting the repositories page, as a user', () => {
     cy.contains('bbtestrepo1')
     cy.contains('bbtestrepo2')
   })
-
-  afterEach(() => {
-    cy.deleteUser('testuser')
-  })
 })
