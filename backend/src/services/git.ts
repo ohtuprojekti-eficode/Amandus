@@ -1,4 +1,5 @@
 import { AppContext } from '../types/user'
+import { StatusResult } from '../types/gitTypes'
 import { SaveArgs } from '../types/params'
 import { sanitizeBranchName } from '../utils/sanitize'
 import {
@@ -160,6 +161,14 @@ export const saveMerge = async (
   }
 }
 
+export const getGitStatus = async (
+  repoLocation: string
+): Promise<StatusResult> => {
+  const gitObject = getGitObject(repoLocation)
+  const localGitStatus = await gitStatus(gitObject)
+  return localGitStatus
+}
+
 export const getLocalBranches = async (
   repoLocation: string
 ): Promise<string[]> => {
@@ -189,7 +198,6 @@ export const addAndCommitLocal = async (
   commitMessage: string,
   context: AppContext
 ): Promise<void> => {
-
   const amandusUser = context.currentUser
   const gitUsername = amandusUser.username
   const email = amandusUser.email
@@ -207,5 +215,3 @@ export const addAndCommitLocal = async (
   )
   await commitAddedChanges(gitObject, gitUsername, email, validCommitMessage)
 }
-
-
