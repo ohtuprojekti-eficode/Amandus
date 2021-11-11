@@ -74,3 +74,10 @@ jobs:
           wait-on: http://localhost:3001
           env: configFile=production
           browser: chrome
+
+      - name: Upload screenshots
+        uses: actions/upload-artifact@latest
+        if: failure()
+        with:
+            name: cypress-snapshots
+            path: cypress/screenshots
