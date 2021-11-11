@@ -90,3 +90,9 @@ export const COMMIT_CHANGES = gql`
     commitLocalChanges(url: $url, commitMessage: $commitMessage) 
   }
 `
+
+export const RESET_HARD = gql`
+mutation resetLocalChanges($url: String!) {
+  resetLocalChanges(url: $url) 
+}
+`

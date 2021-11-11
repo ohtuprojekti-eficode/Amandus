@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
   cloneRepository,
@@ -9,6 +11,7 @@ import {
   switchCurrentBranch,
   pullNewestChanges,
   addAndCommitLocal,
+  resetAll,
 } from '../services/git'
 import { existsSync, readFileSync } from 'fs'
 import readRecursive from 'recursive-readdir'
@@ -131,6 +134,7 @@ const resolvers = {
         throw new Error('User is not connected to any service')
       }
 
+      //TODO fix typescript errors for this func
       const allRepositories = await Promise.all(context.currentUser.services.map(
         async (service) => {
           const token = await tokenService.getAccessTokenByServiceAndId(
@@ -257,6 +261,19 @@ const resolvers = {
       }
       return 'committed'
     },
+    resetLocalChanges: async (
+      _root: unknown,
+      args: { url: string },
+      context: AppContext
+    ): Promise<string> => {
+      
+      const repoLocation = getRepoLocationFromUrlString(
+        args.url,
+        context.currentUser.username
+      )
+      const result = await resetAll(repoLocation)
+      return result
+    }
   },
 }
 

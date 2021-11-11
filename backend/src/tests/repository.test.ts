@@ -348,7 +348,7 @@ describe('switchBranch mutation', () => {
   })
 })
 
-describe('SaveChanges mutation', () => {
+describe('LocalChanges mutation', () => {
   const repoPath = join('.', 'repositories', 'testuser', 'github', 'fakegithubuser', 'testRepo')
 
   beforeEach(async () => {

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { AppContext } from '../types/user'
 import { SaveArgs } from '../types/params'
 import { sanitizeBranchName } from '../utils/sanitize'
@@ -23,6 +25,7 @@ import {
   updateBranchFromRemote,
   getLastCommitMessage,
   gitStatus,
+  gitReset,
 } from '../utils/gitUtils'
 import tokenService from '../services/token'
 
@@ -125,6 +128,7 @@ export const saveMerge = async (
   const gitUsername = currentService?.username || amandusUser.username
   const email = currentService?.email || amandusUser.email
 
+  //TODO fix typescript errors for this funcy func
   const remoteToken = await tokenService.getAccessTokenByServiceAndId(
     amandusUser.id,
     usedService
@@ -206,6 +210,14 @@ export const addAndCommitLocal = async (
     modifiedFiles
   )
   await commitAddedChanges(gitObject, gitUsername, email, validCommitMessage)
+}
+
+export const resetAll = async (
+  repoLocation: string
+): Promise<string> => {
+  const gitObject = getGitObject(repoLocation)
+  const result = await gitReset(gitObject, 'hard')
+  return result
 }
 
 
