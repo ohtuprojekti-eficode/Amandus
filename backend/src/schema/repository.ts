@@ -9,6 +9,7 @@ import {
   switchCurrentBranch,
   pullNewestChanges,
   addAndCommitLocal,
+  getGitStatus,
 } from '../services/git'
 import { existsSync, readFileSync } from 'fs'
 import readRecursive from 'recursive-readdir'
@@ -33,6 +34,19 @@ const typeDef = `
     type File {
         name: String!
         content: String!
+        status: String
+    }
+    type StatusResult {
+      not_added: [String]!
+      conflicted: [String]!
+      created: [String]!
+      deleted: [String]!
+      modified: [String]!
+      staged: [String]!
+      ahead: Int!
+      behind: Int!
+      current: String!
+      tracking: String!
     }
     input FileInput {
       name: String!
@@ -45,6 +59,7 @@ const typeDef = `
       url: String!
       commitMessage: String!
       service: String!
+      gitStatus: StatusResult!
     }
     type Repository {
       id: String!
@@ -102,9 +117,17 @@ const resolvers = {
       }
 
       const filePaths = await readRecursive(repoLocation, ['.git'])
+      const gitStatus = await getGitStatus(repoLocation)
+
+      const fileStatuses = gitStatus.files.map((fileStatus) => ({
+        absFilename: repoLocation.substring(2) + '/' + fileStatus.path,
+        status: fileStatus.working_dir,
+      }))
+
       const files = filePaths.map((file) => ({
         name: relative('repositories/', file),
         content: readFileSync(file, 'utf-8'),
+        status: fileStatuses.find((data) => data.absFilename == file)?.status,
       }))
 
       const branches = await getLocalBranches(repoLocation)
@@ -115,6 +138,7 @@ const resolvers = {
         url: args.url,
         commitMessage,
         service,
+        gitStatus,
       }
     },
 
@@ -131,13 +155,13 @@ const resolvers = {
         throw new Error('User is not connected to any service')
       }
 
-      const allRepositories = await Promise.all(context.currentUser.services.map(
-        async (service) => {
+      const allRepositories = await Promise.all(
+        context.currentUser.services.map(async (service) => {
           const token = await tokenService.getAccessTokenByServiceAndId(
             context.currentUser.id,
             service.serviceName
           )
-          
+
           if (!token) {
             console.log(
               `Service token missing for service ${service.serviceName}`
