@@ -10,7 +10,7 @@ import { TreeView, TreeItem } from '@material-ui/lab'
 import { File, FileTree } from '../../types'
 import { makeStyles } from '@material-ui/core/styles'
 import { parseToFileTree } from '../../utils/files'
-import { lightBlue } from '@material-ui/core/colors'
+//import { lightBlue } from '@material-ui/core/colors'
 
 interface PropsType {
   files: File[]
@@ -65,7 +65,7 @@ const FileTreeView = ({ files }: PropsType) => {
         nodeId={fileTree.path}
         onClick={handleClick(fileTree.path, fileTree.type)}
         label={fileTree.name}
-        endIcon={fileTree.status == 'M' ? <Build /> : ''}
+        endIcon={fileTree.status === 'M' ? <Build /> : ''}
       >
         {fileTree.children.length !== 0
           ? fileTree.children.map((node) => buildTree(node))
