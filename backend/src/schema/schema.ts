@@ -55,12 +55,12 @@ const Mutation = `
             password: String!
         ): Tokens
         saveChanges(
-            file: FileInput! 
+            files: [FileInput]! 
             branch: String!
             commitMessage: String
         ): String
         saveMergeEdit(
-            file: FileInput! 
+            files: [FileInput]! 
             commitMessage: String
         ): String
         connectGitService(
