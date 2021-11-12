@@ -120,31 +120,25 @@ const resolvers = {
         throw new Error('User is not connected to any service')
       }
 
+      if (!context.accessToken) {
+        throw new Error('access token is missing!!')
+      }
+
       const allRepositories = await Promise.all(context.currentUser.services.map(
         async (service) => {
-
-          const tokenResponse = await fetch(`http://localhost:3002/api/tokens/${context.currentUser.id}/${service.serviceName}`, {
+          const tokenResponse = await fetch(`http://tokenservice:3002/api/tokens/${context.currentUser.id}/${service.serviceName}`, {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${context.accessToken}` }
           })
 
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           const token = await tokenResponse.json()
-
-          console.log('HELLO FROM BACKEND')
-          console.log('ATTEMPTED TO FETCH SERVICE TOKEN:')
-          console.log(token.access_token)
-          // const token = await tokenService.getAccessTokenByServiceAndId(
-          //   context.currentUser.id,
-          //   service.serviceName
-          // )
 
           if (!token) {
             console.log(`Service token missing for service ${service.serviceName}`)
             return []
           }
 
-          const response = await getRepoList(service, token)
+          const response = await getRepoList(service, token.access_token)
           const serviceRepositories: Repository[] = parseServiceRepositories(response, service.serviceName)
 
           return serviceRepositories

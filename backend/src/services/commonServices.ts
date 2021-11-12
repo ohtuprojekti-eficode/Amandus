@@ -9,14 +9,24 @@ export const getRepoList = (
   service: ServiceUser,
   token: string
 ): Promise<ServiceRepository[] | ServiceRepository> => {
+  console.log('FETCHING REPOS FROM')
+  console.log(service.reposurl)
+  console.log('WITH TOKEN')
+  console.log(`Bearer ${token}`)
+
   return fetch(`${service.reposurl}`, {
     headers: {
       Authorization: `Bearer ${token}`
     },
   })
-    .then<ServiceRepository[] | ServiceRepository>((res) => res.json())
-    .catch((error: Error) => {
-      throw new Error(error.message)
+    .then<ServiceRepository[] | ServiceRepository>(res => {
+      return res.json().then(data => {
+        if (!res.ok) throw new Error(data.message)
+        else return data
+      })
+    })
+    .catch(e => {
+      throw new Error((e as Error).message)
     })
 }
 
@@ -25,15 +35,15 @@ export const requestServiceUser = async (
   code: string
 ): Promise<ServiceUserResponse> => {
 
-  if(service === 'github'){
+  if (service === 'github') {
     return await requestGithubUser(code)
   }
 
-  if(service === 'bitbucket'){
+  if (service === 'bitbucket') {
     return await requestBitbucketUser(code)
   }
 
-  if(service === 'gitlab'){
+  if (service === 'gitlab') {
     return await requestGitLabUser(code)
   }
 

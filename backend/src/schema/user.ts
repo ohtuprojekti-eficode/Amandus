@@ -1,4 +1,5 @@
 import { UserInputError, ForbiddenError } from 'apollo-server'
+import fetch from 'node-fetch'
 import bcrypt from 'bcryptjs'
 import Crypto from 'crypto'
 import User from '../model/user'
@@ -158,13 +159,23 @@ const resolvers = {
         throw new UserInputError(`${service} code not provided`)
       }
 
-      const serviceUserResponse = await requestServiceUser(service, args.code)    
+      //TODO: rename requestServiceUser, as it returns user and token, not just user
+      const serviceUserResponse = await requestServiceUser(service, args.code)
+      const body = { serviceToken: serviceUserResponse.response }
 
-      tokenService.setToken(
-        context.currentUser.id,
-        service,
-        serviceUserResponse.response
-      )
+      const response = await fetch(`http://tokenservice:3002/api/tokens/${context.currentUser.id}/${service}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${context.accessToken}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      })
+
+      if (response.status !== 200) {
+        throw new Error('something went wrong while adding new token')
+      }
+
       const serviceUser = serviceUserResponse.serviceUser
       const tokens = createTokens(context.currentUser)
 
@@ -221,7 +232,7 @@ const resolvers = {
     deleteUser: async (
       _root: unknown,
       args: UserType,
-      _context: AppContext
+      context: AppContext
     ): Promise<void> => {
       const { username } = args
 
@@ -229,7 +240,28 @@ const resolvers = {
         throw new UserInputError('User not valid')
       }
       const user = await User.findUserByUsername(username)
-      user?.id && tokenService.deleteTokenByUserId(user.id)
+      // user?.id && tokenService.deleteTokenByUserId(user.id)
+
+      if (!user?.id) {
+        throw new Error('Did not receive user id for use removal')
+      }
+
+      console.log(`Attempting removal of user ${user.id} with token ${context.accessToken}`)
+
+      //TODO: ADD CHECK IF RES.OK!
+      await fetch(`http://tokenservice:3002/api/tokens/${user.id}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${context.accessToken}`,
+            "Content-Type": "application/json"
+          }
+        }).then(res => res.json())
+        .catch(e => {
+          throw new Error((e as Error).message)
+        })
+
+
       await User.deleteUser(username)
     },
   },

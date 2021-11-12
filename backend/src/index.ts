@@ -27,29 +27,29 @@ const corsOptions = {
 const server = new ApolloServer({
   schema,
   context: async ({ req, res }) => {
-    const accessToken: any = req.headers['x-access-token']
-    const refreshToken: any = req && req.headers['x-refresh-token']
+    const accessTokenHeader: any = req.headers['x-access-token']
+    const refreshTokenHeader: any = req && req.headers['x-refresh-token']
 
-    if (!accessToken || !refreshToken) return
+    if (!accessTokenHeader || !refreshTokenHeader) return
 
     try {
       // client is accessing with non-expired access token...
-      const decodedAccessToken = <UserJWT>verify(accessToken, config.JWT_SECRET)
+      const decodedAccessToken = <UserJWT>verify(accessTokenHeader, config.JWT_SECRET)
       if (!decodedAccessToken.id) return
 
       const currentUser = await User.getUserById(decodedAccessToken.id)
       if (!currentUser) return
 
-      const stringifiedAccessToken = accessToken as string
-      const stringifiedRefreshToken = refreshToken as string
+      const accessToken = accessTokenHeader as string
+      const refreshToken = refreshTokenHeader as string
 
-      return { currentUser, stringifiedAccessToken, stringifiedRefreshToken }
+      return { currentUser, accessToken, refreshToken }
     } catch (e) {
       if (e instanceof jwt.TokenExpiredError) {
         // trying to access with expired access token...
         try {
           const decodedRefreshToken = <UserJWT>(
-            verify(refreshToken, config.JWT_SECRET)
+            verify(refreshTokenHeader, config.JWT_SECRET)
           )
           if (!decodedRefreshToken.id) return
 
@@ -69,10 +69,10 @@ const server = new ApolloServer({
             'x-refresh-token': newTokens.refreshToken,
           })
 
-          const newAccessToken = newTokens.accessToken
-          const newRefreshToken = newTokens.refreshToken
+          const accessToken = newTokens.accessToken
+          const refreshToken = newTokens.refreshToken
 
-          return { currentUser, newAccessToken, newRefreshToken }
+          return { currentUser, accessToken, refreshToken }
         } catch (e) {
           // client is accessing with expired access token and refresh token...
           if (e instanceof jwt.TokenExpiredError) return

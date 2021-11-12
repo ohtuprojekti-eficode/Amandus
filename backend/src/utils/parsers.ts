@@ -19,6 +19,8 @@ export const parseServiceRepositories = (response: ServiceRepository[] | Service
 }
 
 export const parseGithubRepositories = (response: GitHubRepository[]): Repository[] => {
+  console.log('response in parser: ')
+  console.log(response)
   const repolist = response.map((repo: GitHubRepository) => {
     const repoId = `${repo.id}`
 
