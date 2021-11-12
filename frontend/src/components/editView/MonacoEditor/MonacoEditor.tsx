@@ -100,10 +100,12 @@ const MonacoEditor = ({
         setWaitingToSave(true)
         await saveChanges({
           variables: {
-            file: {
-              name: filename,
-              content: editorRef.current.getValue(),
-            },
+            files: [
+              {
+                name: filename,
+                content: editorRef.current.getValue(),
+              },
+            ],
             branch: branchName,
             commitMessage: newCommitMessage,
           },

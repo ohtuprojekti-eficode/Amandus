@@ -26,6 +26,7 @@ import {
   gitStatus,
 } from '../utils/gitUtils'
 import tokenService from '../services/token'
+import { ApolloError } from 'apollo-server-errors'
 
 export const switchCurrentBranch = async (
   repoLocation: string,
@@ -59,10 +60,18 @@ export const saveChanges = async (
   saveArgs: SaveArgs,
   context: AppContext
 ): Promise<void> => {
-  const { file, branch, commitMessage } = saveArgs
-  const usedService = getServiceFromFilePath(file.name)
-  const currentService = context.currentUser
-    .services?.find(s => s.serviceName === usedService)
+  const { files, branch, commitMessage } = saveArgs
+
+  const firstFile = files[0]
+
+  if (!firstFile) {
+    throw new ApolloError('no files selected to commit')
+  }
+
+  const usedService = getServiceFromFilePath(firstFile.name)
+  const currentService = context.currentUser.services?.find(
+    (s) => s.serviceName === usedService
+  )
 
   const amandusUser = context.currentUser
   const gitUsername = currentService?.username || amandusUser.username
@@ -73,20 +82,22 @@ export const saveChanges = async (
     usedService
   )
 
-  const repositoryName = getRepositoryFromFilePath(file.name)
-  const repoLocation =
-    getRepoLocationFromRepoName(
-      repositoryName,
-      amandusUser.username,
-      usedService
-    )
+  const repositoryName = getRepositoryFromFilePath(firstFile.name)
+  const repoLocation = getRepoLocationFromRepoName(
+    repositoryName,
+    amandusUser.username,
+    usedService
+  )
 
-  const realFilename = getFileNameFromFilePath(file.name, repositoryName)
+  const realFilenames = files.map((file) =>
+    getFileNameFromFilePath(file.name, repositoryName)
+  )
+
   const sanitizedBranchName = sanitizeBranchName(branch)
   const validCommitMessage = makeCommitMessage(
     commitMessage,
     gitUsername,
-    [realFilename]
+    realFilenames
   )
 
   const gitObject = getGitObject(repoLocation)
@@ -94,9 +105,9 @@ export const saveChanges = async (
   await validateBranchName(sanitizedBranchName)
   await checkoutBranch(gitObject, sanitizedBranchName)
 
-  writeToFile(file)
+  files.forEach((file) => writeToFile(file))
 
-  await addChanges(gitObject, [realFilename])
+  await addChanges(gitObject, realFilenames)
   await commitAddedChanges(gitObject, gitUsername, email, validCommitMessage)
 
   if (remoteToken) {
@@ -117,10 +128,18 @@ export const saveMerge = async (
   saveArgs: SaveArgs,
   context: AppContext
 ): Promise<void> => {
-  const { file, commitMessage } = saveArgs
-  const usedService = getServiceFromFilePath(file.name)
-  const currentService = context.currentUser
-    .services?.find(s => s.serviceName === usedService)
+  const { files, commitMessage } = saveArgs
+
+  const firstFile = files[0]
+
+  if (!firstFile) {
+    throw new ApolloError('no files selected to commit')
+  }
+
+  const usedService = getServiceFromFilePath(firstFile.name)
+  const currentService = context.currentUser.services?.find(
+    (s) => s.serviceName === usedService
+  )
 
   const amandusUser = context.currentUser
   const gitUsername = currentService?.username || amandusUser.username
@@ -130,23 +149,25 @@ export const saveMerge = async (
     amandusUser.id,
     usedService
   )
-  const repositoryName = getRepositoryFromFilePath(file.name)
+  const repositoryName = getRepositoryFromFilePath(firstFile.name)
   const repoLocation = getRepoLocationFromRepoName(
     repositoryName,
     amandusUser.username,
     usedService
   )
-  const realFilename = getFileNameFromFilePath(file.name, repositoryName)
+  const realFilenames = files.map((file) =>
+    getFileNameFromFilePath(file.name, repositoryName)
+  )
   const currentBranch = await getCurrentBranchName(repoLocation)
   const validCommitMessage = makeCommitMessage(
     commitMessage,
     gitUsername,
-    [realFilename]
+    realFilenames
   )
 
   const gitObject = getGitObject(repoLocation)
-  writeToFile(file)
-  await addChanges(gitObject, [realFilename])
+  files.forEach((file) => writeToFile(file))
+  await addChanges(gitObject, realFilenames)
   await commitAddedChanges(gitObject, gitUsername, email, validCommitMessage)
 
   if (remoteToken) {

@@ -84,10 +84,12 @@ const MonacoDiffEditor = ({
         setWaitingToMerge(true)
         await saveMergeEdit({
           variables: {
-            file: {
-              name: filename,
-              content: editorRef.current.getModifiedEditor().getValue(),
-            },
+            files: [
+              {
+                name: filename,
+                content: editorRef.current.getModifiedEditor().getValue(),
+              },
+            ],
             commitMessage: newCommitMessage,
           },
         })
