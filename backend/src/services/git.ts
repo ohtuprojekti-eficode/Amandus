@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { AppContext } from '../types/user'
 import { StatusResult } from '../types/gitTypes'
 import { SaveArgs } from '../types/params'
@@ -25,6 +27,7 @@ import {
   getLastCommitMessage,
   gitStatus,
   resetSingleFile,
+  gitReset,
 } from '../utils/gitUtils'
 import tokenService from '../services/token'
 import { ApolloError } from 'apollo-server-errors'
@@ -146,6 +149,7 @@ export const saveMerge = async (
   const gitUsername = currentService?.username || amandusUser.username
   const email = currentService?.email || amandusUser.email
 
+  //TODO fix typescript errors for this funcy func
   const remoteToken = await tokenService.getAccessTokenByServiceAndId(
     amandusUser.id,
     usedService
@@ -249,7 +253,14 @@ export const resetFile = async (
   const repositoryName = getRepositoryFromFilePath(fileName)
   const realFilename = getFileNameFromFilePath(fileName, repositoryName)
   const gitObject = getGitObject(repoLocation)
-
-
   return resetSingleFile(gitObject, realFilename)
 }
+  
+export const resetAll = async (
+  repoLocation: string
+): Promise<string> => {
+  const gitObject = getGitObject(repoLocation)
+  const result = await gitReset(gitObject, 'hard')
+  return result
+}
+

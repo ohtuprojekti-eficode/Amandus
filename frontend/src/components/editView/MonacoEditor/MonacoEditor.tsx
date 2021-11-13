@@ -78,6 +78,7 @@ const MonacoEditor = ({
     mutationSaveLoading,
     pullLoading,
     commitChanges,
+    resetAll
   } = useEditor(cloneUrl)
 
   const theme = useTheme()
@@ -159,6 +160,14 @@ const MonacoEditor = ({
     pullProps.handleDialogClose()
   }
 
+  const handleReset = async () => {
+    await resetAll({
+      variables: {
+        url: cloneUrl
+      },
+    })
+  }
+
   return (
     <div>
       <h2 className={classes.title}>
@@ -211,6 +220,16 @@ const MonacoEditor = ({
             Save
           </Button>
           <ServiceConnected service={currentService} />
+          <Button
+            style={{ marginLeft: 25 }}
+            color="primary"
+            variant="outlined"
+            size="small"
+            disabled={pullLoading || mutationSaveLoading}
+            onClick={handleReset}
+          >
+            Discrad Changes
+          </Button>
         </div>
         <LatestCommit commitMessage={commitMessage} />
         {autosaving && (
