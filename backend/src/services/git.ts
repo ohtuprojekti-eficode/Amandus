@@ -24,6 +24,7 @@ import {
   updateBranchFromRemote,
   getLastCommitMessage,
   gitStatus,
+  resetSingleFile,
 } from '../utils/gitUtils'
 import tokenService from '../services/token'
 import { ApolloError } from 'apollo-server-errors'
@@ -226,7 +227,6 @@ export const addAndCommitLocal = async (
   const gitObject = getGitObject(repoLocation)
   const statusResult = await gitStatus(gitObject)
   const modifiedFiles: string[] = statusResult.modified
-  console.log('modeified files: ', modifiedFiles)
   await addChanges(gitObject, modifiedFiles)
 
   const validCommitMessage = makeCommitMessage(
@@ -235,4 +235,21 @@ export const addAndCommitLocal = async (
     modifiedFiles
   )
   await commitAddedChanges(gitObject, gitUsername, email, validCommitMessage)
+}
+
+export const resetFile = async (
+  url: string,
+  fileName: string,
+  context: AppContext
+): Promise<string> => {
+  const repoLocation = getRepoLocationFromUrlString(
+    url,
+    context.currentUser.username
+  )
+  const repositoryName = getRepositoryFromFilePath(fileName)
+  const realFilename = getFileNameFromFilePath(fileName, repositoryName)
+  const gitObject = getGitObject(repoLocation)
+
+
+  return resetSingleFile(gitObject, realFilename)
 }

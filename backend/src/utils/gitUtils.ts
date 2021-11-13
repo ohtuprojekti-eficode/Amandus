@@ -195,3 +195,10 @@ export const gitStatus = async (
   const statusResult = await git.status()
   return statusResult
 }
+
+export const resetSingleFile = async (
+  git: SimpleGit,
+  fileName: string
+): Promise<string> => {
+  return await git.checkout('HEAD', ['--', fileName])
+}

@@ -10,6 +10,7 @@ import {
   pullNewestChanges,
   addAndCommitLocal,
   getGitStatus,
+  resetFile,
 } from '../services/git'
 import { existsSync, readFileSync } from 'fs'
 import readRecursive from 'recursive-readdir'
@@ -281,6 +282,21 @@ const resolvers = {
       }
       return 'committed'
     },
+    resetCurrentFile: async (
+      _root: unknown,
+      args: {url: string, fileName: string},
+      context: AppContext
+    ): Promise<string> => {
+      if (!context.currentUser) {
+        throw new ForbiddenError('You have to login')
+      }
+      try {
+        await resetFile(args.url, args.fileName, context)
+      } catch (e) {
+        throw new ApolloError((e as Error).message)
+      }
+      return `reset file ${args.fileName}`
+    }
   },
 }
 
