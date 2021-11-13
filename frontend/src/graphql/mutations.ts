@@ -92,3 +92,9 @@ mutation resetLocalChanges($url: String!) {
   resetLocalChanges(url: $url) 
 }
 `
+
+export const RESET_FILE = gql`
+mutation resetCurrentFile($url: String!, $fileName: String!) {
+  resetCurrentFile(url: $url, fileName: $fileName) 
+}
+`

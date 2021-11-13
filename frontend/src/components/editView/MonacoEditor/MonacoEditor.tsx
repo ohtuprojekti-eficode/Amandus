@@ -78,7 +78,8 @@ const MonacoEditor = ({
     mutationSaveLoading,
     pullLoading,
     commitChanges,
-    resetAll
+    resetAll,
+    resetFile
   } = useEditor(cloneUrl)
 
   const theme = useTheme()
@@ -168,6 +169,15 @@ const MonacoEditor = ({
     })
   }
 
+  const handleResetFile = async () => {
+    await resetFile({
+      variables: {
+        url: cloneUrl,
+        fileName: filename
+      }
+    })
+  }
+
   return (
     <div>
       <h2 className={classes.title}>
@@ -228,7 +238,17 @@ const MonacoEditor = ({
             disabled={pullLoading || mutationSaveLoading}
             onClick={handleReset}
           >
-            Discrad Changes
+            Discrad All Changes
+          </Button>
+          <Button
+            style={{ marginLeft: 25 }}
+            color="primary"
+            variant="outlined"
+            size="small"
+            disabled={pullLoading || mutationSaveLoading}
+            onClick={handleResetFile}
+          >
+            Discrad File Changes
           </Button>
         </div>
         <LatestCommit commitMessage={commitMessage} />
