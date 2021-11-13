@@ -275,12 +275,8 @@ const resolvers = {
       args: CommitArgs,
       context: AppContext
     ): Promise<string> => {
-      const repoLocation = getRepoLocationFromUrlString(
-        args.url,
-        context.currentUser.username
-      )
       try {
-        await addAndCommitLocal(repoLocation, args.commitMessage, context)
+        await addAndCommitLocal(args.url, args.commitMessage, args.fileName, context)
       } catch (e) {
         throw new ApolloError((e as Error).message)
       }
@@ -288,7 +284,7 @@ const resolvers = {
     },
     resetCurrentFile: async (
       _root: unknown,
-      args: {url: string, fileName: string},
+      args: { url: string, fileName: string },
       context: AppContext
     ): Promise<string> => {
       if (!context.currentUser) {
@@ -306,7 +302,7 @@ const resolvers = {
       args: { url: string },
       context: AppContext
     ): Promise<string> => {
-      
+
       const repoLocation = getRepoLocationFromUrlString(
         args.url,
         context.currentUser.username

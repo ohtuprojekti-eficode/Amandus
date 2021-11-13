@@ -155,6 +155,7 @@ const MonacoEditor = ({
       variables: {
         url: cloneUrl,
         commitMessage: commitMessage,
+        fileName: filename
       },
     })
     await handlePull()
