@@ -60,6 +60,10 @@ const EditView = ({ cloneUrl }: Props) => {
     const currentService = repoStateData.repoState.service
     const files = repoStateData.repoState.files
     const filename = location.search.slice(3)
+    const isConflicted =
+      repoStateData.repoState.gitStatus.conflicted?.some((name) =>
+        filename.includes(name)
+      ) ?? false
 
     const file = files.find((e) => e.name === filename)
 
@@ -73,6 +77,7 @@ const EditView = ({ cloneUrl }: Props) => {
     return (
       <Editor
         fileContent={fileContent}
+        isConflicted={isConflicted}
         filename={filename}
         commitMessage={commitMessage}
         cloneUrl={urlToClone}
