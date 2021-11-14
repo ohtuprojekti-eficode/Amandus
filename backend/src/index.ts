@@ -110,5 +110,4 @@ if (process.env.NODE_ENV !== 'test') {
   )
 }
 
-console.log('Amandus backend started, NODE_ENV: ', process.env.NODE_ENV)
 export { server }
