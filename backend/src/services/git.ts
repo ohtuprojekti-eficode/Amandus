@@ -1,4 +1,5 @@
 import { AppContext } from '../types/user'
+import { StatusResult } from '../types/gitTypes'
 import { SaveArgs } from '../types/params'
 import { sanitizeBranchName } from '../utils/sanitize'
 import {
@@ -22,8 +23,10 @@ import {
   cloneRepositoryToSpecificFolder,
   updateBranchFromRemote,
   getLastCommitMessage,
+  gitStatus,
 } from '../utils/gitUtils'
 import tokenService from '../services/token'
+import { ApolloError } from 'apollo-server-errors'
 
 export const switchCurrentBranch = async (
   repoLocation: string,
@@ -57,8 +60,15 @@ export const saveChanges = async (
   saveArgs: SaveArgs,
   context: AppContext
 ): Promise<void> => {
-  const { file, branch, commitMessage } = saveArgs
-  const usedService = getServiceFromFilePath(file)
+  const { files, branch, commitMessage } = saveArgs
+
+  const firstFile = files[0]
+
+  if (!firstFile) {
+    throw new ApolloError('no files selected to commit')
+  }
+
+  const usedService = getServiceFromFilePath(firstFile.name)
   const currentService = context.currentUser.services?.find(
     (s) => s.serviceName === usedService
   )
@@ -72,19 +82,22 @@ export const saveChanges = async (
     usedService
   )
 
-  const repositoryName = getRepositoryFromFilePath(file)
+  const repositoryName = getRepositoryFromFilePath(firstFile.name)
   const repoLocation = getRepoLocationFromRepoName(
     repositoryName,
     amandusUser.username,
     usedService
   )
 
-  const realFilename = getFileNameFromFilePath(file, repositoryName)
+  const realFilenames = files.map((file) =>
+    getFileNameFromFilePath(file.name, repositoryName)
+  )
+
   const sanitizedBranchName = sanitizeBranchName(branch)
   const validCommitMessage = makeCommitMessage(
     commitMessage,
     gitUsername,
-    realFilename
+    realFilenames
   )
 
   const gitObject = getGitObject(repoLocation)
@@ -92,9 +105,9 @@ export const saveChanges = async (
   await validateBranchName(sanitizedBranchName)
   await checkoutBranch(gitObject, sanitizedBranchName)
 
-  writeToFile(file)
+  files.forEach((file) => writeToFile(file))
 
-  await addChanges(gitObject, [realFilename])
+  await addChanges(gitObject, realFilenames)
   await commitAddedChanges(gitObject, gitUsername, email, validCommitMessage)
 
   if (remoteToken) {
@@ -115,8 +128,15 @@ export const saveMerge = async (
   saveArgs: SaveArgs,
   context: AppContext
 ): Promise<void> => {
-  const { file, commitMessage } = saveArgs
-  const usedService = getServiceFromFilePath(file)
+  const { files, commitMessage } = saveArgs
+
+  const firstFile = files[0]
+
+  if (!firstFile) {
+    throw new ApolloError('no files selected to commit')
+  }
+
+  const usedService = getServiceFromFilePath(firstFile.name)
   const currentService = context.currentUser.services?.find(
     (s) => s.serviceName === usedService
   )
@@ -129,23 +149,25 @@ export const saveMerge = async (
     amandusUser.id,
     usedService
   )
-  const repositoryName = getRepositoryFromFilePath(file)
+  const repositoryName = getRepositoryFromFilePath(firstFile.name)
   const repoLocation = getRepoLocationFromRepoName(
     repositoryName,
     amandusUser.username,
     usedService
   )
-  const realFilename = getFileNameFromFilePath(file, repositoryName)
+  const realFilenames = files.map((file) =>
+    getFileNameFromFilePath(file.name, repositoryName)
+  )
   const currentBranch = await getCurrentBranchName(repoLocation)
   const validCommitMessage = makeCommitMessage(
     commitMessage,
     gitUsername,
-    realFilename
+    realFilenames
   )
 
   const gitObject = getGitObject(repoLocation)
-  writeToFile(file)
-  await addChanges(gitObject, [realFilename])
+  files.forEach((file) => writeToFile(file))
+  await addChanges(gitObject, realFilenames)
   await commitAddedChanges(gitObject, gitUsername, email, validCommitMessage)
 
   if (remoteToken) {
@@ -158,6 +180,14 @@ export const saveMerge = async (
       repositoryName
     )
   }
+}
+
+export const getGitStatus = async (
+  repoLocation: string
+): Promise<StatusResult> => {
+  const gitObject = getGitObject(repoLocation)
+  const localGitStatus = await gitStatus(gitObject)
+  return localGitStatus
 }
 
 export const getLocalBranches = async (
@@ -182,4 +212,27 @@ export const getCurrentCommitMessage = async (
   const gitObject = getGitObject(repoLocation)
   const commitMessage = await getLastCommitMessage(gitObject)
   return commitMessage
+}
+
+export const addAndCommitLocal = async (
+  repoLocation: string,
+  commitMessage: string,
+  context: AppContext
+): Promise<void> => {
+  const amandusUser = context.currentUser
+  const gitUsername = amandusUser.username
+  const email = amandusUser.email
+
+  const gitObject = getGitObject(repoLocation)
+  const statusResult = await gitStatus(gitObject)
+  const modifiedFiles: string[] = statusResult.modified
+  console.log('modeified files: ', modifiedFiles)
+  await addChanges(gitObject, modifiedFiles)
+
+  const validCommitMessage = makeCommitMessage(
+    commitMessage,
+    gitUsername,
+    modifiedFiles
+  )
+  await commitAddedChanges(gitObject, gitUsername, email, validCommitMessage)
 }

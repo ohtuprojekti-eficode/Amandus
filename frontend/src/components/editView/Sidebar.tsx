@@ -1,7 +1,7 @@
 import React from 'react'
 import { Drawer, Toolbar } from '@material-ui/core'
 import FileTreeView from './FileTreeView'
-import { File } from '../types'
+import { File } from '../../types'
 import BranchSelector from './BranchSelector'
 
 interface Props {

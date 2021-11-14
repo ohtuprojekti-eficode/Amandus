@@ -8,28 +8,45 @@ import {
   getLocalBranches,
   switchCurrentBranch,
   pullNewestChanges,
+  addAndCommitLocal,
+  getGitStatus,
 } from '../services/git'
 import { existsSync, readFileSync } from 'fs'
 import readRecursive from 'recursive-readdir'
 import { ForbiddenError, ApolloError } from 'apollo-server'
 import { relative } from 'path'
 import { AppContext } from '../types/user'
-import { BranchSwitchArgs, SaveArgs } from '../types/params'
+import { BranchSwitchArgs, CommitArgs, SaveArgs } from '../types/params'
 import { RepoState } from '../types/repoState'
 import {
   getRepoLocationFromUrlString,
   getServiceNameFromUrlString,
+  writeToFile,
 } from '../utils/utils'
 import { parseServiceRepositories } from '../utils/parsers'
 import { getRepoList } from '../services/commonServices'
 import tokenService from '../services/token'
 
 import { Repository } from '../types/repository'
+import { File } from '../types/file'
 
 const typeDef = `
     type File {
         name: String!
         content: String!
+        status: String
+    }
+    type StatusResult {
+      not_added: [String]!
+      conflicted: [String]!
+      created: [String]!
+      deleted: [String]!
+      modified: [String]!
+      staged: [String]!
+      ahead: Int!
+      behind: Int!
+      current: String!
+      tracking: String!
     }
     input FileInput {
       name: String!
@@ -42,6 +59,7 @@ const typeDef = `
       url: String!
       commitMessage: String!
       service: String!
+      gitStatus: StatusResult!
     }
     type Repository {
       id: String!
@@ -60,16 +78,17 @@ const resolvers = {
       args: { url: string },
       context: AppContext
     ): Promise<string> => {
-      const repoLocation = getRepoLocationFromUrlString(args.url, context.currentUser.username)
+      const repoLocation = getRepoLocationFromUrlString(
+        args.url,
+        context.currentUser.username
+      )
       // TODO: Would be ideal that user's configs are set when repo
       // is first cloned instead of doing it in commit operation
       // (because automerges also require username and email)
       // requires user specific repos & clone only possible
       // when context.currentuser exists
       if (!existsSync(repoLocation)) {
-
         await cloneRepository(args.url, context.currentUser.username)
-
       }
 
       return 'Cloned'
@@ -84,22 +103,43 @@ const resolvers = {
       }
 
       const service = getServiceNameFromUrlString(args.url)
-      const repoLocation = getRepoLocationFromUrlString(args.url, context.currentUser.username)
+      const repoLocation = getRepoLocationFromUrlString(
+        args.url,
+        context.currentUser.username
+      )
       const currentBranch = await getCurrentBranchName(repoLocation)
       const commitMessage = await getCurrentCommitMessage(repoLocation)
 
       if (!service) {
-        throw new Error('Unable to parse service name, or service is unsupported.')
+        throw new Error(
+          'Unable to parse service name, or service is unsupported.'
+        )
       }
 
       const filePaths = await readRecursive(repoLocation, ['.git'])
+      const gitStatus = await getGitStatus(repoLocation)
+
+      const fileStatuses = gitStatus.files.map((fileStatus) => ({
+        absFilename: repoLocation.substring(2) + '/' + fileStatus.path,
+        status: fileStatus.working_dir,
+      }))
+
       const files = filePaths.map((file) => ({
         name: relative('repositories/', file),
         content: readFileSync(file, 'utf-8'),
+        status: fileStatuses.find((data) => data.absFilename == file)?.status,
       }))
 
       const branches = await getLocalBranches(repoLocation)
-      return { currentBranch, files, branches, url: args.url, commitMessage, service }
+      return {
+        currentBranch,
+        files,
+        branches,
+        url: args.url,
+        commitMessage,
+        service,
+        gitStatus,
+      }
     },
 
     getRepoListFromService: async (
@@ -115,27 +155,29 @@ const resolvers = {
         throw new Error('User is not connected to any service')
       }
 
-      const allRepositories = await Promise.all(context.currentUser.services.map(
-        async (service) => {
+      const allRepositories = await Promise.all(
+        context.currentUser.services.map(async (service) => {
           const token = await tokenService.getAccessTokenByServiceAndId(
             context.currentUser.id,
             service.serviceName
           )
-          
+
           if (!token) {
             // console.log(`Service token missing for service ${service.serviceName}`)
             return []
           }
 
           const response = await getRepoList(service, token)
-          const serviceRepositories: Repository[] = parseServiceRepositories(response, service.serviceName)
+          const serviceRepositories: Repository[] = parseServiceRepositories(
+            response,
+            service.serviceName
+          )
 
           return serviceRepositories
-        }
-      ))
+        })
+      )
 
       return allRepositories.flat()
-
     },
   },
 
@@ -183,7 +225,10 @@ const resolvers = {
       branchSwitchArgs: BranchSwitchArgs,
       context: AppContext
     ): Promise<string> => {
-      const repoLocation = getRepoLocationFromUrlString(branchSwitchArgs.url, context.currentUser.username)
+      const repoLocation = getRepoLocationFromUrlString(
+        branchSwitchArgs.url,
+        context.currentUser.username
+      )
       return await switchCurrentBranch(repoLocation, branchSwitchArgs.branch)
     },
     pullRepository: async (
@@ -191,7 +236,10 @@ const resolvers = {
       args: { url: string },
       context: AppContext
     ): Promise<string> => {
-      const repoLocation = getRepoLocationFromUrlString(args.url, context.currentUser.username)
+      const repoLocation = getRepoLocationFromUrlString(
+        args.url,
+        context.currentUser.username
+      )
       try {
         await pullNewestChanges(repoLocation)
       } catch (e) {
@@ -202,6 +250,34 @@ const resolvers = {
         }
       }
       return 'Pulled'
+    },
+    localSave: (
+      _root: unknown,
+      args: { file: File },
+      context: AppContext
+    ): string => {
+      if (!context.currentUser) {
+        throw new ForbiddenError('You have to login')
+      }
+      writeToFile(args.file)
+
+      return 'saved locally'
+    },
+    commitLocalChanges: async (
+      _root: unknown,
+      args: CommitArgs,
+      context: AppContext
+    ): Promise<string> => {
+      const repoLocation = getRepoLocationFromUrlString(
+        args.url,
+        context.currentUser.username
+      )
+      try {
+        await addAndCommitLocal(repoLocation, args.commitMessage, context)
+      } catch (e) {
+        throw new ApolloError((e as Error).message)
+      }
+      return 'committed'
     },
   },
 }

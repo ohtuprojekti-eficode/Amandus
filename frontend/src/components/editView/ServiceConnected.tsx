@@ -4,12 +4,12 @@ import {
   IS_BB_CONNECTED,
   IS_GH_CONNECTED,
   IS_GL_CONNECTED,
-} from '../graphql/queries'
+} from '../../graphql/queries'
 import {
   IsBitbucketConnectedResult,
   IsGithubConnectedResult,
   IsGitLabConnectedResult,
-} from '../types'
+} from '../../types'
 
 const ServiceConnected = ({ service }: { service: string }) => {
   let connected = false

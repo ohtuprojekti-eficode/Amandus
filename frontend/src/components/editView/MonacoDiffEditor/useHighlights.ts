@@ -21,10 +21,17 @@ const stylesInUse = makeStyles(() =>
  * Handles merge conflict editor highlighting
  * @returns function to update highlights
  */
-const useHighlights = () => {
+const useHighlights = (original: string) => {
   const classes = stylesInUse()
 
   const decorationRef = useRef<string[][]>([]) // keeps track of current decorations
+
+  const previousBlocksRef = useRef<ConflictBlock[]>([]) // keeps track of the blocks previously handled
+
+  React.useEffect(() => {
+    // remove decorations when changing file
+    decorationRef.current = []
+  }, [original])
 
   const updateHighlights = React.useCallback(
     (
@@ -32,6 +39,9 @@ const useHighlights = () => {
       monaco: Monaco,
       conflictBlocks: ConflictBlock[]
     ) => {
+      if (previousBlocksRef.current !== conflictBlocks) {
+        // only update if the blocks changed
+
       conflictBlocks.forEach((block, index) => {
         const oldDecorations = decorationRef.current[index]
 
@@ -69,6 +79,9 @@ const useHighlights = () => {
           decorationRef.current[index] = decos
         }
       })
+      }
+
+      previousBlocksRef.current = conflictBlocks
     },
     [classes.currentHighLight, classes.incomingHighLight]
   )

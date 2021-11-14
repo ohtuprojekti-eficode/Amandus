@@ -5,10 +5,10 @@ import ListItem from '@material-ui/core/ListItem'
 import ListItemText from '@material-ui/core/ListItemText'
 import MenuItem from '@material-ui/core/MenuItem'
 import Menu from '@material-ui/core/Menu'
-import { SWITCH_BRANCH } from '../graphql/mutations'
-import { REPO_STATE } from '../graphql/queries'
+import { SWITCH_BRANCH } from '../../graphql/mutations'
+import { REPO_STATE } from '../../graphql/queries'
 import { useMutation, useQuery } from '@apollo/client'
-import { RepoStateQueryResult } from '../types'
+import { RepoStateQueryResult } from '../../types'
 
 const useStyles = makeStyles(() =>
   createStyles({

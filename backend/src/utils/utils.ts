@@ -27,19 +27,19 @@ const runShellCommand = async (command: string): Promise<string> => {
 export const pipe = <T>(...fns: Array<(a: T) => T>) => (x: T): T =>
   fns.reduce((value, func) => func(value), x)
 
-export const getRepositoryFromFilePath = (file: File): string => {
-  return file.name.split('/').slice(2, 4).join('/')
+export const getRepositoryFromFilePath = (filePath: string): string => {
+  return filePath.split('/').slice(2, 4).join('/')
 }
 
-export const getServiceFromFilePath = (file: File): ServiceName => {
-  return file.name.split('/')[1] as ServiceName
+export const getServiceFromFilePath = (filePath: string): ServiceName => {
+  return filePath.split('/')[1] as ServiceName
 }
 
 export const getFileNameFromFilePath = (
-  file: File,
+  filePath: string,
   repositoryName: string
 ): string => {
-  return file.name.split(`${repositoryName}/`)[1] || file.name
+  return filePath.split(`${repositoryName}/`)[1] || filePath
 }
 
 interface ServiceProps {
@@ -68,11 +68,11 @@ export const writeToFile = (file: File): void => {
 export const makeCommitMessage = (
   rawCommitMessage: string,
   username: string,
-  realFilename: string
+  realFilenames: string[]
 ): string => {
   return rawCommitMessage
     ? sanitizeCommitMessage(rawCommitMessage)
-    : `User ${username} modified file ${realFilename}`
+    : `User ${username} modified file(s) ${realFilenames.join()}`
 }
 
 export const getRepoLocationFromUrlString = (
@@ -88,6 +88,16 @@ export const getRepoLocationFromUrlString = (
 
   const repoLocation = `./repositories/${username}/${service}${repositoryName}`
   return repoLocation
+}
+export const getRepoNameFromUrlString = (
+  urlString: string
+): string => {
+  const url = new URL(urlString)
+  const repositoryName =
+    url.pathname.endsWith('.git')
+      ? url.pathname.slice(0, -4)
+      : url.pathname
+  return repositoryName
 }
 
 export const getRepoLocationFromRepoName = (
