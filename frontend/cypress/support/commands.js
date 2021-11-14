@@ -63,3 +63,23 @@ Cypress.Commands.add('deleteUser', (username) => {
   })
   localStorage.clear()
 })
+
+Cypress.Commands.add('connectWith', (service) => {
+  let callbackUrl
+  switch (service) {
+    case 'github':
+      callbackUrl = '/auth/github/callback?code=asdasdasd'
+      break
+    case 'gitlab':
+      callbackUrl = '/auth/gitlab/callback?code=asdasdasd'
+      break
+    case 'bitbucket':
+      callbackUrl = '/auth/bitbucket/callback?code=asdasdasd'
+      break;
+    default:
+      throw new Error(`no such service: ${service}`)
+  }
+
+  cy.visit(Cypress.env('HOST') + callbackUrl)
+  cy.url().should('contain', '/connections')
+})

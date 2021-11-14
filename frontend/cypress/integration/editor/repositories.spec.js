@@ -8,24 +8,21 @@ describe('When visiting the repositories page, as a user', () => {
     cy.contains('error getting repos...User is not connected to any service')
   })
   it('I can see my Github repos after connecting with Github', () => {
-    cy.visit(Cypress.env('HOST') + '/auth/github/callback?code=asdasdasd')
-    cy.url().should('contain', '/connections')
+    cy.connectWith('github')
 
     cy.visit(Cypress.env('HOST') + '/repositories')
     cy.contains('ghtestrepo1')
     cy.contains('ghtestrepo2')
   })
   it('I can see my Bitbucket repos after connecting with Bitbucket', () => {
-    cy.visit(Cypress.env('HOST') + '/auth/bitbucket/callback?code=asdasdasd')
-    cy.url().should('contain', '/connections')
+    cy.connectWith('bitbucket')
 
     cy.visit(Cypress.env('HOST') + '/repositories')
     cy.contains('bbtestrepo1')
     cy.contains('bbtestrepo2')
   })
   it('I can see my Gitlab repos after connecting with Gitlab', () => {
-    cy.visit(Cypress.env('HOST') + '/auth/gitlab/callback?code=asdasdasd')
-    cy.url().should('contain', '/connections')
+    cy.connectWith('gitlab')
 
     cy.visit(Cypress.env('HOST') + '/repositories')
     cy.contains('gltestrepo1')
@@ -33,14 +30,9 @@ describe('When visiting the repositories page, as a user', () => {
   })
 
   it('I can see all of my repos after connecting with every service', () => {
-    cy.visit(Cypress.env('HOST') + '/auth/github/callback?code=asdasdasd')
-    cy.url().should('contain', '/connections')
-
-    cy.visit(Cypress.env('HOST') + '/auth/bitbucket/callback?code=asdasdasd')
-    cy.url().should('contain', '/connections')
-
-    cy.visit(Cypress.env('HOST') + '/auth/gitlab/callback?code=asdasdasd')
-    cy.url().should('contain', '/connections')
+    cy.connectWith('github')
+    cy.connectWith('gitlab')
+    cy.connectWith('bitbucket')
 
     cy.visit(Cypress.env('HOST') + '/repositories')
     cy.contains('ghtestrepo1')
