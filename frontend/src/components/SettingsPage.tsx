@@ -19,61 +19,63 @@ interface Props {
   user: UserType | undefined
 }
 
-
-
-// @ts-ignore
-const MiscObject = (props) => {
-
-  const [fieldValue, setFieldValue] = useState(props.value)
+const MiscObject = ({ name, value, parentCallback, unit }: {
+  name: string, 
+  value: number, 
+  unit?: string, 
+  parentCallback: (name: string, value: number) => void, 
+}) => {
+  const [fieldValue, setFieldValue] = useState(value)
 
   useEffect(() => {
-   setFieldValue(props.value) 
-  }, [props.value])
+   setFieldValue(value) 
+  }, [value])
 
-  // @ts-ignore 
-  const handleFieldValueChange = (incomingValue) => {
-// @ts-ignore
-    props.parentCallback({ "name": props.name, "value": parseInt(incomingValue) })
-    setFieldValue(incomingValue)
+  const handleFieldValueChange = (incomingValue: string) => {
+    parentCallback(name, parseInt(incomingValue))
+    setFieldValue(parseInt(incomingValue))
   }
   
   return (
     <div>
-      <b>{props.name}</b>
+      <b>{name}</b>
       <TextField
-        id={props.name + "-toggle"}
-        name={props.name + "-toggle"}
+        id={name + "-toggle"}
+        name={name + "-toggle"}
         value={fieldValue}
         type="number"
         color="primary"
         onChange={({ target }) => handleFieldValueChange(target.value)}
         inputProps={{ 'aria-label': 'primary checkbox' }}
         />
-      {props.unit}
+      {unit}
     </div>
   )
 }
 
-// @ts-ignore
-const PluginObject = (props) => {
+const PluginObject = ({ name, active, parentCallback }: { 
+  name: string, 
+  active: boolean, 
+  parentCallback: (name: string, value: boolean) => void, 
+}) => {
 
-  const [switchChecked, setSwitchChecked] = useState(props.active)
+  const [switchChecked, setSwitchChecked] = useState(active)
   
   useEffect(() => {
-   setSwitchChecked(props.active) 
-  }, [props.active])
+   setSwitchChecked(active) 
+  }, [active])
   
   const handleSwitchToggle = () => {
+    parentCallback(name, !switchChecked)
     setSwitchChecked(!switchChecked)
-    props.parentCallback({ "name": props.name, "value": !switchChecked })
   }
   
   return (
     <div>
-      <b>{props.name}</b>
+      <b>{name}</b>
       <Switch
-        id={props.name + "-toggle"}
-        name={props.name + "-toggle"}
+        id={name + "-toggle"}
+        name={name + "-toggle"}
         checked={switchChecked}
         onChange={handleSwitchToggle}
         color="primary"
@@ -97,6 +99,7 @@ const SettingsPage = ({ user }: Props) => {
   }
 */
   const [saved, setSaved] = useState(false)
+  const [changesMade, setChangesMade] = useState(false)
 
 
   const {settings: nestedSettings, setSettings} = useSettings()
@@ -105,16 +108,13 @@ const SettingsPage = ({ user }: Props) => {
   const [saveSettings] = useMutation(SAVE_SETTINGS, {
   })
  
-  // @ts-ignore
-  const handleSubmit = async (event) => {
-    event.preventDefault()
+  const handleSubmit = async () => {
 
     try {
       const vars = { variables: { settings: settings }}
       console.log('vars', vars)
       await saveSettings (
         { variables: { settings: settings }, update: (cache) => { 
-           const currentContent = cache.readQuery({ query: GET_SETTINGS})
            const updatedContent = { getSettings: settings }
            cache.writeQuery({query: GET_SETTINGS, data: updatedContent})
         }}
@@ -131,8 +131,9 @@ const SettingsPage = ({ user }: Props) => {
 
   }
 
-// @ts-ignore
-  const handleCallback = ({ name, value }: { name: string, value: number | boolean }) => {
+  const handleCallback = ( name: string, value: boolean | number ) => {
+    setChangesMade(true)
+    
     switch (typeof value) {
       
       case "boolean":
@@ -148,7 +149,7 @@ const SettingsPage = ({ user }: Props) => {
         )
         setSettings({ settings: {...settings, misc: altMisc}})
         break;
-
+        
     }
   }
 
@@ -166,7 +167,6 @@ const SettingsPage = ({ user }: Props) => {
       <h1> Admins only. </h1>
 
       {settings.misc.map((m: MiscSettingObject) => 
-      // @ts-ignore
         <MiscObject 
           key={m.name} 
           name={m.name} 
@@ -177,7 +177,6 @@ const SettingsPage = ({ user }: Props) => {
        )}
 
       {settings.plugins.map((p: PluginSettingObject) => 
-      // @ts-ignore
         <PluginObject 
           key={p.name} 
           name={p.name} 
@@ -195,6 +194,9 @@ const SettingsPage = ({ user }: Props) => {
         >
           Save settings
       </Button>
+      <p>
+        {changesMade ? 'Settings changed. Please save.': ''}
+      </p>
       <p>
         {saved ? 'Saved successfully. Refreshing page...': ''}
       </p> 

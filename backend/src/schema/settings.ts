@@ -53,7 +53,6 @@ const resolvers = {
       _root: unknown,
       settings: SettingsObject 
     ): string => {
-      console.log('be', settings)
 
       try {   
         writeFileSync('src/utils/settings.json', JSON.stringify(settings, null, 4))

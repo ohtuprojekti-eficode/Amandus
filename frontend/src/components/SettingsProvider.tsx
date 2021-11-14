@@ -17,7 +17,6 @@ const SettingsProvider: React.FC = ({ children }) => {
         misc: data.getSettings.misc, 
         plugins: data.getSettings.plugins} }
       setSettings(newSettings)
-      console.log('useEffect', data.getSettings)
     }
   }, [data])
 
