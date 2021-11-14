@@ -33,8 +33,8 @@ const GitLabAuthBtn = ({ connected }: AuthBtnProps) => {
     />
   )
 
-  if (error) return <p>{error.message}</p>
-  if (!data) return <p>no data in response</p>
+  if (error) return <p>error: {error.message}</p>
+  if (!data) return <></>
 
   return (
     <div>
