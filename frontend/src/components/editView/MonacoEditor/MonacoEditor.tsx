@@ -247,9 +247,9 @@ const MonacoEditor = ({
             variant="outlined"
             size="small"
             disabled={pullLoading || mutationSaveLoading}
-            onClick={handleReset}
+            onClick={handleResetFile}
           >
-            Discrad All Changes
+            Reset File
           </Button>
           <Button
             style={{ marginLeft: 25 }}
@@ -257,9 +257,9 @@ const MonacoEditor = ({
             variant="outlined"
             size="small"
             disabled={pullLoading || mutationSaveLoading}
-            onClick={handleResetFile}
+            onClick={handleReset}
           >
-            Discrad File Changes
+            Reset Repo
           </Button>
         </div>
         <LatestCommit commitMessage={commitMessage} />
