@@ -59,11 +59,17 @@ jobs:
           cp -r frontend/build backend/build/frontBuild
           cd backend
           yarn migrate-up-prod 
-          yarn run start &
+          NODE_ENV=e2etest node ./build/index.js &
         env:
+          NODE_ENV: e2etest
+          DATABASE_URL_TEST: postgres://test:test@localhost:${{ job.services.postgres.ports[5432] }}/test
           DATABASE_URL: postgres://test:test@localhost:${{ job.services.postgres.ports[5432] }}/test
           GH_CLIENT_ID: ${{ secrets.GH_CLIENT_ID }}
           GH_CLIENT_SECRET: ${{ secrets.GH_CLIENT_SECRET }}
+          GL_CLIENT_ID: ${{ secrets.GL_CLIENT_ID }}
+          GL_CLIENT_SECRET: ${{ secrets.GL_CLIENT_SECRET }}
+          BB_CLIENT_ID: ${{ secrets.BB_CLIENT_ID }}
+          BB_CLIENT_SECRET: ${{ secrets.BB_CLIENT_SECRET }}
 
       - name: E2E testing
         uses: cypress-io/github-action@v2
@@ -71,6 +77,13 @@ jobs:
           working-directory: frontend
           wait-on: http://localhost:3001
           env: configFile=production
+
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+            name: cypress-snapshots
+            path: frontend/cypress/screenshots
 
       - name: Dockerhub login
         uses: docker/login-action@v1

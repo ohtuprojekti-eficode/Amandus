@@ -27,7 +27,7 @@ exports.up = (pgm) => {
         username TEXT, 
         email TEXT,
         reposurl TEXT,
-        UNIQUE(services_id, username));`)
+        UNIQUE(services_id, user_id));`)
 
   pgm.sql(`CREATE TABLE REPOSITORY(
         id serial PRIMARY KEY,

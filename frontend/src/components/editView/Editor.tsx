@@ -1,15 +1,15 @@
 import { makeStyles, createStyles, useTheme } from '@material-ui/core'
 import { loader } from '@monaco-editor/react'
 import React, { useEffect } from 'react'
-import { initMonaco, initLanguageClient } from '../utils/monacoInitializer'
-import MonacoDiffEditor from './MonacoDiffEditor/'
+import { initMonaco, initLanguageClient } from '../../utils/monacoInitializer'
+import MonacoDiffEditor from './MonacoDiffEditor'
 import useMergeConflictDetector from './MonacoDiffEditor/useMergeConflictDetector'
-import MonacoEditor from './MonacoEditor'
+import MonacoEditor from './MonacoEditor/MonacoEditor'
 
-import VsCodeDarkTheme from '../styles/editor-themes/vs-dark-plus-theme'
-import VsCodeLightTheme from '../styles/editor-themes/vs-light-plus-theme'
+import VsCodeDarkTheme from '../../styles/editor-themes/vs-dark-plus-theme'
+import VsCodeLightTheme from '../../styles/editor-themes/vs-light-plus-theme'
 
-import { SimpleLanguageInfoProvider } from '../utils/providers'
+import { SimpleLanguageInfoProvider } from '../../utils/providers'
 
 interface EditorProps {
   fileContent: string

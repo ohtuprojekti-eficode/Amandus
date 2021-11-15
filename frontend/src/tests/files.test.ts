@@ -17,12 +17,15 @@ describe('Add to file tree', () => {
             path: 'src/folder1/new_file.txt',
             type: 'file',
             children: [],
+            status: ''
           },
         ],
+        status: ''
       },
-      { name: 'folder2', path: 'src/folder2', type: 'folder', children: [] },
-      { name: 'index.ts', path: 'src/index.ts', type: 'file', children: [] },
+      { name: 'folder2', path: 'src/folder2', type: 'folder', children: [], status: '' },
+      { name: 'index.ts', path: 'src/index.ts', type: 'file', children: [], status: '' },
     ],
+    status: ''
   }
   it('adds a file to the tree', () => {
     const tree: FileTree = {
@@ -30,12 +33,13 @@ describe('Add to file tree', () => {
       path: 'src',
       type: 'root',
       children: [
-        { name: 'folder1', path: 'src/folder1', type: 'folder', children: [] },
-        { name: 'folder2', path: 'src/folder2', type: 'folder', children: [] },
-        { name: 'index.ts', path: 'src/index.ts', type: 'file', children: [] },
+        { name: 'folder1', path: 'src/folder1', type: 'folder', children: [], status: '' },
+        { name: 'folder2', path: 'src/folder2', type: 'folder', children: [], status: '' },
+        { name: 'index.ts', path: 'src/index.ts', type: 'file', children: [], status: '' },
       ],
+      status: ''
     }
-    addToFileTree(tree, 'src/folder1/new_file.txt', 1)
+    addToFileTree(tree, 'src/folder1/new_file.txt', 1, '')
     expect(tree).toEqual(expectedTree)
   })
   it('adds file and required folders to tree', () => {
@@ -44,21 +48,22 @@ describe('Add to file tree', () => {
       path: 'src',
       type: 'root',
       children: [
-        { name: 'index.ts', path: 'src/index.ts', type: 'file', children: [] },
-        { name: 'folder2', path: 'src/folder2', type: 'folder', children: [] },
+        { name: 'index.ts', path: 'src/index.ts', type: 'file', children: [], status: '' },
+        { name: 'folder2', path: 'src/folder2', type: 'folder', children: [], status: '' },
       ],
+      status: ''
     }
-    addToFileTree(tree, 'src/folder1/new_file.txt', 1)
+    addToFileTree(tree, 'src/folder1/new_file.txt', 1, '')
     expect(tree).toEqual(expectedTree)
   })
 })
 
 describe('Parse to file tree', () => {
   const files: File[] = [
-    { name: 'project/src/index.js', content: 'a' },
-    { name: 'project/src/index/test.txt', content: 'b' },
-    { name: 'project/src/tests/test2.ts', content: 'c' },
-    { name: 'project/src/tests/test.js', content: 'd' },
+    { name: 'project/src/index.js', content: 'a', status: '' },
+    { name: 'project/src/index/test.txt', content: 'b', status: '' },
+    { name: 'project/src/tests/test2.ts', content: 'c', status: '' },
+    { name: 'project/src/tests/test.js', content: 'd', status: '' },
   ]
 
   it('returns a tree describing the directory structure', () => {
@@ -77,8 +82,10 @@ describe('Parse to file tree', () => {
               path: 'project/src/index/test.txt',
               type: 'file',
               children: [],
+              status: '' 
             },
           ],
+          status: '' 
         },
         {
           name: 'tests',
@@ -89,23 +96,28 @@ describe('Parse to file tree', () => {
               name: 'test.js',
               path: 'project/src/tests/test.js',
               type: 'file',
-              children: [],
+              children: [], 
+              status: '' 
             },
             {
               name: 'test2.ts',
               path: 'project/src/tests/test2.ts',
               type: 'file',
-              children: [],
+              children: [], 
+              status: '' 
             },
-          ],
+          ], 
+          status: '' 
         },
         {
           name: 'index.js',
           path: 'project/src/index.js',
           type: 'file',
-          children: [],
+          children: [], 
+          status: '' 
         },
-      ],
+      ], 
+      status: null 
     }
     expect(parseToFileTree(files)).toEqual(tree)
   })
@@ -129,9 +141,11 @@ describe('Parse to file tree', () => {
                   name: 'test.txt',
                   path: 'project/src/index/test.txt',
                   type: 'file',
-                  children: [],
+                  children: [], 
+                  status: '' 
                 },
-              ],
+              ], 
+              status: '' 
             },
             {
               name: 'tests',
@@ -142,25 +156,31 @@ describe('Parse to file tree', () => {
                   name: 'test.js',
                   path: 'project/src/tests/test.js',
                   type: 'file',
-                  children: [],
+                  children: [], 
+                  status: '' 
                 },
                 {
                   name: 'test2.ts',
                   path: 'project/src/tests/test2.ts',
                   type: 'file',
                   children: [],
+                  status: '' 
                 },
-              ],
+              ], 
+              status: '' 
             },
             {
               name: 'index.js',
               path: 'project/src/index.js',
               type: 'file',
-              children: [],
+              children: [], 
+              status: '' 
             },
-          ],
+          ], 
+          status: ''
         },
       ],
+      status: null 
     }
     expect(parseToFileTree(files, 1)).toEqual(tree)
   })

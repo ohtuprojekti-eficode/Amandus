@@ -96,7 +96,10 @@ app.get('/onig', (_req, res) => {
   res.send(wasmFile)
 })
 
-if (process.env.NODE_ENV === 'production') {
+if (
+  process.env.NODE_ENV === 'production' ||
+  process.env.NODE_ENV === 'e2etest'
+) {
   app.use(express.static('build/frontBuild'))
   app.get('*', (_req, res) => {
     res.sendFile(path.join(__dirname, '../build/frontBuild/index.html'))

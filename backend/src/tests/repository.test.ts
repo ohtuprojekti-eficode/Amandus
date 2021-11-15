@@ -4,7 +4,10 @@
 
 import { gql } from 'apollo-server'
 import { createTestClient } from 'apollo-server-testing'
-import { createTestClient as createIntegrationTestClient, TestQuery } from 'apollo-server-integration-testing'
+import {
+  createTestClient as createIntegrationTestClient,
+  TestQuery,
+} from 'apollo-server-integration-testing'
 import { appendFileSync, mkdirSync, rmdirSync } from 'fs'
 import { join } from 'path'
 import simpleGit from 'simple-git'
@@ -16,25 +19,18 @@ import user from '../model/user'
 import { UserType } from '../types/user'
 import { Tokens } from '../types/tokens'
 
-
 const SAVE_CHANGES = gql`
   mutation saveChanges(
-    $file: FileInput!
+    $files: [FileInput]!
     $branch: String!
     $commitMessage: String
   ) {
-    saveChanges(file: $file, branch: $branch, commitMessage: $commitMessage)
+    saveChanges(files: $files, branch: $branch, commitMessage: $commitMessage)
   }
 `
 
 describe('getRepoState query', () => {
-  const repoPath = join(
-    '.',
-    'repositories',
-    'testuser',
-    'github',
-    'test'
-  )
+  const repoPath = join('.', 'repositories', 'testuser', 'github', 'test')
   let testUser: UserType
   let tokens: Tokens
   let query: TestQuery
@@ -59,7 +55,6 @@ describe('getRepoState query', () => {
       },
     })
     query = testClient.query
-
   })
 
   afterEach(() => {
@@ -75,7 +70,7 @@ describe('getRepoState query', () => {
       }
     `
     const queryResult = await query(GET_REPO_BRANCHES)
-    expect(queryResult).toEqual({ "data": { "getRepoState": { "branches": [] } } })
+    expect(queryResult).toEqual({ data: { getRepoState: { branches: [] } } })
   })
 
   it('list of all branches contains correct branches', async () => {
@@ -93,29 +88,31 @@ describe('getRepoState query', () => {
       .branch(['secondBranch'])
 
     const GET_REPO_BRANCHES = gql`
-        query {
-          getRepoState(url: "https://github.com/test") {
-            branches
-          }
+      query {
+        getRepoState(url: "https://github.com/test") {
+          branches
         }
-      `
+      }
+    `
     const queryResult = await query(GET_REPO_BRANCHES)
-    expect(queryResult).toEqual({ "data": { "getRepoState": { "branches": ["master", "secondBranch"] } } })
+    expect(queryResult).toEqual({
+      data: { getRepoState: { branches: ['master', 'secondBranch'] } },
+    })
   })
 
   it('list of current files is empty when no files exist', async () => {
     const GET_REPO_FILES = gql`
-        query {
-          getRepoState(url: "https://github.com/test") {
-            files {
-              name
-              content
-            }
+      query {
+        getRepoState(url: "https://github.com/test") {
+          files {
+            name
+            content
           }
         }
-      `
+      }
+    `
     const queryResult = await query(GET_REPO_FILES)
-    expect(queryResult).toEqual({ "data": { "getRepoState": { "files": [] } } })
+    expect(queryResult).toEqual({ data: { getRepoState: { files: [] } } })
   })
 
   it('list of all files contains correct files', async () => {
@@ -133,29 +130,42 @@ describe('getRepoState query', () => {
       .branch(['secondBranch'])
 
     const GET_REPO_FILES = gql`
-        query {
-          getRepoState(url: "https://github.com/test") {
-            files {
-              name
-              content
-            }
+      query {
+        getRepoState(url: "https://github.com/test") {
+          files {
+            name
+            content
           }
         }
-      `
+      }
+    `
     const queryResult = await query(GET_REPO_FILES)
-    expect(queryResult).toEqual({ "data": { "getRepoState": { "files": [{ "content": "Commit and add file to create master branch", "name": "testuser/github/test/file.txt" }] } } })
+    expect(queryResult).toEqual({
+      data: {
+        getRepoState: {
+          files: [
+            {
+              content: 'Commit and add file to create master branch',
+              name: 'testuser/github/test/file.txt',
+            },
+          ],
+        },
+      },
+    })
   })
 
   it('current branch name is empty when branch status is unknown', async () => {
     const GET_REPO_BRANCH = gql`
-        query {
-          getRepoState(url: "https://github.com/test") {
-            currentBranch
-          }
+      query {
+        getRepoState(url: "https://github.com/test") {
+          currentBranch
         }
-      `
+      }
+    `
     const queryResult = await query(GET_REPO_BRANCH)
-    expect(queryResult).toEqual({ "data": { "getRepoState": { "currentBranch": "" } } })
+    expect(queryResult).toEqual({
+      data: { getRepoState: { currentBranch: '' } },
+    })
   })
 
   it('current branch name is correct', async () => {
@@ -173,14 +183,16 @@ describe('getRepoState query', () => {
       .branch(['secondBranch'])
 
     const GET_REPO_BRANCH = gql`
-        query {
-          getRepoState(url: "https://github.com/test") {
-            currentBranch
-          }
+      query {
+        getRepoState(url: "https://github.com/test") {
+          currentBranch
         }
+      }
     `
     const queryResult = await query(GET_REPO_BRANCH)
-    expect(queryResult).toEqual({ "data": { "getRepoState": { "currentBranch": "master" } } })
+    expect(queryResult).toEqual({
+      data: { getRepoState: { currentBranch: 'master' } },
+    })
   })
 
   it('latest commit message is empty when status is unknown', async () => {
@@ -192,7 +204,9 @@ describe('getRepoState query', () => {
       }
     `
     const queryResult = await query(GET_COMMIT_MESSAGE)
-    expect(queryResult).toEqual({ "data": { "getRepoState": { "commitMessage": "" } } })
+    expect(queryResult).toEqual({
+      data: { getRepoState: { commitMessage: '' } },
+    })
   })
 
   it('latest commit message is correct', async () => {
@@ -216,7 +230,9 @@ describe('getRepoState query', () => {
     `
 
     const queryResult = await query(GET_COMMIT_MESSAGE)
-    expect(queryResult).toEqual({ "data": { "getRepoState": { "commitMessage": "new commit" } } })
+    expect(queryResult).toEqual({
+      data: { getRepoState: { commitMessage: 'new commit' } },
+    })
   })
 
   it('too long commit message is cutted correctly', async () => {
@@ -241,18 +257,14 @@ describe('getRepoState query', () => {
     `
 
     const queryResult = await query(GET_COMMIT_MESSAGE)
-    expect(queryResult).toEqual({ "data": { "getRepoState": { "commitMessage": 'a'.repeat(72).concat('...') } } })
+    expect(queryResult).toEqual({
+      data: { getRepoState: { commitMessage: 'a'.repeat(72).concat('...') } },
+    })
   })
 })
 
 describe('switchBranch mutation', () => {
-  const repoPath = join(
-    '.',
-    'repositories',
-    'testuser',
-    'github',
-    'test'
-  )
+  const repoPath = join('.', 'repositories', 'testuser', 'github', 'test')
   let testUser: UserType
   let tokens: Tokens
   let mutate: TestQuery
@@ -324,7 +336,9 @@ describe('switchBranch mutation', () => {
       }
     `
 
-    expect(await mutate(SWITCH_BRANCH)).toEqual({ "data": { "switchBranch": "secondBranch" } })
+    expect(await mutate(SWITCH_BRANCH)).toEqual({
+      data: { switchBranch: 'secondBranch' },
+    })
   })
 
   it('creates a new branch when switching to branch that does not exist', async () => {
@@ -349,7 +363,14 @@ describe('switchBranch mutation', () => {
 })
 
 describe('SaveChanges mutation', () => {
-  const repoPath = join('.', 'repositories', 'testuser', 'github', 'fakegithubuser', 'testRepo')
+  const repoPath = join(
+    '.',
+    'repositories',
+    'testuser',
+    'github',
+    'fakegithubuser',
+    'testRepo'
+  )
 
   beforeEach(async () => {
     await User.deleteAll()
@@ -376,18 +397,20 @@ describe('SaveChanges mutation', () => {
       apolloServer: server,
       extendMockRequest: {
         headers: {
-          "x-access-token": tokens.accessToken,
-          "x-refresh-token": tokens.refreshToken
-        }
+          'x-access-token': tokens.accessToken,
+          'x-refresh-token': tokens.refreshToken,
+        },
       },
     })
-    
+
     const mutateResult = await mutate(SAVE_CHANGES, {
       variables: {
-        file: {
-          name: `testuser/github/fakegithubuser/testRepo/file.txt`,
-          content: 'test content',
-        },
+        files: [
+          {
+            name: `testuser/github/fakegithubuser/testRepo/file.txt`,
+            content: 'test content',
+          },
+        ],
         branch: 'master',
         commitMessage: 'Add test file',
       },
@@ -417,10 +440,12 @@ describe('SaveChanges mutation', () => {
     const mutateResult = await mutate({
       mutation: SAVE_CHANGES,
       variables: {
-        file: {
-          name: `testuser/github/fakegithubuser/testRepo/file.txt`,
-          content: 'test content',
-        },
+        files: [
+          {
+            name: `testuser/github/fakegithubuser/testRepo/file.txt`,
+            content: 'test content',
+          },
+        ],
         branch: 'master',
         commitMessage: 'Add test file',
       },

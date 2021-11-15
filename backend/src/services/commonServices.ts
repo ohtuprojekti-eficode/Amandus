@@ -1,9 +1,16 @@
 import { ServiceUser, ServiceUserResponse } from '../types/service'
 import { ServiceRepository } from '../types/repository'
-import fetch from 'node-fetch'
 import { requestGithubUser } from './gitHub'
 import { requestBitbucketUser } from './bitbucket'
 import { requestGitLabUser } from './gitLab'
+
+import { default as nodeFetch } from 'node-fetch'
+import nodeFetchMock from '../tests/mocks/fetch'
+
+// in case of running e2e tests, use mocked fetch:
+const fetch = process.env.NODE_ENV === 'e2etest'
+  ? nodeFetchMock
+  : nodeFetch
 
 export const getRepoList = (
   service: ServiceUser,
@@ -29,22 +36,21 @@ export const getRepoList = (
       throw new Error((e as Error).message)
     })
 }
-
 export const requestServiceUser = async (
   service: string,
   code: string
-): Promise<ServiceUserResponse> => {
+  ): Promise<ServiceUserResponse> => {
 
-  if (service === 'github') {
-    return await requestGithubUser(code)
+  if(service === 'github'){
+    return await requestGithubUser(code, fetch)
   }
 
-  if (service === 'bitbucket') {
-    return await requestBitbucketUser(code)
+  if(service === 'bitbucket'){
+    return await requestBitbucketUser(code, fetch)
   }
 
-  if (service === 'gitlab') {
-    return await requestGitLabUser(code)
+  if(service === 'gitlab'){
+    return await requestGitLabUser(code, fetch)
   }
 
   throw Error(`unable to fetch user of ${service}`)
