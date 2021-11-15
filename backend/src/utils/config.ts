@@ -25,6 +25,8 @@ const DATABASE_URL =
     ? process.env.DATABASE_URL_TEST
     : process.env.DATABASE_URL
 
+const TOKEN_SERVICE_URL = process.env.TOKEN_SERVICE_URL || 'http://tokenservice:3002'
+
 export default {
   PORT,
   JWT_SECRET,
@@ -38,4 +40,5 @@ export default {
   GITLAB_CLIENT_SECRET,
   GITLAB_CB_URL,
   DATABASE_URL,
+  TOKEN_SERVICE_URL
 }

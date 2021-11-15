@@ -82,17 +82,14 @@ const removeUser = (
   }
 
   if (!tokenStorage.has(decodedToken.id)) {
-    console.log('User has no entries in token storage')
     return
   }
 
   const result = tokenStorage.delete(decodedToken.id)
 
   if (!result) {
-    console.log('could not remove user')
     throw new Error(`User removal unsuccessful`)
   }
-  console.log('User removed successfully')
 }
 
 const getServiceDetails = (

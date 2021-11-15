@@ -1,127 +1,89 @@
 import { AccessTokenResponse, ServiceName } from './../types/service'
-import { verify } from 'jsonwebtoken'
+import fetch from 'node-fetch'
+
 import config from '../utils/config'
-import { formatData, hasExpired } from '../utils/tokens'
-import { UserJWT } from '../types/user'
-import { refreshGitLabToken } from './gitLab'
-import { refreshBitbucketToken } from './bitbucket'
 
-type TokenMap = Map<ServiceName, AccessTokenResponse>
+const tokenServiceUrl = config.TOKEN_SERVICE_URL
 
-const tokenStorage = new Map<number, TokenMap>()
+const getAccessToken = async (
+  id: number,
+  serviceName: ServiceName,
+  amandusToken: string
+): Promise<string> => {
+  const tokenResponse = await fetch(`${tokenServiceUrl}/api/tokens/${id}/${serviceName}?data=token`, {
+    method: 'GET',
+    headers: { 'Authorization': `Bearer ${amandusToken}` }
+  })
 
-const setToken = (
-  userId: number,
+  const { access_token } = await tokenResponse.json() as AccessTokenResponse
+
+  return access_token
+}
+
+const setAccessToken = async (
+  id: number,
   service: ServiceName,
-  data: AccessTokenResponse
-): void => {
-  const tokenMap: TokenMap =
-    tokenStorage.get(userId) ?? new Map<ServiceName, AccessTokenResponse>()
+  amandusToken: string,
+  serviceToken: AccessTokenResponse
+): Promise<void> => {
+  const body = { serviceToken: serviceToken }
 
-  tokenMap.set(service, formatData(data))
-  tokenStorage.set(userId, tokenMap)
-}
+  const response = await fetch(`${tokenServiceUrl}/api/tokens/${id}/${service}?data=token`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${amandusToken}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(body)
+  })
 
-const removeToken = (userId: number, service: ServiceName): void => {
-  const tokenMap = getTokenMapById(userId)
-
-  if (tokenMap) {
-    tokenMap.delete(service)
+  if (response.status !== 200) {
+    throw new Error('something went wrong while adding new token')
   }
 }
 
-const getTokenMap = (amandusToken: string): TokenMap | null => {
-  // if refactored as an idependent service, this version should be used.
-  // for now it is ok to allow fetching with user id
-  const decodedToken = <UserJWT>verify(amandusToken, config.JWT_SECRET)
-
-  return tokenStorage.get(decodedToken.id) ?? null
-}
-
-const getTokenMapById = (userId: number): TokenMap | null => {
-  // this should NOT be used, if refactored as an independent service
-  return tokenStorage.get(userId) ?? null
-}
-
-const getServiceDetails = (
-  userId: number,
-  service: ServiceName
-): AccessTokenResponse | null => {
-  const tokenMap = getTokenMapById(userId)
-
-  if (tokenMap) {
-    const serviceData = tokenMap.get(service)
-
-    return serviceData ?? null
-  }
-
-  return null
-}
-
-const isServiceConnected = (userId: number, service: ServiceName): boolean => {
-  return getServiceDetails(userId, service) ? true : false
-}
-
-const getAccessTokenByServiceAndId = async (
-  userId: number,
-  service: ServiceName
-): Promise<string | null> => {
-  const data = getServiceDetails(userId, service)
-  if (data) {
-    if (hasExpired(data) && data.refresh_token) {
-      try {
-        const newData = await refreshToken(service, data.refresh_token)
-        setToken(userId, service, newData)
-        return newData.access_token
-      } catch (e) {
-        console.log(e)
-        removeToken(userId, service)
-        return null
+const deleteUser = async (
+  id: number,
+  amandusToken: string
+): Promise<void> => {
+  const response = await fetch(`${tokenServiceUrl}/api/tokens/${id}`,
+    {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${amandusToken}`,
+        "Content-Type": "application/json"
       }
-    }
+    })
 
-    return data.access_token
+  if (response.status !== 200) {
+    throw new Error('Something went wrong while deleting user tokens from token service')
   }
-
-  return null
 }
 
-const deleteTokenByUserId = (userId: number): void => {
-  // this should probably not be used, if refactored as an independent service
-  tokenStorage.delete(userId)
-}
-
-const refreshToken = async (
+const isServiceConnected = async (
+  id: number,
   service: ServiceName,
-  refreshToken: string
-): Promise<AccessTokenResponse> => {
-  let details: AccessTokenResponse = { access_token: '' }
+  amandusToken: string
+): Promise<boolean> => {
+  const response = await fetch(`${tokenServiceUrl}/api/tokens/${id}/${service}?data=state`, {
+    method: 'GET',
+    headers: { 'Authorization': `Bearer ${amandusToken}` }
+  })
 
-  switch (service) {
-    case 'gitlab':
-      details = await refreshGitLabToken(refreshToken)
-      break
-    case 'bitbucket':
-      details = await refreshBitbucketToken(refreshToken)
-      break
-    default:
+  if (!response.ok) {
+    throw new Error('Error fetching service connection status')
   }
 
-  return details
-}
+  // TODO: add checks for response format
+  const { connected } = await response.json() as { connected: boolean }
 
-const clearStorage = (): void => {
-  tokenStorage.clear()
+  return connected
+
 }
 
 export default {
-  setToken,
-  removeToken,
-  getTokenMap,
-  getTokenMapById,
-  getServiceDetails,
-  clearStorage,
-  getAccessTokenByServiceAndId,
-  isServiceConnected,
-  deleteTokenByUserId,
+  getAccessToken,
+  setAccessToken,
+  deleteUser,
+  isServiceConnected
 }

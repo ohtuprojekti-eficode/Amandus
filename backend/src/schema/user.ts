@@ -1,5 +1,4 @@
 import { UserInputError, ForbiddenError } from 'apollo-server'
-import fetch from 'node-fetch'
 import bcrypt from 'bcryptjs'
 import Crypto from 'crypto'
 import User from '../model/user'
@@ -178,20 +177,13 @@ const resolvers = {
 
       //TODO: rename requestServiceUser, as it returns user and token, not just user
       const serviceUserResponse = await requestServiceUser(service, args.code)
-      const body = { serviceToken: serviceUserResponse.response }
 
-      const response = await fetch(`http://tokenservice:3002/api/tokens/${context.currentUser.id}/${service}?data=token`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${context.accessToken}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(body)
-      })
-
-      if (response.status !== 200) {
-        throw new Error('something went wrong while adding new token')
-      }
+      await tokenService.setAccessToken(
+        context.currentUser.id,
+        service,
+        context.accessToken,
+        serviceUserResponse.response
+      )
 
       const serviceUser = serviceUserResponse.serviceUser
       const tokens = createTokens(context.currentUser)
@@ -262,24 +254,9 @@ const resolvers = {
         throw new Error('Did not receive user id for use removal')
       }
 
-      console.log(`Attempting removal of user ${user.id} with token ${context.accessToken}`)
-
-      const response = await fetch(`http://tokenservice:3002/api/tokens/${user.id}`,
-        {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${context.accessToken}`,
-            "Content-Type": "application/json"
-          }
-        })
-
-      if (response.status !== 200) {
-        console.log(response.json())
-        throw new Error('Something went wrong while deleting user tokens from token service')
-      }
-
-
+      await tokenService.deleteUser(user.id, context.accessToken)
       await User.deleteUser(username)
+
     },
   },
 }

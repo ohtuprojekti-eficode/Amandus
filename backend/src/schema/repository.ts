@@ -25,10 +25,8 @@ import {
 } from '../utils/utils'
 import { parseServiceRepositories } from '../utils/parsers'
 import { getRepoList } from '../services/commonServices'
-// import tokenService from '../services/token'
-import fetch from 'node-fetch'
+import tokenService from '../services/token'
 import { Repository } from '../types/repository'
-// import { AccessTokenResponse } from '../types/service'
 import { File } from '../types/file'
 
 const typeDef = `
@@ -102,11 +100,6 @@ const resolvers = {
       if (!args.url) {
         throw new Error('Repository url not provided')
       }
-
-      console.log('HELLO FROM BACKEND')
-      console.log('HERE IS CURRENT APPCONTEXT:')
-      console.log(context)
-
       const service = getServiceNameFromUrlString(args.url)
       const repoLocation = getRepoLocationFromUrlString(
         args.url,
@@ -166,23 +159,19 @@ const resolvers = {
 
       const allRepositories = await Promise.all(context.currentUser.services.map(
         async (service) => {
-          const tokenResponse = await fetch(`http://tokenservice:3002/api/tokens/${context.currentUser.id}/${service.serviceName}?data=token`, {
-            method: 'GET',
-            headers: { 'Authorization': `Bearer ${context.accessToken}` }
-          })
+          const token = await tokenService.getAccessToken(
+            context.currentUser.id,
+            service.serviceName,
+            context.accessToken
+          )
 
-          const token = await tokenResponse.json()
+          if (!token) return []
 
-          if (!token) {
-            //console.log(`no token for service ${service.serviceName}`)
-            return []
-          }
-
-          const response = await getRepoList(service, token.access_token)
+          const response = await getRepoList(service, token)
           const serviceRepositories: Repository[] = parseServiceRepositories(
             response,
             service.serviceName
-            )
+          )
 
           return serviceRepositories
         })
