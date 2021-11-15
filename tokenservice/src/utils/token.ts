@@ -5,7 +5,9 @@ import {
   Tokens
 } from "../types"
 import { sign } from 'jsonwebtoken'
+import fetch from 'node-fetch'
 import config from './config'
+
 
 export const hasExpired = (data: AccessTokenResponse): boolean => {
   const { created_at, expires_in } = data
@@ -40,7 +42,7 @@ export const refreshToken = async (
   return details
 }
 
-const refreshGitLabToken = (
+const refreshGitLabToken = async (
   refreshToken: string
 ): Promise<AccessTokenResponse> => {
   const credentials = {
@@ -51,7 +53,7 @@ const refreshGitLabToken = (
     redirect_uri: config.GITLAB_CB_URL,
   }
 
-  return fetch('https://gitlab.com/oauth/token', {
+  const response = await fetch('https://gitlab.com/oauth/token', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -59,13 +61,17 @@ const refreshGitLabToken = (
     },
     body: JSON.stringify(credentials),
   })
-    .then<AccessTokenResponse>((res) => res.json())
-    .catch((error: Error) => {
-      throw new Error(error.message)
-    })
+
+  if (!response.ok) {
+    throw new Error('error fetching refresh token')
+  }
+
+  const token = await response.json() as AccessTokenResponse
+
+  return token
 }
 
-const refreshBitbucketToken = (
+const refreshBitbucketToken = async (
   refreshToken: string
 ): Promise<AccessTokenResponse> => {
   const credentials = {
@@ -82,7 +88,7 @@ const refreshBitbucketToken = (
     refresh_token: `${refreshToken}`,
   })
 
-  return fetch('https://bitbucket.org/site/oauth2/access_token', {
+  const response = await fetch('https://bitbucket.org/site/oauth2/access_token', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -91,10 +97,14 @@ const refreshBitbucketToken = (
     },
     body: params,
   })
-    .then<AccessTokenResponse>((res) => res.json())
-    .catch((error: Error) => {
-      throw new Error(error.message)
-    })
+
+  if (!response.ok) {
+    throw new Error('error fetching refresh token')
+  }
+
+  const token = await response.json() as AccessTokenResponse
+
+  return token
 }
 
 export const createTokens = (user: UserType | null): Tokens => {
