@@ -98,7 +98,7 @@ jobs:
           docker push ${{ secrets.DOCKER_REPO }}:application-latest
       
       - name: Upload screenshots
-        uses: actions/upload-artifact@latest
+        uses: actions/upload-artifact@v2
         if: failure()
         with:
             name: cypress-snapshots
