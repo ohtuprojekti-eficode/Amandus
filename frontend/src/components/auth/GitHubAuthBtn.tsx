@@ -16,13 +16,13 @@ const GitHubAuthBtn = ({ connected }: AuthBtnProps) => {
     window.location.href = data!.githubLoginUrl
   }
 
-  if (error || !data) {
-    return <></>
-  }
+  if (error) return <p>error: {error.message}</p>
+  if (!data) return <></>
 
   return (
     <div>
       <Button
+        id="githubAuthButton"
         variant="contained"
         color="primary"
         startIcon={<GitHubIcon />}

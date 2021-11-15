@@ -26,9 +26,8 @@ const BitbucketAuthBtn = ({ connected }: AuthBtnProps) => {
     window.location.href = data!.bitbucketLoginUrl
   }
 
-  if (error || !data) {
-    return <></>
-  }
+  if (error) return <p>error: {error.message}</p>
+  if (!data) return <></>
 
   const bitbucketIcon = (
     <img
@@ -41,6 +40,7 @@ const BitbucketAuthBtn = ({ connected }: AuthBtnProps) => {
   return (
     <div>
       <Button
+        id="bitbucketAuthButton"
         startIcon={bitbucketIcon}
         variant="contained"
         color="primary"

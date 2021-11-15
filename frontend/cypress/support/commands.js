@@ -23,3 +23,63 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
+
+Cypress.Commands.add('createUserAndLogin', (username, email, password) => {
+  const query = `mutation {
+    register(
+      username:"${username}",
+      email:"${email}",
+      password:"${password}"
+    ) {
+      accessToken,
+      refreshToken
+    }
+  }`
+
+  cy.request({
+    method: 'post',
+    url: Cypress.env('GRAPHQL_URI'),
+    body: { query },
+    failOnStatusCode: false
+  }).then((res) => {
+    cy.log(res);
+    localStorage.setItem('amandus-user-access-token', res.body.data.register.accessToken)
+    localStorage.setItem('amandus-user-refresh-token', res.body.data.register.accessToken)
+  })
+})
+
+Cypress.Commands.add('deleteUser', (username) => {
+  const query = `mutation {
+    deleteUser(username:"${username}")
+  }`
+
+  cy.request({
+    method: 'post',
+    url: Cypress.env('GRAPHQL_URI'),
+    body: { query },
+    failOnStatusCode: false
+  }).then((res) => {
+    cy.log(res);
+  })
+  localStorage.clear()
+})
+
+Cypress.Commands.add('connectWith', (service) => {
+  let callbackUrl
+  switch (service) {
+    case 'github':
+      callbackUrl = '/auth/github/callback?code=asdasdasd'
+      break
+    case 'gitlab':
+      callbackUrl = '/auth/gitlab/callback?code=asdasdasd'
+      break
+    case 'bitbucket':
+      callbackUrl = '/auth/bitbucket/callback?code=asdasdasd'
+      break;
+    default:
+      throw new Error(`no such service: ${service}`)
+  }
+
+  cy.visit(Cypress.env('HOST') + callbackUrl)
+  cy.url().should('contain', '/connections')
+})

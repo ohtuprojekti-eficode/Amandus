@@ -1,5 +1,6 @@
 {
     "env": {
-        "HOST": "http://localhost:3000"
+        "HOST": "http://localhost:3000",
+        "GRAPHQL_URI": "http://localhost:3001/graphql"
       }
 }

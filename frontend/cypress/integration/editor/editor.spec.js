@@ -28,6 +28,6 @@ describe('When visiting the edit view page, as a user', () => {
 
     cy.visit(Cypress.env('HOST') + '/edit')
 
-    cy.get('.MuiButton-containedPrimary').should('not.be.disabled')
+    cy.contains('Please select repository')
   })
 })
