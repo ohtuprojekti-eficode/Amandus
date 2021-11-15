@@ -1,4 +1,4 @@
-import { ServiceTokenType, ServiceUser } from './service'
+import { ServiceName, ServiceTokenType, ServiceUser } from './service'
 
 export interface UserType {
   id: number
@@ -34,4 +34,10 @@ export interface UserJWT {
   gitlabToken?: string
 }
 
-
+export interface UserForCommit {
+  usedService: ServiceName
+  gitUsername: string
+  email: string
+  repositoryName: string
+  repoLocation: string
+}

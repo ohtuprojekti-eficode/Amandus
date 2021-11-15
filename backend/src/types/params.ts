@@ -38,4 +38,5 @@ export interface AddServiceArgs {
 export interface CommitArgs {
   url: string
   commitMessage: string
+  fileName: string
 }
