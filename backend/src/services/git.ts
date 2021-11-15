@@ -77,9 +77,10 @@ export const saveChanges = async (
   const gitUsername = currentService?.username || amandusUser.username
   const email = currentService?.email || amandusUser.email
 
-  const remoteToken = await tokenService.getAccessTokenByServiceAndId(
+  const remoteToken = await tokenService.getAccessToken(
     amandusUser.id,
-    usedService
+    usedService,
+    context.accessToken
   )
 
   const repositoryName = getRepositoryFromFilePath(firstFile.name)
@@ -145,10 +146,12 @@ export const saveMerge = async (
   const gitUsername = currentService?.username || amandusUser.username
   const email = currentService?.email || amandusUser.email
 
-  const remoteToken = await tokenService.getAccessTokenByServiceAndId(
+  const remoteToken = await tokenService.getAccessToken(
     amandusUser.id,
-    usedService
+    usedService,
+    context.accessToken
   )
+
   const repositoryName = getRepositoryFromFilePath(firstFile.name)
   const repoLocation = getRepoLocationFromRepoName(
     repositoryName,
