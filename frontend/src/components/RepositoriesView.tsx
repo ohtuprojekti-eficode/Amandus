@@ -18,7 +18,7 @@ const RepoLine = ({repo}: RepoProps) => {
       <ListItemText>{repo.name}</ListItemText> 
 
       </ListItem>
-        <Link to={{ pathname: '/edit', state: { cloneUrl: repo.clone_url}}} > edit in amandus </Link>
+        <Link to={{ pathname: '/edit', state: { cloneUrl: repo.clone_url}}} style={{color: "green"}}> edit in amandus </Link>
       
     </ListItem>
   )

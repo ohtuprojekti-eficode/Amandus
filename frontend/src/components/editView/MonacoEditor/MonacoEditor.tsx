@@ -43,6 +43,9 @@ const stylesInUse = makeStyles(() =>
       display: 'flex',
       alignItems: 'center',
     },
+    resetButton: {
+      color: "red"
+    }
   })
 )
 
@@ -150,7 +153,7 @@ const MonacoEditor = ({
     }
   }
 
-  const handleCommit = async (commitMessage: string) => {
+  const handleCommitAndPull = async (commitMessage: string) => {
     await commitChanges({
       variables: {
         url: cloneUrl,
@@ -168,6 +171,12 @@ const MonacoEditor = ({
         url: cloneUrl
       },
     })
+  }
+
+  const handleResetAndPull = async () => {
+    await handleReset()
+    await handlePull()
+    pullProps.handleDialogClose()
   }
 
   const handleResetFile = async () => {
@@ -208,7 +217,8 @@ const MonacoEditor = ({
       <PullDialog
         open={pullProps.dialogOpen}
         handleClose={pullProps.handleDialogClose}
-        handleSubmit={handleCommit}
+        handleSubmit={handleCommitAndPull}
+        handleResetAll={handleResetAndPull}
         error={pullProps.dialogError}
       />
       <div className={classes.saveGroup}>
@@ -233,7 +243,7 @@ const MonacoEditor = ({
           <ServiceConnected service={currentService} />
           <Button
             style={{ marginLeft: 25 }}
-            color="primary"
+            className={ classes.resetButton }
             variant="outlined"
             size="small"
             disabled={pullLoading || mutationSaveLoading}
@@ -243,7 +253,7 @@ const MonacoEditor = ({
           </Button>
           <Button
             style={{ marginLeft: 25 }}
-            color="primary"
+            className={ classes.resetButton }
             variant="outlined"
             size="small"
             disabled={pullLoading || mutationSaveLoading}
