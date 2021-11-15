@@ -4,12 +4,14 @@ import {
   ServiceUserResponse,
   ServiceUser,
 } from '../types/service'
-import fetch from 'node-fetch'
+
+import { default as nodeFetch } from 'node-fetch'
 import config from '../utils/config'
 import { UserInputError } from 'apollo-server-errors'
 
 export const requestGitLabToken = (
-  code: string
+  code: string,
+  fetch: typeof nodeFetch
 ): Promise<AccessTokenResponse> => {
   const credentials = {
     client_id: config.GITLAB_CLIENT_ID || '',
@@ -34,7 +36,8 @@ export const requestGitLabToken = (
 }
 
 export const requestGitLabUserAccount = (
-  token: string
+  token: string,
+  fetch: typeof nodeFetch
 ): Promise<GitLabUserType> => {
   return fetch('https://gitlab.com/api/v4/user', {
     headers: {
@@ -48,7 +51,8 @@ export const requestGitLabUserAccount = (
 }
 
 export const refreshGitLabToken = (
-  refreshToken: string
+  refreshToken: string,
+  fetch: typeof nodeFetch = nodeFetch
 ): Promise<AccessTokenResponse> => {
   const credentials = {
     client_id: config.GITLAB_CLIENT_ID || '',
@@ -73,16 +77,17 @@ export const refreshGitLabToken = (
 }
 
 export const requestGitLabUser = async (
-  code: string
+  code: string,
+  fetch: typeof nodeFetch
 ): Promise<ServiceUserResponse> => {
-  const response = await requestGitLabToken(code)
+  const response = await requestGitLabToken(code, fetch)
   const { access_token } = response
 
   if (!access_token) {
     throw new UserInputError('Invalid or expired GitLab code')
   }
 
-  const gitLabUser = await requestGitLabUserAccount(access_token)
+  const gitLabUser = await requestGitLabUserAccount(access_token, fetch)
 
   const serviceUser: ServiceUser = {
     serviceName: 'gitlab',

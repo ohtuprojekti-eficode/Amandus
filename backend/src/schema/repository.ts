@@ -163,9 +163,7 @@ const resolvers = {
           )
 
           if (!token) {
-            console.log(
-              `Service token missing for service ${service.serviceName}`
-            )
+            // console.log(`Service token missing for service ${service.serviceName}`)
             return []
           }
 

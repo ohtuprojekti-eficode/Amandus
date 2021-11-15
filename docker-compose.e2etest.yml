@@ -1,0 +1,47 @@
+version: '3'
+
+services:
+  frontend:
+    command: yarn start
+    build: ./frontend
+    stdin_open: true
+    volumes:
+      - ./frontend/:/usr/src/frontend
+      - ./frontend/node_modules:/usr/src/frontend/node_modules
+    ports:
+      - '3000:3000'
+
+  backend:
+    command: sh -c "sleep 5 && yarn run migrate-up-prod && yarn dev"
+    build: ./backend
+    stdin_open: true
+    volumes:
+      - ./backend/:/usr/src/app
+      - ./backend/node_modules:/usr/src/app/node_modules
+    ports:
+      - '3001:3001'
+    environment:
+      - NODE_ENV=e2etest
+      - DATABASE_URL=postgres://test:test@userdata:5432/test
+      - DATABASE_URL_TEST=postgres://test:test@userdata:5432/test
+    depends_on:
+      - userdata
+  
+  userdata:
+    image: 'postgres'
+    environment:
+      - POSTGRES_USER=test
+      - POSTGRES_DB=test
+      - POSTGRES_PASSWORD=test
+    volumes:
+      - testdata-data:/var/lib/postgresql/data/
+    ports:
+      - '5432:5432'
+  
+  language-server:
+    image: 'ohtuamandus/robot-language-server'
+    ports:
+      - '5555:5555'
+
+volumes:
+  testdata-data:
