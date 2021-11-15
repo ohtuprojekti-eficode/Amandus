@@ -362,7 +362,6 @@ describe('switchBranch mutation', () => {
   })
 })
 
-<<<<<<< HEAD
 describe('SaveChanges mutation', () => {
   const repoPath = join(
     '.',
@@ -372,10 +371,6 @@ describe('SaveChanges mutation', () => {
     'fakegithubuser',
     'testRepo'
   )
-=======
-describe('LocalChanges mutation', () => {
-  const repoPath = join('.', 'repositories', 'testuser', 'github', 'fakegithubuser', 'testRepo')
->>>>>>> reset
 
   beforeEach(async () => {
     await User.deleteAll()

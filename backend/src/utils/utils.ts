@@ -158,3 +158,4 @@ export const extractUserForCommit = (fileName: string, context: AppContext): Use
   }
   return userForCommit
 }
+
