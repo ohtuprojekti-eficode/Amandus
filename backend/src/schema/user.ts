@@ -49,45 +49,29 @@ const resolvers = {
     ): UserType | undefined => {
       return context.currentUser
     },
-    isServiceConnected: (
-      _root: unknown,
-      _args: unknown,
-      context: AppContext,
-      service: string
-    ): Promise<any> => {
-      return fetch(`http://tokenservice:3002/api/tokens/${context.currentUser.id}/${service}?data=state`, {
-        method: 'GET',
-        headers: { 'Authorization': `Bearer ${context.accessToken}` }
-      }).then(res => {
-        if (!res.ok) {
-          throw new Error('Error fetching service connection state')
-        }
-        return res.json()
-      }
-      )
-    },
-    isGithubConnected: (
+    isGithubConnected: async (
       _root: unknown,
       _args: unknown,
       context: AppContext
-    ): boolean => {
-      return tokenService.isServiceConnected(context.currentUser.id, 'github')
+    ): Promise<boolean> => {
+      return await tokenService.isServiceConnected(context.currentUser.id, 'github', context.accessToken)
     },
-    isGitLabConnected: (
+    isGitLabConnected: async (
       _root: unknown,
       _args: unknown,
       context: AppContext
-    ): boolean => {
-      return tokenService.isServiceConnected(context.currentUser.id, 'gitlab')
+    ): Promise<boolean> => {
+      return await tokenService.isServiceConnected(context.currentUser.id, 'gitlab', context.accessToken)
     },
-    isBitbucketConnected: (
+    isBitbucketConnected: async (
       _root: unknown,
       _args: unknown,
       context: AppContext
-    ): boolean => {
-      return tokenService.isServiceConnected(
+    ): Promise<boolean> => {
+      return await tokenService.isServiceConnected(
         context.currentUser.id,
-        'bitbucket'
+        'bitbucket',
+        context.accessToken
       )
     },
     githubLoginUrl: (): string => {
