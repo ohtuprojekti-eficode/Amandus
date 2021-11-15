@@ -24,6 +24,7 @@ services:
       - DATABASE_URL=postgres://ohtu_user:ohtupassword@userdata:5432/account_database
     depends_on:
       - userdata
+    restart: on-failure:10
 
   tokenservice:
     command: yarn dev
