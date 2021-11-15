@@ -80,11 +80,19 @@ const removeUser = (
   if (id !== decodedToken.id) {
     throw new Error('token and id mismatch')
   }
+
+  if (!tokenStorage.has(decodedToken.id)) {
+    console.log('User has no entries in token storage')
+    return
+  }
+
   const result = tokenStorage.delete(decodedToken.id)
 
   if (!result) {
-    throw new Error(`User removal unsuccessful: user not found`)
+    console.log('could not remove user')
+    throw new Error(`User removal unsuccessful`)
   }
+  console.log('User removed successfully')
 }
 
 const getServiceDetails = (
@@ -100,6 +108,14 @@ const getServiceDetails = (
   }
 
   return null
+}
+
+const isServiceConnected = (
+  id: number,
+  service: ServiceName,
+  amandusToken: string,
+): boolean => {
+  return getServiceDetails(amandusToken, service, id) ? true : false
 }
 
 const getTokenMap = (amandusToken: string, id: number): TokenMap | null => {
@@ -122,5 +138,6 @@ export default {
   removeUser,
   clearStorage,
   getTokenMap,
-  getServiceDetails
+  getServiceDetails,
+  isServiceConnected
 }

@@ -50,6 +50,23 @@ const resolvers = {
     ): UserType | undefined => {
       return context.currentUser
     },
+    isServiceConnected: (
+      _root: unknown,
+      _args: unknown,
+      context: AppContext,
+      service: string
+    ): Promise<any> => {
+      return fetch(`http://tokenservice:3002/api/tokens/${context.currentUser.id}/${service}?data=state`, {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${context.accessToken}` }
+      }).then(res => {
+        if (!res.ok) {
+          throw new Error('Error fetching service connection state')
+        }
+        return res.json()
+      }
+      )
+    },
     isGithubConnected: (
       _root: unknown,
       _args: unknown,
@@ -163,7 +180,7 @@ const resolvers = {
       const serviceUserResponse = await requestServiceUser(service, args.code)
       const body = { serviceToken: serviceUserResponse.response }
 
-      const response = await fetch(`http://tokenservice:3002/api/tokens/${context.currentUser.id}/${service}`, {
+      const response = await fetch(`http://tokenservice:3002/api/tokens/${context.currentUser.id}/${service}?data=token`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${context.accessToken}`,
@@ -240,7 +257,6 @@ const resolvers = {
         throw new UserInputError('User not valid')
       }
       const user = await User.findUserByUsername(username)
-      // user?.id && tokenService.deleteTokenByUserId(user.id)
 
       if (!user?.id) {
         throw new Error('Did not receive user id for use removal')
@@ -248,18 +264,19 @@ const resolvers = {
 
       console.log(`Attempting removal of user ${user.id} with token ${context.accessToken}`)
 
-      //TODO: ADD CHECK IF RES.OK!
-      await fetch(`http://tokenservice:3002/api/tokens/${user.id}`,
+      const response = await fetch(`http://tokenservice:3002/api/tokens/${user.id}`,
         {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${context.accessToken}`,
             "Content-Type": "application/json"
           }
-        }).then(res => res.json())
-        .catch(e => {
-          throw new Error((e as Error).message)
         })
+
+      if (response.status !== 200) {
+        console.log(response.json())
+        throw new Error('Something went wrong while deleting user tokens from token service')
+      }
 
 
       await User.deleteUser(username)

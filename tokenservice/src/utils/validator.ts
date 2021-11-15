@@ -90,6 +90,9 @@ const parseDeleteRequest = (
 ): DeleteRequestContent => {
 
   const serviceName = req.params.service
+  console.log('PARSING DELETE REQUEST')
+  console.log(`service: ${serviceName}`)
+  console.log(`id: ${req.params.id}`)
 
   const deleteRequestContent: DeleteRequestContent = {
     id: Number(req.params.id),

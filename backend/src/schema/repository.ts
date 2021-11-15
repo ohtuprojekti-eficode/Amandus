@@ -126,7 +126,7 @@ const resolvers = {
 
       const allRepositories = await Promise.all(context.currentUser.services.map(
         async (service) => {
-          const tokenResponse = await fetch(`http://tokenservice:3002/api/tokens/${context.currentUser.id}/${service.serviceName}`, {
+          const tokenResponse = await fetch(`http://tokenservice:3002/api/tokens/${context.currentUser.id}/${service.serviceName}?data=token`, {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${context.accessToken}` }
           })
@@ -134,7 +134,7 @@ const resolvers = {
           const token = await tokenResponse.json()
 
           if (!token) {
-            console.log(`Service token missing for service ${service.serviceName}`)
+            console.log(`no token for service ${service.serviceName}`)
             return []
           }
 

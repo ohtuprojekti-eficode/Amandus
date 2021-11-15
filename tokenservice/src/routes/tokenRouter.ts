@@ -16,14 +16,26 @@ router.post('/:id/:service', (req, res) => {
 })
 
 router.get('/:id/:service', (req, res) => {
+  const data = req.query.data
   const { id, serviceName, amandusToken } = parseGetRequest(req)
 
-  tokenService.getAccessToken(amandusToken, serviceName, id)
-    .then(token => {
-      token ? res.json({ 'access_token': token }) : res.status(404).send('token not found')
-    }).catch((e) => {
-      res.status(404).send((e as Error).message)
-    })
+  if (!data) {
+    res.status(400).send('invalid data query string')
+  }
+
+  if (data === 'state') {
+    const serviceState = tokenService.isServiceConnected(id, serviceName, amandusToken)
+    res.json({ 'connected': serviceState })
+  }
+
+  if (data === 'token') {
+    tokenService.getAccessToken(amandusToken, serviceName, id)
+      .then(token => {
+        token ? res.json({ 'access_token': token }) : res.status(404).send('token not found')
+      }).catch((e) => {
+        res.status(404).send((e as Error).message)
+      })
+  }
 })
 
 router.delete('/:id/:service', (req, res) => {
