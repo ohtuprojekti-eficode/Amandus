@@ -7,7 +7,6 @@ import { closePool } from '../db/connect'
 import { server } from '../index'
 import User from '../model/user'
 import { createTokens } from '../utils/tokens'
-import { v4 as uuid } from 'uuid'
 import tokenService from '../services/token'
 
 const ADD_SERVICE = gql`
@@ -555,7 +554,7 @@ describe('isGithubConnected', () => {
 
     const user = await User.registerUser(userToSave)
     const frontendJWTs = createTokens(user)
-    tokenService.setToken(user.id, 'github', { access_token: uuid() })
+    await tokenService.setAccessToken(user.id, 'github', frontendJWTs.accessToken, { access_token: 'gh_token' })
 
     const { query } = createIntegrationTestClient({
       apolloServer: server,

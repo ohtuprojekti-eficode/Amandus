@@ -42,14 +42,11 @@ test('access token can be received', async () => {
 })
 
 test('if access token does not exists, nothing is returned', async () => {
-
-
   const amandusToken = createAmandusToken()
-  const invalidToken = async () => {
-    await tokenService.getAccessToken(1, 'bitbucket', amandusToken)
-  }
 
-  await expect(invalidToken()).rejects.toThrow()
+  const response = await tokenService.getAccessToken(1, 'bitbucket', amandusToken)
+
+  expect(response).toBeNull()
 
 })
 
