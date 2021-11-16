@@ -1,6 +1,7 @@
 import simpleGit, { BranchSummary, GitError, SimpleGit, StatusResult } from 'simple-git'
 import { v4 as uuidv4 } from 'uuid'
 import { ServiceName } from '../types/service'
+import { getServiceUrlFromServiceName } from './utils'
 
 export const gitRemoveRemote = async (
   git: SimpleGit,
@@ -58,22 +59,11 @@ export const gitAddRemote = async (
   service: ServiceName,
   repositoryName: string
 ): Promise<void> => {
-  const serviceUrl = (service: ServiceName): string => {
-    switch (service) {
-      case 'github':
-        return 'github.com'
-      case 'gitlab':
-        return 'gitlab.com'
-      case 'bitbucket':
-        return 'bitbucket.org'
-    }
-  }
-
   if (service === 'gitlab') username = 'oauth2'
 
   await git.addRemote(
     remoteId,
-    `https://${username}:${token}@${serviceUrl(service)}/${repositoryName}`
+    `https://${username}:${token}@${getServiceUrlFromServiceName(service)}/${repositoryName}`
   )
 }
 

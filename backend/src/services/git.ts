@@ -1,4 +1,4 @@
-import { AppContext } from '../types/user'
+import { AppContext, UserType } from '../types/user'
 import { StatusResult } from '../types/gitTypes'
 import { SaveArgs } from '../types/params'
 import { sanitizeBranchName } from '../utils/sanitize'
@@ -11,6 +11,9 @@ import {
   writeToFile,
   getRepoLocationFromRepoName,
   getServiceFromFilePath,
+  getServiceNameFromUrlString,
+  getServiceUrlFromServiceName,
+  getRepoNameFromUrlString,
 } from '../utils/utils'
 import {
   doAutoMerge,
@@ -50,10 +53,33 @@ export const pullNewestChanges = async (
 
 export const cloneRepository = async (
   url: string,
-  username: string
+  user: UserType
 ): Promise<void> => {
-  const repoLocation = getRepoLocationFromUrlString(url, username)
-  await cloneRepositoryToSpecificFolder(url, repoLocation)
+  const repoLocation = getRepoLocationFromUrlString(url, user.username)
+
+  const service = getServiceNameFromUrlString(url)
+  if (!service) {
+    throw new Error(`Could not parse service from ${url}`);
+  }
+
+  const token = await tokenService.getAccessTokenByServiceAndId(user.id, service)
+  if (!token) { // cloning without credentials
+    await cloneRepositoryToSpecificFolder(url, repoLocation)
+    return
+  }
+
+  const currentService = user.services?.find(
+    (s) => s.serviceName === service
+  )
+  const gitUsername = service === 'gitlab'
+    ? 'oauth2'
+    : currentService?.username || user.username
+
+  const repositoryName = getRepoNameFromUrlString(url)
+
+  const urlWithCredentials =
+    `https://${gitUsername}:${token}@${getServiceUrlFromServiceName(service)}${repositoryName}`
+  await cloneRepositoryToSpecificFolder(urlWithCredentials, repoLocation)
 }
 
 export const saveChanges = async (
