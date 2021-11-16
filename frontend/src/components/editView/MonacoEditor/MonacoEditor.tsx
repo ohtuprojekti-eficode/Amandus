@@ -43,6 +43,9 @@ const stylesInUse = makeStyles(() =>
       display: 'flex',
       alignItems: 'center',
     },
+    resetButton: {
+      color: "red"
+    }
   })
 )
 
@@ -78,6 +81,8 @@ const MonacoEditor = ({
     mutationSaveLoading,
     pullLoading,
     commitChanges,
+    resetAll,
+    resetFile
   } = useEditor(cloneUrl)
 
   const theme = useTheme()
@@ -148,15 +153,39 @@ const MonacoEditor = ({
     }
   }
 
-  const handleCommit = async (commitMessage: string) => {
+  const handleCommitAndPull = async (commitMessage: string) => {
     await commitChanges({
       variables: {
         url: cloneUrl,
         commitMessage: commitMessage,
+        fileName: filename
       },
     })
     await handlePull()
     pullProps.handleDialogClose()
+  }
+
+  const handleReset = async () => {
+    await resetAll({
+      variables: {
+        url: cloneUrl
+      },
+    })
+  }
+
+  const handleResetAndPull = async () => {
+    await handleReset()
+    await handlePull()
+    pullProps.handleDialogClose()
+  }
+
+  const handleResetFile = async () => {
+    await resetFile({
+      variables: {
+        url: cloneUrl,
+        fileName: filename
+      }
+    })
   }
 
   return (
@@ -188,7 +217,8 @@ const MonacoEditor = ({
       <PullDialog
         open={pullProps.dialogOpen}
         handleClose={pullProps.handleDialogClose}
-        handleSubmit={handleCommit}
+        handleSubmit={handleCommitAndPull}
+        handleResetAll={handleResetAndPull}
         error={pullProps.dialogError}
       />
       <div className={classes.saveGroup}>
@@ -211,6 +241,26 @@ const MonacoEditor = ({
             Save
           </Button>
           <ServiceConnected service={currentService} />
+          <Button
+            style={{ marginLeft: 25 }}
+            className={ classes.resetButton }
+            variant="outlined"
+            size="small"
+            disabled={pullLoading || mutationSaveLoading}
+            onClick={handleResetFile}
+          >
+            Reset File
+          </Button>
+          <Button
+            style={{ marginLeft: 25 }}
+            className={ classes.resetButton }
+            variant="outlined"
+            size="small"
+            disabled={pullLoading || mutationSaveLoading}
+            onClick={handleReset}
+          >
+            Reset Repo
+          </Button>
         </div>
         <LatestCommit commitMessage={commitMessage} />
         {autosaving && (
