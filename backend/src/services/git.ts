@@ -72,13 +72,13 @@ export const saveChanges = async (
   }
 
   const amandusUser = context.currentUser
- 
-  const { 
+
+  const {
     usedService,
     gitUsername,
     email,
     repositoryName,
-    repoLocation 
+    repoLocation
   } = extractUserForCommit(firstFile.name, context)
 
   const remoteToken = await tokenService.getAccessToken(
@@ -135,13 +135,13 @@ export const saveMerge = async (
   }
 
   const amandusUser = context.currentUser
-  
-  const { 
+
+  const {
     usedService,
     gitUsername,
     email,
     repositoryName,
-    repoLocation 
+    repoLocation
   } = extractUserForCommit(firstFile.name, context)
 
   const remoteToken = await tokenService.getAccessToken(
@@ -220,11 +220,11 @@ export const addAndCommitLocal = async (
     context.currentUser.username
   )
 
-  const { 
+  const {
     gitUsername,
     email,
   } = extractUserForCommit(fileName, context)
- 
+
   const gitObject = getGitObject(repoLocation)
   const statusResult = await gitStatus(gitObject)
   const modifiedFiles: string[] = statusResult.modified

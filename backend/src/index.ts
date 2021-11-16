@@ -27,7 +27,7 @@ const corsOptions = {
 const server = new ApolloServer({
   schema,
   context: async ({ req, res }) => {
-    const accessTokenHeader: any = req.headers['x-access-token']
+    const accessTokenHeader: any = req && req.headers['x-access-token']
     const refreshTokenHeader: any = req && req.headers['x-refresh-token']
 
     if (!accessTokenHeader || !refreshTokenHeader) return

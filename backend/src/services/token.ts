@@ -9,15 +9,20 @@ const getAccessToken = async (
   id: number,
   serviceName: ServiceName,
   amandusToken: string
-): Promise<string> => {
-  const tokenResponse = await fetch(`${tokenServiceUrl}/api/tokens/${id}/${serviceName}?data=token`, {
-    method: 'GET',
-    headers: { 'Authorization': `Bearer ${amandusToken}` }
-  })
+): Promise<string | null> => {
 
-  const { access_token } = await tokenResponse.json() as AccessTokenResponse
+  try {
+    const tokenResponse = await fetch(`${tokenServiceUrl}/api/tokens/${id}/${serviceName}?data=token`, {
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${amandusToken}` }
+    })
 
-  return access_token
+    const { access_token } = await tokenResponse.json() as AccessTokenResponse
+
+    return access_token
+  } catch (e) {
+    return null
+  }
 }
 
 const setAccessToken = async (
@@ -25,7 +30,7 @@ const setAccessToken = async (
   service: ServiceName,
   amandusToken: string,
   serviceToken: AccessTokenResponse
-): Promise<void> => {
+): Promise<boolean> => {
   const body = { serviceToken: serviceToken }
 
   const response = await fetch(`${tokenServiceUrl}/api/tokens/${id}/${service}?data=token`, {
@@ -40,6 +45,8 @@ const setAccessToken = async (
   if (response.status !== 200) {
     throw new Error('something went wrong while adding new token')
   }
+
+  return true
 }
 
 const deleteUser = async (
