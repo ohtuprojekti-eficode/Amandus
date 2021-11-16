@@ -6,7 +6,7 @@ import { File } from '../types/file'
 import { sanitizeCommitMessage } from './sanitize'
 
 import { ServiceName, ServiceTokenType } from '../types/service'
-import { AppContext } from '../types/user'
+import { AppContext, UserForCommit } from '../types/user'
 
 
 
@@ -135,3 +135,38 @@ export const getServiceUrlFromServiceName = (service: ServiceName): string => {
       return 'bitbucket.org'
   }
 }
+
+/**
+ * 
+ * @param fileName: string
+ * @param context: AppContext 
+ * 
+ * @returns usedService, gitUsername, email, repositoryName, repoLocation 
+ */
+export const extractUserForCommit = (fileName: string, context: AppContext): UserForCommit => {
+  console.log('filename is: ', fileName)
+  const usedService = getServiceFromFilePath(fileName)
+  const currentService = context.currentUser.services?.find(
+    (s) => s.serviceName === usedService
+  )
+  const amandusUser = context.currentUser
+  const gitUsername = currentService?.username || context.currentUser.username
+  const email = currentService?.email || amandusUser.email
+
+  const repositoryName = getRepositoryFromFilePath(fileName)
+  const repoLocation = getRepoLocationFromRepoName(
+    repositoryName,
+    amandusUser.username,
+    usedService
+  )
+
+  const userForCommit: UserForCommit = {
+    usedService,
+    gitUsername,
+    email,
+    repositoryName,
+    repoLocation
+  }
+  return userForCommit
+}
+

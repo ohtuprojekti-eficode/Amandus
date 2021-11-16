@@ -86,6 +86,14 @@ const Mutation = `
         commitLocalChanges(
             url: String!
             commitMessage: String
+            fileName: String!
+        ): String
+        resetLocalChanges(
+            url: String!
+        ): String
+        resetCurrentFile(
+            url: String!
+            fileName: String!
         ): String
     }
 `
