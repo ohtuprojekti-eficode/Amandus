@@ -18,16 +18,19 @@ const setToken = (
   id: number
 ): void => {
   const decodedToken = <UserJWT>verify(amandusToken, config.JWT_SECRET)
-  if (id !== decodedToken.id) {
-    throw new Error('token and id mismatch')
+  if (id !== decodedToken.id) throw new Error('token and id mismatch')
+
+  try {
+    const tokenMap: TokenMap =
+      tokenStorage.get(decodedToken.id) ?? new Map<ServiceName, AccessTokenResponse>()
+
+    tokenMap.set(service, formatData(token))
+    tokenStorage.set(decodedToken.id, tokenMap)
+
+  } catch (e) {
+    throw new Error(`failed to save new token: ${(e as Error).message}`)
   }
 
-  const tokenMap: TokenMap =
-    tokenStorage.get(decodedToken.id) ?? new Map<ServiceName, AccessTokenResponse>()
-
-  tokenMap.set(service, formatData(token))
-
-  tokenStorage.set(decodedToken.id, tokenMap)
 }
 
 const getAccessToken = async (
@@ -38,6 +41,7 @@ const getAccessToken = async (
   const data = getServiceDetails(amandusToken, service, id)
 
   if (data) {
+
     if (hasExpired(data) && data.refresh_token) {
       try {
         const newData = await refreshToken(service, data.refresh_token)
@@ -47,6 +51,7 @@ const getAccessToken = async (
       } catch (e) {
         console.log(e)
         removeToken(amandusToken, service, id)
+
         return null
       }
     }
@@ -82,7 +87,7 @@ const removeUser = (
   }
 
   if (!tokenStorage.has(decodedToken.id)) {
-    return
+    throw new Error('user does not exist')
   }
 
   const result = tokenStorage.delete(decodedToken.id)
@@ -115,7 +120,10 @@ const isServiceConnected = (
   return getServiceDetails(amandusToken, service, id) ? true : false
 }
 
-const getTokenMap = (amandusToken: string, id: number): TokenMap | null => {
+const getTokenMap = (
+  amandusToken: string,
+  id: number
+): TokenMap | null => {
   const decodedToken = <UserJWT>verify(amandusToken, config.JWT_SECRET)
   if (id !== decodedToken.id) {
     throw new Error('token and id mismatch')

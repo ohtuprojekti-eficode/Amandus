@@ -4,8 +4,11 @@ import {
   PostRequestContent,
   ServiceName,
   AccessTokenResponse,
+  RequestContent,
   GetRequestContent,
-  DeleteRequestContent
+  DeleteRequestContent,
+  QueryType,
+  RequestBody
 } from '../types'
 
 const isString = (text: unknown): text is string => {
@@ -29,9 +32,16 @@ const isAccessTokenResponse = (token: unknown): token is AccessTokenResponse => 
   return true
 }
 
+const isQueryType = (query: unknown): query is QueryType => {
+  if (query === 'state' || query === 'token') {
+    return true
+  }
+  return false
+}
+
 const parseAmandusToken = (authHeader: unknown): string => {
   if (!authHeader || !isString(authHeader) || !authHeader.startsWith('Bearer ')) {
-    throw new Error('Incorrect or missing amandus token')
+    throw new TypeError('incorrect or missing amandus token')
   }
 
   return authHeader.substring(7, authHeader.length)
@@ -39,7 +49,7 @@ const parseAmandusToken = (authHeader: unknown): string => {
 
 const parseServiceToken = (token: unknown): AccessTokenResponse => {
   if (!token || !isAccessTokenResponse(token)) {
-    throw new Error('Incorrect or missing service token')
+    throw new TypeError('incorrect or missing service token')
   }
 
   return token
@@ -47,14 +57,17 @@ const parseServiceToken = (token: unknown): AccessTokenResponse => {
 
 const parseServiceName = (name: unknown): ServiceName => {
   if (!name || !isServiceName(name)) {
-    throw new Error('Incorrect or missing service name')
+    throw new TypeError('incorrect or missing service name')
   }
 
   return name
 }
 
-type RequestBody = {
-  serviceToken: AccessTokenResponse
+const parseQueryType = (query: unknown): QueryType => {
+  if (!query || !isQueryType(query)) {
+    throw new TypeError('invalid data query string')
+  }
+  return query
 }
 
 const parsePostRequest = (
@@ -79,13 +92,14 @@ const parseGetRequest = (
   const getRequestContent: GetRequestContent = {
     id: Number(req.params.id),
     serviceName: parseServiceName(req.params.service),
-    amandusToken: parseAmandusToken(req.headers.authorization)
+    amandusToken: parseAmandusToken(req.headers.authorization),
+    queryType: parseQueryType(req.query.data)
   }
 
   return getRequestContent
 }
 
-const parseDeleteRequest = (
+const parseDeleteTokenRequest = (
   req: Request
 ): DeleteRequestContent => {
 
@@ -93,15 +107,28 @@ const parseDeleteRequest = (
 
   const deleteRequestContent: DeleteRequestContent = {
     id: Number(req.params.id),
-    serviceName: serviceName ? parseServiceName(serviceName) : undefined,
+    serviceName: parseServiceName(serviceName),
     amandusToken: parseAmandusToken(req.headers.authorization)
   }
 
   return deleteRequestContent
 }
 
+const parseDeleteUserRequest = (
+  req: Request
+): RequestContent => {
+
+  const deleteUserRequestContent: RequestContent = {
+    id: Number(req.params.id),
+    amandusToken: parseAmandusToken(req.headers.authorization)
+  }
+
+  return deleteUserRequestContent
+}
+
 export {
   parsePostRequest,
   parseGetRequest,
-  parseDeleteRequest
+  parseDeleteTokenRequest,
+  parseDeleteUserRequest
 }
