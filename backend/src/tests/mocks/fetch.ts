@@ -77,15 +77,15 @@ const nodeFetchMock = (url: RequestInfo, _init?: RequestInit | undefined): Promi
           id: '321',
           name: 'gltestrepo1',
           path_with_namespace: 'elvis/gltestrepo1',
-          http_url_to_repo: 'https://github.com/elvis/gltestrepo1.git',
-          web_url: 'https://github.com/elvis/gltestrepo1.git'
+          http_url_to_repo: 'https://gitlab.com/elvis/gltestrepo1.git',
+          web_url: 'https://gitlab.com/elvis/gltestrepo1.git'
         },
         {
           id: '321321',
           name: 'gltestrepo2',
           path_with_namespace: 'elvis/gltestrepo2',
-          http_url_to_repo: 'https://github.com/elvis/gltestrepo2.git',
-          web_url: 'https://github.com/elvis/gltestrepo2.git'
+          http_url_to_repo: 'https://gitlab.com/elvis/gltestrepo2.git',
+          web_url: 'https://gitlab.com/elvis/gltestrepo2.git'
         },
       ])
 

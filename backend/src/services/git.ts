@@ -56,7 +56,9 @@ export const pullNewestChanges = async (
 
 export const cloneRepository = async (
   url: string,
-  user: UserType
+  user: UserType,
+  cloneTo: typeof cloneRepositoryToSpecificFolder
+    = cloneRepositoryToSpecificFolder
 ): Promise<void> => {
   const repoLocation = getRepoLocationFromUrlString(url, user.username)
 
@@ -86,7 +88,7 @@ export const cloneRepository = async (
   const urlWithCredentials =
     `https://${gitUsername}:${token}@${getServiceUrlFromServiceName(service)}${repositoryName}`
 
-  await cloneRepositoryToSpecificFolder(urlWithCredentials, repoLocation)
+  await cloneTo(urlWithCredentials, repoLocation)
 }
 
 export const saveChanges = async (
@@ -102,13 +104,13 @@ export const saveChanges = async (
   }
 
   const amandusUser = context.currentUser
- 
-  const { 
+
+  const {
     usedService,
     gitUsername,
     email,
     repositoryName,
-    repoLocation 
+    repoLocation
   } = extractUserForCommit(firstFile.name, context)
 
   const remoteToken = await tokenService.getAccessTokenByServiceAndId(
@@ -164,13 +166,13 @@ export const saveMerge = async (
   }
 
   const amandusUser = context.currentUser
-  
-  const { 
+
+  const {
     usedService,
     gitUsername,
     email,
     repositoryName,
-    repoLocation 
+    repoLocation
   } = extractUserForCommit(firstFile.name, context)
 
   //TODO fix typescript errors for this funcy func
@@ -249,11 +251,11 @@ export const addAndCommitLocal = async (
     context.currentUser.username
   )
 
-  const { 
+  const {
     gitUsername,
     email,
   } = extractUserForCommit(fileName, context)
- 
+
   const gitObject = getGitObject(repoLocation)
   const statusResult = await gitStatus(gitObject)
   const modifiedFiles: string[] = statusResult.modified
