@@ -3,7 +3,7 @@ import { useDebouncedCallback } from 'use-debounce'
 import useSave from './useSave'
 
 /**
- * Autosaves periodically and when not moving the cursor for the set interval
+ * Autosaves when not moving the cursor for the set interval
  *
  * @param filename name of the file being edited
  * @param repoUrl repository url in backend
@@ -14,9 +14,7 @@ const useAutoSave = (filename: string, repoUrl: string) => {
 
   const interval = 1000
 
-  const debouncedAutoSave = useDebouncedCallback(save, interval, {
-    maxWait: 5000,
-  })
+  const debouncedAutoSave = useDebouncedCallback(save, interval)
 
   React.useEffect(
     // Cancels autosave when user changes the file that is being edited.
