@@ -49,10 +49,32 @@ const setAccessToken = async (
   return true
 }
 
+const deleteToken = async (
+  id: number,
+  service: ServiceName,
+  amandusToken: string,
+): Promise<boolean> => {
+  const response = await fetch(`${tokenServiceUrl}/api/tokens/${id}/${service}`,
+    {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${amandusToken}`,
+        "Content-Type": "application/json"
+      }
+    })
+
+  if (response.status !== 200) {
+    throw new Error('Something went wrong while deleting user data from token service')
+  }
+
+  const { removed } = await response.json() as { removed: boolean }
+  return removed
+}
+
 const deleteUser = async (
   id: number,
   amandusToken: string
-): Promise<void> => {
+): Promise<boolean> => {
   const response = await fetch(`${tokenServiceUrl}/api/tokens/${id}`,
     {
       method: 'DELETE',
@@ -63,8 +85,11 @@ const deleteUser = async (
     })
 
   if (response.status !== 200) {
-    throw new Error('Something went wrong while deleting user tokens from token service')
+    throw new Error('Something went wrong while deleting user data from token service')
   }
+
+  const { removed } = await response.json() as { removed: boolean }
+  return removed
 }
 
 const isServiceConnected = async (
@@ -92,5 +117,6 @@ export default {
   getAccessToken,
   setAccessToken,
   deleteUser,
+  deleteToken,
   isServiceConnected
 }

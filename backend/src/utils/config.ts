@@ -25,19 +25,9 @@ const DATABASE_URL =
     ? process.env.DATABASE_URL_TEST
     : process.env.DATABASE_URL
 
-const TOKEN_SERVICE_URL = 'http://localhost:3002'
-
-// (() => {
-//   if (process.env.NODE_ENV === 'test') {
-//     return 'http://localhost:3002'
-//   }
-
-//   if (process.env.NODE_ENV === 'e2etest') {
-//     return 'http://tokenservice:3002'
-//   }
-
-//   return process.env.TOKEN_SERVICE_URL
-// })
+const TOKEN_SERVICE_URL = process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'e2etest'
+  ? 'http://localhost:3002'
+  : process.env.TOKEN_SERVICE_URL
 
 export default {
   PORT,
