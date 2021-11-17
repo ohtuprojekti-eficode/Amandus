@@ -6,6 +6,7 @@ import { CLONE_REPO, ME, REPO_STATE } from '../../graphql/queries'
 import { MeQueryResult, RepoStateQueryResult } from '../../types'
 import AuthenticateDialog from '../AuthenticateDialog'
 import Editor from './Editor'
+import FileProvider from './FileProvider'
 import Sidebar from './Sidebar'
 
 interface LocationState {
@@ -75,16 +76,18 @@ const EditView = ({ cloneUrl }: Props) => {
     const commitMessage = repoStateData.repoState.commitMessage
 
     return (
-      <Editor
-        fileContent={fileContent}
-        isConflicted={isConflicted}
-        filename={filename}
-        commitMessage={commitMessage}
-        cloneUrl={urlToClone}
-        currentBranch={currentBranch}
-        currentService={currentService}
-        onMergeError={repoStateQuery}
-      />
+      <FileProvider cloneUrl={cloneUrl ?? ''}>
+        <Editor
+          fileContent={fileContent}
+          isConflicted={isConflicted}
+          filename={filename}
+          commitMessage={commitMessage}
+          cloneUrl={urlToClone}
+          currentBranch={currentBranch}
+          currentService={currentService}
+          onMergeError={repoStateQuery}
+        />
+      </FileProvider>
     )
   }
 
