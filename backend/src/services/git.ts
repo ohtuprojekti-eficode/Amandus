@@ -66,22 +66,26 @@ export const cloneRepository = async (
   }
 
   const token = await tokenService.getAccessTokenByServiceAndId(user.id, service)
-  if (!token) { // cloning without credentials
-    await cloneRepositoryToSpecificFolder(url, repoLocation)
-    return
+  if (!token) {
+    throw new Error(`Could not find token for ${service}`);
   }
 
   const currentService = user.services?.find(
     (s) => s.serviceName === service
   )
+  if (!currentService?.username) {
+    throw new Error(`Could not find username for ${service}`);
+  }
+
   const gitUsername = service === 'gitlab'
     ? 'oauth2'
-    : currentService?.username || user.username
+    : currentService.username
 
   const repositoryName = getRepoNameFromUrlString(url)
 
   const urlWithCredentials =
     `https://${gitUsername}:${token}@${getServiceUrlFromServiceName(service)}${repositoryName}`
+
   await cloneRepositoryToSpecificFolder(urlWithCredentials, repoLocation)
 }
 
