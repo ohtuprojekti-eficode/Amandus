@@ -6,6 +6,7 @@ import {
 } from '@material-ui/core'
 import React, { useState } from 'react'
 import useSaveDialog from '../../hooks/useSaveDialog'
+import { useFiles } from './FileProvider'
 import LatestCommit from './LatestCommit'
 import useEditor from './MonacoEditor/useMonacoEditor'
 import ResetButtons from './ResetButtons'
@@ -36,6 +37,8 @@ const EditorBottomBar = ({
 
   const classes = stylesInUse()
 
+  const { modifiedFiles } = useFiles()
+
   const pullProps = useSaveDialog()
 
   const {
@@ -65,7 +68,7 @@ const EditorBottomBar = ({
       setWaitingToSave(true)
       await saveChanges({
         variables: {
-          files: [],
+          files: modifiedFiles.map(({ name, content }) => ({ name, content })),
           branch: branchName,
           commitMessage: newCommitMessage,
         },

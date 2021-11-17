@@ -3,7 +3,9 @@ import Editor from '@monaco-editor/react'
 import { editor } from 'monaco-editor'
 import React, { useRef } from 'react'
 import useAutoSave from '../../../hooks/useAutoSave'
+import ConflictedEditorBottomBar from '../ConflictedBottomBar'
 import EditorBottomBar from '../EditorBottomBar'
+import { useFiles } from '../FileProvider'
 
 interface Props {
   content: string
@@ -39,6 +41,8 @@ const MonacoEditor = ({
 }: Props) => {
   const classes = stylesInUse()
 
+  const { conflictExists } = useFiles()
+
   const [onEditorChange, autosaving] = useAutoSave(filename, cloneUrl)
 
   const theme = useTheme()
@@ -66,15 +70,27 @@ const MonacoEditor = ({
         // Updating the theme here so we override things set by <Editor>
         updateTheme()
       }
-      <EditorBottomBar
-        cloneUrl={cloneUrl}
-        currentBranch={currentBranch}
-        filename={filename}
-        currentService={currentService}
-        autosaving={autosaving}
-        onMergeError={onMergeError}
-        commitMessage={commitMessage}
-      />
+      {conflictExists ? (
+        <ConflictedEditorBottomBar
+          filename={filename}
+          cloneUrl={cloneUrl}
+          currentBranch={currentBranch}
+          currentService={currentService}
+          commitMessage={commitMessage}
+          original={content}
+          modified={content}
+        />
+      ) : (
+        <EditorBottomBar
+          cloneUrl={cloneUrl}
+          currentBranch={currentBranch}
+          filename={filename}
+          currentService={currentService}
+          autosaving={autosaving}
+          onMergeError={onMergeError}
+          commitMessage={commitMessage}
+        />
+      )}
     </div>
   )
 }

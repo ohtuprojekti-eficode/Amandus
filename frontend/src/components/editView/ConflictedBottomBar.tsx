@@ -1,8 +1,12 @@
 import { Button, createStyles, makeStyles } from '@material-ui/core'
 import React, { useState } from 'react'
+import useSave from '../../hooks/useSave'
 import useSaveDialog from '../../hooks/useSaveDialog'
+import { useFiles } from './FileProvider'
 import LatestCommit from './LatestCommit'
 import useDiffEditor from './MonacoDiffEditor/useDiffEditor'
+import useMergeConflictDetector from './MonacoDiffEditor/useMergeConflictDetector'
+import ResetButtons from './ResetButtons'
 import MergeDialog from './saveDialogs/MergeDialog'
 import ServiceConnected from './ServiceConnected'
 
@@ -10,16 +14,20 @@ interface Props {
   cloneUrl: string
   currentBranch: string
   original: string
+  modified: string
   currentService: string
   commitMessage: string
+  filename: string
 }
 
 const ConflictedEditorBottomBar = ({
   commitMessage,
+  filename,
   currentBranch,
   currentService,
   cloneUrl,
   original,
+  modified,
 }: Props) => {
   const {
     dialogOpen,
@@ -33,15 +41,26 @@ const ConflictedEditorBottomBar = ({
 
   const classes = stylesInUse()
 
-  const { mergeConflictExists, saveMergeEdit, mutationMergeLoading } =
-    useDiffEditor(original, cloneUrl)
+  const [save] = useSave()
+
+  const { allSolved, conflictedFiles, solvedConflicts } = useFiles()
+
+  const { saveMergeEdit, mutationMergeLoading } = useDiffEditor(
+    original,
+    cloneUrl
+  )
+
+  const mergeConflictExists = useMergeConflictDetector(modified)
 
   const handleDialogSubmit = async (newCommitMessage: string) => {
     try {
       setWaitingToMerge(true)
       await saveMergeEdit({
         variables: {
-          files: [],
+          files: conflictedFiles.map(({ name, content }) => ({
+            name,
+            content,
+          })),
           commitMessage: newCommitMessage,
         },
       })
@@ -63,6 +82,17 @@ const ConflictedEditorBottomBar = ({
     }
   }
 
+  const handleSave = async () => {
+    try {
+      await save(modified, filename, cloneUrl)
+    } catch (e) {
+      console.log('error saving:', e)
+    }
+  }
+
+  const isConflicted = !!conflictedFiles.find((f) => f.name === filename)
+  const isSolved = !!solvedConflicts.find((f) => f.name === filename)
+
   return (
     <>
       <MergeDialog
@@ -79,12 +109,23 @@ const ConflictedEditorBottomBar = ({
           <Button
             color="primary"
             variant="contained"
-            disabled={mutationMergeLoading || mergeConflictExists}
+            disabled={mutationMergeLoading || !allSolved}
             onClick={handleDialogOpen}
           >
             Merge
           </Button>
+          {isConflicted && (
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={handleSave}
+              disabled={mergeConflictExists}
+            >
+              {isSolved ? 'Save changes' : 'Mark solved'}
+            </Button>
+          )}
           <ServiceConnected service={currentService} />
+          <ResetButtons cloneUrl={cloneUrl} filename={filename} />
         </div>
         <LatestCommit commitMessage={commitMessage} />
       </div>

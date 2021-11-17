@@ -75,8 +75,10 @@ const MonacoDiffEditor = ({
         updateTheme()
       }
       <ConflictedEditorBottomBar
+        filename={filename}
         cloneUrl={cloneUrl}
         original={original}
+        modified={modifiedContent}
         currentBranch={currentBranch}
         currentService={currentService}
         commitMessage={commitMessage}
