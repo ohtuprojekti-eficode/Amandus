@@ -110,8 +110,6 @@ const SettingsPage = ({ user }: Props) => {
   const handleSubmit = async () => {
 
     try {
-      const vars = { settings: settings }
-//      console.log('vars', vars)
       await saveSettings (
         { variables: { settings: settings }, update: (cache) => { 
            const updatedContent = { getSettings: settings }
