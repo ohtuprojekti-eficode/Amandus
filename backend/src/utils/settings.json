@@ -3,12 +3,7 @@
         "misc": [
             {
                 "name": "Autosave Interval",
-                "value": 11,
-                "unit": "ms"
-            },
-            {
-                "name": "Autodelete Interval",
-                "value": 8,
+                "value": 200,
                 "unit": "ms"
             }
         ],
@@ -16,14 +11,6 @@
             {
                 "name": "robot-language-server",
                 "active": true
-            },
-            {
-                "name": "c-language-server",
-                "active": false
-            },
-            {
-                "name": "cypress-language-server",
-                "active": false
             }
         ]
     }
