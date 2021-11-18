@@ -4,6 +4,9 @@ import { promisify } from 'util'
 import { writeFileSync } from 'fs'
 import { File } from '../types/file'
 import { sanitizeCommitMessage } from './sanitize'
+import config from './config'
+
+const repositoriesDir = config.REPONAME
 
 import { ServiceName, ServiceTokenType } from '../types/service'
 import { AppContext, UserForCommit } from '../types/user'
@@ -66,7 +69,7 @@ export const getServiceTokenFromAppContext = ({
 }
 
 export const writeToFile = (file: File): void => {
-  writeFileSync(`./repositories/${file.name}`, file.content)
+  writeFileSync(`./${repositoriesDir}/${file.name}`, file.content)
 }
 
 export const makeCommitMessage = (
@@ -89,7 +92,7 @@ export const getRepoLocationFromUrlString = (
     ? url.pathname.slice(0, -4)
     : url.pathname
 
-  const repoLocation = `./repositories/${username}/${service}${repositoryName}`
+  const repoLocation = `./${repositoriesDir}/${username}/${service}${repositoryName}`
   return repoLocation
 }
 export const getRepoNameFromUrlString = (urlString: string): string => {
@@ -105,7 +108,7 @@ export const getRepoLocationFromRepoName = (
   username: string,
   service: ServiceName
 ): string => {
-  const repoLocation = `./repositories/${username}/${service}/${repositoryName}`
+  const repoLocation = `./${repositoriesDir}/${username}/${service}/${repositoryName}`
   return repoLocation
 }
 
