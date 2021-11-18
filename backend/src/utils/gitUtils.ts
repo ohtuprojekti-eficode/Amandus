@@ -1,4 +1,4 @@
-import simpleGit, { BranchSummary, GitError, SimpleGit } from 'simple-git'
+import simpleGit, { BranchSummary, GitError, SimpleGit, StatusResult, ResetMode } from 'simple-git'
 import { v4 as uuidv4 } from 'uuid'
 import { ServiceName } from '../types/service'
 
@@ -186,4 +186,36 @@ export const setUpstreamForBranch = async (
 
 export const pullToCurrentBranch = async (git: SimpleGit): Promise<void> => {
   await git.pull()
+}
+
+export const gitStatus = async (
+  git: SimpleGit,
+  _options?: Array<string>
+): Promise<StatusResult> => {
+  const statusResult = await git.status()
+  return statusResult
+}
+
+export const resetSingleFile = async (
+  git: SimpleGit,
+  fileName: string
+): Promise<string> => {
+  const result = await git.checkout('HEAD', ['--', fileName])
+  return result
+}
+
+/**
+ * 
+ * @param git SimpleGit
+ * @param resetMode string literal of type 'mixed' 'soft' 'hard' 'merge' 'keep'
+ * @param _options string array of possible git reset options
+ */
+export const gitReset = async (
+  git: SimpleGit,
+  resetMode: string,
+  _options?: Array<string>
+): Promise<string> => {
+  const mode: ResetMode = resetMode as ResetMode
+  const result = await git.reset(mode)
+  return result
 }

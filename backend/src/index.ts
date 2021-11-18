@@ -15,8 +15,6 @@ import User from './model/user'
 import path from 'path'
 import { UserJWT } from './types/user'
 
-import tokenService from './services/token'
-
 const app = express()
 
 app.use(cors())
@@ -29,8 +27,8 @@ const corsOptions = {
 const server = new ApolloServer({
   schema,
   context: async ({ req, res }) => {
-    const accessToken: any = req && req.headers["x-access-token"]
-    const refreshToken: any = req && req.headers["x-refresh-token"]
+    const accessToken: any = req && req.headers['x-access-token']
+    const refreshToken: any = req && req.headers['x-refresh-token']
 
     if (!accessToken || !refreshToken) return
 
@@ -38,20 +36,18 @@ const server = new ApolloServer({
       // client is accessing with non-expired access token...
       const decodedAccessToken = <UserJWT>verify(accessToken, config.JWT_SECRET)
       if (!decodedAccessToken.id) return
-      
+
       const currentUser = await User.getUserById(decodedAccessToken.id)
       if (!currentUser) return
 
-      const userTokens = tokenService.getTokensForApolloContextById(
-        currentUser.id
-      )
-
-      return { currentUser, ...userTokens}
+      return { currentUser }
     } catch (e) {
       if (e instanceof jwt.TokenExpiredError) {
         // trying to access with expired access token...
         try {
-          const decodedRefreshToken = <UserJWT>verify(refreshToken, config.JWT_SECRET)
+          const decodedRefreshToken = <UserJWT>(
+            verify(refreshToken, config.JWT_SECRET)
+          )
           if (!decodedRefreshToken.id) return
 
           const currentUser = await User.getUserById(decodedRefreshToken.id)
@@ -61,25 +57,21 @@ const server = new ApolloServer({
           // if (currentUser.refreshTokenCount !== decodedRefreshToken.count) return
 
           // generate new tokens for the user
-          const newTokens = createTokens(currentUser);
+          const newTokens = createTokens(currentUser)
 
           // send new tokens to the client in headers
           res.set({
-            "Access-Control-Expose-Headers": "x-access-token,x-refresh-token",
-            "x-access-token": newTokens.accessToken,
-            "x-refresh-token": newTokens.refreshToken
+            'Access-Control-Expose-Headers': 'x-access-token,x-refresh-token',
+            'x-access-token': newTokens.accessToken,
+            'x-refresh-token': newTokens.refreshToken,
           })
 
-          const userTokens = tokenService.getTokensForApolloContextById(
-            currentUser.id
-          )
-          return { currentUser, ...userTokens }
+          return { currentUser }
         } catch (e) {
           // client is accessing with expired access token and refresh token...
           if (e instanceof jwt.TokenExpiredError) return
-          throw (e)
+          throw e
         }
-
       } else {
         throw e
       }
@@ -98,7 +90,10 @@ app.get('/onig', (_req, res) => {
   res.send(wasmFile)
 })
 
-if (process.env.NODE_ENV === 'production') {
+if (
+  process.env.NODE_ENV === 'production' ||
+  process.env.NODE_ENV === 'e2etest'
+) {
   app.use(express.static('build/frontBuild'))
   app.get('*', (_req, res) => {
     res.sendFile(path.join(__dirname, '../build/frontBuild/index.html'))

@@ -18,15 +18,20 @@ import useHighlights from './useHighlights'
 
 const useMergeCodeLens = (original: string, language = 'robot') => {
   const [modifiedContent, setModifiedContent] = useState(original)
-  const [conflictBlocks, setInitialBlocks] = useState(() =>
+  const [conflictBlocks, setConflictBlocks] = useState(() =>
     findConflictBlocks(original)
   )
-  const updateHighlights = useHighlights()
+  const updateHighlights = useHighlights(original)
   const codeLensHandle = useRef<IDisposable | null>(null)
   const [monaco, setMonaco] = useState<Monaco | null>(null)
   const [editor, setEditor] = useState<editor.IStandaloneDiffEditor | null>(
     null
   )
+
+  useEffect(() => {
+    // update conflict blocks when content (e.g. file) changes
+    setConflictBlocks(findConflictBlocks(original))
+  }, [original])
 
   useEffect(() => {
     // handles updating the right side of the editor
@@ -66,7 +71,7 @@ const useMergeCodeLens = (original: string, language = 'robot') => {
 
       const getHandler = (status: HandleStatus, index: number) => {
         return () => {
-          setInitialBlocks((blocks) => {
+          setConflictBlocks((blocks) => {
             return blocks.map((block, i) =>
               i === index ? { ...block, handleStatus: status } : block
             )

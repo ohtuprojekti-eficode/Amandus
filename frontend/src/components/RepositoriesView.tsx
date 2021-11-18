@@ -1,14 +1,14 @@
 import React from 'react'
 import { GET_REPO_LIST } from '../graphql/queries'
 import { useQuery } from '@apollo/client'
-import { Repo } from '../types'
+import { Repository } from '../types'
 import {Box, List, ListItem} from '@material-ui/core'
 import ListItemText from '@material-ui/core/ListItemText'
 import { Link } from 'react-router-dom'
 
 
 interface RepoProps {
-  repo: Repo
+  repo: Repository
 }
 
 const RepoLine = ({repo}: RepoProps) => {
@@ -18,7 +18,7 @@ const RepoLine = ({repo}: RepoProps) => {
       <ListItemText>{repo.name}</ListItemText> 
 
       </ListItem>
-        <Link to={{ pathname: '/edit', state: { cloneUrl: repo.clone_url}}} > edit in amandus </Link>
+        <Link to={{ pathname: '/edit', state: { cloneUrl: repo.clone_url}}} style={{color: "green"}}> edit in amandus </Link>
       
     </ListItem>
   )
@@ -51,21 +51,21 @@ const RepositoriesView = () => {
         GitHub repos
       </h3>
       {gitHubRepos.map(
-          (repo: Repo) => 
+          (repo: Repository) => 
           <RepoLine key={repo.id} repo={repo}/>
         )}
         <h3>
         Bitbucket repos
       </h3>
         {bitbucketRepos.map(
-          (repo: Repo) =>
+          (repo: Repository) =>
           <RepoLine key={repo.id} repo={repo} />
         )}
         <h3>
         GitLab repos
       </h3>
         {gitLabRepos.map(
-          (repo: Repo) => 
+          (repo: Repository) => 
           <RepoLine key={repo.id} repo={repo} />
         )}
       </List>

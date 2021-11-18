@@ -1,6 +1,7 @@
 export interface File {
   name: string
   content: string
+  status: string | null
 }
 
 export interface FileListQueryResult {
@@ -65,27 +66,41 @@ export interface RepoStateQueryResult {
     branches: string[]
     url: string
     commitMessage: string
-    service: string|undefined
+    service: string | undefined
+    gitStatus: StatusResult
   }
 }
 
-export interface AuthorizeWithGHMutationResult {
-  authorizeWithGithub: {
-    serviceUser: ServiceUserType & { __typename: string }
-    tokens: Tokens
-  }
+export interface StatusResult {
+  not_added?: string[]
+  conflicted?: string[]
+  created?: string[]
+  deleted?: string[]
+  modified?: string[]
+  renamed?: StatusResultRenamed[]
+  staged?: string[]
+  files?: FileStatusResult[]
+  ahead?: number
+  behind?: number
+  current?: string
+  tracking?: string
 }
 
-export interface AuthorizeWithBBMutationResult {
-  authorizeWithBitbucket: {
-    serviceUser: ServiceUserType & { __typename: string}
-    tokens: Tokens
-  }
+export interface FileStatusResult {
+  from?: string
+  path: string
+  index: string
+  working_dir: string
 }
 
-export interface AuthorizeWithGLMutationResult {
-  authorizeWithGitLab: {
-    serviceUser: ServiceUserType & { __typename: string }
+export interface StatusResultRenamed {
+  from: string
+  to: string
+}
+
+export interface AuthorizeWithServiceMutationResult {
+  authorizeWithService: {
+    serviceUser: ServiceUser & { __typename: string }
     tokens: Tokens
   }
 }
@@ -95,14 +110,15 @@ export interface FileTree {
   path: string
   type: 'folder' | 'file' | 'root'
   children: FileTree[]
+  status: string | null
 }
 
 export interface Error {
   message: string
 }
 
-export interface ServiceUserType {
-  serviceName: string
+export interface ServiceUser {
+  serviceName: ServiceName
   username: string
   email: string | null
   reposurl: string
@@ -112,12 +128,12 @@ export interface UserType {
   username: string
   user_role: string
   email: string
-  services?: ServiceUserType[]
+  services?: ServiceUser[]
 }
 
 export type ServiceName = 'github' | 'bitbucket' | 'gitlab'
 
-export interface Repo {
+export interface Repository {
   id: string
   name: string
   full_name: string

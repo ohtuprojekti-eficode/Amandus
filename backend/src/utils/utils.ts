@@ -6,9 +6,9 @@ import { File } from '../types/file'
 import { sanitizeCommitMessage } from './sanitize'
 
 import { ServiceName, ServiceTokenType } from '../types/service'
-import { AppContext } from '../types/user'
+import { AppContext, UserForCommit } from '../types/user'
 
-import { Repo, GitHubRepoListResponse, BitbucketRepoListResponse, GitLabRepoListResponse } from '../types/repo'
+
 
 const execProm = promisify(exec)
 
@@ -19,27 +19,27 @@ export const validateBranchName = async (branchName: string): Promise<void> => {
 const runShellCommand = async (command: string): Promise<string> => {
   try {
     return (await execProm(command)).stdout
-  } catch (error) {
-    throw new Error(error.message)
+  } catch (e) {
+    throw new Error((e as Error).message)
   }
 }
 
 export const pipe = <T>(...fns: Array<(a: T) => T>) => (x: T): T =>
   fns.reduce((value, func) => func(value), x)
 
-export const getRepositoryFromFilePath = (file: File): string => {
-  return file.name.split('/').slice(2, 4).join('/')
+export const getRepositoryFromFilePath = (filePath: string): string => {
+  return filePath.split('/').slice(2, 4).join('/')
 }
 
-export const getServiceFromFilePath = (file: File): ServiceName => {
-  return file.name.split('/')[1] as ServiceName
+export const getServiceFromFilePath = (filePath: string): ServiceName => {
+  return filePath.split('/')[1] as ServiceName
 }
 
 export const getFileNameFromFilePath = (
-  file: File,
+  filePath: string,
   repositoryName: string
 ): string => {
-  return file.name.split(`${repositoryName}/`)[1] || file.name
+  return filePath.split(`${repositoryName}/`)[1] || filePath
 }
 
 interface ServiceProps {
@@ -68,11 +68,11 @@ export const writeToFile = (file: File): void => {
 export const makeCommitMessage = (
   rawCommitMessage: string,
   username: string,
-  realFilename: string
+  realFilenames: string[]
 ): string => {
   return rawCommitMessage
     ? sanitizeCommitMessage(rawCommitMessage)
-    : `User ${username} modified file ${realFilename}`
+    : `User ${username} modified file(s) ${realFilenames.join()}`
 }
 
 export const getRepoLocationFromUrlString = (
@@ -88,6 +88,16 @@ export const getRepoLocationFromUrlString = (
 
   const repoLocation = `./repositories/${username}/${service}${repositoryName}`
   return repoLocation
+}
+export const getRepoNameFromUrlString = (
+  urlString: string
+): string => {
+  const url = new URL(urlString)
+  const repositoryName =
+    url.pathname.endsWith('.git')
+      ? url.pathname.slice(0, -4)
+      : url.pathname
+  return repositoryName
 }
 
 export const getRepoLocationFromRepoName = (
@@ -115,62 +125,37 @@ export const getServiceTokenFromContext = (serviceName: string, context: AppCont
   }
 }
 
-export const parseGithubRepositories = (response: GitHubRepoListResponse[]): Repo[] => {
-  const repolist = response.map((repo: GitHubRepoListResponse) => {
-    const repoId = `${repo.id}`
+/**
+ * 
+ * @param fileName: string
+ * @param context: AppContext 
+ * 
+ * @returns usedService, gitUsername, email, repositoryName, repoLocation 
+ */
+export const extractUserForCommit = (fileName: string, context: AppContext): UserForCommit => {
+  console.log('filename is: ', fileName)
+  const usedService = getServiceFromFilePath(fileName)
+  const currentService = context.currentUser.services?.find(
+    (s) => s.serviceName === usedService
+  )
+  const amandusUser = context.currentUser
+  const gitUsername = currentService?.username || context.currentUser.username
+  const email = currentService?.email || amandusUser.email
 
-    const repoObject: Repo = {
-      id: repoId,
-      name: repo.name,
-      full_name: repo.full_name,
-      clone_url: repo.clone_url,
-      html_url: repo.html_url,
-      service: 'github'
-    }
-
-    return repoObject
-  }
+  const repositoryName = getRepositoryFromFilePath(fileName)
+  const repoLocation = getRepoLocationFromRepoName(
+    repositoryName,
+    amandusUser.username,
+    usedService
   )
 
-  return repolist
+  const userForCommit: UserForCommit = {
+    usedService,
+    gitUsername,
+    email,
+    repositoryName,
+    repoLocation
+  }
+  return userForCommit
 }
 
-export const parseBitbucketRepositories = (response: BitbucketRepoListResponse): Repo[] => {
-  const repolist = response.values.map(repo => {
-    const clone_url = repo.links.clone.find(url => url.name === 'https')
-    if (!clone_url) {
-      throw Error('No clone url found, cannot append repo to list')
-    }
-
-    const repoObject: Repo = {
-      id: repo.uuid,
-      name: repo.name,
-      full_name: repo.full_name,
-      clone_url: clone_url.href,
-      html_url: repo.links.html.href,
-      service: 'bitbucket'
-    }
-    return repoObject
-  })
-
-  return repolist
-}
-
-export const parseGitlabRepositories = (response: GitLabRepoListResponse[]): Repo[] => {
-  const repolist = response.map((repo: GitLabRepoListResponse) => {
-    const repoId = `${repo.id}`
-
-    const repoObject: Repo = {
-      id: repoId,
-      name: repo.name,
-      full_name: repo.path_with_namespace,
-      clone_url: repo.http_url_to_repo,
-      html_url: repo.web_url,
-      service: 'gitlab',
-    }
-
-    return repoObject
-  })
-
-  return repolist
-}

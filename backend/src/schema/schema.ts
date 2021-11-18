@@ -15,17 +15,12 @@ const Query = `
         getRepoState(url: String): RepoState!
         cloneRepository(url: String!): String
         currentToken: String
-        getRepoListFromService: [Repo]
+        getRepoListFromService: [Repository]
         getSettings: Settings! 
     },
 `
 
 const Mutation = `
-    enum ServiceName {
-        github
-        bitbucket
-        gitlab
-    }
     type Tokens {
         accessToken: String
         refreshToken: String
@@ -62,12 +57,12 @@ const Mutation = `
             password: String!
         ): Tokens
         saveChanges(
-            file: FileInput! 
+            files: [FileInput]! 
             branch: String!
             commitMessage: String
         ): String
         saveMergeEdit(
-            file: FileInput! 
+            files: [FileInput]! 
             commitMessage: String
         ): String
         connectGitService(
@@ -77,18 +72,34 @@ const Mutation = `
             url: String!
             branch: String!
         ): String
-        authorizeWithGithub(
+        authorizeWithService(
             code: String!
+            service: String!
         ): ServiceAuthResponse
-        authorizeWithBitbucket(
-            code: String!
-        ): ServiceAuthResponse
-        authorizeWithGitLab(
-            code: String!
-        ): ServiceAuthResponse
-        pullRepository(url: String!): String
-        deleteUser(username: String!): String
-        saveSettings(settings: Sinput!): String
+        pullRepository(
+            url: String!
+        ): String
+        deleteUser(
+            username: String!
+        ): String
+        localSave(
+            file: FileInput!
+        ): String
+        commitLocalChanges(
+            url: String!
+            commitMessage: String
+            fileName: String!
+        ): String
+        resetLocalChanges(
+            url: String!
+        ): String
+        resetCurrentFile(
+            url: String!
+            fileName: String!
+        ): String
+        saveSettings(
+            settings: Sinput!
+        ): String
     }
 `
 

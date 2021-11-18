@@ -1,8 +1,8 @@
 import { File } from './file'
-import { ServiceUserType } from './user'
+import { ServiceUser } from './service'
 
 export interface SaveArgs {
-  file: File
+  files: File[]
   branch: string
   commitMessage: string
 }
@@ -32,5 +32,11 @@ export interface LoginUserInput {
 }
 
 export interface AddServiceArgs {
-  service: ServiceUserType
+  service: ServiceUser
+}
+
+export interface CommitArgs {
+  url: string
+  commitMessage: string
+  fileName: string
 }

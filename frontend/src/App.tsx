@@ -3,11 +3,8 @@ import { Route } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
 import { ME } from './graphql/queries'
 import Home from './components/Home'
-import EditView from './components/EditView'
+import EditView from './components/editView/EditView'
 import Header from './components/Header'
-import BBCallBack from './components/auth/BBCallBack'
-import GHCallBack from './components/auth/GHCallBack'
-import GLCallBack from './components/auth/GLCallBack'
 import RegisterForm from './components/RegisterForm'
 import { CssBaseline, Toolbar } from '@material-ui/core'
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles'
@@ -20,6 +17,7 @@ import DeleteAccount from './components/DeleteAccount'
 import { useLocation } from 'react-router-dom'
 import SettingsPage from './components/SettingsPage'
 import SettingsProvider from './components/SettingsProvider'
+import CallBack from './components/auth/CallBack'
 
 interface LocationState {
   cloneUrl: string
@@ -76,14 +74,17 @@ const App = () => {
           </Route>
 
           <Route exact path="/auth/github/callback">
-            <GHCallBack />
+            <CallBack
+            service = {'github'}/>
           </Route>
           <Route exact path="/auth/gitlab/callback">
-            <GLCallBack />
+            <CallBack
+            service = {'gitlab'} />
           </Route>
 
           <Route exact path="/auth/bitbucket/callback">
-            <BBCallBack />
+            <CallBack
+            service = {'bitbucket'} />
           </Route>
           
           <Route path="/edit">

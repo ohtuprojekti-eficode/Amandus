@@ -16,7 +16,7 @@ const typeDef = `
     type MiscSetting {
       name: String!
       value: Int!
-      unit: String!
+      unit: String
     }
     type PluginSetting {
       name: String!

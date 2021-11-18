@@ -2,18 +2,21 @@ import { gql } from '@apollo/client'
 
 export const REPO_STATE = gql`
   query getRepoState($repoUrl: String!) {
-    repoState: getRepoState(
-      url: $repoUrl
-    ) {
+    repoState: getRepoState(url: $repoUrl) {
       currentBranch
       files {
         name
         content
+        status
       }
       branches
       url
       commitMessage
       service
+      gitStatus {
+        modified
+        conflicted
+      }
     }
   }
 `

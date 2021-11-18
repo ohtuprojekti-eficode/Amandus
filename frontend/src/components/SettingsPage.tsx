@@ -105,14 +105,13 @@ const SettingsPage = ({ user }: Props) => {
   const {settings: nestedSettings, setSettings} = useSettings()
   const settings = nestedSettings?.settings
   
-  const [saveSettings] = useMutation(SAVE_SETTINGS, {
-  })
+  const [saveSettings] = useMutation(SAVE_SETTINGS)
  
   const handleSubmit = async () => {
 
     try {
-      const vars = { variables: { settings: settings }}
-      console.log('vars', vars)
+      const vars = { settings: settings }
+//      console.log('vars', vars)
       await saveSettings (
         { variables: { settings: settings }, update: (cache) => { 
            const updatedContent = { getSettings: settings }
@@ -128,7 +127,6 @@ const SettingsPage = ({ user }: Props) => {
     setTimeout(() => {
       window.location.reload()
     }, 700)
-
   }
 
   const handleCallback = ( name: string, value: boolean | number ) => {

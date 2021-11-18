@@ -1,10 +1,16 @@
 import React, { useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom'
-import { ChevronRight, ExpandMore } from '@material-ui/icons'
-import { TreeItem, TreeView } from '@material-ui/lab'
-import { File, FileTree } from '../types'
+import {
+  ChevronRight,
+  ExpandMore,
+  ErrorOutline,
+  Build,
+} from '@material-ui/icons'
+import { TreeView, TreeItem } from '@material-ui/lab'
+import { File, FileTree } from '../../types'
 import { makeStyles } from '@material-ui/core/styles'
-import { parseToFileTree } from '../utils/files'
+import { parseToFileTree } from '../../utils/files'
+//import { lightBlue } from '@material-ui/core/colors'
 
 interface PropsType {
   files: File[]
@@ -17,6 +23,16 @@ const useStyles = makeStyles({
     maxWidth: 400,
     marginLeft: '2px',
   },
+  // currently dont work or are applied to all nodes
+  modified: {
+    background: 'rgb(230, 245, 255)',
+    labelIcon: <Build />,
+  },
+  conflicted: {
+    backgroundColor: 'red',
+    endIcon: <ErrorOutline />,
+  },
+  normal: {},
 })
 
 const FileTreeView = ({ files }: PropsType) => {
@@ -49,6 +65,7 @@ const FileTreeView = ({ files }: PropsType) => {
         nodeId={fileTree.path}
         onClick={handleClick(fileTree.path, fileTree.type)}
         label={fileTree.name}
+        endIcon={fileTree.status === 'M' ? <Build /> : ''}
       >
         {fileTree.children.length !== 0
           ? fileTree.children.map((node) => buildTree(node))

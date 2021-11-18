@@ -15,7 +15,7 @@
         "plugins": [
             {
                 "name": "robot-language-server",
-                "active": false
+                "active": true
             },
             {
                 "name": "c-language-server",
