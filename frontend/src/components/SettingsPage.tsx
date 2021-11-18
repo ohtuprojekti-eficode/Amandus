@@ -88,8 +88,7 @@ const PluginObject = ({ name, active, parentCallback }: {
 
 const SettingsPage = ({ user }: Props) => {
 
-// Hides view from users that are not admins. Uncomment after this page is fully implemented
-/*
+// Hides view from users that are not admins.
   if (user?.user_role !== 'admin') {
     return (
       <h1>
@@ -97,7 +96,7 @@ const SettingsPage = ({ user }: Props) => {
       </h1>
     )
   }
-*/
+  
   const [saved, setSaved] = useState(false)
   const [changesMade, setChangesMade] = useState(false)
 
@@ -124,7 +123,7 @@ const SettingsPage = ({ user }: Props) => {
     setSaved(true)
     setTimeout(() => {
       window.location.reload()
-    }, 700)
+    }, 500)
   }
 
   const handleCallback = ( name: string, value: boolean | number ) => {
