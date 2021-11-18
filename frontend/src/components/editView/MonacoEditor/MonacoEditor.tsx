@@ -1,21 +1,11 @@
-import {
-  Button,
-  CircularProgress,
-  createStyles,
-  makeStyles,
-  useTheme,
-} from '@material-ui/core'
-// import { GitHub } from '@material-ui/icons'
+import { createStyles, makeStyles, useTheme } from '@material-ui/core'
 import Editor from '@monaco-editor/react'
 import { editor } from 'monaco-editor'
-import React, { useRef, useState } from 'react'
+import React, { useRef } from 'react'
 import useAutoSave from '../../../hooks/useAutoSave'
-import useSaveDialog from '../../../hooks/useSaveDialog'
-import LatestCommit from '../LatestCommit'
-import PullDialog from '../saveDialogs/PullDialog'
-import SaveDialog from '../saveDialogs/SaveDialog'
-import ServiceConnected from '../ServiceConnected'
-import useEditor from './useMonacoEditor'
+import ConflictedEditorBottomBar from '../ConflictedBottomBar'
+import EditorBottomBar from '../EditorBottomBar'
+import { useFiles } from '../FileProvider'
 
 interface Props {
   content: string
@@ -30,22 +20,12 @@ interface Props {
 
 const stylesInUse = makeStyles(() =>
   createStyles({
-    saveGroup: {
-      margin: '10px 20px',
-    },
-    buttonAndStatus: {
-      display: 'flex',
-      alignItems: 'center',
-    },
     title: {
       height: '1rem',
       marginLeft: '20px',
       display: 'flex',
       alignItems: 'center',
     },
-    resetButton: {
-      color: "red"
-    }
   })
 )
 
@@ -59,133 +39,18 @@ const MonacoEditor = ({
   currentService,
   updateTheme,
 }: Props) => {
-  const [waitingToSave, setWaitingToSave] = useState(false)
-
-  const {
-    dialogOpen,
-    dialogError,
-    handleDialogClose,
-    setDialogError,
-    handleDialogOpen,
-  } = useSaveDialog()
-
-  const pullProps = useSaveDialog()
-
   const classes = stylesInUse()
 
-  const [onEditorChange, autosaving] = useAutoSave(filename, cloneUrl)
+  const { conflictExists } = useFiles()
 
-  const {
-    saveChanges,
-    pullRepo,
-    mutationSaveLoading,
-    pullLoading,
-    commitChanges,
-    resetAll,
-    resetFile
-  } = useEditor(cloneUrl)
+  const [onEditorChange, autosaving] = useAutoSave(filename, cloneUrl)
 
   const theme = useTheme()
 
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
 
   const handleEditorDidMount = (editor: editor.IStandaloneCodeEditor) => {
-    console.log('mounted')
     editorRef.current = editor
-  }
-
-  const handleDialogSubmit = async (
-    createNewBranch: boolean,
-    newBranch: string,
-    newCommitMessage: string
-  ) => {
-    if (editorRef.current) {
-      const branchName = createNewBranch ? newBranch : currentBranch
-      try {
-        setWaitingToSave(true)
-        await saveChanges({
-          variables: {
-            files: [
-              {
-                name: filename,
-                content: editorRef.current.getValue(),
-              },
-            ],
-            branch: branchName,
-            commitMessage: newCommitMessage,
-          },
-        })
-        handleDialogClose()
-        setDialogError(undefined)
-      } catch (error) {
-        if (
-          error instanceof Error &&
-          error.message === 'Merge conflict detected'
-        ) {
-          setDialogError({
-            title: `Merge conflict on branch ${branchName}`,
-            message:
-              'Cannot push to selected branch. Create a new one or resolve the conflicts.',
-          })
-        }
-      } finally {
-        setWaitingToSave(false)
-      }
-    }
-  }
-
-  const handlePull = async () => {
-    try {
-      await pullRepo({ variables: { repoUrl: cloneUrl } })
-    } catch (error) {
-      if (
-        error instanceof Error &&
-        error.message.includes(
-          'Please commit your changes or stash them before you merge'
-        )
-      ) {
-        pullProps.setDialogError({
-          title: 'Error Pulling',
-          message: error.message,
-        })
-        pullProps.handleDialogOpen()
-      }
-    }
-  }
-
-  const handleCommitAndPull = async (commitMessage: string) => {
-    await commitChanges({
-      variables: {
-        url: cloneUrl,
-        commitMessage: commitMessage,
-        fileName: filename
-      },
-    })
-    await handlePull()
-    pullProps.handleDialogClose()
-  }
-
-  const handleReset = async () => {
-    await resetAll({
-      variables: {
-        url: cloneUrl
-      },
-    })
-  }
-
-  const handleResetAndPull = async () => {
-    await handleReset()
-    await handlePull()
-    pullProps.handleDialogClose()
-  }
-
-  const handleResetFile = async () => {
-    await resetFile({
-      variables: {
-        url: cloneUrl,
-        fileName: filename
-      }
-    })
   }
 
   return (
@@ -205,71 +70,27 @@ const MonacoEditor = ({
         // Updating the theme here so we override things set by <Editor>
         updateTheme()
       }
-      <SaveDialog
-        open={dialogOpen}
-        handleClose={handleDialogClose}
-        handleSubmit={handleDialogSubmit}
-        onResolve={onMergeError}
-        currentBranch={currentBranch}
-        error={dialogError}
-        waitingToSave={waitingToSave}
-      />
-      <PullDialog
-        open={pullProps.dialogOpen}
-        handleClose={pullProps.handleDialogClose}
-        handleSubmit={handleCommitAndPull}
-        handleResetAll={handleResetAndPull}
-        error={pullProps.dialogError}
-      />
-      <div className={classes.saveGroup}>
-        <div className={classes.buttonAndStatus}>
-          <Button
-            style={{ marginRight: 5 }}
-            color="secondary"
-            variant="contained"
-            onClick={handlePull}
-            disabled={pullLoading || mutationSaveLoading}
-          >
-            Pull
-          </Button>
-          <Button
-            color="primary"
-            variant="contained"
-            disabled={pullLoading || mutationSaveLoading}
-            onClick={handleDialogOpen}
-          >
-            Save
-          </Button>
-          <ServiceConnected service={currentService} />
-          <Button
-            style={{ marginLeft: 25 }}
-            className={ classes.resetButton }
-            variant="outlined"
-            size="small"
-            disabled={pullLoading || mutationSaveLoading}
-            onClick={handleResetFile}
-          >
-            Reset File
-          </Button>
-          <Button
-            style={{ marginLeft: 25 }}
-            className={ classes.resetButton }
-            variant="outlined"
-            size="small"
-            disabled={pullLoading || mutationSaveLoading}
-            onClick={handleReset}
-          >
-            Reset Repo
-          </Button>
-        </div>
-        <LatestCommit commitMessage={commitMessage} />
-        {autosaving && (
-          <div>
-            <CircularProgress size={10} />
-            <span> Saving...</span>
-          </div>
-        )}
-      </div>
+      {conflictExists ? (
+        <ConflictedEditorBottomBar
+          filename={filename}
+          cloneUrl={cloneUrl}
+          currentBranch={currentBranch}
+          currentService={currentService}
+          commitMessage={commitMessage}
+          original={content}
+          modified={content}
+        />
+      ) : (
+        <EditorBottomBar
+          cloneUrl={cloneUrl}
+          currentBranch={currentBranch}
+          filename={filename}
+          currentService={currentService}
+          autosaving={autosaving}
+          onMergeError={onMergeError}
+          commitMessage={commitMessage}
+        />
+      )}
     </div>
   )
 }

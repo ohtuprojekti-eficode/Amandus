@@ -66,7 +66,7 @@ export const requestGithubUser = async (
     serviceName: 'github',
     username: gitHubUser.login,
     email: gitHubUser.email,
-    reposurl: gitHubUser.repos_url,
+    reposurl: 'https://api.github.com/user/repos',
   }
 
   return { serviceUser, response }
