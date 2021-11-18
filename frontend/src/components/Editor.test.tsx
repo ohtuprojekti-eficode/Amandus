@@ -1,25 +1,12 @@
-import React from 'react'
-
-import Editor from './editView/Editor'
-
 import { MockedProvider } from '@apollo/client/testing'
-
-import { render, cleanup } from '@testing-library/react'
+import { cleanup, render } from '@testing-library/react'
+import React from 'react'
+import Editor from './editView/Editor'
 
 // these bypass errors with mockedprovider component running out of mocks.
 // better definitely exist, for example giving the mocked responses by hand
 jest.mock('../hooks/useUser', () => () => ({ user: 'test', loading: false }))
 jest.mock('./editView/ServiceConnected', () => () => <div />)
-
-const unConflictedContent =
-  'just\n' + 'normal\n' + 'unconflicted\n' + 'content\n'
-
-const conflictedContent =
-  '<<<<<<< HEAD\n' +
-  'current changes\n' +
-  '=======\n' +
-  'incoming changes\n' +
-  '>>>>>>> commit id\n'
 
 const filename = 'filename'
 const commitMessage = 'commitMessage'
@@ -35,7 +22,8 @@ describe('Editor -component', () => {
     const { getByText } = render(
       <MockedProvider>
         <Editor
-          fileContent={unConflictedContent}
+          isConflicted={false}
+          fileContent={'content'}
           filename={filename}
           commitMessage={commitMessage}
           cloneUrl={cloneUrl}
@@ -55,7 +43,8 @@ describe('Editor -component', () => {
     const { getByText } = render(
       <MockedProvider>
         <Editor
-          fileContent={conflictedContent}
+          isConflicted={true}
+          fileContent={'conflicted content'}
           filename={filename}
           commitMessage={commitMessage}
           cloneUrl={cloneUrl}

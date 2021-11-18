@@ -3,7 +3,6 @@ import { loader } from '@monaco-editor/react'
 import React, { useEffect } from 'react'
 import { initMonaco, initLanguageClient } from '../../utils/monacoInitializer'
 import MonacoDiffEditor from './MonacoDiffEditor'
-import useMergeConflictDetector from './MonacoDiffEditor/useMergeConflictDetector'
 import MonacoEditor from './MonacoEditor/MonacoEditor'
 import useSettings from '../../hooks/useSettings'
 
@@ -14,6 +13,7 @@ import { SimpleLanguageInfoProvider } from '../../utils/providers'
 
 
 interface EditorProps {
+  isConflicted: boolean
   fileContent: string
   filename: string
   commitMessage: string
@@ -26,13 +26,13 @@ interface EditorProps {
 const Editor = ({
   fileContent,
   filename,
+  isConflicted,
   commitMessage,
   cloneUrl,
   onMergeError,
   currentBranch,
   currentService,
 }: EditorProps) => {
-  const mergeConflictExists = useMergeConflictDetector(fileContent)
 
   const { settings } = useSettings()
 
@@ -64,7 +64,7 @@ const Editor = ({
     }
   }
 
-  if (mergeConflictExists) {
+  if (isConflicted) {
     return (
       <div className={classes.editor}>
         <MonacoDiffEditor

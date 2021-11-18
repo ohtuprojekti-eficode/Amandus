@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { AppContext } from '../types/user'
+import { AppContext, UserType } from '../types/user'
 import { StatusResult } from '../types/gitTypes'
 import { SaveArgs } from '../types/params'
 import { sanitizeBranchName } from '../utils/sanitize'
@@ -11,6 +11,9 @@ import {
   makeCommitMessage,
   validateBranchName,
   writeToFile,
+  getServiceNameFromUrlString,
+  getServiceUrlFromServiceName,
+  getRepoNameFromUrlString,
   extractUserForCommit,
 } from '../utils/utils'
 import {
@@ -53,10 +56,39 @@ export const pullNewestChanges = async (
 
 export const cloneRepository = async (
   url: string,
-  username: string
+  user: UserType,
+  cloneTo: typeof cloneRepositoryToSpecificFolder
+    = cloneRepositoryToSpecificFolder
 ): Promise<void> => {
-  const repoLocation = getRepoLocationFromUrlString(url, username)
-  await cloneRepositoryToSpecificFolder(url, repoLocation)
+  const repoLocation = getRepoLocationFromUrlString(url, user.username)
+
+  const service = getServiceNameFromUrlString(url)
+  if (!service) {
+    throw new Error(`Could not parse service from ${url}`);
+  }
+
+  const token = await tokenService.getAccessTokenByServiceAndId(user.id, service)
+  if (!token) {
+    throw new Error(`Could not find token for ${service}`);
+  }
+
+  const currentService = user.services?.find(
+    (s) => s.serviceName === service
+  )
+  if (!currentService?.username) {
+    throw new Error(`Could not find username for ${service}`);
+  }
+
+  const gitUsername = service === 'gitlab'
+    ? 'oauth2'
+    : currentService.username
+
+  const repositoryName = getRepoNameFromUrlString(url)
+
+  const urlWithCredentials =
+    `https://${gitUsername}:${token}@${getServiceUrlFromServiceName(service)}${repositoryName}`
+
+  await cloneTo(urlWithCredentials, repoLocation)
 }
 
 export const saveChanges = async (
@@ -72,13 +104,13 @@ export const saveChanges = async (
   }
 
   const amandusUser = context.currentUser
- 
-  const { 
+
+  const {
     usedService,
     gitUsername,
     email,
     repositoryName,
-    repoLocation 
+    repoLocation
   } = extractUserForCommit(firstFile.name, context)
 
   const remoteToken = await tokenService.getAccessTokenByServiceAndId(
@@ -134,13 +166,13 @@ export const saveMerge = async (
   }
 
   const amandusUser = context.currentUser
-  
-  const { 
+
+  const {
     usedService,
     gitUsername,
     email,
     repositoryName,
-    repoLocation 
+    repoLocation
   } = extractUserForCommit(firstFile.name, context)
 
   //TODO fix typescript errors for this funcy func
@@ -219,11 +251,11 @@ export const addAndCommitLocal = async (
     context.currentUser.username
   )
 
-  const { 
+  const {
     gitUsername,
     email,
   } = extractUserForCommit(fileName, context)
- 
+
   const gitObject = getGitObject(repoLocation)
   const statusResult = await gitStatus(gitObject)
   const modifiedFiles: string[] = statusResult.modified

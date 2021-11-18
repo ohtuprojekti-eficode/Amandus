@@ -15,9 +15,9 @@ import MyLoginForm from './components/MyLoginForm'
 import { MeQueryResult } from './types'
 import DeleteAccount from './components/DeleteAccount'
 import { useLocation } from 'react-router-dom'
+import CallBack from './components/auth/CallBack'
 import SettingsPage from './components/SettingsPage'
 import SettingsProvider from './components/SettingsProvider'
-import CallBack from './components/auth/CallBack'
 
 interface LocationState {
   cloneUrl: string

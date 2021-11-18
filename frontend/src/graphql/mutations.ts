@@ -76,18 +76,18 @@ export const DELETE_USER = gql`
 `
 
 export const SAVE_LOCALLY = gql`
-mutation localSave($file: FileInput!) {
-  localSave(file: $file)
+  mutation localSave($file: FileInput!) {
+    localSave(file: $file)
   }
-  `
-  
+`
+
 export const COMMIT_CHANGES = gql`
-mutation commitLocalChanges($url: String!, $commitMessage: String, $fileName: String!) {
-  commitLocalChanges(url: $url, commitMessage: $commitMessage, fileName: $fileName)
+  mutation commitLocalChanges($url: String!, $commitMessage: String, $fileName: String!) {
+    commitLocalChanges(url: $url, commitMessage: $commitMessage, fileName: $fileName)
   }
-  `
-  
-  export const RESET_HARD = gql`
+`
+
+export const RESET_HARD = gql`
 mutation resetLocalChanges($url: String!) {
   resetLocalChanges(url: $url) 
 }
