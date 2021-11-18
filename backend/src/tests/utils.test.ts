@@ -5,6 +5,9 @@ import {
   getRepoLocationFromUrlString,
   getRepoLocationFromRepoName,
 } from '../utils/utils'
+import config from '../utils/config'
+
+const repositoriesDir = config.REPONAME
 
 describe('Test getRepositoryFromFilePath', () => {
   it('returns correct repo from file', () => {
@@ -69,7 +72,7 @@ describe('Test getRepoLocationFromUrlString', () => {
     const urlString = 'https://github.com/ohtuprojekti-eficode/robot-test-files'
     const repoLocation = getRepoLocationFromUrlString(urlString, 'testuser')
     const expectedLocation =
-      './repositories/testuser/github/ohtuprojekti-eficode/robot-test-files'
+      `./${repositoriesDir}/testuser/github/ohtuprojekti-eficode/robot-test-files`
     expect(repoLocation).toBe(expectedLocation)
   })
 
@@ -77,7 +80,7 @@ describe('Test getRepoLocationFromUrlString', () => {
     const urlString = 'https://github.com/ohtuprojekti-eficode/robot-test-files.git'
     const repoLocation = getRepoLocationFromUrlString(urlString, 'testuser')
     const expectedLocation =
-      './repositories/testuser/github/ohtuprojekti-eficode/robot-test-files'
+    `./${repositoriesDir}/testuser/github/ohtuprojekti-eficode/robot-test-files`
     expect(repoLocation).toBe(expectedLocation)
   })
 })
@@ -87,7 +90,7 @@ describe('Test getRepoLocationFromRepoName', () => {
     const reponame = 'ohtuprojekti-eficode/robot-test-files'
     const repoLocation = getRepoLocationFromRepoName(reponame, 'testuser', 'github')
     const expectedLocation =
-      './repositories/testuser/github/ohtuprojekti-eficode/robot-test-files'
+    `./${repositoriesDir}/testuser/github/ohtuprojekti-eficode/robot-test-files`
     expect(repoLocation).toBe(expectedLocation)
   })
 })

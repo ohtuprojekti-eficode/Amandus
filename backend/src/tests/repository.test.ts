@@ -18,6 +18,9 @@ import { createTokens } from '../utils/tokens'
 import user from '../model/user'
 import { UserType } from '../types/user'
 import { Tokens } from '../types/tokens'
+import config from '../utils/config'
+
+const repositoriesDir = config.REPONAME
 
 const SAVE_CHANGES = gql`
   mutation saveChanges(
@@ -30,7 +33,13 @@ const SAVE_CHANGES = gql`
 `
 
 describe('getRepoState query', () => {
-  const repoPath = join('.', 'repositories', 'testuser', 'github', 'test')
+  const repoPath = join(
+    '.',
+    `${repositoriesDir}`,
+    'testuser',
+    'github',
+    'test'
+  )
   let testUser: UserType
   let tokens: Tokens
   let query: TestQuery
@@ -264,7 +273,13 @@ describe('getRepoState query', () => {
 })
 
 describe('switchBranch mutation', () => {
-  const repoPath = join('.', 'repositories', 'testuser', 'github', 'test')
+  const repoPath = join(
+    '.',
+    `${repositoriesDir}`,
+    'testuser',
+    'github',
+    'test'
+  )
   let testUser: UserType
   let tokens: Tokens
   let mutate: TestQuery
@@ -365,7 +380,7 @@ describe('switchBranch mutation', () => {
 describe('SaveChanges mutation', () => {
   const repoPath = join(
     '.',
-    'repositories',
+    `${repositoriesDir}`,
     'testuser',
     'github',
     'fakegithubuser',

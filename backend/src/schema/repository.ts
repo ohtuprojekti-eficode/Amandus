@@ -33,6 +33,9 @@ import tokenService from '../services/token'
 
 import { Repository } from '../types/repository'
 import { File } from '../types/file'
+import config from '../utils/config'
+
+const repositoriesDir = config.REPONAME
 
 const typeDef = `
     type File {
@@ -129,7 +132,7 @@ const resolvers = {
       }))
 
       const files = filePaths.map((file) => ({
-        name: relative('repositories/', file),
+        name: relative(`${repositoriesDir}/`, file),
         content: readFileSync(file, 'utf-8'),
         status: fileStatuses.find((data) => data.absFilename == file)?.status,
       }))
