@@ -35,6 +35,6 @@ describe('Github API', () => {
     expect(githubUser.response.access_token).toBe('immatokenlol')
     expect(githubUser.serviceUser.username).toBe('elvis')
     expect(githubUser.serviceUser.email).toBe('elvis@detroit.us')
-    expect(githubUser.serviceUser.reposurl).toBe('https://api.github.com/elvis/repos')
+    expect(githubUser.serviceUser.reposurl).toBe('https://api.github.com/user/repos')
   })
 })

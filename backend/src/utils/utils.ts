@@ -134,6 +134,17 @@ export const getServiceTokenFromContext = (
   }
 }
 
+export const getServiceUrlFromServiceName = (service: ServiceName): string => {
+  switch (service) {
+    case 'github':
+      return 'github.com'
+    case 'gitlab':
+      return 'gitlab.com'
+    case 'bitbucket':
+      return 'bitbucket.org'
+  }
+}
+
 /**
  *
  * @param fileName: string

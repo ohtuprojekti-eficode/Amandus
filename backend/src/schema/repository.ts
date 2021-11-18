@@ -92,7 +92,7 @@ const resolvers = {
       // requires user specific repos & clone only possible
       // when context.currentuser exists
       if (!existsSync(repoLocation)) {
-        await cloneRepository(args.url, context.currentUser.username)
+        await cloneRepository(args.url, context.currentUser)
       }
 
       return 'Cloned'
