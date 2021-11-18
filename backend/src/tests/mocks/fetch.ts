@@ -52,8 +52,7 @@ const nodeFetchMock = (url: RequestInfo, _init?: RequestInit | undefined): Promi
             }
           ]
       })
-
-    case 'https://api.github.com/elvis/repos':
+    case 'https://api.github.com/user/repos':
       return toFetchResponse([
         {
           id: 123,
