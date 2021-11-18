@@ -18,6 +18,7 @@ interface Props {
   open: boolean
   handleClose: () => void,
   handleSubmit: (message: string) => void
+  handleResetAll: () => void
   error: Error | undefined
 }
 
@@ -26,6 +27,7 @@ const PullDialog = ({
   open,
   handleClose,
   handleSubmit,
+  handleResetAll,
   error
 }: Props) => {
 
@@ -61,18 +63,25 @@ const PullDialog = ({
       </DialogContent>
       <DialogActions>
         <Button
+          style={{backgroundColor: "red"}}
+          variant="contained"
+          onClick={handleResetAll}
+        >
+          Discard Local Changes
+        </Button>
+        <Button
           variant="outlined"
           onClick={handleClose}
         >
           Cancel
-                </Button>
+        </Button>
         <Button
-          variant="outlined"
+          variant="contained"
           color="primary"
           onClick={() => handleSubmit(commitMessage)}
         >
           Commit and Pull
-                </Button>
+        </Button>
       </DialogActions>
     </Dialog>
   )

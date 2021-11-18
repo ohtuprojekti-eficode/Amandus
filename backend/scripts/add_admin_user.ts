@@ -3,7 +3,7 @@ import User from '../src/model/user'
 const register = async (username: string, email: string, password: string) => {
     try {
         const user = await User.registerAdmin({username, email, password})
-        console.log("added user to database: ",user)
+        console.log("added user to database: ", user)
     }
     catch (e) {
         console.log(e)

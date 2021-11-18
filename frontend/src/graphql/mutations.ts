@@ -82,7 +82,20 @@ export const SAVE_LOCALLY = gql`
 `
 
 export const COMMIT_CHANGES = gql`
-  mutation commitLocalChanges($url: String!, $commitMessage: String) {
-    commitLocalChanges(url: $url, commitMessage: $commitMessage)
+  mutation commitLocalChanges($url: String!, $commitMessage: String, $fileName: String!) {
+    commitLocalChanges(url: $url, commitMessage: $commitMessage, fileName: $fileName)
   }
 `
+
+export const RESET_HARD = gql`
+mutation resetLocalChanges($url: String!) {
+  resetLocalChanges(url: $url) 
+}
+`
+
+export const RESET_FILE = gql`
+mutation resetCurrentFile($url: String!, $fileName: String!) {
+  resetCurrentFile(url: $url, fileName: $fileName) 
+}
+`
+

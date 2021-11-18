@@ -4,11 +4,12 @@ import { promisify } from 'util'
 import { writeFileSync } from 'fs'
 import { File } from '../types/file'
 import { sanitizeCommitMessage } from './sanitize'
+import config from './config'
+
+const repositoriesDir = config.REPONAME
 
 import { ServiceName, ServiceTokenType } from '../types/service'
-import { AppContext } from '../types/user'
-
-
+import { AppContext, UserForCommit } from '../types/user'
 
 const execProm = promisify(exec)
 
@@ -24,8 +25,10 @@ const runShellCommand = async (command: string): Promise<string> => {
   }
 }
 
-export const pipe = <T>(...fns: Array<(a: T) => T>) => (x: T): T =>
-  fns.reduce((value, func) => func(value), x)
+export const pipe =
+  <T>(...fns: Array<(a: T) => T>) =>
+  (x: T): T =>
+    fns.reduce((value, func) => func(value), x)
 
 export const getRepositoryFromFilePath = (filePath: string): string => {
   return filePath.split('/').slice(2, 4).join('/')
@@ -47,7 +50,10 @@ interface ServiceProps {
   appContext: AppContext
 }
 
-export const getServiceTokenFromAppContext = ({ service, appContext }: ServiceProps): ServiceTokenType | undefined => {
+export const getServiceTokenFromAppContext = ({
+  service,
+  appContext,
+}: ServiceProps): ServiceTokenType | undefined => {
   let tokenToReturn: ServiceTokenType | undefined
   switch (service) {
     case 'gitlab':
@@ -56,13 +62,14 @@ export const getServiceTokenFromAppContext = ({ service, appContext }: ServicePr
     case 'bitbucket':
       tokenToReturn = appContext.bitbucketToken as ServiceTokenType
       break
-    default: tokenToReturn = appContext.githubToken as ServiceTokenType
+    default:
+      tokenToReturn = appContext.githubToken as ServiceTokenType
   }
   return tokenToReturn
 }
 
 export const writeToFile = (file: File): void => {
-  writeFileSync(`./repositories/${file.name}`, file.content)
+  writeFileSync(`./${repositoriesDir}/${file.name}`, file.content)
 }
 
 export const makeCommitMessage = (
@@ -81,22 +88,18 @@ export const getRepoLocationFromUrlString = (
 ): string => {
   const url = new URL(urlString)
   const service = getServiceNameFromUrlString(urlString) || 'other'
-  const repositoryName =
-    url.pathname.endsWith('.git')
-      ? url.pathname.slice(0, -4)
-      : url.pathname
+  const repositoryName = url.pathname.endsWith('.git')
+    ? url.pathname.slice(0, -4)
+    : url.pathname
 
-  const repoLocation = `./repositories/${username}/${service}${repositoryName}`
+  const repoLocation = `./${repositoriesDir}/${username}/${service}${repositoryName}`
   return repoLocation
 }
-export const getRepoNameFromUrlString = (
-  urlString: string
-): string => {
+export const getRepoNameFromUrlString = (urlString: string): string => {
   const url = new URL(urlString)
-  const repositoryName =
-    url.pathname.endsWith('.git')
-      ? url.pathname.slice(0, -4)
-      : url.pathname
+  const repositoryName = url.pathname.endsWith('.git')
+    ? url.pathname.slice(0, -4)
+    : url.pathname
   return repositoryName
 }
 
@@ -105,22 +108,78 @@ export const getRepoLocationFromRepoName = (
   username: string,
   service: ServiceName
 ): string => {
-  const repoLocation = `./repositories/${username}/${service}/${repositoryName}`
+  const repoLocation = `./${repositoriesDir}/${username}/${service}/${repositoryName}`
   return repoLocation
 }
 
-export const getServiceNameFromUrlString = (urlString: string): ServiceName | undefined => {
+export const getServiceNameFromUrlString = (
+  urlString: string
+): ServiceName | undefined => {
   if (urlString.includes('github')) return 'github'
   if (urlString.includes('gitlab')) return 'gitlab'
   if (urlString.includes('bitbucket')) return 'bitbucket'
   return undefined
 }
 
-export const getServiceTokenFromContext = (serviceName: string, context: AppContext): string | undefined => {
+export const getServiceTokenFromContext = (
+  serviceName: string,
+  context: AppContext
+): string | undefined => {
   switch (serviceName) {
-    case 'github': return context.githubToken;
-    case 'bitbucket': return context.bitbucketToken;
-    case 'gitlab': return context.gitlabToken;
-    default: return undefined;
+    case 'github':
+      return context.githubToken
+    case 'bitbucket':
+      return context.bitbucketToken
+    case 'gitlab':
+      return context.gitlabToken
+    default:
+      return undefined
   }
+}
+
+export const getServiceUrlFromServiceName = (service: ServiceName): string => {
+  switch (service) {
+    case 'github':
+      return 'github.com'
+    case 'gitlab':
+      return 'gitlab.com'
+    case 'bitbucket':
+      return 'bitbucket.org'
+  }
+}
+
+/**
+ *
+ * @param fileName: string
+ * @param context: AppContext
+ *
+ * @returns usedService, gitUsername, email, repositoryName, repoLocation
+ */
+export const extractUserForCommit = (
+  fileName: string,
+  context: AppContext
+): UserForCommit => {
+  const usedService = getServiceFromFilePath(fileName)
+  const currentService = context.currentUser.services?.find(
+    (s) => s.serviceName === usedService
+  )
+  const amandusUser = context.currentUser
+  const gitUsername = currentService?.username || context.currentUser.username
+  const email = currentService?.email || amandusUser.email
+
+  const repositoryName = getRepositoryFromFilePath(fileName)
+  const repoLocation = getRepoLocationFromRepoName(
+    repositoryName,
+    amandusUser.username,
+    usedService
+  )
+
+  const userForCommit: UserForCommit = {
+    usedService,
+    gitUsername,
+    email,
+    repositoryName,
+    repoLocation,
+  }
+  return userForCommit
 }

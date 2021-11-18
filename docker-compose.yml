@@ -24,6 +24,17 @@ services:
       - DATABASE_URL=postgres://ohtu_user:ohtupassword@userdata:5432/account_database
     depends_on:
       - userdata
+    restart: on-failure:10
+
+  tokenservice:
+    command: yarn dev
+    build: ./tokenservice
+    stdin_open: true
+    volumes:
+      - ./tokenservice/:/usr/src/tokenservice
+      - ./tokenservice/node_modules:/usr/src/app/node_modules
+    ports:
+      - '3002:3002'
 
   userdata:
     image: 'postgres'

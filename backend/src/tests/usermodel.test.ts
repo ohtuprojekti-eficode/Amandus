@@ -57,9 +57,9 @@ describe('getUser query return right user data', () => {
 
     await User.addServiceUser({
       user_id: user.id,
-      services_id: 1,
-      username: 'githubUser2',
-      email: 'githubUser2@email.com',
+      services_id: 2,
+      username: 'bitbucketUser',
+      email: 'bitbucketUser@email.com',
       reposurl: 'repo2.com',
     })
 
@@ -76,9 +76,9 @@ describe('getUser query return right user data', () => {
           username: 'githubUser',
         },
         {
-          serviceName: 'github',
-          email: 'githubUser2@email.com',
-          username: 'githubUser2',
+          serviceName: 'bitbucket',
+          email: 'bitbucketUser@email.com',
+          username: 'bitbucketUser',
           reposurl: 'repo2.com',
         },
       ],

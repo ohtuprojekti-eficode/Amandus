@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
   cloneRepository,
@@ -10,6 +12,8 @@ import {
   pullNewestChanges,
   addAndCommitLocal,
   getGitStatus,
+  resetFile,
+  resetAll,
 } from '../services/git'
 import { existsSync, readFileSync } from 'fs'
 import readRecursive from 'recursive-readdir'
@@ -29,6 +33,9 @@ import tokenService from '../services/token'
 
 import { Repository } from '../types/repository'
 import { File } from '../types/file'
+import config from '../utils/config'
+
+const repositoriesDir = config.REPONAME
 
 const typeDef = `
     type File {
@@ -88,7 +95,7 @@ const resolvers = {
       // requires user specific repos & clone only possible
       // when context.currentuser exists
       if (!existsSync(repoLocation)) {
-        await cloneRepository(args.url, context.currentUser.username)
+        await cloneRepository(args.url, context.currentUser)
       }
 
       return 'Cloned'
@@ -125,7 +132,7 @@ const resolvers = {
       }))
 
       const files = filePaths.map((file) => ({
-        name: relative('repositories/', file),
+        name: relative(`${repositoriesDir}/`, file),
         content: readFileSync(file, 'utf-8'),
         status: fileStatuses.find((data) => data.absFilename == file)?.status,
       }))
@@ -155,17 +162,16 @@ const resolvers = {
         throw new Error('User is not connected to any service')
       }
 
-      const allRepositories = await Promise.all(
-        context.currentUser.services.map(async (service) => {
+      //TODO fix typescript errors for this func
+      const allRepositories = await Promise.all(context.currentUser.services.map(
+        async (service) => {
           const token = await tokenService.getAccessTokenByServiceAndId(
             context.currentUser.id,
             service.serviceName
           )
 
           if (!token) {
-            console.log(
-              `Service token missing for service ${service.serviceName}`
-            )
+            // console.log(`Service token missing for service ${service.serviceName}`)
             return []
           }
 
@@ -270,17 +276,41 @@ const resolvers = {
       args: CommitArgs,
       context: AppContext
     ): Promise<string> => {
-      const repoLocation = getRepoLocationFromUrlString(
-        args.url,
-        context.currentUser.username
-      )
       try {
-        await addAndCommitLocal(repoLocation, args.commitMessage, context)
+        await addAndCommitLocal(args.url, args.commitMessage, args.fileName, context)
       } catch (e) {
         throw new ApolloError((e as Error).message)
       }
       return 'committed'
     },
+    resetCurrentFile: async (
+      _root: unknown,
+      args: { url: string, fileName: string },
+      context: AppContext
+    ): Promise<string> => {
+      if (!context.currentUser) {
+        throw new ForbiddenError('You have to login')
+      }
+      try {
+        await resetFile(args.url, args.fileName, context)
+      } catch (e) {
+        throw new ApolloError((e as Error).message)
+      }
+      return `reset file ${args.fileName}`
+    },
+    resetLocalChanges: async (
+      _root: unknown,
+      args: { url: string },
+      context: AppContext
+    ): Promise<string> => {
+
+      const repoLocation = getRepoLocationFromUrlString(
+        args.url,
+        context.currentUser.username
+      )
+      const result = await resetAll(repoLocation)
+      return result
+    }
   },
 }
 
