@@ -64,10 +64,12 @@ const deleteToken = async (
     })
 
   if (response.status !== 200) {
+
     throw new Error('Something went wrong while deleting user data from token service')
   }
 
   const { removed } = await response.json() as { removed: boolean }
+
   return removed
 }
 
@@ -85,10 +87,15 @@ const deleteUser = async (
     })
 
   if (response.status !== 200) {
+    console.log('error while deleting user')
     throw new Error('Something went wrong while deleting user data from token service')
   }
 
   const { removed } = await response.json() as { removed: boolean }
+
+  if (!removed) {
+    console.log('user not deleted')
+  }
   return removed
 }
 

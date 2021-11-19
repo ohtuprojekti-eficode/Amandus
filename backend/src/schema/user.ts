@@ -235,12 +235,17 @@ const resolvers = {
       const user = await User.findUserByUsername(username)
 
       if (!user?.id) {
-        throw new Error('Did not receive user id for use removal')
+        throw new Error('Did not receive user id for user removal')
       }
 
-      await tokenService.deleteUser(user.id, context.accessToken)
       await User.deleteUser(username)
 
+      try {
+        await tokenService.deleteUser(user.id, context.accessToken)
+      } catch (e) {
+        console.log('encountered error while attempting to delete user tokens')
+        console.log((e as Error).message)
+      }
     },
   },
 }
