@@ -25,17 +25,18 @@ const MiscObject = ({ name, value, parentCallback, unit }: {
   unit?: string, 
   parentCallback: (name: string, value: number) => void, 
 }) => {
+  
+  useEffect(() => {
+    setFieldValue(value) 
+  }, [value])
+  
   const [fieldValue, setFieldValue] = useState(value)
-
   
   const handleFieldValueChange = (incomingValue: string) => {
     parentCallback(name, parseInt(incomingValue))
     setFieldValue(parseInt(incomingValue))
   }
 
-  useEffect(() => {
-   setFieldValue(value) 
-  }, [value])
   
   return (
     <div>
@@ -60,11 +61,11 @@ const PluginObject = ({ name, active, parentCallback }: {
   parentCallback: (name: string, value: boolean) => void, 
 }) => {
 
-  const [switchChecked, setSwitchChecked] = useState(active)
-  
   useEffect(() => {
    setSwitchChecked(active) 
   }, [active])
+  
+  const [switchChecked, setSwitchChecked] = useState(active)
   
   const handleSwitchToggle = () => {
     parentCallback(name, !switchChecked)
@@ -88,8 +89,16 @@ const PluginObject = ({ name, active, parentCallback }: {
 }
 
 const SettingsPage = ({ user }: Props) => {
+  
+  const {settings: nestedSettings, setSettings} = useSettings()
+  const settings = nestedSettings?.settings
+  
+  const [saved, setSaved] = useState(false)
+  const [changesMade, setChangesMade] = useState(false)
+  
+  const [saveSettings] = useMutation(SAVE_SETTINGS)
 
-// Hides view from users that are not admins.
+  // Hides view from users that are not admins.
   if (user?.user_role !== 'admin') {
     return (
       <h1>
@@ -98,14 +107,6 @@ const SettingsPage = ({ user }: Props) => {
     )
   }
 
-  const {settings: nestedSettings, setSettings} = useSettings()
-  const settings = nestedSettings?.settings
-  
-  const [saved, setSaved] = useState(false)
-  const [changesMade, setChangesMade] = useState(false)
-
-  const [saveSettings] = useMutation(SAVE_SETTINGS)
- 
   const handleSubmit = async () => {
 
     try {
