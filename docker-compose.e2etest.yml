@@ -43,5 +43,15 @@ services:
     ports:
       - '5555:5555'
 
+  tokenservice:
+    command: yarn dev
+    build: ./tokenservice
+    stdin_open: true
+    volumes:
+      - ./tokenservice/:/usr/src/tokenservice
+      - ./tokenservice/node_modules:/usr/src/app/node_modules
+    ports:
+      - '3002:3002'
+
 volumes:
   testdata-data:
