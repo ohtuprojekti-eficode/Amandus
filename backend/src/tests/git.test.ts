@@ -104,11 +104,10 @@ describe('cloneRepository', () => {
       cloneRepositoryToSpecificFolderMock
     )
 
-    expect(cloneRepositoryToSpecificFolderMock)
-      .toHaveBeenCalledWith(
-        'https://bloblob:bliblob@bitbucket.org/elvis/bbtestrepo1',
-        './repositories/testuser/bitbucket/elvis/bbtestrepo1'
-      )
+    expect(cloneRepositoryToSpecificFolderMock).toHaveBeenCalledWith(
+      'https://bloblob:bliblob@bitbucket.org/elvis/bbtestrepo1',
+      './testRepositories/testuser/bitbucket/elvis/bbtestrepo1'
+    )
   })
 
   it('calls cloneRepositoryToSpecificFolder the right way (github)', async () => {
@@ -134,11 +133,10 @@ describe('cloneRepository', () => {
       cloneRepositoryToSpecificFolderMock
     )
 
-    expect(cloneRepositoryToSpecificFolderMock)
-      .toHaveBeenCalledWith(
-        'https://bloblob:bliblob@github.com/elvis/ghtestrepo1',
-        './repositories/testuser/github/elvis/ghtestrepo1'
-      )
+    expect(cloneRepositoryToSpecificFolderMock).toHaveBeenCalledWith(
+      'https://bloblob:bliblob@github.com/elvis/ghtestrepo1',
+      './testRepositories/testuser/github/elvis/ghtestrepo1'
+    )
   })
 
   it('calls cloneRepositoryToSpecificFolder the right way (gitlab)', async () => {
@@ -163,14 +161,12 @@ describe('cloneRepository', () => {
       cloneRepositoryToSpecificFolderMock
     )
 
-    expect(cloneRepositoryToSpecificFolderMock)
-      .toHaveBeenCalledWith(
-        'https://oauth2:bliblob@gitlab.com/elvis/gltestrepo1',
-        './repositories/testuser/gitlab/elvis/gltestrepo1'
-      )
+    expect(cloneRepositoryToSpecificFolderMock).toHaveBeenCalledWith(
+      'https://oauth2:bliblob@gitlab.com/elvis/gltestrepo1',
+      './testRepositories/testuser/gitlab/elvis/gltestrepo1'
+    )
   })
 })
-
 
 afterAll(async () => {
   await closePool()
