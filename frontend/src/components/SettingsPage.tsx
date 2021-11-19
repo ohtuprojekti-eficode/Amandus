@@ -27,14 +27,15 @@ const MiscObject = ({ name, value, parentCallback, unit }: {
 }) => {
   const [fieldValue, setFieldValue] = useState(value)
 
-  useEffect(() => {
-   setFieldValue(value) 
-  }, [value])
-
+  
   const handleFieldValueChange = (incomingValue: string) => {
     parentCallback(name, parseInt(incomingValue))
     setFieldValue(parseInt(incomingValue))
   }
+
+  useEffect(() => {
+   setFieldValue(value) 
+  }, [value])
   
   return (
     <div>
@@ -96,14 +97,13 @@ const SettingsPage = ({ user }: Props) => {
       </h1>
     )
   }
-  
-  const [saved, setSaved] = useState(false)
-  const [changesMade, setChangesMade] = useState(false)
-
 
   const {settings: nestedSettings, setSettings} = useSettings()
   const settings = nestedSettings?.settings
   
+  const [saved, setSaved] = useState(false)
+  const [changesMade, setChangesMade] = useState(false)
+
   const [saveSettings] = useMutation(SAVE_SETTINGS)
  
   const handleSubmit = async () => {
