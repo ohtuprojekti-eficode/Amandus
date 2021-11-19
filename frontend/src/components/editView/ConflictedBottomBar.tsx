@@ -6,7 +6,6 @@ import { useFiles } from './FileProvider'
 import LatestCommit from './LatestCommit'
 import useDiffEditor from './MonacoDiffEditor/useDiffEditor'
 import useMergeConflictDetector from './MonacoDiffEditor/useMergeConflictDetector'
-import ResetButtons from './ResetButtons'
 import MergeDialog from './saveDialogs/MergeDialog'
 import ServiceConnected from './ServiceConnected'
 
@@ -43,7 +42,8 @@ const ConflictedEditorBottomBar = ({
 
   const [save] = useSave()
 
-  const { allSolved, conflictedFiles, solvedConflicts } = useFiles()
+  const { allSolved, conflictedFiles, solvedConflicts, files, selected } =
+    useFiles()
 
   const { saveMergeEdit, mutationMergeLoading } = useDiffEditor(
     original,
@@ -57,10 +57,12 @@ const ConflictedEditorBottomBar = ({
       setWaitingToMerge(true)
       await saveMergeEdit({
         variables: {
-          files: conflictedFiles.map(({ name, content }) => ({
-            name,
-            content,
-          })),
+          files: files // only include selected files
+            .filter((f) => selected.includes(f.name))
+            .map(({ name, content }) => ({
+              name,
+              content,
+            })),
           commitMessage: newCommitMessage,
         },
       })
@@ -125,7 +127,6 @@ const ConflictedEditorBottomBar = ({
             </Button>
           )}
           <ServiceConnected service={currentService} />
-          <ResetButtons cloneUrl={cloneUrl} filename={filename} />
         </div>
         <LatestCommit commitMessage={commitMessage} />
       </div>
