@@ -6,11 +6,13 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   makeStyles,
   TextField,
 } from '@material-ui/core'
 import { Alert, AlertTitle } from '@material-ui/lab'
 import React, { useState } from 'react'
+import FileSelector from '../../FileSelector'
 
 interface Error {
   title: string
@@ -69,8 +71,9 @@ const MergeDialog = ({
           {error.message}
         </Alert>
       )}
-
       <DialogContent>
+        <FileSelector />
+        <Divider />
         <TextField
           margin="normal"
           label="Commit message"

@@ -19,7 +19,7 @@ import {
   TextField,
 } from '@material-ui/core'
 import { Alert, AlertTitle } from '@material-ui/lab'
-//import BranchSelector from './BranchSelector'
+import FileSelector from '../../FileSelector'
 
 interface Error {
   title: string
@@ -115,6 +115,7 @@ const SaveDialog = ({
               </Collapse>
             </Grid>
           </Grid>
+          <FileSelector />
           <Divider />
           <TextField
             margin="normal"
@@ -169,7 +170,7 @@ const SaveDialog = ({
       )}
 
       {(!error || showBranchSelector) && BranchSelector()}
-      
+
       <DialogActions>
         <Button variant="outlined" onClick={handleClose}>
           Cancel

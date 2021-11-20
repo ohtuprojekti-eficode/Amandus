@@ -10,6 +10,8 @@ interface FileContext {
   solvedConflicts: File[]
   allSolved: boolean
   conflictExists: boolean
+  selected: string[]
+  setSelected: React.Dispatch<React.SetStateAction<string[]>>
 }
 
 const defaultValue: FileContext = {
@@ -19,6 +21,8 @@ const defaultValue: FileContext = {
   solvedConflicts: [],
   allSolved: false,
   conflictExists: false,
+  selected: [],
+  setSelected: () => null,
 }
 
 const FileContext = React.createContext<FileContext>(defaultValue)
@@ -67,8 +71,31 @@ const FileProvider: React.FC<{ cloneUrl: string }> = ({
     }
   }, [data])
 
+  const [selected, setSelected] = React.useState<string[]>([])
+
+  React.useEffect(() => {
+    const { files, modifiedFiles, conflictedFiles } = returnValue
+    if (modifiedFiles.length || conflictedFiles.length) {
+      const conflictedFileNames = conflictedFiles.map((f) => f.name)
+      const modifiedFileNames = modifiedFiles.map((f) => f.name)
+
+      // pre-select files that are conflicted / modified
+      const initialSelected = files
+        .map((f) => f.name)
+        .filter(
+          (fileName) =>
+            modifiedFileNames.includes(fileName) ||
+            conflictedFileNames.includes(fileName)
+        )
+
+      setSelected(initialSelected)
+    }
+  }, [returnValue])
+
   return (
-    <FileContext.Provider value={returnValue}>{children}</FileContext.Provider>
+    <FileContext.Provider value={{ ...returnValue, selected, setSelected }}>
+      {children}
+    </FileContext.Provider>
   )
 }
 
