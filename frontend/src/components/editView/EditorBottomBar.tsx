@@ -37,7 +37,7 @@ const EditorBottomBar = ({
 
   const classes = stylesInUse()
 
-  const { modifiedFiles } = useFiles()
+  const { files, selected } = useFiles()
 
   const pullProps = useSaveDialog()
 
@@ -68,7 +68,12 @@ const EditorBottomBar = ({
       setWaitingToSave(true)
       await saveChanges({
         variables: {
-          files: modifiedFiles.map(({ name, content }) => ({ name, content })),
+          files: files // only include selected files
+            .filter((f) => selected.includes(f.name))
+            .map(({ name, content }) => ({
+              name,
+              content,
+            })),
           branch: branchName,
           commitMessage: newCommitMessage,
         },
