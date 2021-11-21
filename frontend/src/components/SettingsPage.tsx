@@ -99,6 +99,7 @@ const SettingsPage = ({ user }: Props) => {
   const [saveSettings] = useMutation(SAVE_SETTINGS)
 
   // Hides view from users that are not admins.
+  /*
   if (user?.user_role !== 'admin') {
     return (
       <h1>
@@ -106,6 +107,7 @@ const SettingsPage = ({ user }: Props) => {
       </h1>
     )
   }
+*/
 
   const handleSubmit = async () => {
 

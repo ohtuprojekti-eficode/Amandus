@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { ApolloError } from 'apollo-server'
 import { SETTINGS } from '../constants'
-import { SettingsObject } from '../types/settings'
+import { SettingsObject, MiscSettingObject, PluginSettingObject } from '../types/settings'
 import { writeFileSync } from 'fs'
 
 const typeDef = `
@@ -33,37 +33,38 @@ const typeDef = `
     }
 `
 
+
 const resolvers = {
   Settings: {
-    misc: (root: SettingsObject) => root.settings.misc,
-    plugins: (root: SettingsObject) => root.settings.plugins
+    misc: (root: SettingsObject): MiscSettingObject[] => root.settings.misc,
+    plugins: (root: SettingsObject): PluginSettingObject[] => root.settings.plugins
   },
 
   Query: {
     getSettings: (
       _root: unknown,
     ): SettingsObject => {
-      return <SettingsObject> SETTINGS
+      return <SettingsObject>SETTINGS
     },
   },
 
-  
+
   Mutation: {
     saveSettings: (
       _root: unknown,
-      settings: SettingsObject 
+      settings: SettingsObject
     ): string => {
 
-      try {   
+      try {
         writeFileSync('src/utils/settings.json', JSON.stringify(settings, null, 4))
       } catch (error) {
-          throw new ApolloError('Could not save settings')
-      } 
-        return 'Saved!' 
-      },
+        throw new ApolloError('Could not save settings')
+      }
+      return 'Saved!'
     },
-  }
-  
+  },
+}
+
 
 export default {
   resolvers,

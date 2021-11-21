@@ -1,7 +1,7 @@
 import { MockedProvider } from '@apollo/client/testing'
 import { cleanup, render } from '@testing-library/react'
 import React from 'react'
-import Editor from './editView/Editor'
+import Editor from '../components/editView/Editor'
 
 // these bypass errors with mockedprovider component running out of mocks.
 // better definitely exist, for example giving the mocked responses by hand
