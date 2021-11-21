@@ -6,7 +6,7 @@ import Editor from '../components/editView/Editor'
 // these bypass errors with mockedprovider component running out of mocks.
 // better definitely exist, for example giving the mocked responses by hand
 jest.mock('../hooks/useUser', () => () => ({ user: 'test', loading: false }))
-jest.mock('./editView/ServiceConnected', () => () => <div />)
+jest.mock('../components/editView/ServiceConnected', () => () => <div />)
 
 const filename = 'filename'
 const commitMessage = 'commitMessage'
