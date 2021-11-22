@@ -1,7 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/unbound-method */
-
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { gql } from 'apollo-server'
 import { createTestClient } from 'apollo-server-testing'
 import {
@@ -19,7 +17,6 @@ import user from '../model/user'
 import { UserType } from '../types/user'
 import { Tokens } from '../types/tokens'
 import config from '../utils/config'
-// import { File } from '../types/file'
 
 const repositoriesDir: string = config.REPONAME
 
@@ -159,12 +156,10 @@ describe('getRepoState query', () => {
     expect(queryResult).toEqual({
       data: {
         getRepoState: {
-          files: [
-            {
-              content: 'Commit and add file to create master branch',
-              name: 'testuser/github/test/file.txt',
-            },
-          ],
+          files: [{
+            content: 'Commit and add file to create master branch',
+            name: 'testuser/github/test/file.txt',
+          }],
         },
       },
     })
@@ -555,16 +550,6 @@ describe('Local save and Reset mutations', () => {
     mutate = testClient.mutate
     query = testClient.query
 
-    /* const file1: File = {
-      name: `${repoPath}/file1.txt`,
-      content: 'Expected test content1',
-    }
-
-    const file2: File = {
-      name: `${repoPath}/file2.txt`,
-      content: 'Expected test content2',
-    }*/
-
     appendFileSync(
       `${repoPath}/file1.txt`,
       'Expected test content1'
@@ -620,14 +605,17 @@ describe('Local save and Reset mutations', () => {
     expect(queryResult).toEqual({
       data: {
         getRepoState: {
-          files: [{
-            content: modifiedContent,
-            name: `${repoPath.split('/').slice(1,).join('/')}/file1.txt`
-          },
-          {
-            name: `${repoPath.split('/').slice(1,).join('/')}/file2.txt`,
-            content: 'Expected test content2'
-          }],
+          files:
+            expect.arrayContaining(
+              [{
+                content: modifiedContent,
+                name: `${repoPath.split('/').slice(1,).join('/')}/file1.txt`
+              },
+              {
+                name: `${repoPath.split('/').slice(1,).join('/')}/file2.txt`,
+                content: 'Expected test content2'
+              }]
+            ),
           commitMessage: 'Expected commit'
         }
       }
@@ -670,20 +658,22 @@ describe('Local save and Reset mutations', () => {
     expect(queryResult).toEqual({
       data: {
         getRepoState: {
-          files: [{
-            content: 'Expected test content1',
-            name: `${repoPath.split('/').slice(1,).join('/')}/file1.txt`
-          },
-          {
-            name: `${repoPath.split('/').slice(1,).join('/')}/file2.txt`,
-            content: 'Expected test content2'
-          }],
+          files:
+            expect.arrayContaining(
+              [{
+                content: 'Expected test content1',
+                name: `${repoPath.split('/').slice(1,).join('/')}/file1.txt`
+              },
+              {
+                name: `${repoPath.split('/').slice(1,).join('/')}/file2.txt`,
+                content: 'Expected test content2'
+              }]
+            ),
           commitMessage: 'Expected commit'
         }
       }
     })
   })
-
 })
 
 afterAll(async () => {
