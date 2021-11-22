@@ -27,16 +27,16 @@ const registerAdmin = async ({
 }: RegisterUserInput): Promise<UserType> => {
   const user_role = 'admin'
   const queryText =
-  'INSERT INTO USERS(username, user_role, email, password) VALUES($1, $2, $3, $4) RETURNING id, username, user_role, email'
-const cryptedPassword = bcrypt.hashSync(password, 10)
-const queryResult = await pool.query<UserRecord>(queryText, [
-  username,
-  user_role,
-  email,
-  cryptedPassword,
-])
+    'INSERT INTO USERS(username, user_role, email, password) VALUES($1, $2, $3, $4) RETURNING id, username, user_role, email'
+  const cryptedPassword = bcrypt.hashSync(password, 10)
+  const queryResult = await pool.query<UserRecord>(queryText, [
+    username,
+    user_role,
+    email,
+    cryptedPassword,
+  ])
 
-return queryResult.rows[0]
+  return queryResult.rows[0]
 }
 
 const findUserByUsername = async (
@@ -78,7 +78,7 @@ const addServiceUser = async ({
   ])
 }
 
-const getUserById = async (id: number): Promise<UserType | null > => {
+const getUserById = async (id: number): Promise<UserType | null> => {
   const sql = `
     SELECT row_to_json(t) AS user
     FROM (
