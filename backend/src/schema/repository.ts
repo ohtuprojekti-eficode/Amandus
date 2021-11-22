@@ -269,7 +269,7 @@ const resolvers = {
       }
       writeToFile(args.file)
 
-      return 'saved locally'
+      return 'Saved locally'
     },
     commitLocalChanges: async (
       _root: unknown,

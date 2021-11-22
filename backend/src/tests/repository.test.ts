@@ -20,7 +20,7 @@ import { UserType } from '../types/user'
 import { Tokens } from '../types/tokens'
 import config from '../utils/config'
 
-const repositoriesDir = config.REPONAME
+const repositoriesDir: string = config.REPONAME
 
 const SAVE_CHANGES = gql`
   mutation saveChanges(
@@ -29,6 +29,12 @@ const SAVE_CHANGES = gql`
     $commitMessage: String
   ) {
     saveChanges(files: $files, branch: $branch, commitMessage: $commitMessage)
+  }
+`
+
+const SAVE_LOCALLY = gql`
+  mutation localSave($file: FileInput!) {
+    localSave(file: $file)
   }
 `
 
@@ -473,6 +479,116 @@ describe('SaveChanges mutation', () => {
     expect(errorFound).toBeTruthy()
   })
 })
+
+describe('Local save and Reset mutations', () => {
+  const repoPath = join(
+    '.',
+    `${repositoriesDir}`,
+    'testuser',
+    'github',
+    'fakegithubuser',
+    'testRepo'
+  )
+  let testUser: UserType
+  let tokens: Tokens
+  let mutate: TestQuery
+  let query: TestQuery
+
+
+  beforeEach(async () => {
+    mkdirSync(repoPath, { recursive: true })
+    await simpleGit(repoPath).init()
+
+    await user.deleteAll()
+    testUser = await User.registerUser({
+      username: 'testuser',
+      password: 'mypAssword?45',
+      email: 'test@test.fi',
+    })
+    tokens = createTokens(testUser)
+    const testClient = createIntegrationTestClient({
+      apolloServer: server,
+      extendMockRequest: {
+        headers: {
+          'x-access-token': tokens.accessToken,
+          'x-refresh-token': tokens.refreshToken,
+        },
+      },
+    })
+    mutate = testClient.mutate
+    query = testClient.query
+
+    await mutate(SAVE_CHANGES, {
+      variables: {
+        files: [
+          {
+            name: `${repoPath}/file1.txt`,
+            content: 'Expected test content1',
+          },
+          {
+            name: `${repoPath}/file2.txt`,
+            content: 'Expected test content2',
+          },
+        ],
+        branch: 'master',
+        commitMessage: 'Expected commit',
+      },
+    })
+  })
+
+  afterEach(() => {
+    rmdirSync(repoPath, { recursive: true })
+  })
+
+  it('local save works as expected', async () => {
+
+    const modifiedContent = 'modified content'
+
+    const mutateResult = await mutate(SAVE_LOCALLY, {
+      variables: {
+        file:
+        {
+          name: `${repoPath.split('/').slice(1,).join('/')}/file1.txt`,
+          content: modifiedContent,
+        }
+      },
+    })
+
+    expect(mutateResult).toEqual({
+      data: {
+        localSave: 'Saved locally',
+      },
+    })
+
+    const GET_REPO_FILES = gql`
+      query {
+        getRepoState(url: "https://github.com/${repoPath.split('/').slice(-2).join('/')}") {
+          files {
+            name
+            content
+          }
+        }
+      }
+    `
+    const queryResult = await query(GET_REPO_FILES)
+    expect(queryResult).toEqual({
+      data: {
+        getRepoState: {
+          files: [
+            {
+              content: modifiedContent,
+              name: `${repoPath.split('/').slice(1,).join('/')}/file1.txt`
+            }
+          ]
+        }
+      }
+    })
+  })
+
+})
+
+
+
 
 afterAll(async () => {
   await closePool()
