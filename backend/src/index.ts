@@ -14,6 +14,7 @@ import schema from './schema/schema'
 import User from './model/user'
 import path from 'path'
 import { UserJWT } from './types/user'
+import { initTestRepo } from './utils/testUtil'
 
 const app = express()
 
@@ -98,6 +99,14 @@ if (
   app.get('*', (_req, res) => {
     res.sendFile(path.join(__dirname, '../build/frontBuild/index.html'))
   })
+}
+
+if (process.env.NODE_ENV === 'e2etest') {
+  try {
+    initTestRepo()
+  } catch (e) {
+    console.log(e);
+  }
 }
 
 if (process.env.NODE_ENV !== 'test') {
