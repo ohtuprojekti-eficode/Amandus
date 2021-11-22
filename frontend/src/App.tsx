@@ -7,7 +7,7 @@ import EditView from './components/editView/EditView'
 import Header from './components/Header'
 import RegisterForm from './components/RegisterForm'
 import { CssBaseline, Toolbar } from '@material-ui/core'
-import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles'
+import { createTheme, ThemeProvider } from '@material-ui/core/styles'
 import { lightTheme, darkTheme } from './styles/themes'
 import RepositoriesView from './components/RepositoriesView'
 import Connections from './components/Connections'
@@ -16,6 +16,8 @@ import { MeQueryResult } from './types'
 import DeleteAccount from './components/DeleteAccount'
 import { useLocation } from 'react-router-dom'
 import CallBack from './components/auth/CallBack'
+import SettingsPage from './components/SettingsPage'
+import SettingsProvider from './components/SettingsProvider'
 
 interface LocationState {
   cloneUrl: string
@@ -43,7 +45,7 @@ const App = () => {
     localStorage.setItem('theme', newTheme)
   }
 
-  const appliedTheme = createMuiTheme(
+  const appliedTheme = createTheme(
     theme === 'light' ? lightTheme : darkTheme
   )
 
@@ -55,58 +57,66 @@ const App = () => {
 
   return (
     <div>
-      <ThemeProvider theme={appliedTheme}>
-        <CssBaseline />
-        <Header
-          user={user?.me}
-          logout={logout}
-          theme={theme}
-          toggleTheme={toggleTheme}
-        />
-        <div>
-          <Toolbar />
+      <SettingsProvider>
+        <ThemeProvider theme={appliedTheme}>
+          <CssBaseline />
+          <Header
+            user={user?.me}
+            logout={logout}
+            theme={theme}
+            toggleTheme={toggleTheme}
+          />
+          <div>
+            <Toolbar />
 
-          <Route exact path="/">
-            <Home />
-          </Route>
+            <Route exact path="/">
+              <Home />
+            </Route>
 
-          <Route exact path="/auth/github/callback">
-            <CallBack
-            service = {'github'}/>
-          </Route>
-          <Route exact path="/auth/gitlab/callback">
-            <CallBack
-            service = {'gitlab'} />
-          </Route>
+            <Route exact path="/auth/github/callback">
+              <CallBack
+                service={'github'} />
+            </Route>
+            <Route exact path="/auth/gitlab/callback">
+              <CallBack
+                service={'gitlab'} />
+            </Route>
 
-          <Route exact path="/auth/bitbucket/callback">
-            <CallBack
-            service = {'bitbucket'} />
-          </Route>
-          
-          <Route path="/edit">
-            <EditView 
-            cloneUrl = {cloneUrl}/>
-          </Route>
+            <Route exact path="/auth/bitbucket/callback">
+              <CallBack
+                service={'bitbucket'} />
+            </Route>
 
-          <Route exact path="/repositories">
-            <RepositoriesView />
-          </Route>
+            <Route path="/edit">
+              <EditView
+                cloneUrl={cloneUrl} />
+            </Route>
 
-          <Route exact path="/connections">
-            <Connections />
-          </Route>
+            <Route exact path="/repositories">
+              <RepositoriesView />
+            </Route>
 
-          <Route exact path="/deleteAccount">
-            <DeleteAccount 
-             user = {user?.me}
-            />
-          </Route>
+            <Route exact path="/connections">
+              <Connections />
+            </Route>
 
-          <Route exact path="/register" component={RegisterForm} />
-          <Route exact path="/login" component={MyLoginForm} />
-        </div>
-      </ThemeProvider>
+            <Route exact path="/deleteAccount">
+              <DeleteAccount
+                user={user?.me}
+              />
+            </Route>
+
+            <Route exact path="/settings">
+              <SettingsPage
+                user={user?.me}
+              />
+            </Route>
+
+            <Route exact path="/register" component={RegisterForm} />
+            <Route exact path="/login" component={MyLoginForm} />
+          </div>
+        </ThemeProvider>
+      </SettingsProvider>
     </div>
   )
 }

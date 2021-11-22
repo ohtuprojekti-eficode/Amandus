@@ -1,6 +1,6 @@
 import User from '../src/model/user'
 
-const register = async (username: string, email: string, password: string) => {
+const register = async (username: string, email: string, password: string): Promise<void> => {
     try {
         const user = await User.registerAdmin({username, email, password})
         console.log("added user to database: ", user)

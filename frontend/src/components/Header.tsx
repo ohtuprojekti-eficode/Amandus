@@ -106,6 +106,13 @@ const Header = ({ user, logout, theme, toggleTheme }: Props) => {
               Delete Account
             </Link>
             )}
+              <Link
+              component={RouterLink}
+              className={classes.linkBtnTransparent}
+              to="/settings"
+              >
+                Settings 
+              </Link>
           </div>
           <Switch
             checked={switchChecked}

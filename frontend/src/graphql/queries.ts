@@ -90,3 +90,19 @@ export const GET_REPO_LIST = gql`
     }
   }
 `
+
+export const GET_SETTINGS = gql`
+  query {
+    getSettings {
+      misc {
+        name, 
+        value, 
+        unit
+      }
+      plugins {
+        name,
+        active
+      }
+    }
+  }
+`

@@ -14,7 +14,7 @@ import schema from './schema/schema'
 import User from './model/user'
 import path from 'path'
 import { UserJWT } from './types/user'
-
+// import { RegisterUserInput } from './types/params'
 const app = express()
 
 app.use(cors())
@@ -99,6 +99,15 @@ if (
     res.sendFile(path.join(__dirname, '../build/frontBuild/index.html'))
   })
 }
+
+/* if (process.env.NODE_ENV === 'e2etest') {
+  const user: RegisterUserInput = {
+    username: "testuser", 
+    email: "testuser@testus.er", 
+    password: "Testi123!"
+  }
+  User.registerAdmin(user).catch(e => console.log(e))
+} */
 
 if (process.env.NODE_ENV !== 'test') {
   const httpServer = createServer(app)
