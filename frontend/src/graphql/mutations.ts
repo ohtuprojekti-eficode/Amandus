@@ -88,14 +88,14 @@ export const COMMIT_CHANGES = gql`
 `
 
 export const RESET_HARD = gql`
-mutation resetLocalChanges($url: String!) {
-  resetLocalChanges(url: $url) 
-}
+  mutation resetLocalChanges($url: String!) {
+    resetLocalChanges(url: $url) 
+  }
 `
 
 export const RESET_FILE = gql`
-mutation resetCurrentFile($url: String!, $fileName: String!) {
-  resetCurrentFile(url: $url, fileName: $fileName) 
-}
+  mutation resetCurrentFile($url: String!, $fileName: String!) {
+    resetCurrentFile(url: $url, fileName: $fileName) 
+  }
 `
 

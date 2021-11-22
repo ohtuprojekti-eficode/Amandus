@@ -515,6 +515,8 @@ describe('Local save and Reset mutations', () => {
   let mutate: TestQuery
   let query: TestQuery
 
+  const modifiedContent = 'modified content'
+
   const GET_REPO_FILES = gql`
       query {
         getRepoState(url: "https://github.com/${repoPath.split('/').slice(-2).join('/')}") {
@@ -537,6 +539,7 @@ describe('Local save and Reset mutations', () => {
       password: 'mypAssword?45',
       email: 'test@test.fi',
     })
+
     tokens = createTokens(testUser)
     const testClient = createIntegrationTestClient({
       apolloServer: server,
@@ -547,6 +550,7 @@ describe('Local save and Reset mutations', () => {
         },
       },
     })
+
     mutate = testClient.mutate
     query = testClient.query
 
@@ -583,8 +587,6 @@ describe('Local save and Reset mutations', () => {
 
   it('local save works as expected', async () => {
 
-    const modifiedContent = 'modified content'
-
     const mutateResult = await mutate(SAVE_LOCALLY, {
       variables: {
         file:
@@ -608,8 +610,8 @@ describe('Local save and Reset mutations', () => {
           files:
             expect.arrayContaining(
               [{
+                name: `${repoPath.split('/').slice(1,).join('/')}/file1.txt`,
                 content: modifiedContent,
-                name: `${repoPath.split('/').slice(1,).join('/')}/file1.txt`
               },
               {
                 name: `${repoPath.split('/').slice(1,).join('/')}/file2.txt`,
@@ -623,8 +625,6 @@ describe('Local save and Reset mutations', () => {
   })
 
   it('reseting file works as expected', async () => {
-
-    const modifiedContent = 'modified content'
 
     await mutate(SAVE_LOCALLY, {
       variables: {
@@ -661,8 +661,87 @@ describe('Local save and Reset mutations', () => {
           files:
             expect.arrayContaining(
               [{
-                content: 'Expected test content1',
-                name: `${repoPath.split('/').slice(1,).join('/')}/file1.txt`
+                name: `${repoPath.split('/').slice(1,).join('/')}/file1.txt`,
+                content: 'Expected test content1'
+              },
+              {
+                name: `${repoPath.split('/').slice(1,).join('/')}/file2.txt`,
+                content: 'Expected test content2'
+              }]
+            ),
+          commitMessage: 'Expected commit'
+        }
+      }
+    })
+  })
+
+  it('reseting repository works as expected', async () => {
+
+    await mutate(SAVE_LOCALLY, {
+      variables: {
+        file: {
+          name: `${repoPath.split('/').slice(1,).join('/')}/file1.txt`,
+          content: modifiedContent,
+        }
+      },
+    })
+
+    await mutate(SAVE_LOCALLY, {
+      variables: {
+        file: {
+          name: `${repoPath.split('/').slice(1,).join('/')}/file2.txt`,
+          content: modifiedContent,
+        }
+      },
+    })
+
+    const queryResult = await query(GET_REPO_FILES)
+    expect(queryResult).toEqual({
+      data: {
+        getRepoState: {
+          files:
+            expect.arrayContaining(
+              [{
+                name: `${repoPath.split('/').slice(1,).join('/')}/file1.txt`,
+                content: modifiedContent
+              },
+              {
+                name: `${repoPath.split('/').slice(1,).join('/')}/file2.txt`,
+                content: modifiedContent
+              }]
+            ),
+          commitMessage: 'Expected commit'
+        }
+      }
+    })
+
+    const RESET_HARD = gql`
+      mutation resetLocalChanges($url: String!) {
+        resetLocalChanges(url: $url) 
+      }
+    `
+
+    const mutateResult = await mutate(RESET_HARD, {
+      variables: {
+        url: `https://github.com/${repoPath.split('/').slice(-2).join('/')}`
+      }
+    })
+
+    expect(mutateResult).toEqual({
+      data: {
+        resetLocalChanges: expect.stringMatching("HEAD is now at ")
+      },
+    })
+
+    const finalQueryResult = await query(GET_REPO_FILES)
+    expect(finalQueryResult).toEqual({
+      data: {
+        getRepoState: {
+          files:
+            expect.arrayContaining(
+              [{
+                name: `${repoPath.split('/').slice(1,).join('/')}/file1.txt`,
+                content: 'Expected test content1'
               },
               {
                 name: `${repoPath.split('/').slice(1,).join('/')}/file2.txt`,
