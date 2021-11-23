@@ -1,5 +1,6 @@
 import React from 'react'
 import { useDebouncedCallback } from 'use-debounce'
+import useSettings from './useSettings'
 import useSave from './useSave'
 
 /**
@@ -11,8 +12,11 @@ import useSave from './useSave'
  */
 const useAutoSave = (filename: string, repoUrl: string) => {
   const [save, saving] = useSave()
+  
+  const {settings: nestedSettings } = useSettings()
+  const settings = nestedSettings?.settings
 
-  const interval = 1000
+  const interval = settings.misc.find(a => a.name === "Autosave Interval")?.value
 
   const debouncedAutoSave = useDebouncedCallback(save, interval)
 

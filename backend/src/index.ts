@@ -14,8 +14,12 @@ import schema from './schema/schema'
 import User from './model/user'
 import path from 'path'
 import { UserJWT } from './types/user'
+<<<<<<< HEAD
 import { initTestRepo } from './utils/testUtil'
 
+=======
+// import { RegisterUserInput } from './types/params'
+>>>>>>> dfe7e73d59c0e22e32f04d4f1248ee6de983e67d
 const app = express()
 
 app.use(cors())
@@ -107,6 +111,15 @@ if (process.env.NODE_ENV === 'e2etest') {
   } catch (e) {
     console.log(e);
   }
+
+  /*
+  const user: RegisterUserInput = {
+    username: "testuser", 
+    email: "testuser@testus.er", 
+    password: "Testi123!"
+  }
+  User.registerAdmin(user).catch(e => console.log(e))
+  */
 }
 
 if (process.env.NODE_ENV !== 'test') {

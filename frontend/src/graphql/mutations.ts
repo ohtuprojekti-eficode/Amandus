@@ -99,3 +99,8 @@ mutation resetCurrentFile($url: String!, $fileName: String!) {
 }
 `
 
+export const SAVE_SETTINGS = gql`
+  mutation saveSettings($settings: Sinput!) {
+    saveSettings(settings: $settings)
+  }
+`

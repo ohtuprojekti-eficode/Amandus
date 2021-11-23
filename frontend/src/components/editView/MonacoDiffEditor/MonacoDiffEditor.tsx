@@ -79,9 +79,9 @@ const MonacoDiffEditor = ({
         cloneUrl={cloneUrl}
         original={original}
         modified={modifiedContent}
-        currentBranch={currentBranch}
         currentService={currentService}
         commitMessage={commitMessage}
+        currentBranch={currentBranch}
       />
     </div>
   )

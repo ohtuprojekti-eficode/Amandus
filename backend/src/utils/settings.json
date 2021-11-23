@@ -1,0 +1,17 @@
+{
+    "settings": {
+        "misc": [
+            {
+                "name": "Autosave Interval",
+                "value": 500,
+                "unit": "ms"
+            }
+        ],
+        "plugins": [
+            {
+                "name": "robot-language-server",
+                "active": true
+            }
+        ]
+    }
+}
