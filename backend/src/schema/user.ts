@@ -19,6 +19,9 @@ import { Tokens } from '../types/tokens'
 
 import tokenService from '../services/token'
 import { requestServiceUser } from '../services/commonServices'
+import { rename } from 'fs'
+
+const repositoriesDir = config.REPONAME
 
 const typeDef = `
     enum ServiceName {
@@ -249,6 +252,13 @@ const resolvers = {
         if (!queryResult) {
           throw new UserInputError(`Could not find user ${args.username} from database`)
         }
+
+        const currentReposLocation = `./${repositoriesDir}/${args.username}/`
+        const newReposLocation = `./${repositoriesDir}/${args.newUsername}/`
+        rename(currentReposLocation, newReposLocation, (err) => {
+          if (err) throw err
+          console.log('Directory renamed succesfully')
+        })
       }
 
       if (args.newPassword) {
