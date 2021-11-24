@@ -246,8 +246,10 @@ const resolvers = {
         throw new ForbiddenError('You have to login')
       }
 
-      if (context.currentUser.username !== args.username &&
-        context.currentUser.user_role !== 'admin') {
+      if (
+        context.currentUser.username !== args.username &&
+        context.currentUser.user_role !== 'admin'
+      ) {
         throw new ForbiddenError('You have no permission to edit other users')
       }
 
