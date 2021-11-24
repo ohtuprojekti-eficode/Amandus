@@ -162,7 +162,7 @@ const resolvers = {
         throw new UserInputError(`${service} code not provided`)
       }
 
-      const serviceUserResponse = await requestServiceUser(service, args.code)    
+      const serviceUserResponse = await requestServiceUser(service, args.code)
 
       tokenService.setToken(
         context.currentUser.id,
@@ -239,52 +239,55 @@ const resolvers = {
     updateUser: async (
       _root: unknown,
       args: UpdateUserInput,
-      _context: AppContext
-    ): Promise<void> => {
+      context: AppContext
+    ): Promise<string> => {
+      // auth
+      if (!context.currentUser) {
+        throw new ForbiddenError('You have to login')
+      }
+
+      if (context.currentUser.username !== args.username &&
+        context.currentUser.user_role !== 'admin') {
+        throw new ForbiddenError('You have no permission to edit other users')
+      }
+
+      // validations
+      if (!(await User.findUserByUsername(args.username))) {
+        throw new UserInputError(`No such a user: ${args.username}`)
+      }
+
       const { validationFailed, errorMessage } = validateUserUpdateArgs(args)
       if (validationFailed) {
         throw new UserInputError(errorMessage)
       }
-      
-      if (args.newUsername) {
-        console.log('changing username to', args.newUsername)
-        const queryResult = await User.updateUsername(args.username, args.newUsername)
-        if (!queryResult) {
-          throw new UserInputError(`Could not find user ${args.username} from database`)
+
+      // updates
+      if (args.newUserRole) {
+        if (context.currentUser.user_role !== 'admin') {
+          throw new ForbiddenError('You have no permission to change roles')
         }
+        await User.updateUserRole(args.username, args.newUserRole)
+      }
+
+      if (args.newPassword) {
+        await User.updatePassword(args.username, args.newPassword)
+      }
+
+      if (args.newEmail) {
+        await User.updateEmail(args.username, args.newEmail)
+      }
+
+      if (args.newUsername) {
+        await User.updateUsername(args.username, args.newUsername)
 
         const currentReposLocation = `./${repositoriesDir}/${args.username}/`
         const newReposLocation = `./${repositoriesDir}/${args.newUsername}/`
         rename(currentReposLocation, newReposLocation, (err) => {
           if (err) throw err
-          console.log('Directory renamed succesfully')
         })
       }
 
-      if (args.newPassword) {
-        console.log('changing password to', args.newPassword)
-        const queryResult = await User.updatePassword(args.username, args.newPassword)
-        if (!queryResult) {
-          throw new UserInputError(`Could not find user ${args.username} from database`)
-        }
-      }
-
-      if (args.newEmail) {
-        console.log('changing email to', args.newEmail)
-        const queryResult = await User.updateEmail(args.username, args.newEmail)
-        if (!queryResult) {
-          throw new UserInputError(`Could not find user ${args.username} from database`)
-        }
-      }
-
-      if (args.newUserRole) {
-        console.log('changing user role to', args.newUserRole)
-        const queryResult = await User.updateUserRole(args.username, args.newUserRole)
-        if (!queryResult) {
-          throw new UserInputError(`Could not find user ${args.username} from database`)
-        }
-      }
-
+      return 'Succesfully updated'
     },
   },
 }
