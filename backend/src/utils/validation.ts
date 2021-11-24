@@ -10,7 +10,7 @@ const usernameErrors = (username: string) => {
 }
 
 const passwordErrors = (password: string | null) => {
-  if (password === null) return []
+  if (password === undefined || password === null) return []
   const errors: string[] = []
 
   if (password.length === 0) {

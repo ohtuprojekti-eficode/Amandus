@@ -20,6 +20,20 @@ const registerUser = async ({
   return queryResult.rows[0]
 }
 
+const updateEmail = async (username: string, newEmail: string): Promise<UserRecord | null>=> {
+  const queryText =
+    'UPDATE USERS SET email = $1 WHERE username = $2 RETURNING id, username, user_role, email'
+  const queryResult = await pool.query<UserRecord>(queryText, [
+    newEmail,
+    username
+  ])
+
+  if (queryResult.rows.length === 0) {
+    return null
+  }
+  return queryResult.rows[0]
+}
+
 const registerAdmin = async ({
   username,
   email,
@@ -119,5 +133,6 @@ export default {
   deleteAll,
   addServiceUser,
   getUserById,
-  deleteUser
+  deleteUser,
+  updateEmail
 }

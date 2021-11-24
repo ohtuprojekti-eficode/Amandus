@@ -237,7 +237,6 @@ const resolvers = {
       _root: unknown,
       args: UpdateUserInput,
       _context: AppContext
-    // eslint-disable-next-line @typescript-eslint/require-await
     ): Promise<void> => {
       const { validationFailed, errorMessage } = validateUserUpdateArgs(args)
       if (validationFailed) {
@@ -247,12 +246,19 @@ const resolvers = {
       if (args.newUsername) {
         console.log('changing username to', args.newUsername)
       }
+      
       if (args.newPassword) {
         console.log('changing password to', args.newPassword)
       }
+
       if (args.newEmail) {
         console.log('changing email to', args.newEmail)
+        const queryResult = await User.updateEmail(args.username, args.newEmail)
+        if (!queryResult) {
+          throw new UserInputError(`Could not find user ${args.username} from database`)
+        }
       }
+
       if (args.newUserRole) {
         console.log('changing user role to', args.newUserRole)
       }
