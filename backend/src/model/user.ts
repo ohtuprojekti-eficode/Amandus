@@ -20,6 +20,21 @@ const registerUser = async ({
   return queryResult.rows[0]
 }
 
+const updateUsername = async (username: string, newUsername: string): Promise<UserRecord | null>=> {
+  const queryText =
+    'UPDATE USERS SET username = $1 WHERE username = $2 RETURNING id, username, user_role, email'
+  const queryResult = await pool.query<UserRecord>(queryText, [
+    newUsername,
+    username
+  ])
+
+  if (queryResult.rows.length === 0) {
+    return null
+  }
+  return queryResult.rows[0]
+}
+
+
 const updatePassword = async (username: string, newPassword: string): Promise<UserRecord | null>=> {
   const queryText =
     'UPDATE USERS SET password = $1 WHERE username = $2 RETURNING id, username, user_role, email'
@@ -165,5 +180,6 @@ export default {
   deleteUser,
   updateEmail,
   updateUserRole,
-  updatePassword
+  updatePassword,
+  updateUsername
 }

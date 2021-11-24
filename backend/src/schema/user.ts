@@ -245,6 +245,10 @@ const resolvers = {
       
       if (args.newUsername) {
         console.log('changing username to', args.newUsername)
+        const queryResult = await User.updateUsername(args.username, args.newUsername)
+        if (!queryResult) {
+          throw new UserInputError(`Could not find user ${args.username} from database`)
+        }
       }
 
       if (args.newPassword) {
