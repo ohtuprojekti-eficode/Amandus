@@ -34,6 +34,20 @@ const updateEmail = async (username: string, newEmail: string): Promise<UserReco
   return queryResult.rows[0]
 }
 
+const updateUserRole = async (username: string, newUserRole: string): Promise<UserRecord | null>=> {
+  const queryText =
+    'UPDATE USERS SET user_role = $1 WHERE username = $2 RETURNING id, username, user_role, email'
+  const queryResult = await pool.query<UserRecord>(queryText, [
+    newUserRole,
+    username
+  ])
+
+  if (queryResult.rows.length === 0) {
+    return null
+  }
+  return queryResult.rows[0]
+}
+
 const registerAdmin = async ({
   username,
   email,
@@ -134,5 +148,6 @@ export default {
   addServiceUser,
   getUserById,
   deleteUser,
-  updateEmail
+  updateEmail,
+  updateUserRole
 }

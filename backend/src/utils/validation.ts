@@ -31,7 +31,7 @@ const passwordErrors = (password: string | null) => {
 }
 
 const emailErrors = (email: string | null) => {
-  if (email === null) return []
+  if (email === undefined || email === null) return []
   const errors: string[] = []
   if (email.length === 0) {
     errors.push('Email can not be empty')

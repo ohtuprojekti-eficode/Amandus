@@ -246,7 +246,7 @@ const resolvers = {
       if (args.newUsername) {
         console.log('changing username to', args.newUsername)
       }
-      
+
       if (args.newPassword) {
         console.log('changing password to', args.newPassword)
       }
@@ -261,6 +261,10 @@ const resolvers = {
 
       if (args.newUserRole) {
         console.log('changing user role to', args.newUserRole)
+        const queryResult = await User.updateUserRole(args.username, args.newUserRole)
+        if (!queryResult) {
+          throw new UserInputError(`Could not find user ${args.username} from database`)
+        }
       }
 
     },
