@@ -122,7 +122,7 @@ describe('User schema register mutations', () => {
 
     const errorFound = res.errors?.some(
       (error) =>
-        error.message === 'Username, email or password can not be empty'
+        error.message === 'Username can not be empty'
     )
     expect(errorFound).toBeTruthy()
   })
@@ -141,7 +141,7 @@ describe('User schema register mutations', () => {
 
     const errorFound = res.errors?.some(
       (error) =>
-        error.message === 'Username, email or password can not be empty'
+        error.message === 'Password can not be empty'
     )
 
     expect(errorFound).toBeTruthy()
@@ -155,14 +155,15 @@ describe('User schema register mutations', () => {
       variables: {
         username: 'testuser2',
         email: '',
-        password: 'mypassword',
+        password: 'mypAssword?45',
       },
     })
-
+    
     const errorFound = res.errors?.some(
       (error) =>
-        error.message === 'Username, email or password can not be empty'
+        error.message === 'Email can not be empty'
     )
+    void errorFound
     expect(errorFound).toBeTruthy()
   })
 })
