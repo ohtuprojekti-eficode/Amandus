@@ -82,6 +82,13 @@ const Mutation = `
         deleteUser(
             username: String!
         ): String
+        updateUser(
+            username: String!,
+            newUsername: String,
+            newEmail: String,
+            newPassword: String,
+            newUserRole: String
+        ): String
         localSave(
             file: FileInput!
         ): String

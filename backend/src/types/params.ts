@@ -31,6 +31,14 @@ export interface LoginUserInput {
   password: string
 }
 
+export interface UpdateUserInput {
+  username: string
+  newUsername: string | null
+  newEmail: string | null
+  newPassword: string | null
+  newUserRole: string | null
+}
+
 export interface AddServiceArgs {
   service: ServiceUser
 }

@@ -5,11 +5,12 @@ import User from '../model/user'
 import Service from '../model/service'
 import { createTokens } from '../utils/tokens'
 import config from '../utils/config'
-import { validateUserArgs } from '../utils/validation'
+import { validateUserArgs, validateUserUpdateArgs } from '../utils/validation'
 import {
   RegisterUserInput,
   LoginUserInput,
   AddServiceArgs,
+  UpdateUserInput,
 } from '../types/params'
 import { UserType, AppContext } from '../types/user'
 import { ServiceAuthCode, ServiceAuthResponse } from '../types/service'
@@ -231,6 +232,31 @@ const resolvers = {
       const user = await User.findUserByUsername(username)
       user?.id && tokenService.deleteTokenByUserId(user.id)
       await User.deleteUser(username)
+    },
+    updateUser: async (
+      _root: unknown,
+      args: UpdateUserInput,
+      _context: AppContext
+    // eslint-disable-next-line @typescript-eslint/require-await
+    ): Promise<void> => {
+      const { validationFailed, errorMessage } = validateUserUpdateArgs(args)
+      if (validationFailed) {
+        throw new UserInputError(errorMessage)
+      }
+      
+      if (args.newUsername) {
+        console.log('changing username to', args.newUsername)
+      }
+      if (args.newPassword) {
+        console.log('changing password to', args.newPassword)
+      }
+      if (args.newEmail) {
+        console.log('changing email to', args.newEmail)
+      }
+      if (args.newUserRole) {
+        console.log('changing user role to', args.newUserRole)
+      }
+
     },
   },
 }
