@@ -14,14 +14,14 @@ interface NotificationContextType {
 
 const AUTO_HIDE_DELAY = 5000
 
-const NotificationContext = React.createContext<NotificationContextType>({
-  notify: () => null,
-  notification: null,
-  handleClose: () => null,
-  autoHideDelay: AUTO_HIDE_DELAY,
-})
-
-export const useNotification = () => React.useContext(NotificationContext)
+export const NotificationContext = React.createContext<NotificationContextType>(
+  {
+    notify: () => null,
+    notification: null,
+    handleClose: () => null,
+    autoHideDelay: AUTO_HIDE_DELAY,
+  }
+)
 
 const NotificationProvider: React.FC = ({ children }) => {
   const [notification, setNotification] = React.useState<Notification | null>(

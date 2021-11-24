@@ -1,4 +1,4 @@
-import Notification from './components/Notification'
+import Notification from './components/Notification/Notification'
 import React, { useState } from 'react'
 import { Route } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
@@ -19,7 +19,7 @@ import { useLocation } from 'react-router-dom'
 import CallBack from './components/auth/CallBack'
 import SettingsPage from './components/SettingsPage'
 import SettingsProvider from './components/SettingsProvider'
-import NotificationProvider from './components/NotificationProvider'
+import NotificationProvider from './components/Notification/NotificationProvider'
 
 interface LocationState {
   cloneUrl: string

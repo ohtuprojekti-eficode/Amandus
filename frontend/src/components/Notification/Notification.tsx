@@ -2,7 +2,7 @@ import { Snackbar } from '@material-ui/core'
 
 import { Alert } from '@material-ui/lab'
 import React from 'react'
-import { useNotification } from './NotificationProvider'
+import useNotification from './useNotification'
 
 const Notification = () => {
   const { notification, handleClose, autoHideDelay } = useNotification()
@@ -13,6 +13,7 @@ const Notification = () => {
   return (
     <Snackbar
       open={true}
+      id="app-wide-notification"
       onClose={handleClose}
       autoHideDuration={autoHideDelay}
       anchorOrigin={{

@@ -6,7 +6,7 @@ import {
 } from '@material-ui/core'
 import React, { useState } from 'react'
 import useSaveDialog from '../../hooks/useSaveDialog'
-import { useNotification } from '../NotificationProvider'
+import useNotification from '../Notification/useNotification'
 import { useFiles } from './FileProvider'
 import LatestCommit from './LatestCommit'
 import useEditor from './MonacoEditor/useMonacoEditor'
