@@ -249,6 +249,10 @@ const resolvers = {
 
       if (args.newPassword) {
         console.log('changing password to', args.newPassword)
+        const queryResult = await User.updatePassword(args.username, args.newPassword)
+        if (!queryResult) {
+          throw new UserInputError(`Could not find user ${args.username} from database`)
+        }
       }
 
       if (args.newEmail) {

@@ -20,6 +20,21 @@ const registerUser = async ({
   return queryResult.rows[0]
 }
 
+const updatePassword = async (username: string, newPassword: string): Promise<UserRecord | null>=> {
+  const queryText =
+    'UPDATE USERS SET password = $1 WHERE username = $2 RETURNING id, username, user_role, email'
+  const cryptedPassword = bcrypt.hashSync(newPassword, 10)
+  const queryResult = await pool.query<UserRecord>(queryText, [
+    cryptedPassword,
+    username
+  ])
+
+  if (queryResult.rows.length === 0) {
+    return null
+  }
+  return queryResult.rows[0]
+}
+
 const updateEmail = async (username: string, newEmail: string): Promise<UserRecord | null>=> {
   const queryText =
     'UPDATE USERS SET email = $1 WHERE username = $2 RETURNING id, username, user_role, email'
@@ -149,5 +164,6 @@ export default {
   getUserById,
   deleteUser,
   updateEmail,
-  updateUserRole
+  updateUserRole,
+  updatePassword
 }
