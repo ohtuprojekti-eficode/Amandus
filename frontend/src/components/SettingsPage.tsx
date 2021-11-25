@@ -14,6 +14,7 @@ import {
   UserType } from '../types'
 
 import useSettings from '../hooks/useSettings'
+import AuthenticateDialog from './AuthenticateDialog'
 
 interface Props {
   user: UserType | undefined
@@ -162,6 +163,9 @@ const SettingsPage = ({ user }: Props) => {
   
     return (
     <div>
+      <div>        
+        <AuthenticateDialog open={!user} />
+      </div>
       <h1> Admins only. </h1>
 
       {settings.misc.map((m: MiscSettingObject) => 
