@@ -44,11 +44,14 @@ const PullDialog = ({
       onExit={handleExit}
       aria-labelledby="form-dialog-title"
     >
-      <DialogTitle id="form-dialog-title">Commit changes to resolve conflict</DialogTitle>
-      {error && <Alert severity="error">
-        <AlertTitle>{error.title}</AlertTitle>
-        {error.message}
-      </Alert>}
+      <DialogTitle id="form-dialog-title">
+        Commit changes to resolve conflict
+      </DialogTitle>
+      {error &&
+        <Alert severity="error">
+          <AlertTitle>{error.title}</AlertTitle>
+          {error.message}
+        </Alert>}
       <DialogContent>
         <TextField
           margin="normal"
@@ -63,7 +66,7 @@ const PullDialog = ({
       </DialogContent>
       <DialogActions>
         <Button
-          style={{backgroundColor: "red"}}
+          style={{ backgroundColor: "red" }}
           variant="contained"
           onClick={handleResetAll}
         >

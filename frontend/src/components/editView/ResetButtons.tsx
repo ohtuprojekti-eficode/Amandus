@@ -1,6 +1,8 @@
 import { Button, createStyles, makeStyles } from '@material-ui/core'
 import React from 'react'
+import useSaveDialog from '../../hooks/useSaveDialog'
 import useEditor from './MonacoEditor/useMonacoEditor'
+import ResetDialog from './saveDialogs/ResetDialog'
 
 const ResetButtons = ({
   cloneUrl,
@@ -23,18 +25,34 @@ const ResetButtons = ({
     })
   }
 
-  const handleReset = async () => {
+  const {
+    dialogOpen,
+    handleDialogClose,
+    handleDialogOpen,
+  } = useSaveDialog()
+  
+  const handleResetClick = () => {
+    handleDialogOpen()
+  }
+
+  const handleReset = async (): Promise<void> => {
     await resetAll({
       variables: {
         url: cloneUrl,
       },
     })
+    handleDialogClose()
   }
 
   return (
     <>
+      <ResetDialog
+        open={dialogOpen}
+        handleClose={handleDialogClose}
+        handleResetAll={handleReset}
+      />
       <Button
-        style={{ marginLeft: 25 }}
+        style={{ marginLeft: 150 }}
         className={classes.resetButton}
         variant="outlined"
         size="small"
@@ -44,12 +62,12 @@ const ResetButtons = ({
         Reset File
       </Button>
       <Button
-        style={{ marginLeft: 25 }}
+        style={{ marginLeft: 5 }}
         className={classes.resetButton}
         variant="outlined"
         size="small"
         disabled={pullLoading || mutationSaveLoading}
-        onClick={handleReset}
+        onClick={handleResetClick}
       >
         Reset Repo
       </Button>
@@ -60,7 +78,7 @@ const ResetButtons = ({
 const stylesInUse = makeStyles(() =>
   createStyles({
     resetButton: {
-      color: 'red',
+      backgroundColor: 'red',
     },
   })
 )
