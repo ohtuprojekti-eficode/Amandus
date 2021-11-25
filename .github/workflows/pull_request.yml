@@ -43,6 +43,14 @@ jobs:
           yarn build
           yarn test --watchAll=false
 
+      - name: Install, build, test and start token service # start necessary for backend tests
+        run: |
+          cd tokenservice
+          yarn
+          yarn tsc
+          yarn test
+          yarn start &
+
       - name: Install, build and test backend
         run: |
           cd backend
@@ -53,6 +61,7 @@ jobs:
         env:
           DATABASE_URL_TEST: postgres://test:test@localhost:${{ job.services.postgres.ports[5432] }}/test
           DATABASE_URL: postgres://test:test@localhost:${{ job.services.postgres.ports[5432] }}/test
+          TOKEN_SERVICE_URL: http://localhost:3002
 
       - name: Start server for E2E tests
         run: |
@@ -70,6 +79,7 @@ jobs:
           GL_CLIENT_SECRET: ${{ secrets.GL_CLIENT_SECRET }}
           BB_CLIENT_ID: ${{ secrets.BB_CLIENT_ID }}
           BB_CLIENT_SECRET: ${{ secrets.BB_CLIENT_SECRET }}
+          TOKEN_SERVICE_URL: http://localhost:3002
 
       - name: E2E testing
         uses: cypress-io/github-action@v2
@@ -82,5 +92,5 @@ jobs:
         uses: actions/upload-artifact@v2
         if: failure()
         with:
-            name: cypress-snapshots
-            path: frontend/cypress/screenshots
+          name: cypress-snapshots
+          path: frontend/cypress/screenshots
