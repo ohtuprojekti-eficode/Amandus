@@ -1,7 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/unbound-method */
-
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { gql } from 'apollo-server'
 import { createTestClient } from 'apollo-server-testing'
 import {
@@ -20,7 +18,7 @@ import { UserType } from '../types/user'
 import { Tokens } from '../types/tokens'
 import config from '../utils/config'
 
-const repositoriesDir = config.REPONAME
+const repositoriesDir: string = config.REPONAME
 
 const SAVE_CHANGES = gql`
   mutation saveChanges(
@@ -29,6 +27,12 @@ const SAVE_CHANGES = gql`
     $commitMessage: String
   ) {
     saveChanges(files: $files, branch: $branch, commitMessage: $commitMessage)
+  }
+`
+
+const SAVE_LOCALLY = gql`
+  mutation localSave($file: FileInput!) {
+    localSave(file: $file)
   }
 `
 
@@ -152,12 +156,10 @@ describe('getRepoState query', () => {
     expect(queryResult).toEqual({
       data: {
         getRepoState: {
-          files: [
-            {
-              content: 'Commit and add file to create master branch',
-              name: 'testuser/github/test/file.txt',
-            },
-          ],
+          files: [{
+            content: 'Commit and add file to create master branch',
+            name: 'testuser/github/test/file.txt',
+          }],
         },
       },
     })
@@ -408,7 +410,7 @@ describe('SaveChanges mutation', () => {
 
     const tokens = createTokens(user)
 
-    const { mutate } = createIntegrationTestClient({
+    const { mutate, query } = createIntegrationTestClient({
       apolloServer: server,
       extendMockRequest: {
         headers: {
@@ -447,6 +449,31 @@ describe('SaveChanges mutation', () => {
       filenameIsCorrect,
       commitMessageIsCorrect,
     ]).toEqual([true, true, true])
+
+    const GET_REPO_FILES = gql`
+      query {
+        getRepoState(url: "https://github.com/${repoPath.split('/').slice(-2).join('/')}") {
+          files {
+            name
+            content
+          }
+          commitMessage
+        }
+      }
+    `
+    const queryResult = await query(GET_REPO_FILES)
+
+    expect(queryResult).toEqual({
+      data: {
+        getRepoState: {
+          files: [{
+            content: 'test content',
+            name: `${repoPath.split('/').slice(1,).join('/')}/file.txt`
+          }],
+          commitMessage: 'Add test file'
+        }
+      }
+    })
   })
 
   it('Saving changes does not work when user is not defined', async () => {
@@ -471,6 +498,260 @@ describe('SaveChanges mutation', () => {
     )
 
     expect(errorFound).toBeTruthy()
+  })
+})
+
+describe('Local save and Reset mutations', () => {
+  const repoPath = join(
+    '.',
+    `${repositoriesDir}`,
+    'testuser',
+    'github',
+    'fakegithubuser',
+    'testRepo'
+  )
+  let testUser: UserType
+  let tokens: Tokens
+  let mutate: TestQuery
+  let query: TestQuery
+
+  const modifiedContent = 'modified content'
+
+  const GET_REPO_FILES = gql`
+      query {
+        getRepoState(url: "https://github.com/${repoPath.split('/').slice(-2).join('/')}") {
+          files {
+            name
+            content
+          }
+          commitMessage
+        }
+      }
+    `
+
+  beforeEach(async () => {
+    mkdirSync(repoPath, { recursive: true })
+    await simpleGit(repoPath).init()
+
+    await user.deleteAll()
+    testUser = await User.registerUser({
+      username: 'testuser',
+      password: 'mypAssword?45',
+      email: 'test@test.fi',
+    })
+
+    tokens = createTokens(testUser)
+    const testClient = createIntegrationTestClient({
+      apolloServer: server,
+      extendMockRequest: {
+        headers: {
+          'x-access-token': tokens.accessToken,
+          'x-refresh-token': tokens.refreshToken,
+        },
+      },
+    })
+
+    mutate = testClient.mutate
+    query = testClient.query
+
+    appendFileSync(
+      `${repoPath}/file1.txt`,
+      'Expected test content1'
+    )
+    appendFileSync(
+      `${repoPath}/file2.txt`,
+      'Expected test content2'
+    )
+
+    await mutate(SAVE_CHANGES, {
+      variables: {
+        files: [
+          {
+            name: `${repoPath.split('/').slice(1,).join('/')}/file1.txt`,
+            content: 'Expected test content1',
+          },
+          {
+            name: `${repoPath.split('/').slice(1,).join('/')}/file2.txt`,
+            content: 'Expected test content2',
+          },
+        ],
+        branch: 'master',
+        commitMessage: 'Expected commit',
+      },
+    })
+  })
+
+  afterEach(() => {
+    rmdirSync(repoPath, { recursive: true })
+  })
+
+  it('local save works as expected', async () => {
+
+    const mutateResult = await mutate(SAVE_LOCALLY, {
+      variables: {
+        file:
+        {
+          name: `${repoPath.split('/').slice(1,).join('/')}/file1.txt`,
+          content: modifiedContent,
+        }
+      },
+    })
+
+    expect(mutateResult).toEqual({
+      data: {
+        localSave: 'Saved locally',
+      },
+    })
+
+    const queryResult = await query(GET_REPO_FILES)
+    expect(queryResult).toEqual({
+      data: {
+        getRepoState: {
+          files:
+            expect.arrayContaining(
+              [{
+                name: `${repoPath.split('/').slice(1,).join('/')}/file1.txt`,
+                content: modifiedContent,
+              },
+              {
+                name: `${repoPath.split('/').slice(1,).join('/')}/file2.txt`,
+                content: 'Expected test content2'
+              }]
+            ),
+          commitMessage: 'Expected commit'
+        }
+      }
+    })
+  })
+
+  it('reseting file works as expected', async () => {
+
+    await mutate(SAVE_LOCALLY, {
+      variables: {
+        file: {
+          name: `${repoPath.split('/').slice(1,).join('/')}/file1.txt`,
+          content: modifiedContent,
+        }
+      },
+    })
+
+    const RESET_FILE = gql`
+      mutation resetCurrentFile($url: String!, $fileName: String!) {
+        resetCurrentFile(url: $url, fileName: $fileName) 
+      }
+    `
+
+    const mutateResult = await mutate(RESET_FILE, {
+      variables: {
+        url: `https://github.com/${repoPath.split('/').slice(-2).join('/')}`,
+        fileName: `${repoPath.split('/').slice(1,).join('/')}/file1.txt`
+      }
+    })
+
+    expect(mutateResult).toEqual({
+      data: {
+        resetCurrentFile: `reset file ${repoPath.split('/').slice(1,).join('/')}/file1.txt`,
+      },
+    })
+
+    const queryResult = await query(GET_REPO_FILES)
+    expect(queryResult).toEqual({
+      data: {
+        getRepoState: {
+          files:
+            expect.arrayContaining(
+              [{
+                name: `${repoPath.split('/').slice(1,).join('/')}/file1.txt`,
+                content: 'Expected test content1'
+              },
+              {
+                name: `${repoPath.split('/').slice(1,).join('/')}/file2.txt`,
+                content: 'Expected test content2'
+              }]
+            ),
+          commitMessage: 'Expected commit'
+        }
+      }
+    })
+  })
+
+  it('reseting repository works as expected', async () => {
+
+    await mutate(SAVE_LOCALLY, {
+      variables: {
+        file: {
+          name: `${repoPath.split('/').slice(1,).join('/')}/file1.txt`,
+          content: modifiedContent,
+        }
+      },
+    })
+
+    await mutate(SAVE_LOCALLY, {
+      variables: {
+        file: {
+          name: `${repoPath.split('/').slice(1,).join('/')}/file2.txt`,
+          content: modifiedContent,
+        }
+      },
+    })
+
+    const queryResult = await query(GET_REPO_FILES)
+    expect(queryResult).toEqual({
+      data: {
+        getRepoState: {
+          files:
+            expect.arrayContaining(
+              [{
+                name: `${repoPath.split('/').slice(1,).join('/')}/file1.txt`,
+                content: modifiedContent
+              },
+              {
+                name: `${repoPath.split('/').slice(1,).join('/')}/file2.txt`,
+                content: modifiedContent
+              }]
+            ),
+          commitMessage: 'Expected commit'
+        }
+      }
+    })
+
+    const RESET_HARD = gql`
+      mutation resetLocalChanges($url: String!) {
+        resetLocalChanges(url: $url) 
+      }
+    `
+
+    const mutateResult = await mutate(RESET_HARD, {
+      variables: {
+        url: `https://github.com/${repoPath.split('/').slice(-2).join('/')}`
+      }
+    })
+
+    expect(mutateResult).toEqual({
+      data: {
+        resetLocalChanges: expect.stringMatching("HEAD is now at ")
+      },
+    })
+
+    const finalQueryResult = await query(GET_REPO_FILES)
+    expect(finalQueryResult).toEqual({
+      data: {
+        getRepoState: {
+          files:
+            expect.arrayContaining(
+              [{
+                name: `${repoPath.split('/').slice(1,).join('/')}/file1.txt`,
+                content: 'Expected test content1'
+              },
+              {
+                name: `${repoPath.split('/').slice(1,).join('/')}/file2.txt`,
+                content: 'Expected test content2'
+              }]
+            ),
+          commitMessage: 'Expected commit'
+        }
+      }
+    })
   })
 })
 
