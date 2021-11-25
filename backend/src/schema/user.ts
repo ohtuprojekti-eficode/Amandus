@@ -19,7 +19,7 @@ import { Tokens } from '../types/tokens'
 
 import tokenService from '../services/token'
 import { requestServiceUser } from '../services/commonServices'
-import { rename } from 'fs'
+import fs from 'fs'
 
 const repositoriesDir = config.REPONAME
 
@@ -284,9 +284,11 @@ const resolvers = {
 
         const currentReposLocation = `./${repositoriesDir}/${args.username}/`
         const newReposLocation = `./${repositoriesDir}/${args.newUsername}/`
-        rename(currentReposLocation, newReposLocation, (err) => {
-          if (err) throw err
-        })
+        if (fs.existsSync(currentReposLocation)) {
+          fs.rename(currentReposLocation, newReposLocation, (err) => {
+            if (err) throw err
+          })
+        }
       }
 
       return 'Succesfully updated'
