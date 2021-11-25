@@ -48,20 +48,12 @@ Cypress.Commands.add('createUserAndLogin', (username, email, password) => {
   })
 })
 
-Cypress.Commands.add('deleteUser', (username) => {
-  const query = `mutation {
-    deleteUser(username:"${username}")
-  }`
+Cypress.Commands.add('resetUsers', () => {
+  cy.request('POST', `${Cypress.env('BACKEND_URI')}/reset`)
+})
 
-  cy.request({
-    method: 'post',
-    url: Cypress.env('GRAPHQL_URI'),
-    body: { query },
-    failOnStatusCode: false
-  }).then((res) => {
-    cy.log(res);
-  })
-  localStorage.clear()
+Cypress.Commands.add('resetTokens', () => {
+  cy.request('POST', `${Cypress.env('TOKENSERVICE_URI')}/reset`)
 })
 
 Cypress.Commands.add('connectWith', (service) => {

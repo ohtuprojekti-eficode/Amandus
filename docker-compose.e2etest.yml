@@ -52,6 +52,8 @@ services:
       - ./tokenservice/node_modules:/usr/src/app/node_modules
     ports:
       - '3002:3002'
+    environment:
+      - NODE_ENV=e2etest
 
 volumes:
   testdata-data:
