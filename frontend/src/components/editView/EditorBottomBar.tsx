@@ -6,6 +6,7 @@ import {
 } from '@material-ui/core'
 import React, { useState } from 'react'
 import useSaveDialog from '../../hooks/useSaveDialog'
+import useNotification from '../Notification/useNotification'
 import { useFiles } from './FileProvider'
 import LatestCommit from './LatestCommit'
 import useEditor from './MonacoEditor/useMonacoEditor'
@@ -36,6 +37,8 @@ const EditorBottomBar = ({
   const [waitingToSave, setWaitingToSave] = useState(false)
 
   const classes = stylesInUse()
+
+  const { notify } = useNotification()
 
   const { files, selected } = useFiles()
 
@@ -78,6 +81,9 @@ const EditorBottomBar = ({
           commitMessage: newCommitMessage,
         },
       })
+
+      notify('Push succesful')
+
       handleDialogClose()
       setDialogError(undefined)
     } catch (error) {
