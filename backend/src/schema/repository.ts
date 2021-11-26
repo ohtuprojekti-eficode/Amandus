@@ -30,7 +30,6 @@ import {
 import { parseServiceRepositories } from '../utils/parsers'
 import { getRepoList } from '../services/commonServices'
 import tokenService from '../services/token'
-
 import { Repository } from '../types/repository'
 import { File } from '../types/file'
 import config from '../utils/config'
@@ -95,7 +94,7 @@ const resolvers = {
       // requires user specific repos & clone only possible
       // when context.currentuser exists
       if (!existsSync(repoLocation)) {
-        await cloneRepository(args.url, context.currentUser)
+        await cloneRepository(args.url, context)
       }
 
       return 'Cloned'
@@ -108,7 +107,6 @@ const resolvers = {
       if (!args.url) {
         throw new Error('Repository url not provided')
       }
-
       const service = getServiceNameFromUrlString(args.url)
       const repoLocation = getRepoLocationFromUrlString(
         args.url,
@@ -162,18 +160,19 @@ const resolvers = {
         throw new Error('User is not connected to any service')
       }
 
-      //TODO fix typescript errors for this func
+      if (!context.accessToken) {
+        throw new Error('access token is missing!!')
+      }
+
       const allRepositories = await Promise.all(context.currentUser.services.map(
         async (service) => {
-          const token = await tokenService.getAccessTokenByServiceAndId(
+          const token = await tokenService.getAccessToken(
             context.currentUser.id,
-            service.serviceName
+            service.serviceName,
+            context.accessToken
           )
 
-          if (!token) {
-            // console.log(`Service token missing for service ${service.serviceName}`)
-            return []
-          }
+          if (!token) return []
 
           const response = await getRepoList(service, token)
           const serviceRepositories: Repository[] = parseServiceRepositories(
@@ -308,8 +307,8 @@ const resolvers = {
         args.url,
         context.currentUser.username
       )
-      const result = await resetAll(repoLocation)
-      return result
+
+      return await resetAll(repoLocation)
     }
   },
 }

@@ -10,238 +10,213 @@ const createAmandusToken = () => {
   }).accessToken
 }
 
-describe('token service (credential store)', () => {
-  beforeEach(() => tokenService.clearStorage())
+describe('Token service', () => {
+  const amandusToken = createAmandusToken()
+  const gitHubToken = { access_token: 'gh_token' }
+  const bitBucketToken = { access_token: 'bb_token' }
 
-  describe('with id', () => {
-    it('should return null if empty', () => {
-      const tokenMap = tokenService.getTokenMapById(1)
+  beforeEach(async () => {
+    // clear user from token service before every test
+    try {
+      await tokenService.deleteUser(1, amandusToken)
+    } catch (e) {
+      //ignore error received when attempting to remove non-existing user
+    }
+  })
 
-      expect(tokenMap).toBe(null)
+  describe('setting new token', () => {
+    it('succeeds with valid parameters', async () => {
+      const tokenIsSet = await tokenService.setAccessToken(1, 'github', amandusToken, gitHubToken)
+      expect(tokenIsSet).toBe(true)
     })
 
-    it('should return token map if not empty', () => {
-      const token = { access_token: 'ghtoken' }
-
-      tokenService.setToken(1, 'github', token)
-
-      const tokenMap = tokenService.getTokenMapById(1)
-
-      expect(tokenMap).not.toBeNull()
-
-      expect(tokenMap?.get('github')?.access_token).toBe('ghtoken')
+    it('fails with invalid amandus token', async () => {
+      const setWithInvalidToken = async () => {
+        await tokenService.setAccessToken(1, 'github', 'invalidToken', gitHubToken)
+      }
+      await expect(setWithInvalidToken()).rejects.toThrow()
     })
 
-    it('token should be able to be removed', () => {
-      const token = { access_token: 'ghtoken' }
-      tokenService.setToken(1, 'github', token)
+    it('fails with invalid id', async () => {
+      const setWithInvalidId = async () => {
+        await tokenService.setAccessToken(2, 'bitbucket', amandusToken, bitBucketToken)
+      }
 
-      const tokenMap = tokenService.getTokenMapById(1)
-      expect(tokenMap).not.toBeNull()
-      expect(tokenMap?.get('github')?.access_token).toBe('ghtoken')
-
-      tokenService.removeToken(1, 'github')
-      const tokenMapAfter = tokenService.getTokenMapById(1)
-      expect(tokenMapAfter?.get('github')?.access_token).toBe(undefined)
+      await expect(setWithInvalidId()).rejects.toThrow()
     })
 
-    it('should contain tokens which are not removed', () => {
-      const token1 = { access_token: 'ghtoken' }
-      const token2 = { access_token: 'gltoken' }
-      const token3 = { access_token: 'bbtoken' }
-      tokenService.setToken(56, 'github', token1)
-      tokenService.setToken(56, 'gitlab', token2)
-      tokenService.setToken(56, 'bitbucket', token3)
+    it('if service token does not exist, nothing is returned', async () => {
+      const retrievedToken = await tokenService.getAccessToken(1, 'github', amandusToken)
+      expect(retrievedToken).toBeNull()
+    })
 
-      const tokenMap = tokenService.getTokenMapById(56)
-      expect(tokenMap?.size).toBe(3)
+    it('new token can be set', async () => {
+      const tokenIsSet = await tokenService.setAccessToken(1, 'github', amandusToken, gitHubToken)
+      expect(tokenIsSet).toBe(true)
+    })
 
-      tokenService.removeToken(56, 'github')
-      tokenService.removeToken(56, 'gitlab')
+  })
 
-      const tokenMapAfter = tokenService.getTokenMapById(56)
-      expect(tokenMapAfter?.get('github')?.access_token).toBe(undefined)
-      expect(tokenMapAfter?.get('gitlab')?.access_token).toBe(undefined)
-      expect(tokenMapAfter?.get('bitbucket')?.access_token).toBe('bbtoken')
+  describe('getting token', () => {
+    it('succeeds with valid parameters', async () => {
+      const tokenIsSet = await tokenService.setAccessToken(1, 'github', amandusToken, gitHubToken)
+      expect(tokenIsSet).toBe(true)
+
+      const retrievedToken = await tokenService.getAccessToken(1, 'github', amandusToken)
+      expect(retrievedToken).toBe(gitHubToken.access_token)
+    })
+
+    it('fails if token is not set', async () => {
+      const retrievedToken = await tokenService.getAccessToken(1, 'github', amandusToken)
+      expect(retrievedToken).toBeNull()
+    })
+
+    it('fails with invalid amandus token', async () => {
+      const tokenIsSet = await tokenService.setAccessToken(1, 'github', amandusToken, gitHubToken)
+      expect(tokenIsSet).toBe(true)
+
+      const retrievedToken = await tokenService.getAccessToken(1, 'github', 'invalid_token')
+
+      expect(retrievedToken).toBeNull()
+    })
+
+    it('fails with invalid id', async () => {
+      const tokenIsSet = await tokenService.setAccessToken(1, 'github', amandusToken, gitHubToken)
+      expect(tokenIsSet).toBe(true)
+
+      const retrievedToken = await tokenService.getAccessToken(2, 'github', amandusToken)
+
+      expect(retrievedToken).toBeNull()
     })
   })
 
-  describe('with amandus token', () => {
-    const token = createAmandusToken()
+  describe('service connection status check', () => {
+    it('returns true, if a service token exists', async () => {
+      const tokenIsSet = await tokenService.setAccessToken(1, 'github', amandusToken, gitHubToken)
+      expect(tokenIsSet).toBe(true)
 
-    it('should return null if empty', () => {
-      const tokenMap = tokenService.getTokenMap(token)
-
-      expect(tokenMap).toBe(null)
+      const isConnected = await tokenService.isServiceConnected(1, 'github', amandusToken)
+      expect(isConnected).toBe(true)
     })
 
-    it('should return token map if not empty', () => {
-      const token1 = { access_token: 'ghtoken' }
-
-      tokenService.setToken(1, 'github', token1)
-
-      const tokenMap = tokenService.getTokenMap(token)
-
-      expect(tokenMap).not.toBeNull()
-
-      expect(tokenMap?.get('github')?.access_token).toBe('ghtoken')
-    })
-  })
-})
-
-describe('Access through service', () => {
-  beforeEach(() => tokenService.clearStorage())
-
-  describe('Storing access details', () => {
-    it('data without creation and expiration time should not have them', () => {
-      const data = { access_token: 'ghtoken' }
-
-      tokenService.setToken(1, 'github', data)
-
-      const details = tokenService.getServiceDetails(1, 'github')
-
-      expect(details).not.toBeNull()
-      expect(details?.access_token).toBe('ghtoken')
-      expect(details?.refresh_token).toBe(undefined)
-      expect(details?.created_at).toBe(undefined)
-      expect(details?.expires_in).toBe(undefined)
+    it('returns false, if service token does not exist', async () => {
+      const isConnected = await tokenService.isServiceConnected(1, 'github', amandusToken)
+      expect(isConnected).toBe(false)
     })
 
-    it('expiration time should be added if creation time exists', () => {
-      const data = {
-        access_token: 'gitlabtoken',
-        refresh_token: 'Qo5JZktS',
-        created_at: 12345,
+    it('fails with invalid amandus token', async () => {
+      const tokenIsSet = await tokenService.setAccessToken(1, 'github', amandusToken, gitHubToken)
+      expect(tokenIsSet).toBe(true)
+
+      const getWithInvalidToken = async () => {
+        await tokenService.isServiceConnected(1, 'github', 'invalid_token')
       }
 
-      tokenService.setToken(2, 'gitlab', data)
-
-      const details = tokenService.getServiceDetails(2, 'gitlab')
-
-      expect(details).not.toBeNull()
-      expect(details?.access_token).toBe('gitlabtoken')
-      expect(details?.refresh_token).toBe('Qo5JZktS')
-      expect(details?.created_at).toBe(12345)
-      expect(details?.expires_in).not.toBe(undefined)
+      await expect(getWithInvalidToken()).rejects.toThrow()
     })
 
-    it('creation time should be added if expiration time exists', () => {
-      const data = {
-        access_token: 'bitbuckettoken',
-        refresh_token: 'pUMc4BLh',
-        expires_in: 7200,
+    it('fails with invalid id', async () => {
+      const tokenIsSet = await tokenService.setAccessToken(1, 'github', amandusToken, gitHubToken)
+      expect(tokenIsSet).toBe(true)
+
+      const getWithInvalidToken = async () => {
+        await tokenService.isServiceConnected(2, 'github', amandusToken)
       }
 
-      tokenService.setToken(3, 'bitbucket', data)
-
-      const details = tokenService.getServiceDetails(3, 'bitbucket')
-
-      expect(details).not.toBeNull()
-      expect(details?.access_token).toBe('bitbuckettoken')
-      expect(details?.refresh_token).toBe('pUMc4BLh')
-      expect(details?.created_at).not.toBe(undefined)
-      expect(details?.expires_in).toBe(7200)
-    })
-
-    it('if time data exists it should not be altered', () => {
-      const data = {
-        access_token: 'mysterytoken',
-        refresh_token: 'QYAg4Jdd',
-        created_at: 987654321,
-        expires_in: 8721,
-      }
-
-      tokenService.setToken(4, 'bitbucket', data)
-
-      const details = tokenService.getServiceDetails(4, 'bitbucket')
-
-      expect(details).not.toBeNull()
-      expect(details?.access_token).toBe('mysterytoken')
-      expect(details?.refresh_token).toBe('QYAg4Jdd')
-      expect(details?.created_at).toBe(987654321)
-      expect(details?.expires_in).toBe(8721)
+      await expect(getWithInvalidToken()).rejects.toThrow()
     })
   })
 
-  describe('Retrieving access token', () => {
-    it('should not return any access token if none is set', async () => {
-      const details = await tokenService.getAccessTokenByServiceAndId(
-        1,
-        'github'
-      )
+  describe('token deletation', () => {
+    it('succeeds with valid parameters', async () => {
+      const tokenIsSet = await tokenService.setAccessToken(1, 'github', amandusToken, gitHubToken)
+      expect(tokenIsSet).toBe(true)
 
-      expect(details).toBeNull()
+      const removed = await tokenService.deleteToken(1, 'github', amandusToken)
+      expect(removed).toBe(true)
+
+      const retrievedToken = await tokenService.getAccessToken(1, 'github', amandusToken)
+      expect(retrievedToken).toBeNull()
     })
 
-    it('should not return access token from different service', async () => {
-      const data1 = {
-        access_token: 'token1',
-        refresh_token: 'QYAg4Jdd',
-        expires_in: 84000,
-      }
-      const data2 = {
-        access_token: 'token2',
-        refresh_token: 'QpUMc4BLh',
-        expires_in: 7200,
+    it('fails if token does not exist', async () => {
+      const deleteNonExistingToken = async () => {
+        await tokenService.deleteToken(1, 'github', amandusToken)
       }
 
-      tokenService.setToken(3467, 'gitlab', data1)
-      tokenService.setToken(3467, 'bitbucket', data2)
-      const details = await tokenService.getAccessTokenByServiceAndId(
-        3467,
-        'github'
-      )
-
-      expect(details).toBeNull()
+      await expect(deleteNonExistingToken()).rejects.toThrow()
     })
 
-    it('all tokens should be corresponding to their service', async () => {
-      const data1 = {
-        access_token: 'kjgS7c12N',
-        refresh_token: 'QYAg4Jdd',
-        expires_in: 84000,
-      }
-      const data2 = {
-        access_token: '28Ggc4iK',
-        refresh_token: 'QpUMc4BLh',
-        expires_in: 7200,
-      }
-      const data3 = {
-        access_token: 'SnB81Szpq',
-        refresh_token: 'QpUMc4BLh',
-        expires_in: 7200,
+    it('fails with invalid amandus token', async () => {
+      const tokenIsSet = await tokenService.setAccessToken(1, 'github', amandusToken, gitHubToken)
+      expect(tokenIsSet).toBe(true)
+
+      const deleteWithInvalidToken = async () => {
+        await tokenService.deleteToken(1, 'github', 'invalid_token')
       }
 
-      tokenService.setToken(8004, 'github', data1)
-      tokenService.setToken(8004, 'gitlab', data2)
-      tokenService.setToken(8004, 'bitbucket', data3)
-      const token1 = await tokenService.getAccessTokenByServiceAndId(
-        8004,
-        'github'
-      )
-      const token2 = await tokenService.getAccessTokenByServiceAndId(
-        8004,
-        'gitlab'
-      )
-      const token3 = await tokenService.getAccessTokenByServiceAndId(
-        8004,
-        'bitbucket'
-      )
+      await expect(deleteWithInvalidToken()).rejects.toThrow()
 
-      expect(token1).toBe('kjgS7c12N')
-      expect(token2).toBe('28Ggc4iK')
-      expect(token3).toBe('SnB81Szpq')
+      const retrievedToken = await tokenService.getAccessToken(1, 'github', amandusToken)
+      expect(retrievedToken).toBe(gitHubToken.access_token)
+    })
+
+    it('fails with invalid id', async () => {
+      const tokenIsSet = await tokenService.setAccessToken(1, 'github', amandusToken, gitHubToken)
+      expect(tokenIsSet).toBe(true)
+
+      const deleteWithInvalidId = async () => {
+        await tokenService.deleteToken(2, 'github', amandusToken)
+      }
+
+      await expect(deleteWithInvalidId()).rejects.toThrow()
+
+      const retrievedToken = await tokenService.getAccessToken(1, 'github', amandusToken)
+      expect(retrievedToken).toBe(gitHubToken.access_token)
     })
   })
 
-  describe('Deleting user', () => {
-    it('User tokens should be removed', async () => {
-      const details = await tokenService.getAccessTokenByServiceAndId(
-        1,
-        'github'
-      )
+  describe('user deletation', () => {
+    it('succeeds with valid parameters', async () => {
+      const tokenIsSet = await tokenService.setAccessToken(1, 'github', amandusToken, gitHubToken)
+      expect(tokenIsSet).toBe(true)
 
-      expect(details).toBeNull()
+      const removed = await tokenService.deleteUser(1, amandusToken)
+      expect(removed).toBe(true)
+
+      const retrievedToken = await tokenService.getAccessToken(1, 'github', amandusToken)
+      expect(retrievedToken).toBeNull()
+    })
+
+    it('fails if user does not exist', async () => {
+      const deleteUser = async () => {
+        await tokenService.deleteUser(1, amandusToken)
+      }
+
+      await expect(deleteUser()).rejects.toThrow()
+
+    })
+
+    it('fails with invalid amandus token', async () => {
+      const tokenIsSet = await tokenService.setAccessToken(1, 'github', amandusToken, gitHubToken)
+      expect(tokenIsSet).toBe(true)
+
+      const deleteWithInvalidToken = async () => {
+        await tokenService.deleteUser(1, 'invalid_token')
+      }
+
+      await expect(deleteWithInvalidToken()).rejects.toThrow()
+    })
+
+    it('fails with invalid id', async () => {
+      const tokenIsSet = await tokenService.setAccessToken(1, 'github', amandusToken, gitHubToken)
+      expect(tokenIsSet).toBe(true)
+
+      const deleteWithInvalidToken = async () => {
+        await tokenService.deleteUser(2, amandusToken)
+      }
+
+      await expect(deleteWithInvalidToken()).rejects.toThrow()
     })
   })
 })

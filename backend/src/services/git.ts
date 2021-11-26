@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { AppContext, UserType } from '../types/user'
+import { AppContext } from '../types/user'
 import { StatusResult } from '../types/gitTypes'
 import { SaveArgs } from '../types/params'
 import { sanitizeBranchName } from '../utils/sanitize'
@@ -56,10 +56,11 @@ export const pullNewestChanges = async (
 
 export const cloneRepository = async (
   url: string,
-  user: UserType,
+  context: AppContext,
   cloneTo: typeof cloneRepositoryToSpecificFolder
     = cloneRepositoryToSpecificFolder
 ): Promise<void> => {
+  const user = context.currentUser
   const repoLocation = getRepoLocationFromUrlString(url, user.username)
 
   const service = getServiceNameFromUrlString(url)
@@ -67,7 +68,7 @@ export const cloneRepository = async (
     throw new Error(`Could not parse service from ${url}`);
   }
 
-  const token = await tokenService.getAccessTokenByServiceAndId(user.id, service)
+  const token = await tokenService.getAccessToken(user.id, service, context.accessToken)
   if (!token) {
     throw new Error(`Could not find token for ${service}`);
   }
@@ -75,6 +76,7 @@ export const cloneRepository = async (
   const currentService = user.services?.find(
     (s) => s.serviceName === service
   )
+
   if (!currentService?.username) {
     throw new Error(`Could not find username for ${service}`);
   }
@@ -113,9 +115,10 @@ export const saveChanges = async (
     repoLocation
   } = extractUserForCommit(firstFile.name, context)
 
-  const remoteToken = await tokenService.getAccessTokenByServiceAndId(
+  const remoteToken = await tokenService.getAccessToken(
     amandusUser.id,
-    usedService
+    usedService,
+    context.accessToken
   )
 
   const realFilenames = files.map((file) =>
@@ -175,10 +178,10 @@ export const saveMerge = async (
     repoLocation
   } = extractUserForCommit(firstFile.name, context)
 
-  //TODO fix typescript errors for this funcy func
-  const remoteToken = await tokenService.getAccessTokenByServiceAndId(
+  const remoteToken = await tokenService.getAccessToken(
     amandusUser.id,
-    usedService
+    usedService,
+    context.accessToken
   )
 
   const realFilenames = files.map((file) =>
@@ -281,7 +284,7 @@ export const resetFile = async (
   const repositoryName = getRepositoryFromFilePath(fileName)
   const realFilename = getFileNameFromFilePath(fileName, repositoryName)
   const gitObject = getGitObject(repoLocation)
-  return resetSingleFile(gitObject, realFilename)
+  return await resetSingleFile(gitObject, realFilename)
 }
 
 export const resetAll = async (

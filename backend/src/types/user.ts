@@ -14,6 +14,8 @@ export type ContextTokens = {
 
 export interface AppContext extends ContextTokens {
   currentUser: UserType
+  accessToken: string,
+  refreshToken: string
 }
 
 export interface UserRecord {
