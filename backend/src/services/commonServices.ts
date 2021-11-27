@@ -16,30 +16,37 @@ export const getRepoList = (
   service: ServiceUser,
   token: string
 ): Promise<ServiceRepository[] | ServiceRepository> => {
+
   return fetch(`${service.reposurl}`, {
     headers: {
       Authorization: `Bearer ${token}`
     },
   })
-    .then<ServiceRepository[] | ServiceRepository>((res) => res.json())
-    .catch((error: Error) => {
-      throw new Error(error.message)
+    .then<ServiceRepository[] | ServiceRepository>(res => {
+      return res.json().then(data => {
+        if (!res.ok) throw new Error((data as { message: string }).message)
+        // add checks for data format
+        else return data as ServiceRepository[] | ServiceRepository
+      })
+    })
+    .catch(e => {
+      throw new Error((e as Error).message)
     })
 }
 export const requestServiceUser = async (
   service: string,
   code: string
-  ): Promise<ServiceUserResponse> => {
+): Promise<ServiceUserResponse> => {
 
-  if(service === 'github'){
+  if (service === 'github') {
     return await requestGithubUser(code, fetch)
   }
 
-  if(service === 'bitbucket'){
+  if (service === 'bitbucket') {
     return await requestBitbucketUser(code, fetch)
   }
 
-  if(service === 'gitlab'){
+  if (service === 'gitlab') {
     return await requestGitLabUser(code, fetch)
   }
 

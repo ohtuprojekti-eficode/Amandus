@@ -27,26 +27,29 @@ const corsOptions = {
 const server = new ApolloServer({
   schema,
   context: async ({ req, res }) => {
-    const accessToken: any = req && req.headers['x-access-token']
-    const refreshToken: any = req && req.headers['x-refresh-token']
+    const accessTokenHeader: any = req && req.headers['x-access-token']
+    const refreshTokenHeader: any = req && req.headers['x-refresh-token']
 
-    if (!accessToken || !refreshToken) return
+    if (!accessTokenHeader || !refreshTokenHeader) return
 
     try {
       // client is accessing with non-expired access token...
-      const decodedAccessToken = <UserJWT>verify(accessToken, config.JWT_SECRET)
+      const decodedAccessToken = <UserJWT>verify(accessTokenHeader, config.JWT_SECRET)
       if (!decodedAccessToken.id) return
 
       const currentUser = await User.getUserById(decodedAccessToken.id)
       if (!currentUser) return
 
-      return { currentUser }
+      const accessToken = accessTokenHeader as string
+      const refreshToken = refreshTokenHeader as string
+
+      return { currentUser, accessToken, refreshToken }
     } catch (e) {
       if (e instanceof jwt.TokenExpiredError) {
         // trying to access with expired access token...
         try {
           const decodedRefreshToken = <UserJWT>(
-            verify(refreshToken, config.JWT_SECRET)
+            verify(refreshTokenHeader, config.JWT_SECRET)
           )
           if (!decodedRefreshToken.id) return
 
@@ -66,7 +69,10 @@ const server = new ApolloServer({
             'x-refresh-token': newTokens.refreshToken,
           })
 
-          return { currentUser }
+          const accessToken = newTokens.accessToken
+          const refreshToken = newTokens.refreshToken
+
+          return { currentUser, accessToken, refreshToken }
         } catch (e) {
           // client is accessing with expired access token and refresh token...
           if (e instanceof jwt.TokenExpiredError) return
@@ -89,6 +95,12 @@ app.get('/onig', (_req, res) => {
   res.setHeader('content-type', 'application/wasm')
   res.send(wasmFile)
 })
+
+if (process.env.NODE_ENV === 'e2etest') {
+  app.post('/reset', (_req, res) => {
+    void User.deleteAll().then(() => res.status(204).send())
+  })
+}
 
 if (
   process.env.NODE_ENV === 'production' ||

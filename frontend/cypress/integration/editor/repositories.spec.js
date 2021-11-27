@@ -1,6 +1,7 @@
 describe('When visiting the repositories page, as a user', () => {
   beforeEach(() => {
-    cy.deleteUser('testuser')
+    cy.resetUsers()
+    cy.resetTokens()
     cy.createUserAndLogin('testuser', 'testuser@testus.er', 'Testi123!')
   })
   it('I can see appropriate message when I am logged in but not connected to any services', () => {

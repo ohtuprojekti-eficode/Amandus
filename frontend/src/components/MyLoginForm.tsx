@@ -79,7 +79,7 @@ const MyLoginForm = () => {
       localStorage.setItem('amandus-user-access-token', loginResponse.data.login.accessToken)
       localStorage.setItem('amandus-user-refresh-token', loginResponse.data.login.refreshToken)
 
-      window.location.href = '/'
+      window.location.href = '/connections'
     } catch (error) {
       setFormStatus(formStatusProps.error)
     }

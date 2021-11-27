@@ -1,4 +1,5 @@
 export type ServiceName = 'github' | 'bitbucket' | 'gitlab'
+export type QueryType = 'state' | 'token'
 
 export interface UserJWT {
   id: number
@@ -8,19 +9,22 @@ export interface UserJWT {
   gitlabToken?: string
 }
 
-export interface GetRequestContent {
+export interface RequestContent {
   id: number
+  amandusToken: string
+}
+
+export interface GetRequestContent extends RequestContent {
   serviceName: ServiceName
-  amandusToken: string
+  queryType: QueryType
 }
 
-export interface DeleteRequestContent {
-  id: number
-  serviceName?: ServiceName
-  amandusToken: string
+export interface DeleteRequestContent extends RequestContent {
+  serviceName: ServiceName
 }
 
-export interface PostRequestContent extends GetRequestContent {
+export interface PostRequestContent extends RequestContent {
+  serviceName: ServiceName
   serviceToken: AccessTokenResponse
 }
 

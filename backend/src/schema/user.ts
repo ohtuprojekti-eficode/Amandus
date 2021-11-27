@@ -53,28 +53,29 @@ const resolvers = {
     ): UserType | undefined => {
       return context.currentUser
     },
-    isGithubConnected: (
+    isGithubConnected: async (
       _root: unknown,
       _args: unknown,
       context: AppContext
-    ): boolean => {
-      return tokenService.isServiceConnected(context.currentUser.id, 'github')
+    ): Promise<boolean> => {
+      return await tokenService.isServiceConnected(context.currentUser.id, 'github', context.accessToken)
     },
-    isGitLabConnected: (
+    isGitLabConnected: async (
       _root: unknown,
       _args: unknown,
       context: AppContext
-    ): boolean => {
-      return tokenService.isServiceConnected(context.currentUser.id, 'gitlab')
+    ): Promise<boolean> => {
+      return await tokenService.isServiceConnected(context.currentUser.id, 'gitlab', context.accessToken)
     },
-    isBitbucketConnected: (
+    isBitbucketConnected: async (
       _root: unknown,
       _args: unknown,
       context: AppContext
-    ): boolean => {
-      return tokenService.isServiceConnected(
+    ): Promise<boolean> => {
+      return await tokenService.isServiceConnected(
         context.currentUser.id,
-        'bitbucket'
+        'bitbucket',
+        context.accessToken
       )
     },
     githubLoginUrl: (): string => {
@@ -162,13 +163,16 @@ const resolvers = {
         throw new UserInputError(`${service} code not provided`)
       }
 
+      //TODO: rename requestServiceUser, as it returns user and token, not just user
       const serviceUserResponse = await requestServiceUser(service, args.code)
 
-      tokenService.setToken(
+      await tokenService.setAccessToken(
         context.currentUser.id,
         service,
+        context.accessToken,
         serviceUserResponse.response
       )
+
       const serviceUser = serviceUserResponse.serviceUser
       const tokens = createTokens(context.currentUser)
 
@@ -225,7 +229,7 @@ const resolvers = {
     deleteUser: async (
       _root: unknown,
       args: UserType,
-      _context: AppContext
+      context: AppContext
     ): Promise<void> => {
       const { username } = args
 
@@ -233,8 +237,19 @@ const resolvers = {
         throw new UserInputError('User not valid')
       }
       const user = await User.findUserByUsername(username)
-      user?.id && tokenService.deleteTokenByUserId(user.id)
+
+      if (!user?.id) {
+        throw new Error('Did not receive user id for user removal')
+      }
+
       await User.deleteUser(username)
+
+      try {
+        await tokenService.deleteUser(user.id, context.accessToken)
+      } catch (e) {
+        console.log('encountered error while attempting to delete user tokens')
+        console.log((e as Error).message)
+      }
     },
     updateUser: async (
       _root: unknown,

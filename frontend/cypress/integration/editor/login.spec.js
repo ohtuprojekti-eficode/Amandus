@@ -51,6 +51,8 @@ describe('When visiting the login page, as a user', () => {
     
     cy.contains(`Hello, ${username}`)
     cy.contains(`Logout`)
+    cy.contains('Connections')
+
   })
 
 })
