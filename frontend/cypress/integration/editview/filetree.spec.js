@@ -1,6 +1,7 @@
 describe('When opening repository for editing', () => {
   beforeEach(() => {
-    cy.deleteUser('testuser')
+    cy.resetUsers()
+    cy.resetTokens()
     cy.createUserAndLogin('testuser', 'testuser@testus.er', 'Testi123!')
     cy.resetRepoState()
     cy.openRepositoryToEditor()
