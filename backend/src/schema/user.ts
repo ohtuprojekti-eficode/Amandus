@@ -306,7 +306,7 @@ const resolvers = {
         }
       }
 
-      return 'Succesfully updated'
+      return 'Successfully updated'
     },
   },
 }
