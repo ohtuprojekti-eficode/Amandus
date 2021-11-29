@@ -47,6 +47,7 @@ export interface MiscSettingObject {
   name: string
   value: number
   unit: string 
+  active: boolean
 }
 
 export interface PluginSettingObject {

@@ -4,10 +4,10 @@ export const DEFAULT_SETTINGS = {
             {
                 "name": "Autosave Interval",
                 "value": 1000,
-                "unit": "ms"
+                "unit": "ms",
+                "active": true
             }
         ],
-    
         "plugins": [
             {
                 "name": "robot-language-server",

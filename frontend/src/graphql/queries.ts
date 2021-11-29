@@ -97,7 +97,8 @@ export const GET_SETTINGS = gql`
       misc {
         name, 
         value, 
-        unit
+        unit,
+        active
       }
       plugins {
         name,

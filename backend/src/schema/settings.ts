@@ -17,6 +17,7 @@ const typeDef = `
       name: String!
       value: Int!
       unit: String
+      active: Boolean
     }
     type PluginSetting {
       name: String!
@@ -26,6 +27,7 @@ const typeDef = `
       name: String!
       value: Int!
       unit: String!
+      active: Boolean
     }
     input Pinput {
       name: String!
@@ -61,6 +63,7 @@ const resolvers = {
         throw new ApolloError('Could not save settings')
       }
       return 'Saved!'
+
     },
   },
 }
