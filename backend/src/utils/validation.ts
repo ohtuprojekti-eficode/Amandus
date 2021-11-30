@@ -1,7 +1,8 @@
 import { RegisterUserInput, UpdateUserInput } from '../types/params'
 import validator from 'validator'
 
-const usernameErrors = (username: string) => {
+const usernameErrors = (username: string | null) => {
+  if (username === undefined || username === null) return []
   const errors: string[] = []
   if (username.length === 0) {
     errors.push('Username can not be empty')
@@ -55,11 +56,11 @@ export const validateUserArgs = ({
 }
 
 export const validateUserUpdateArgs = ({
-  username,
+  newUsername,
   newPassword,
   newEmail,
 }: UpdateUserInput): { errorMessage: string, validationFailed: boolean } => {
-  const errors = [...usernameErrors(username), ...passwordErrors(newPassword), ...emailErrors(newEmail)]
+  const errors = [...usernameErrors(newUsername), ...passwordErrors(newPassword), ...emailErrors(newEmail)]
   if (errors.length > 0) {
     return { errorMessage: errors[0], validationFailed: true }
   }

@@ -8,6 +8,10 @@ import { server } from '../index'
 import User from '../model/user'
 import { createTokens } from '../utils/tokens'
 import tokenService from '../services/token'
+import bcrypt from 'bcryptjs'
+import { existsSync } from 'fs'
+import config from '../utils/config'
+const repositoriesDir = config.REPONAME
 
 const ADD_SERVICE = gql`
   mutation connectGitService($service: AddServiceArgs!) {
@@ -55,7 +59,23 @@ const LOGIN = gql`
     }
   }
 `
-
+const UPDATE_USER = gql`
+  mutation updateUser(
+    $username: String!,
+    $newUsername: String,
+    $newPassword: String,
+    $newEmail: String,
+    $newUserRole: String
+  ){
+    updateUser(
+      username: $username,
+      newUsername: $newUsername,
+      newPassword: $newPassword,
+      newEmail: $newEmail,
+      newUserRole: $newUserRole
+    )
+  }
+`
 describe('User schema register mutations', () => {
   beforeEach(async () => {
     await User.deleteAll()
@@ -605,6 +625,225 @@ describe('isGithubConnected', () => {
     })
   })
 })
+describe('updateUser', () => {
+  beforeEach(async () => {
+    await User.deleteAll()
+  })
+  it('if user is not logged in, error is thrown', async () => {
+    const { mutate } = createNormalTestClient(server)
+    const res = await mutate({
+      mutation: UPDATE_USER,
+      variables: {
+        username: 'testuser2',
+        newEmail: 'testi@testi.com',
+        newUsername: 'testuser33',
+        newUserRole: 'non-admin',
+        newPassword: 'Testi123!', 
+      },
+    })
+    const errorFound = res.errors?.some(
+      (error) => error.message === 'You have to login'
+    )
+    expect(errorFound).toBeTruthy()
+  })
+
+  it('non-admin can edit own account details and the details change in db and backend', async () => {
+    const userToSave = {
+      username: 'testuser_oldname',
+      password: 'mypAssword?45',
+      email: 'test@test.fi',
+    }
+    const user = await User.registerUser(userToSave)
+    const tokens = createTokens(user)
+
+    const { mutate } = createIntegrationTestClient({
+      apolloServer: server,
+      extendMockRequest: {
+        headers: {
+          'x-access-token': tokens.accessToken,
+          'x-refresh-token': tokens.refreshToken,
+        },
+      },
+    })
+    const res = await mutate(UPDATE_USER, {
+      variables: {
+        username: 'testuser_oldname',
+        newEmail: 'testi@testi.com',
+        newUsername: 'testuser_newname',
+        newPassword: 'Testi123!', 
+      },
+    })
+    expect(res).toStrictEqual({"data": {"updateUser": "Successfully updated"}})
+
+    const userAfterMutation = await User.findUserByUsername('testuser_newname')
+    expect(userAfterMutation).toBeTruthy()
+    expect(userAfterMutation?.email).toBe('testi@testi.com')
+
+    const passwordMatch = await bcrypt.compare(
+      'Testi123!',
+      userAfterMutation?.password || ''
+    )
+    expect(passwordMatch).toBe(true)
+
+    const oldReposLocation = `./${repositoriesDir}/testuser_oldname/`
+    const newReposLocation = `./${repositoriesDir}/testuser_newname/`
+    expect(!existsSync(oldReposLocation))
+    expect(existsSync(newReposLocation))
+  })
+  
+  it('non-admin cannot edit other users details or own admin status', async () => {
+    const user = await User.registerUser({
+      username: 'testuser',
+      password: 'mypAssword?45',
+      email: 'test@test.fi',
+    })
+
+    await User.registerUser({
+      username: 'testuser2',
+      password: 'mypAssword?45',
+      email: 'test@test.fi',
+    })
+
+    const tokens = createTokens(user)
+
+    const { mutate } = createIntegrationTestClient({
+      apolloServer: server,
+      extendMockRequest: {
+        headers: {
+          'x-access-token': tokens.accessToken,
+          'x-refresh-token': tokens.refreshToken,
+        },
+      },
+    })
+
+    const res = await mutate(UPDATE_USER, {
+      variables: {
+        username: 'testuser2',
+        newEmail: 'testi@testi.com',
+        newUsername: 'testuser33',
+        newPassword: 'Testi123!', 
+      },
+    })
+    expect(res).toHaveProperty('errors')
+
+    const res2 = await mutate(UPDATE_USER, {
+      variables: {
+        username: 'testuser',
+        newUserRole: 'admin'
+      },
+    })
+    expect(res2).toHaveProperty('errors')
+  })
+
+  it('admin can edit other users details and role', async () => {
+    const adminUser = await User.registerAdmin({
+      username: 'testuser',
+      password: 'mypAssword?45',
+      email: 'test@test.fi',
+    })
+
+    await User.registerUser({
+      username: 'testuser2',
+      password: 'mypAssword?45',
+      email: 'test@test.fi',
+    })
+
+    const tokens = createTokens(adminUser)
+
+    const { mutate } = createIntegrationTestClient({
+      apolloServer: server,
+      extendMockRequest: {
+        headers: {
+          'x-access-token': tokens.accessToken,
+          'x-refresh-token': tokens.refreshToken,
+        },
+      },
+    })
+
+    const res = await mutate(UPDATE_USER, {
+      variables: {
+        username: 'testuser2',
+        newEmail: 'testi@testi.com',
+        newUsername: 'testuser33',
+        newPassword: 'Testi123!', 
+        newUserRole: 'admin'
+      },
+    })
+    expect(res).toStrictEqual({"data": {"updateUser": "Successfully updated"}})
+    const userAfterMutation = await User.findUserByUsername('testuser33')
+    expect(userAfterMutation).toBeTruthy()
+    expect(userAfterMutation?.email).toBe('testi@testi.com')
+    expect(userAfterMutation?.user_role).toBe('admin')
+
+    const passwordMatch = await bcrypt.compare(
+      'Testi123!',
+      userAfterMutation?.password || ''
+    )
+    expect(passwordMatch).toBe(true)
+  })
+
+  it('invalid args throw errors', async () => {
+    const user = await User.registerAdmin({
+      username: 'testuser',
+      password: 'mypAssword?45',
+      email: 'test@test.fi',
+    })
+
+    const tokens = createTokens(user)
+
+    const { mutate } = createIntegrationTestClient({
+      apolloServer: server,
+      extendMockRequest: {
+        headers: {
+          'x-access-token': tokens.accessToken,
+          'x-refresh-token': tokens.refreshToken,
+        },
+      },
+    })
+    
+    let res
+    res = await mutate(UPDATE_USER, {
+      variables: {
+        username: 'nosuchusername',
+        newEmail: 'testi@testi.com',
+      },
+    })
+    expect(res).toHaveProperty('errors')
+
+    res = await mutate(UPDATE_USER, {
+      variables: {
+        username: 'testuser',
+        newEmail: 'thisisnotemail',
+      },
+    })
+    expect(res).toHaveProperty('errors')
+
+    res = await mutate(UPDATE_USER, {
+      variables: {
+        username: 'testuser',
+        newUsername: '',
+      },
+    })
+    expect(res).toHaveProperty('errors')
+
+    res = await mutate(UPDATE_USER, {
+      variables: {
+        username: 'testuser',
+        newPassword: 'notgood',
+      },
+    })
+    expect(res).toHaveProperty('errors')
+
+    res = await mutate(UPDATE_USER, {
+      variables: {
+        username: 'testuser',
+        newUserRole: 'ylijumala',
+      },
+    })
+    expect(res).toHaveProperty('errors')
+  })
+})
+
 afterAll(async () => {
   await closePool()
 })
