@@ -99,6 +99,7 @@ const SettingsPage = ({ user }: Props) => {
   
   const [saveSettings] = useMutation(SAVE_SETTINGS)
 
+
   // Hides view from users that are not admins.
   /*
   if (user?.user_role !== 'admin') {
@@ -126,7 +127,7 @@ const SettingsPage = ({ user }: Props) => {
     
     setSaved(true)
     setTimeout(() => {
-      window.location.reload()
+      window.location.reload(false)
     }, 500)
   }
 
