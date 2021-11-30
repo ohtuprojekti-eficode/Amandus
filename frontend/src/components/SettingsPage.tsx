@@ -143,7 +143,7 @@ const SettingsPage = ({ user }: Props) => {
     setSaved(true)
     setTimeout(() => {
       window.location.reload()
-    }, 700)
+    }, 500)
   }
 
   const handleCallback = ( name: string, value: boolean | number ) => {
@@ -153,15 +153,15 @@ const SettingsPage = ({ user }: Props) => {
     const altPlugins = settings.plugins.map(p =>
         p.name === name ? {...p, active: value} : p
       )
-    //@ts-ignore
-    setSettings({ settings: {...settings, plugins: altPlugins}})
+    
+    setSettings({ settings: {...settings, plugins: altPlugins as PluginSettingObject[]}})
 
     const altMiscs = settings.misc.map(m => 
       m.name === name ? 
         typeof value == "boolean" ? {...m, active: value} : {...m, value: value} 
       : m
     )
-    //@ts-ignore
+
     setSettings({ settings: {...settings, misc: altMiscs}})
 
     console.log(settings)
