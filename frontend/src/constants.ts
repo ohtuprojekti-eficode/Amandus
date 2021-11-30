@@ -4,7 +4,9 @@ export const DEFAULT_SETTINGS = {
             {
                 "name": "Autosave Interval",
                 "value": 1000,
-                "unit": "ms"
+                "unit": "ms",
+                "min": 500,
+                "max": 60000
             }
         ],
     

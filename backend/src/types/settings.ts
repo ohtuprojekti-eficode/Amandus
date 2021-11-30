@@ -8,7 +8,9 @@ export interface SettingsObject {
 export interface MiscSettingObject {
   name: string
   value: number
-  unit: string 
+  unit: string
+  min?: number
+  max?: number
 }
 
 export interface PluginSettingObject {

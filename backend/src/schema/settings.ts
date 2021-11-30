@@ -17,6 +17,8 @@ const typeDef = `
       name: String!
       value: Int!
       unit: String
+      min: Int
+      max: Int
     }
     type PluginSetting {
       name: String!
