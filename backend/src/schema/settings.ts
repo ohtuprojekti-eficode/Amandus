@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { ApolloError } from 'apollo-server'
-import { SETTINGS } from '../constants'
+import { readSettings } from '../constants'
 import { SettingsObject, MiscSettingObject, PluginSettingObject } from '../types/settings'
 import { writeFileSync } from 'fs'
 
@@ -44,7 +44,7 @@ const resolvers = {
     getSettings: (
       _root: unknown,
     ): SettingsObject => {
-      return <SettingsObject>SETTINGS
+      return <SettingsObject> JSON.parse(readSettings())
     },
   },
 
