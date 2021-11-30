@@ -1,7 +1,9 @@
 {
   "env": {
     "HOST": "http://localhost:3001",
-    "GRAPHQL_URI": "http://localhost:3001/graphql"
+    "GRAPHQL_URI": "http://localhost:3001/graphql",
+    "BACKEND_URI": "http://localhost:3001",
+    "TOKENSERVICE_URI": "http://localhost:3002"
   },
   "defaultCommandTimeout": 15000
 }

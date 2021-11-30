@@ -106,13 +106,14 @@ const Header = ({ user, logout, theme, toggleTheme }: Props) => {
                 Delete Account
               </Link>
             )}
-            {user && (<Link
-              component={RouterLink}
-              className={classes.linkBtnTransparent}
-              to="/settings"
-            >
-              Settings
-            </Link>
+            {user && (
+              <Link
+                component={RouterLink}
+                className={classes.linkBtnTransparent}
+                to="/settings"
+              >
+                Settings
+              </Link>
             )}
           </div>
           <Switch

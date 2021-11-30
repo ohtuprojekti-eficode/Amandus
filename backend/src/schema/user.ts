@@ -5,11 +5,12 @@ import User from '../model/user'
 import Service from '../model/service'
 import { createTokens } from '../utils/tokens'
 import config from '../utils/config'
-import { validateUserArgs } from '../utils/validation'
+import { validateUserArgs, validateUserUpdateArgs } from '../utils/validation'
 import {
   RegisterUserInput,
   LoginUserInput,
   AddServiceArgs,
+  UpdateUserInput,
 } from '../types/params'
 import { UserType, AppContext } from '../types/user'
 import { ServiceAuthCode, ServiceAuthResponse } from '../types/service'
@@ -18,6 +19,9 @@ import { Tokens } from '../types/tokens'
 
 import tokenService from '../services/token'
 import { requestServiceUser } from '../services/commonServices'
+import fs from 'fs'
+
+const repositoriesDir = config.REPONAME
 
 const typeDef = `
     enum ServiceName {
@@ -49,28 +53,29 @@ const resolvers = {
     ): UserType | undefined => {
       return context.currentUser
     },
-    isGithubConnected: (
+    isGithubConnected: async (
       _root: unknown,
       _args: unknown,
       context: AppContext
-    ): boolean => {
-      return tokenService.isServiceConnected(context.currentUser.id, 'github')
+    ): Promise<boolean> => {
+      return await tokenService.isServiceConnected(context.currentUser.id, 'github', context.accessToken)
     },
-    isGitLabConnected: (
+    isGitLabConnected: async (
       _root: unknown,
       _args: unknown,
       context: AppContext
-    ): boolean => {
-      return tokenService.isServiceConnected(context.currentUser.id, 'gitlab')
+    ): Promise<boolean> => {
+      return await tokenService.isServiceConnected(context.currentUser.id, 'gitlab', context.accessToken)
     },
-    isBitbucketConnected: (
+    isBitbucketConnected: async (
       _root: unknown,
       _args: unknown,
       context: AppContext
-    ): boolean => {
-      return tokenService.isServiceConnected(
+    ): Promise<boolean> => {
+      return await tokenService.isServiceConnected(
         context.currentUser.id,
-        'bitbucket'
+        'bitbucket',
+        context.accessToken
       )
     },
     githubLoginUrl: (): string => {
@@ -158,13 +163,16 @@ const resolvers = {
         throw new UserInputError(`${service} code not provided`)
       }
 
-      const serviceUserResponse = await requestServiceUser(service, args.code)    
+      //TODO: rename requestServiceUser, as it returns user and token, not just user
+      const serviceUserResponse = await requestServiceUser(service, args.code)
 
-      tokenService.setToken(
+      await tokenService.setAccessToken(
         context.currentUser.id,
         service,
+        context.accessToken,
         serviceUserResponse.response
       )
+
       const serviceUser = serviceUserResponse.serviceUser
       const tokens = createTokens(context.currentUser)
 
@@ -221,7 +229,7 @@ const resolvers = {
     deleteUser: async (
       _root: unknown,
       args: UserType,
-      _context: AppContext
+      context: AppContext
     ): Promise<void> => {
       const { username } = args
 
@@ -229,8 +237,76 @@ const resolvers = {
         throw new UserInputError('User not valid')
       }
       const user = await User.findUserByUsername(username)
-      user?.id && tokenService.deleteTokenByUserId(user.id)
+
+      if (!user?.id) {
+        throw new Error('Did not receive user id for user removal')
+      }
+
       await User.deleteUser(username)
+
+      try {
+        await tokenService.deleteUser(user.id, context.accessToken)
+      } catch (e) {
+        console.log('encountered error while attempting to delete user tokens')
+        console.log((e as Error).message)
+      }
+    },
+    updateUser: async (
+      _root: unknown,
+      args: UpdateUserInput,
+      context: AppContext
+    ): Promise<string> => {
+      // auth
+      if (!context.currentUser) {
+        throw new ForbiddenError('You have to login')
+      }
+
+      if (
+        context.currentUser.username !== args.username &&
+        context.currentUser.user_role !== 'admin'
+      ) {
+        throw new ForbiddenError('You have no permission to edit other users')
+      }
+
+      // validations
+      if (!(await User.findUserByUsername(args.username))) {
+        throw new UserInputError(`No such a user: ${args.username}`)
+      }
+
+      const { validationFailed, errorMessage } = validateUserUpdateArgs(args)
+      if (validationFailed) {
+        throw new UserInputError(errorMessage)
+      }
+
+      // updates
+      if (args.newUserRole) {
+        if (context.currentUser.user_role !== 'admin') {
+          throw new ForbiddenError('You have no permission to change roles')
+        }
+        await User.updateUserRole(args.username, args.newUserRole)
+      }
+
+      if (args.newPassword) {
+        await User.updatePassword(args.username, args.newPassword)
+      }
+
+      if (args.newEmail) {
+        await User.updateEmail(args.username, args.newEmail)
+      }
+
+      if (args.newUsername) {
+        await User.updateUsername(args.username, args.newUsername)
+
+        const currentReposLocation = `./${repositoriesDir}/${args.username}/`
+        const newReposLocation = `./${repositoriesDir}/${args.newUsername}/`
+        if (fs.existsSync(currentReposLocation)) {
+          fs.rename(currentReposLocation, newReposLocation, (err) => {
+            if (err) throw err
+          })
+        }
+      }
+
+      return 'Successfully updated'
     },
   },
 }

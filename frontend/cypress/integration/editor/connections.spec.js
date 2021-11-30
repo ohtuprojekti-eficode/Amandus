@@ -1,6 +1,7 @@
 describe('When visiting the connections page, as a user', () => {
   beforeEach(() => {
-    cy.deleteUser('testuser')
+    cy.resetUsers()
+    cy.resetTokens()
     cy.createUserAndLogin('testuser', 'testuser@testus.er', 'Testi123!')
   })
   it('I can see title "Connections" when I am logged in', () => {

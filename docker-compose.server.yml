@@ -23,6 +23,22 @@ services:
       - JWT_SECRET=
       - PORT=
       - DATABASE_URL=
+      - TOKEN_SERVICE_URL=
+
+  tokenservice:
+    image: ''
+    restart: always
+    ports:
+      - ':'
+    environment:
+      - GL_CLIENT_ID=
+      - GL_CLIENT_SECRET=
+      - GL_CB_URL=
+      - JWT_SECRET=
+      - PORT=
+      - BB_CLIENT_ID=
+      - BB_CLIENT_SECRET=
+      - BB_CB_URL=
 
   userdata:
     image: 'postgres'

@@ -1,6 +1,8 @@
 {
-    "env": {
-        "HOST": "http://localhost:3000",
-        "GRAPHQL_URI": "http://localhost:3001/graphql"
-      }
+  "env": {
+    "HOST": "http://localhost:3000",
+    "GRAPHQL_URI": "http://localhost:3001/graphql",
+    "BACKEND_URI": "http://localhost:3001",
+    "TOKENSERVICE_URI": "http://localhost:3002"
+  }
 }

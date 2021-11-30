@@ -7,7 +7,6 @@ import { closePool } from '../db/connect'
 import { server } from '../index'
 import User from '../model/user'
 import { createTokens } from '../utils/tokens'
-import { v4 as uuid } from 'uuid'
 import tokenService from '../services/token'
 
 const ADD_SERVICE = gql`
@@ -122,7 +121,7 @@ describe('User schema register mutations', () => {
 
     const errorFound = res.errors?.some(
       (error) =>
-        error.message === 'Username, email or password can not be empty'
+        error.message === 'Username can not be empty'
     )
     expect(errorFound).toBeTruthy()
   })
@@ -141,7 +140,7 @@ describe('User schema register mutations', () => {
 
     const errorFound = res.errors?.some(
       (error) =>
-        error.message === 'Username, email or password can not be empty'
+        error.message === 'Password can not be empty'
     )
 
     expect(errorFound).toBeTruthy()
@@ -155,14 +154,15 @@ describe('User schema register mutations', () => {
       variables: {
         username: 'testuser2',
         email: '',
-        password: 'mypassword',
+        password: 'mypAssword?45',
       },
     })
-
+    
     const errorFound = res.errors?.some(
       (error) =>
-        error.message === 'Username, email or password can not be empty'
+        error.message === 'Email can not be empty'
     )
+    void errorFound
     expect(errorFound).toBeTruthy()
   })
 })
@@ -555,7 +555,7 @@ describe('isGithubConnected', () => {
 
     const user = await User.registerUser(userToSave)
     const frontendJWTs = createTokens(user)
-    tokenService.setToken(user.id, 'github', { access_token: uuid() })
+    await tokenService.setAccessToken(user.id, 'github', frontendJWTs.accessToken, { access_token: 'gh_token' })
 
     const { query } = createIntegrationTestClient({
       apolloServer: server,

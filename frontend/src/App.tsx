@@ -1,3 +1,4 @@
+import Notification from './components/Notification/Notification'
 import React, { useState } from 'react'
 import { Route } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
@@ -18,6 +19,7 @@ import { useLocation } from 'react-router-dom'
 import CallBack from './components/auth/CallBack'
 import SettingsPage from './components/SettingsPage'
 import SettingsProvider from './components/SettingsProvider'
+import NotificationProvider from './components/Notification/NotificationProvider'
 
 interface LocationState {
   cloneUrl: string
@@ -28,7 +30,8 @@ const App = () => {
   const location = useLocation<LocationState>()
   const [cloneUrl, setCloneUrl] = useState<string | undefined>(undefined)
 
-  if (location.state?.cloneUrl && location.state.cloneUrl !== cloneUrl) setCloneUrl(location.state.cloneUrl)
+  if (location.state?.cloneUrl && location.state.cloneUrl !== cloneUrl)
+    setCloneUrl(location.state.cloneUrl)
 
   const defaultTheme = 'light'
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
@@ -45,9 +48,7 @@ const App = () => {
     localStorage.setItem('theme', newTheme)
   }
 
-  const appliedTheme = createTheme(
-    theme === 'light' ? lightTheme : darkTheme
-  )
+  const appliedTheme = createTheme(theme === 'light' ? lightTheme : darkTheme)
 
   const logout = () => {
     localStorage.removeItem('amandus-user-access-token')
@@ -59,62 +60,57 @@ const App = () => {
     <div>
       <SettingsProvider>
         <ThemeProvider theme={appliedTheme}>
-          <CssBaseline />
-          <Header
-            user={user?.me}
-            logout={logout}
-            theme={theme}
-            toggleTheme={toggleTheme}
-          />
-          <div>
-            <Toolbar />
+          <NotificationProvider>
+            <CssBaseline />
+            <Notification />
+            <Header
+              user={user?.me}
+              logout={logout}
+              theme={theme}
+              toggleTheme={toggleTheme}
+            />
+            <div>
+              <Toolbar />
 
-            <Route exact path="/">
-              <Home />
-            </Route>
+              <Route exact path="/">
+                <Home />
+              </Route>
 
-            <Route exact path="/auth/github/callback">
-              <CallBack
-                service={'github'} />
-            </Route>
-            <Route exact path="/auth/gitlab/callback">
-              <CallBack
-                service={'gitlab'} />
-            </Route>
+              <Route exact path="/auth/github/callback">
+                <CallBack service={'github'} />
+              </Route>
+              <Route exact path="/auth/gitlab/callback">
+                <CallBack service={'gitlab'} />
+              </Route>
 
-            <Route exact path="/auth/bitbucket/callback">
-              <CallBack
-                service={'bitbucket'} />
-            </Route>
+              <Route exact path="/auth/bitbucket/callback">
+                <CallBack service={'bitbucket'} />
+              </Route>
 
-            <Route path="/edit">
-              <EditView
-                cloneUrl={cloneUrl} />
-            </Route>
+              <Route path="/edit">
+                <EditView cloneUrl={cloneUrl} />
+              </Route>
 
-            <Route exact path="/repositories">
-              <RepositoriesView />
-            </Route>
+              <Route exact path="/repositories">
+                <RepositoriesView />
+              </Route>
 
-            <Route exact path="/connections">
-              <Connections />
-            </Route>
+              <Route exact path="/connections">
+                <Connections />
+              </Route>
 
-            <Route exact path="/deleteAccount">
-              <DeleteAccount
-                user={user?.me}
-              />
-            </Route>
+              <Route exact path="/deleteAccount">
+                <DeleteAccount user={user?.me} />
+              </Route>
 
-            <Route exact path="/settings">
-              <SettingsPage
-                user={user?.me}
-              />
-            </Route>
+              <Route exact path="/settings">
+                <SettingsPage user={user?.me} />
+              </Route>
 
-            <Route exact path="/register" component={RegisterForm} />
-            <Route exact path="/login" component={MyLoginForm} />
-          </div>
+              <Route exact path="/register" component={RegisterForm} />
+              <Route exact path="/login" component={MyLoginForm} />
+            </div>
+          </NotificationProvider>
         </ThemeProvider>
       </SettingsProvider>
     </div>

@@ -25,6 +25,9 @@ const DATABASE_URL =
     ? process.env.DATABASE_URL_TEST
     : process.env.DATABASE_URL
 
+const TOKEN_SERVICE_URL = process.env.NODE_ENV === 'test'
+  ? 'http://localhost:3002'
+  : process.env.TOKEN_SERVICE_URL
 const REPONAME =
   process.env.NODE_ENV == 'test' || process.env.NODE_ENV == 'e2etest'
     ? 'testRepositories'
@@ -43,5 +46,6 @@ export default {
   GITLAB_CLIENT_SECRET,
   GITLAB_CB_URL,
   DATABASE_URL,
+  TOKEN_SERVICE_URL,
   REPONAME,
 }
