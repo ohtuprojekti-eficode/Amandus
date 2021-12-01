@@ -127,7 +127,7 @@ const SettingsPage = ({ user }: Props) => {
     
     setSaved(true)
     setTimeout(() => {
-      window.location.reload(false)
+      window.location.reload()
     }, 500)
   }
 
