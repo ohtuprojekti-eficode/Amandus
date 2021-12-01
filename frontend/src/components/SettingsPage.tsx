@@ -221,7 +221,10 @@ const SettingsPage = ({ user }: Props) => {
         Save settings
       </Button>
       <p>
-        {changesMade ? 'Settings changed. Please save.' : ''}
+        {flag ? 'Invalid input value.' : '' } 
+      </p>
+      <p>
+        {changesMade && !flag ? 'Settings changed. Please save.' : ''}
       </p>
       <p>
         {saved ? 'Saved successfully. Refreshing page...' : ''}
