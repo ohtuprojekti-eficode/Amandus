@@ -28,6 +28,8 @@ const typeDef = `
       name: String!
       value: Int!
       unit: String!
+      min: Int
+      max: Int
     }
     input Pinput {
       name: String!
@@ -56,7 +58,6 @@ const resolvers = {
       _root: unknown,
       settings: SettingsObject
     ): string => {
-
       try {
         writeFileSync('src/utils/settings.json', JSON.stringify(settings, null, 4))
       } catch (error) {
