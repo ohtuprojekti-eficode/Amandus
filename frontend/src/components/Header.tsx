@@ -89,30 +89,30 @@ const Header = ({ user, logout, theme, toggleTheme }: Props) => {
               </Link>
             )}
             {user && (
-            <Link
-              component={RouterLink}
-              className={classes.linkBtnTransparent}
-              to="/connections"
-            >
-              Connections
-            </Link>
-            )}
-            {user && (
               <Link
-              component={RouterLink}
-              className={classes.linkBtnTransparent}
-              to="/deleteAccount"
-            >
-              Delete Account
-            </Link>
-            )}
-            {user && (
-              <Link
-              component={RouterLink}
-              className={classes.linkBtnTransparent}
-              to="/settings"
+                component={RouterLink}
+                className={classes.linkBtnTransparent}
+                to="/connections"
               >
-                Settings 
+                Connections
+              </Link>
+            )}
+            {user && (
+              <Link
+                component={RouterLink}
+                className={classes.linkBtnTransparent}
+                to="/deleteAccount"
+              >
+                Delete Account
+              </Link>
+            )}
+            {user && (
+              <Link
+                component={RouterLink}
+                className={classes.linkBtnTransparent}
+                to="/settings"
+              >
+                Settings
               </Link>
             )}
           </div>
@@ -144,14 +144,14 @@ const Header = ({ user, logout, theme, toggleTheme }: Props) => {
             )}
             {user && (
               <div>
-                {user.user_role === 'admin' ? 
-                <span className={classes.loginGreet}>
-                  (ADMIN)
-                </span>  : ''  
+                {user.user_role === 'admin' ?
+                  <span className={classes.loginGreet}>
+                    (ADMIN)
+                </span> : ''
                 }
                 <span className={classes.loginGreet}>
                   Hello, {user.username}
-                </span> 
+                </span>
                 <Link
                   component={RouterLink}
                   className={classes.linkBtnBordered}
@@ -162,7 +162,7 @@ const Header = ({ user, logout, theme, toggleTheme }: Props) => {
                 </Link>
               </div>
             )}
-            
+
           </div>
         </Toolbar>
       </AppBar>
