@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { useMutation } from '@apollo/client'
-import { SAVE_SETTINGS } from '../graphql/mutations'
-import { GET_SETTINGS } from '../graphql/queries'
+import { SAVE_SETTINGS } from '../../graphql/mutations'
+import { GET_SETTINGS } from '../../graphql/queries'
+import { MiscObject } from './MiscObject'
+import { PluginObject } from './PluginObject'
 
 import {
-  Switch,
-  TextField,
   Button
 } from '@material-ui/core'
 
@@ -13,106 +13,13 @@ import {
   MiscSettingObject,
   PluginSettingObject,
   UserType
-} from '../types'
+} from '../../types'
 
-import useSettings from '../hooks/useSettings'
-import AuthenticateDialog from './AuthenticateDialog'
+import useSettings from '../../hooks/useSettings'
+import AuthenticateDialog from '../AuthenticateDialog'
 
 interface Props {
   user: UserType | undefined
-}
-
-const MiscObject = ({ name, value, min, max, parentCallback, unit, active }: {
-  name: string,
-  value: number,
-  min?: number,
-  max?: number
-  unit?: string,
-  active?: boolean
-  parentCallback: (
-    name: string,
-    value: number | boolean,
-    min?: number,
-    max?: number
-  ) => void,
-}) => {
-
-  useEffect(() => {
-    setFieldValue(value) 
-    setSwitchChecked(active) 
-  }, [value, active])
-
-  const [fieldValue, setFieldValue] = useState(value)
-  
-  const [switchChecked, setSwitchChecked] = useState(active)
-  
-  const handleFieldValueChange = (incomingValue: string) => {
-    parentCallback(name, parseInt(incomingValue), min, max)
-    setFieldValue(parseInt(incomingValue))
-  }
-  
-  const handleSwitchToggle = () => {
-    parentCallback(name, !switchChecked)
-    setSwitchChecked(!switchChecked)
-  }
-  
-  return (
-    <div>
-      <b>{name}</b>
-      <TextField
-        id={name + "-toggle"}
-        name={name + "-toggle"}
-        value={fieldValue}
-        type="number"
-        color="primary"
-        onChange={({ target }) => handleFieldValueChange(target.value)}
-        inputProps={{ 'aria-label': 'primary checkbox', min: min, max: max }}
-        disabled={!switchChecked}
-        />
-      {unit}
-      <Switch
-        id={name + "-toggle"}
-        name={name + "-toggle"}
-        checked={switchChecked}
-        onChange={handleSwitchToggle}
-        color="primary"
-        inputProps={{ 'aria-label': 'primary checkbox' }}
-        />
-    </div>
-  )
-}
-
-
-const PluginObject = ({ name, active, parentCallback }: {
-  name: string,
-  active: boolean,
-  parentCallback: (name: string, value: boolean) => void,
-}) => {
-  
-  useEffect(() => {
-    setSwitchChecked(active)
-  }, [active])
-  
-  const [switchChecked, setSwitchChecked] = useState(active)
-  
-  const handleSwitchToggle = () => {
-    parentCallback(name, !switchChecked)
-    setSwitchChecked(!switchChecked)
-  }
-  
-  return (
-    <div>
-      <b>{name}</b>
-      <Switch
-        id={name + "-toggle"}
-        name={name + "-toggle"}
-        checked={switchChecked}
-        onChange={handleSwitchToggle}
-        color="primary"
-        inputProps={{ 'aria-label': 'primary checkbox' }}
-        />
-    </div>
-  )
 }
 
 const valueIsWithinRange = (value: number, min?: number, max?: number): boolean => {
@@ -127,7 +34,7 @@ const valueIsWithinRange = (value: number, min?: number, max?: number): boolean 
   return true
 }
 
-const SettingsPage = ({ user }: Props) => {
+export const SettingsPage = ({ user }: Props) => {
   
   const { settings: nestedSettings, setSettings } = useSettings()
   const settings = nestedSettings?.settings
@@ -199,10 +106,10 @@ const SettingsPage = ({ user }: Props) => {
         setSettings({ settings: { ...settings, misc: altMisc } })
         break;
     }
-  
   }
-
+ 
   
+
   if (!settings) {
     return (
       <div>
@@ -210,7 +117,6 @@ const SettingsPage = ({ user }: Props) => {
       </div>
     )
   }
-
 
   return (
     <div>

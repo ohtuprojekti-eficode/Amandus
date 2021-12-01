@@ -17,7 +17,7 @@ import { MeQueryResult } from './types'
 import DeleteAccount from './components/DeleteAccount'
 import { useLocation } from 'react-router-dom'
 import CallBack from './components/auth/CallBack'
-import SettingsPage from './components/SettingsPage'
+import SettingsPage from './components/settingsPage/SettingsPage'
 import SettingsProvider from './components/SettingsProvider'
 import NotificationProvider from './components/Notification/NotificationProvider'
 
