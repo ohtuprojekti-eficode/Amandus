@@ -4,7 +4,9 @@
             {
                 "name": "Autosave Interval",
                 "value": 500,
-                "unit": "ms"
+                "unit": "ms",
+                "min": 500,
+                "max": 60000
             }
         ],
         "plugins": [

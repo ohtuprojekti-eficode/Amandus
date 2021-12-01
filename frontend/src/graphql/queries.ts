@@ -97,7 +97,9 @@ export const GET_SETTINGS = gql`
       misc {
         name, 
         value, 
-        unit
+        unit,
+        min,
+        max
       }
       plugins {
         name,
