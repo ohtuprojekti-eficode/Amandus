@@ -21,13 +21,30 @@ interface Props {
   user: UserType | undefined
 }
 
+const valueIsWithinRange = (value: number, min?: number, max?: number): boolean => {
+  if (min && value < min) {
+    return false
+  }
+
+  if (max && value > max) {
+    return false
+  }
+
+  return true
+}
+
 const MiscObject = ({ name, value, min, max, parentCallback, unit }: {
   name: string,
   value: number,
   min?: number,
   max?: number
   unit?: string,
-  parentCallback: (name: string, value: number) => void,
+  parentCallback: (
+    name: string,
+    value: number,
+    min?: number,
+    max?: number
+  ) => void,
 }) => {
 
   useEffect(() => {
@@ -37,7 +54,7 @@ const MiscObject = ({ name, value, min, max, parentCallback, unit }: {
   const [fieldValue, setFieldValue] = useState(value)
 
   const handleFieldValueChange = (incomingValue: string) => {
-    parentCallback(name, parseInt(incomingValue))
+    parentCallback(name, parseInt(incomingValue), min, max)
     setFieldValue(parseInt(incomingValue))
   }
 
@@ -98,6 +115,7 @@ const SettingsPage = ({ user }: Props) => {
 
   const [saved, setSaved] = useState(false)
   const [changesMade, setChangesMade] = useState(false)
+  const [flag, setFlag] = useState(false)
 
   const [saveSettings] = useMutation(SAVE_SETTINGS)
 
@@ -134,7 +152,7 @@ const SettingsPage = ({ user }: Props) => {
     }, 500)
   }
 
-  const handleCallback = (name: string, value: boolean | number) => {
+  const handleCallback = (name: string, value: boolean | number, min?: number, max?: number) => {
     setChangesMade(true)
 
     switch (typeof value) {
@@ -147,6 +165,8 @@ const SettingsPage = ({ user }: Props) => {
         break;
 
       case "number":
+        setFlag(!valueIsWithinRange(value, min, max))
+
         const altMisc = settings.misc.map(m =>
           m.name === name ? { ...m, value: value } : m
         )
@@ -196,6 +216,7 @@ const SettingsPage = ({ user }: Props) => {
         name="save-settings-button"
         variant="contained"
         color="primary"
+        disabled={flag}
       >
         Save settings
       </Button>
