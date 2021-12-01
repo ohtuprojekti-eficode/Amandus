@@ -3,15 +3,17 @@ import { useMutation } from '@apollo/client'
 import { SAVE_SETTINGS } from '../graphql/mutations'
 import { GET_SETTINGS } from '../graphql/queries'
 
-import { 
-  Switch, 
-  TextField, 
-  Button } from '@material-ui/core'
+import {
+  Switch,
+  TextField,
+  Button
+} from '@material-ui/core'
 
-import { 
-  MiscSettingObject, 
+import {
+  MiscSettingObject,
   PluginSettingObject,
-  UserType } from '../types'
+  UserType
+} from '../types'
 
 import useSettings from '../hooks/useSettings'
 import AuthenticateDialog from './AuthenticateDialog'
@@ -20,14 +22,21 @@ interface Props {
   user: UserType | undefined
 }
 
-const MiscObject = ({ name, value, parentCallback, unit, active }: {
-  name: string, 
-  value: number, 
-  unit?: string, 
+const MiscObject = ({ name, value, min, max, parentCallback, unit, active }: {
+  name: string,
+  value: number,
+  min?: number,
+  max?: number
+  unit?: string,
   active?: boolean
-  parentCallback: (name: string, value: number | boolean) => void, 
+  parentCallback: (
+    name: string,
+    value: number | boolean,
+    min?: number,
+    max?: number
+  ) => void,
 }) => {
-  
+
   useEffect(() => {
     setFieldValue(value) 
     setSwitchChecked(active) 
@@ -38,15 +47,14 @@ const MiscObject = ({ name, value, parentCallback, unit, active }: {
   const [switchChecked, setSwitchChecked] = useState(active)
   
   const handleFieldValueChange = (incomingValue: string) => {
-    parentCallback(name, parseInt(incomingValue))
+    parentCallback(name, parseInt(incomingValue), min, max)
     setFieldValue(parseInt(incomingValue))
   }
-
+  
   const handleSwitchToggle = () => {
     parentCallback(name, !switchChecked)
     setSwitchChecked(!switchChecked)
   }
-
   
   return (
     <div>
@@ -58,7 +66,7 @@ const MiscObject = ({ name, value, parentCallback, unit, active }: {
         type="number"
         color="primary"
         onChange={({ target }) => handleFieldValueChange(target.value)}
-        inputProps={{ 'aria-label': 'primary checkbox' }}
+        inputProps={{ 'aria-label': 'primary checkbox', min: min, max: max }}
         disabled={!switchChecked}
         />
       {unit}
@@ -69,19 +77,20 @@ const MiscObject = ({ name, value, parentCallback, unit, active }: {
         onChange={handleSwitchToggle}
         color="primary"
         inputProps={{ 'aria-label': 'primary checkbox' }}
-      />
+        />
     </div>
   )
 }
 
-const PluginObject = ({ name, active, parentCallback }: { 
-  name: string, 
-  active: boolean, 
-  parentCallback: (name: string, value: boolean) => void, 
-}) => {
 
+const PluginObject = ({ name, active, parentCallback }: {
+  name: string,
+  active: boolean,
+  parentCallback: (name: string, value: boolean) => void,
+}) => {
+  
   useEffect(() => {
-   setSwitchChecked(active) 
+    setSwitchChecked(active)
   }, [active])
   
   const [switchChecked, setSwitchChecked] = useState(active)
@@ -101,19 +110,32 @@ const PluginObject = ({ name, active, parentCallback }: {
         onChange={handleSwitchToggle}
         color="primary"
         inputProps={{ 'aria-label': 'primary checkbox' }}
-      />
+        />
     </div>
   )
 }
 
+const valueIsWithinRange = (value: number, min?: number, max?: number): boolean => {
+  if (min && value < min) {
+    return false
+  }
+
+  if (max && value > max) {
+    return false
+  }
+
+  return true
+}
+
 const SettingsPage = ({ user }: Props) => {
   
-  const {settings: nestedSettings, setSettings} = useSettings()
+  const { settings: nestedSettings, setSettings } = useSettings()
   const settings = nestedSettings?.settings
   
   const [saved, setSaved] = useState(false)
   const [changesMade, setChangesMade] = useState(false)
-  
+  const [flag, setFlag] = useState(false)
+
   const [saveSettings] = useMutation(SAVE_SETTINGS)
 
 
@@ -131,43 +153,55 @@ const SettingsPage = ({ user }: Props) => {
   const handleSubmit = async () => {
 
     try {
-      await saveSettings (
-        { variables: { settings: settings }, update: (cache) => { 
-           const updatedContent = { getSettings: settings }
-           cache.writeQuery({query: GET_SETTINGS, data: updatedContent})
-        }}
+      await saveSettings(
+        {
+          variables: { settings: settings }, update: (cache) => {
+            const updatedContent = { getSettings: settings }
+            cache.writeQuery({ query: GET_SETTINGS, data: updatedContent })
+          }
+        }
       )
     }
     catch (e) {
       console.log(e)
     }
-    
+
     setSaved(true)
     setTimeout(() => {
       window.location.reload()
     }, 500)
   }
 
-  const handleCallback = ( name: string, value: boolean | number ) => {
+  const handleCallback = (name: string, value: boolean | number, min?: number, max?: number) => {
     setChangesMade(true)
-    console.log(value)
 
-    const altPlugins = settings.plugins.map(p =>
-        p.name === name ? {...p, active: value} : p
-      )
-    
-    setSettings({ settings: {...settings, plugins: altPlugins as PluginSettingObject[]}})
+    switch (typeof value) {
 
-    const altMiscs = settings.misc.map(m => 
-      m.name === name ? 
-        typeof value == "boolean" ? {...m, active: value} : {...m, value: value} 
-      : m
-    )
+      case "boolean":
+        if (settings.plugins.find(p => p.name === name)) {
+          const altPlugins = settings.plugins.map(p =>
+            p.name === name ? { ...p, active: value } : p
+          )
+          setSettings({ settings: { ...settings, plugins: altPlugins } })
+        } else {
+          const altMisc = settings.misc.map(m =>
+            m.name === name ? { ...m, active: value } : m
+          )
+          setSettings({ settings: { ...settings, misc: altMisc } })
+        }
+        break;
 
-    setSettings({ settings: {...settings, misc: altMiscs}})
-
-    console.log(settings)
+      case "number":
+        setFlag(!valueIsWithinRange(value, min, max))
+        const altMisc = settings.misc.map(m =>
+          m.name === name ? { ...m, value: value } : m
+        )
+        setSettings({ settings: { ...settings, misc: altMisc } })
+        break;
+    }
+  
   }
+
   
   if (!settings) {
     return (
@@ -177,53 +211,59 @@ const SettingsPage = ({ user }: Props) => {
     )
   }
 
-  
-    return (
+
+  return (
     <div>
       <div>        
         <AuthenticateDialog open={!user} />
       </div>
       <h1> Admins only. </h1>
 
-      {settings.misc.map((m: MiscSettingObject) => 
-        <MiscObject 
-          key={m.name} 
-          name={m.name} 
-          value={m.value} 
-          unit={m.unit} 
+      {settings.misc.map((m: MiscSettingObject) =>
+        <MiscObject
+          key={m.name}
+          name={m.name}
+          value={m.value}
+          unit={m.unit}
+          min={m.min}
+          max={m.max}
           active={m.active}
           parentCallback={handleCallback}
-        /> 
-       )}
-
-      {settings.plugins.map((p: PluginSettingObject) => 
-        <PluginObject 
-          key={p.name} 
-          name={p.name} 
-          active={p.active} 
-          parentCallback={handleCallback}
-        /> 
+        />
       )}
-      
-      <Button 
+
+      {settings.plugins.map((p: PluginSettingObject) =>
+        <PluginObject
+          key={p.name}
+          name={p.name}
+          active={p.active}
+          parentCallback={handleCallback}
+        />
+      )}
+
+      <Button
         onClick={handleSubmit}
         id="save-settings-button"
         name="save-settings-button"
-        variant="contained" 
+        variant="contained"
         color="primary"
-        >
-          Save settings
+        disabled={flag}
+      >
+        Save settings
       </Button>
       <p>
-        {changesMade ? 'Settings changed. Please save.': ''}
+        {flag ? 'Invalid input value.' : '' } 
       </p>
       <p>
-        {saved ? 'Saved successfully. Refreshing page...': ''}
-      </p> 
-      
-      
-      </div>
+        {changesMade && !flag ? 'Settings changed. Please save.' : ''}
+      </p>
+      <p>
+        {saved ? 'Saved successfully. Refreshing page...' : ''}
+      </p>
+
+
+    </div>
   )
 }
 
-export default SettingsPage 
+export default SettingsPage
