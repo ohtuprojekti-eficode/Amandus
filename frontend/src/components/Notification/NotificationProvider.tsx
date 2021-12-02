@@ -28,14 +28,14 @@ const NotificationProvider: React.FC = ({ children }) => {
     null
   )
 
-  const notify = (text: string, isError: boolean = false) => {
+  const notify = React.useCallback((text: string, isError: boolean = false) => {
     const newNotification = {
       text,
       isError,
     }
 
     setNotification(newNotification)
-  }
+  }, [])
 
   const handleClose = () => setNotification(null)
 
