@@ -68,7 +68,7 @@ export const validateUserUpdateArgs = ({
   return { errorMessage: 'Update successfull!', validationFailed: false }
 }
 
-export const SettingValuesAreWithinRange = (
+export const SettingValueIsWithinRange = (
   input: SettingsObject
 ): boolean => {
   const settings = input.settings.misc

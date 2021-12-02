@@ -3,7 +3,7 @@ import { ApolloError } from 'apollo-server'
 import { readSettings } from '../constants'
 import { SettingsObject, MiscSettingObject, PluginSettingObject } from '../types/settings'
 import { writeFileSync } from 'fs'
-import { SettingValuesAreWithinRange } from '../utils/validation'
+import { SettingValueIsWithinRange } from '../utils/validation'
 
 const typeDef = `
     type Settings {
@@ -61,7 +61,7 @@ const resolvers = {
       _root: unknown,
       settings: SettingsObject
     ): string => {
-      if (!SettingValuesAreWithinRange(settings)) {
+      if (!SettingValueIsWithinRange(settings)) {
         throw new ApolloError('Given value is not within the valid range')
       }
 
