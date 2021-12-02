@@ -1,8 +1,6 @@
 import Notification from './components/Notification/Notification'
 import React, { useState } from 'react'
 import { Route } from 'react-router-dom'
-import { useQuery } from '@apollo/client'
-import { ME } from './graphql/queries'
 import Home from './components/Home'
 import EditView from './components/editView/EditView'
 import Header from './components/Header'
@@ -13,20 +11,21 @@ import { lightTheme, darkTheme } from './styles/themes'
 import RepositoriesView from './components/RepositoriesView'
 import Connections from './components/Connections'
 import MyLoginForm from './components/MyLoginForm'
-import { MeQueryResult } from './types'
 import DeleteAccount from './components/DeleteAccount'
 import { useLocation } from 'react-router-dom'
 import CallBack from './components/auth/CallBack'
 import SettingsPage from './components/settingsPage/SettingsPage'
 import SettingsProvider from './components/SettingsProvider'
 import NotificationProvider from './components/Notification/NotificationProvider'
+import useUser from './hooks/useUser'
 
 interface LocationState {
   cloneUrl: string
 }
 
 const App = () => {
-  const { data: user } = useQuery<MeQueryResult>(ME)
+  const { user } = useUser()
+
   const location = useLocation<LocationState>()
   const [cloneUrl, setCloneUrl] = useState<string | undefined>(undefined)
 
@@ -50,12 +49,6 @@ const App = () => {
 
   const appliedTheme = createTheme(theme === 'light' ? lightTheme : darkTheme)
 
-  const logout = () => {
-    localStorage.removeItem('amandus-user-access-token')
-    localStorage.removeItem('amandus-user-refresh-token')
-    window.location.href = '/'
-  }
-
   return (
     <div>
       <SettingsProvider>
@@ -63,12 +56,7 @@ const App = () => {
           <NotificationProvider>
             <CssBaseline />
             <Notification />
-            <Header
-              user={user?.me}
-              logout={logout}
-              theme={theme}
-              toggleTheme={toggleTheme}
-            />
+            <Header user={user?.me} theme={theme} toggleTheme={toggleTheme} />
             <div>
               <Toolbar />
 

@@ -7,13 +7,14 @@ import {
   Switch,
   Toolbar,
 } from '@material-ui/core'
-import { Link as RouterLink } from 'react-router-dom'
+import { Link as RouterLink, useHistory } from 'react-router-dom'
 import { UserType } from '../types'
 import Logo from './Logo'
+import useUser from '../hooks/useUser'
+import useNotification from './Notification/useNotification'
 
 interface Props {
   user: UserType | undefined
-  logout: () => void
   theme: string
   toggleTheme: () => void
 }
@@ -57,13 +58,29 @@ const stylesInUse = makeStyles(() =>
   })
 )
 
-const Header = ({ user, logout, theme, toggleTheme }: Props) => {
+const Header = ({ user, theme, toggleTheme }: Props) => {
   const [switchChecked, setSwitchChecked] = useState(theme === 'dark')
   const classes = stylesInUse()
+
+  const history = useHistory()
+
+  const { clearUserFromCache } = useUser()
+
+  const { notify } = useNotification()
 
   const handleSwitchToggle = () => {
     setSwitchChecked(!switchChecked)
     toggleTheme()
+  }
+  const logout = () => {
+    localStorage.removeItem('amandus-user-access-token')
+    localStorage.removeItem('amandus-user-refresh-token')
+
+    clearUserFromCache()
+
+    notify('Logout successful')
+
+    history.push('/')
   }
 
   return (
@@ -144,11 +161,11 @@ const Header = ({ user, logout, theme, toggleTheme }: Props) => {
             )}
             {user && (
               <div>
-                {user.user_role === 'admin' ?
-                  <span className={classes.loginGreet}>
-                    (ADMIN)
-                </span> : ''
-                }
+                {user.user_role === 'admin' ? (
+                  <span className={classes.loginGreet}>(ADMIN)</span>
+                ) : (
+                  ''
+                )}
                 <span className={classes.loginGreet}>
                   Hello, {user.username}
                 </span>
@@ -162,7 +179,6 @@ const Header = ({ user, logout, theme, toggleTheme }: Props) => {
                 </Link>
               </div>
             )}
-
           </div>
         </Toolbar>
       </AppBar>

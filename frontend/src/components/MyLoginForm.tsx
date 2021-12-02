@@ -10,6 +10,9 @@ import {
 } from '@material-ui/core'
 import { useMutation } from '@apollo/client'
 import { LOGIN } from '../graphql/mutations'
+import useNotification from './Notification/useNotification'
+import { useHistory } from 'react-router'
+import useUser from '../hooks/useUser'
 
 const stylesInUse = makeStyles((theme) =>
   createStyles({
@@ -67,6 +70,12 @@ const MyLoginForm = () => {
 
   const [loginUser] = useMutation(LOGIN)
 
+  const { notify } = useNotification()
+
+  const history = useHistory()
+
+  const { refetchUser } = useUser()
+
   const logInUser = async (data: LoginFormFields, resetForm: Function) => {
     try {
       const loginResponse = await loginUser({
@@ -76,16 +85,29 @@ const MyLoginForm = () => {
         },
       })
       setFormStatus(formStatusProps.success)
-      localStorage.setItem('amandus-user-access-token', loginResponse.data.login.accessToken)
-      localStorage.setItem('amandus-user-refresh-token', loginResponse.data.login.refreshToken)
+      localStorage.setItem(
+        'amandus-user-access-token',
+        loginResponse.data.login.accessToken
+      )
+      localStorage.setItem(
+        'amandus-user-refresh-token',
+        loginResponse.data.login.refreshToken
+      )
 
-      window.location.href = '/connections'
+      // this causes a warning in the console when using React.StrictMode
+      refetchUser()
+
+      notify('Login successful')
+
+      history.push('/connections')
     } catch (error) {
-      setFormStatus(formStatusProps.error)
-    }
+      notify('Login failed', true)
 
-    resetForm({})
-    setShowFormStatus(true)
+      setFormStatus(formStatusProps.error)
+
+      resetForm({})
+      setShowFormStatus(true)
+    }
   }
 
   const UserSchema = Yup.object().shape({
@@ -102,9 +124,6 @@ const MyLoginForm = () => {
         }}
         onSubmit={(values: LoginFormFields, actions) => {
           logInUser(values, actions.resetForm)
-          setTimeout(() => {
-            actions.setSubmitting(false)
-          }, 400)
         }}
         validationSchema={UserSchema}
       >
