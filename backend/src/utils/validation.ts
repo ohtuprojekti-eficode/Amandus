@@ -1,5 +1,6 @@
 import { RegisterUserInput, UpdateUserInput } from '../types/params'
 import validator from 'validator'
+import { SettingsObject } from '../types/settings'
 
 const usernameErrors = (username: string | null) => {
   if (username === undefined || username === null) return []
@@ -65,4 +66,24 @@ export const validateUserUpdateArgs = ({
     return { errorMessage: errors[0], validationFailed: true }
   }
   return { errorMessage: 'Update successfull!', validationFailed: false }
+}
+
+export const SettingValuesAreWithinRange = (
+  input: SettingsObject
+): boolean => {
+  const settings = input.settings.misc
+
+  const invalid = settings.some(s => {
+    if (s.min && s.min > s.value) {
+      return true
+    }
+
+    if (s.max && s.max < s.value) {
+      return true
+    }
+
+    return false
+  })
+
+  return invalid ? false : true
 }
