@@ -20,24 +20,35 @@ export const MiscObject = ({ name, value, min, max, parentCallback, unit, active
 }) => {
 
   useEffect(() => {
-    setFieldValue(value) 
-    setSwitchChecked(active) 
+    setFieldValue(value)
+    setSwitchChecked(active)
   }, [value, active])
 
   const [fieldValue, setFieldValue] = useState(value)
-  
+
   const [switchChecked, setSwitchChecked] = useState(active)
-  
+
   const handleFieldValueChange = (incomingValue: string) => {
     parentCallback(name, parseInt(incomingValue), min, max)
     setFieldValue(parseInt(incomingValue))
   }
-  
+
   const handleSwitchToggle = () => {
     parentCallback(name, !switchChecked)
     setSwitchChecked(!switchChecked)
   }
-  
+
+  const rangeInformation = (): string => {
+    if (min && max) return `range: ${min} - ${max}`
+
+    if (min) return `min: ${min}`
+
+    if (max) return `max: ${max}`
+
+    return ''
+  }
+
+
   return (
     <div>
       <b>{name}</b>
@@ -45,12 +56,13 @@ export const MiscObject = ({ name, value, min, max, parentCallback, unit, active
         id={name + "-toggle"}
         name={name + "-toggle"}
         value={fieldValue}
+        helperText={rangeInformation()}
         type="number"
         color="primary"
         onChange={({ target }) => handleFieldValueChange(target.value)}
         inputProps={{ 'aria-label': 'primary checkbox', min: min, max: max }}
         disabled={!switchChecked}
-        />
+      />
       {unit}
       <Switch
         id={name + "-toggle"}
@@ -59,7 +71,7 @@ export const MiscObject = ({ name, value, min, max, parentCallback, unit, active
         onChange={handleSwitchToggle}
         color="primary"
         inputProps={{ 'aria-label': 'primary checkbox' }}
-        />
+      />
     </div>
   )
 }
