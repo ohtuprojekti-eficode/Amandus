@@ -87,6 +87,8 @@ const EditorBottomBar = ({
       handleDialogClose()
       setDialogError(undefined)
     } catch (error) {
+      notify('Error pushing', true)
+
       if (
         error instanceof Error &&
         error.message === 'Merge conflict detected'

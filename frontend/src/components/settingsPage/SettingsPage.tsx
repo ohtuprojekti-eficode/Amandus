@@ -17,6 +17,7 @@ import {
 
 import useSettings from '../../hooks/useSettings'
 import AuthenticateDialog from '../AuthenticateDialog'
+import useNotification from '../Notification/useNotification'
 
 interface Props {
   user: UserType | undefined
@@ -45,6 +46,7 @@ export const SettingsPage = ({ user }: Props) => {
 
   const [saveSettings] = useMutation(SAVE_SETTINGS)
 
+  const { notify } = useNotification()
 
   // Hides view from users that are not admins.
   /*
@@ -58,18 +60,19 @@ export const SettingsPage = ({ user }: Props) => {
 */
 
   const handleSubmit = async () => {
-
     try {
-      await saveSettings(
-        {
-          variables: { settings: settings }, update: (cache) => {
+      await saveSettings({
+        variables: { settings: settings },
+        update: (cache) => {
             const updatedContent = { getSettings: settings }
             cache.writeQuery({ query: GET_SETTINGS, data: updatedContent })
-          }
-        }
-      )
-    }
-    catch (e) {
+        },
+      })
+
+      notify('Save succesful')
+    } catch (e) {
+      notify('Save failed', true)
+
       console.log(e)
     }
 

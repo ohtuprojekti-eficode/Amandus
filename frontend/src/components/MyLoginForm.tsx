@@ -101,6 +101,8 @@ const MyLoginForm = () => {
 
       history.push('/connections')
     } catch (error) {
+      notify('Login failed', true)
+
       setFormStatus(formStatusProps.error)
 
       resetForm({})
