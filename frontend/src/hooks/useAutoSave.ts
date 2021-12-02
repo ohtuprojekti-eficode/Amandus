@@ -29,7 +29,9 @@ const useAutoSave = (filename: string, repoUrl: string) => {
 
   const onEditorContentChange = (value: string | undefined) => {
     // trigger the debounced autosave
-    debouncedAutoSave(value ?? '', filename, repoUrl)
+    if (settings.misc.find(a => a.name === "Autosave Interval")?.active) {
+      debouncedAutoSave(value ?? '', filename, repoUrl)  
+    }
   }
 
   return [onEditorContentChange, saving] as const

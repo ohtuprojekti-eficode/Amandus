@@ -6,10 +6,10 @@ export const DEFAULT_SETTINGS = {
                 "value": 1000,
                 "unit": "ms",
                 "min": 500,
-                "max": 60000
+                "max": 60000,
+                "active": true
             }
         ],
-    
         "plugins": [
             {
                 "name": "robot-language-server",

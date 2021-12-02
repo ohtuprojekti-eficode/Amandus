@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { useMutation } from '@apollo/client'
-import { SAVE_SETTINGS } from '../graphql/mutations'
-import { GET_SETTINGS } from '../graphql/queries'
+import { SAVE_SETTINGS } from '../../graphql/mutations'
+import { GET_SETTINGS } from '../../graphql/queries'
+import { MiscObject } from './MiscObject'
+import { PluginObject } from './PluginObject'
 
 import {
-  Switch,
-  TextField,
   Button
 } from '@material-ui/core'
 
@@ -13,10 +13,10 @@ import {
   MiscSettingObject,
   PluginSettingObject,
   UserType
-} from '../types'
+} from '../../types'
 
-import useSettings from '../hooks/useSettings'
-import AuthenticateDialog from './AuthenticateDialog'
+import useSettings from '../../hooks/useSettings'
+import AuthenticateDialog from '../AuthenticateDialog'
 
 interface Props {
   user: UserType | undefined
@@ -34,86 +34,11 @@ const valueIsWithinRange = (value: number, min?: number, max?: number): boolean 
   return true
 }
 
-const MiscObject = ({ name, value, min, max, parentCallback, unit }: {
-  name: string,
-  value: number,
-  min?: number,
-  max?: number
-  unit?: string,
-  parentCallback: (
-    name: string,
-    value: number,
-    min?: number,
-    max?: number
-  ) => void,
-}) => {
-
-  useEffect(() => {
-    setFieldValue(value)
-  }, [value])
-
-  const [fieldValue, setFieldValue] = useState(value)
-
-  const handleFieldValueChange = (incomingValue: string) => {
-    parentCallback(name, parseInt(incomingValue), min, max)
-    setFieldValue(parseInt(incomingValue))
-  }
-
-  return (
-    <div>
-      <b>{name}</b>
-      <TextField
-        id={name + "-toggle"}
-        name={name + "-toggle"}
-        value={fieldValue}
-        type="number"
-        color="primary"
-        onChange={({ target }) => handleFieldValueChange(target.value)}
-        inputProps={{ 'aria-label': 'primary checkbox', min: min, max: max }}
-      />
-      {unit}
-    </div>
-  )
-}
-
-const PluginObject = ({ name, active, parentCallback }: {
-  name: string,
-  active: boolean,
-  parentCallback: (name: string, value: boolean) => void,
-}) => {
-
-  useEffect(() => {
-    setSwitchChecked(active)
-  }, [active])
-
-  const [switchChecked, setSwitchChecked] = useState(active)
-
-  const handleSwitchToggle = () => {
-    parentCallback(name, !switchChecked)
-    setSwitchChecked(!switchChecked)
-  }
-
-  return (
-    <div>
-      <b>{name}</b>
-      <Switch
-        id={name + "-toggle"}
-        name={name + "-toggle"}
-        checked={switchChecked}
-        onChange={handleSwitchToggle}
-        color="primary"
-        inputProps={{ 'aria-label': 'primary checkbox' }}
-      />
-      {switchChecked ? 'on' : 'off'}
-    </div>
-  )
-}
-
-const SettingsPage = ({ user }: Props) => {
-
+export const SettingsPage = ({ user }: Props) => {
+  
   const { settings: nestedSettings, setSettings } = useSettings()
   const settings = nestedSettings?.settings
-
+  
   const [saved, setSaved] = useState(false)
   const [changesMade, setChangesMade] = useState(false)
   const [flag, setFlag] = useState(false)
@@ -160,23 +85,30 @@ const SettingsPage = ({ user }: Props) => {
     switch (typeof value) {
 
       case "boolean":
-        const altPlugins = settings.plugins.map(p =>
-          p.name === name ? { ...p, active: value } : p
-        )
-        setSettings({ settings: { ...settings, plugins: altPlugins } })
+        if (settings.plugins.find(p => p.name === name)) {
+          const altPlugins = settings.plugins.map(p =>
+            p.name === name ? { ...p, active: value } : p
+          )
+          setSettings({ settings: { ...settings, plugins: altPlugins } })
+        } else {
+          const altMisc = settings.misc.map(m =>
+            m.name === name ? { ...m, active: value } : m
+          )
+          setSettings({ settings: { ...settings, misc: altMisc } })
+        }
         break;
 
       case "number":
         setFlag(!valueIsWithinRange(value, min, max))
-
         const altMisc = settings.misc.map(m =>
           m.name === name ? { ...m, value: value } : m
         )
         setSettings({ settings: { ...settings, misc: altMisc } })
         break;
-
     }
   }
+ 
+  
 
   if (!settings) {
     return (
@@ -185,7 +117,6 @@ const SettingsPage = ({ user }: Props) => {
       </div>
     )
   }
-
 
   return (
     <div>
@@ -202,6 +133,7 @@ const SettingsPage = ({ user }: Props) => {
           unit={m.unit}
           min={m.min}
           max={m.max}
+          active={m.active}
           parentCallback={handleCallback}
         />
       )}

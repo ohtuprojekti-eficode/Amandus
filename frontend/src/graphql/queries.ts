@@ -98,6 +98,7 @@ export const GET_SETTINGS = gql`
         name, 
         value, 
         unit,
+        active,
         min,
         max
       }

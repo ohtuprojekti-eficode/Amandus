@@ -17,6 +17,7 @@ const typeDef = `
       name: String!
       value: Int!
       unit: String
+      active: Boolean
       min: Int
       max: Int
     }
@@ -28,6 +29,7 @@ const typeDef = `
       name: String!
       value: Int!
       unit: String!
+      active: Boolean
       min: Int
       max: Int
     }
@@ -64,6 +66,7 @@ const resolvers = {
         throw new ApolloError('Could not save settings')
       }
       return 'Saved!'
+
     },
   },
 }

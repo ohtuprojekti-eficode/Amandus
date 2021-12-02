@@ -46,6 +46,7 @@ export interface SettingsObject {
 export interface MiscSettingObject {
   name: string
   value: number
+  active: boolean
   unit: string
   min?: number
   max?: number

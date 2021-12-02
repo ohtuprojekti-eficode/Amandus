@@ -6,7 +6,8 @@
                 "value": 500,
                 "unit": "ms",
                 "min": 500,
-                "max": 60000
+                "max": 60000,
+                "active": false
             }
         ],
         "plugins": [
