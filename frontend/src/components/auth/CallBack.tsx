@@ -54,7 +54,7 @@ const CallBack = ({ service }: Props) => {
           localStorage.setItem('amandus-user-access-token', accessToken)
           localStorage.setItem('amandus-user-refresh-token', refreshToken)
 
-          notify('Connection succesful')
+          notify('Connection successful')
 
           history.push('/connections')
         }

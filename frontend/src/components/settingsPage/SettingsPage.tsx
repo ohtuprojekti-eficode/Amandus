@@ -69,7 +69,7 @@ export const SettingsPage = ({ user }: Props) => {
         },
       })
 
-      notify('Save succesful')
+      notify('Save successful')
     } catch (e) {
       notify('Save failed', true)
 

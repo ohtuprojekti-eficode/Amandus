@@ -82,7 +82,7 @@ const EditorBottomBar = ({
         },
       })
 
-      notify('Push succesful')
+      notify('Push successful')
 
       handleDialogClose()
       setDialogError(undefined)

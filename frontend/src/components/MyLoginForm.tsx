@@ -97,7 +97,7 @@ const MyLoginForm = () => {
       // this causes a warning in the console when using React.StrictMode
       refetchUser()
 
-      notify('Login succesful')
+      notify('Login successful')
 
       history.push('/connections')
     } catch (error) {

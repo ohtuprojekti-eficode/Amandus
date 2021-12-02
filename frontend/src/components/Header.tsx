@@ -78,7 +78,7 @@ const Header = ({ user, theme, toggleTheme }: Props) => {
 
     clearUserFromCache()
 
-    notify('Logout succesful')
+    notify('Logout successful')
 
     history.push('/')
   }
